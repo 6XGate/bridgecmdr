@@ -1,0 +1,26 @@
+{
+  "name": "bridgecmdr",
+  "version": "0.1.0",
+  "description": "A/V switch and monitor controller",
+  "main": "index.js",
+  "scripts": {
+    "test": "test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/6XGate/bridgecmdr.git"
+  },
+  "keywords": [
+    "retrogaming",
+    "extron",
+    "audio-video",
+    "sony-pvm",
+    "sony-bmv"
+  ],
+  "author": "Matthew Holder",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/6XGate/bridgecmdr/issues"
+  },
+  "homepage": "https://github.com/6XGate/bridgecmdr#readme"
+}
