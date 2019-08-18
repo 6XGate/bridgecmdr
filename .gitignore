@@ -1,4 +1,3 @@
-# Created by .ignore support plugin (hsz.mobi)
 ### Node template
 # Logs
 logs
@@ -88,3 +87,6 @@ typings/
 
 # DynamoDB Local files
 .dynamodb/
+
+### Build output
+dist/

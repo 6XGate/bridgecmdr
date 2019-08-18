@@ -1,9 +1,15 @@
 {
   "name": "bridgecmdr",
+  "productName": "BridgeCmdr",
   "version": "0.1.0",
   "description": "A/V switch and monitor controller",
-  "main": "index.js",
+  "main": "dist/main/index.js",
   "scripts": {
+    "production": "npm run prod",
+    "prod": "webpack --env.NODE_ENV=production --env.production --progress --hide-modules --config .build/webpack.config/webpack.config.js",
+    "devevlopment": "npm run dev",
+    "dev": "webpack --env.NODE_ENV=development --env.development --progress --hide-modules --config .build/webpack.config/webpack.config.js",
+    "start": "electron .",
     "test": "test.js"
   },
   "repository": {
@@ -22,5 +28,36 @@
   "bugs": {
     "url": "https://github.com/6XGate/bridgecmdr/issues"
   },
-  "homepage": "https://github.com/6XGate/bridgecmdr#readme"
+  "homepage": "https://github.com/6XGate/bridgecmdr#readme",
+  "devDependencies": {
+    "copy-webpack-plugin": "^5.0.4",
+    "css-loader": "^3.2.0",
+    "electron": "^6.0.2",
+    "file-loader": "^4.2.0",
+    "html-webpack-plugin": "^3.2.0",
+    "mini-css-extract-plugin": "^0.8.0",
+    "read-package-json": "^2.1.0",
+    "resolve-url-loader": "^3.1.0",
+    "sass": "^1.22.10",
+    "sass-loader": "^7.2.0",
+    "style-loader": "^1.0.0",
+    "url-loader": "^2.1.0",
+    "vue-devtools": "^5.1.3",
+    "vue-loader": "^15.7.1",
+    "vue-style-loader": "^4.1.2",
+    "vue-template-compiler": "^2.6.10",
+    "webpack": "^4.39.2",
+    "webpack-cli": "^3.3.7",
+    "webpack-node-externals": "^1.7.2"
+  },
+  "dependencies": {
+    "@mdi/font": "^4.0.96",
+    "axios": "^0.19.0",
+    "buefy": "^0.8.2",
+    "bulma": "^0.7.5",
+    "lodash": "^4.17.15",
+    "ow": "^0.13.2",
+    "vue": "^2.6.10",
+    "vue-router": "^3.1.2"
+  }
 }
