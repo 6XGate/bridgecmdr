@@ -24,4 +24,4 @@ import Application from "./Application";
 // The main application instance.
 const theApp = Symbol("[[Application Root]]");
 window.addEventListener("DOMContentLoaded", () =>
-    window[theApp] = new Vue(Application).$mount("#root"));
+    (window[theApp] = new Vue(Application).$mount("#root")));

@@ -16,16 +16,19 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import console from "console";
 import { app, BrowserWindow } from "electron";
+import "../foundation/database";
 
 // We only want to allow a single window.
 let window = null;
 
 function createWindow() {
+    const Driver = require("./components/Driver").default;
+    console.log(Driver.load);
+
     window = new BrowserWindow({
-        width: 800,
-        height: 600,
+        width:          800,
+        height:         600,
         webPreferences: {
             nodeIntegration: true,
         },
@@ -49,6 +52,7 @@ function createWindow() {
 }
 
 app.on("ready", () => {
+    // eslint-disable-next-line dot-notation
     if (process.env["NODE_DEV"] !== "production") {
         require("vue-devtools").install();
     }

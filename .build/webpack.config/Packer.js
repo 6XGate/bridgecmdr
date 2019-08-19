@@ -69,6 +69,10 @@ const allReady = Promise.all([
  * =====================================================================================================================
  * Common configuration
  */
+const esLintLoader = {
+    loader:  "eslint-loader",
+};
+
 const vueLoader = {
     loader: "vue-loader",
     options: {
@@ -119,6 +123,14 @@ const fileLoader = {
  * Common rules
  */
 const rules = {
+    lint: {
+        enforce: "pre",
+        test: (/\.(js|vue)$/u),
+        exclude: (/node_modules/u),
+        use:  [
+            esLintLoader,
+        ],
+    },
     css: {
         test: (/\.css$/u),
         use:  [
@@ -199,6 +211,7 @@ module.exports = class Packer {
         return this;
     }
 
+    // noinspection JSUnusedGlobalSymbols
     /**
      * @param {string} main
      * @returns {Packer}
@@ -209,6 +222,7 @@ module.exports = class Packer {
         return this;
     }
 
+    // noinspection JSUnusedGlobalSymbols
     /**
      * @param {string} main
      * @returns {Packer}
@@ -219,6 +233,7 @@ module.exports = class Packer {
         return this;
     }
 
+    // noinspection JSUnusedGlobalSymbols
     /**
      * @param {string} main
      * @returns {Packer}
@@ -229,6 +244,7 @@ module.exports = class Packer {
         return this;
     }
 
+    // noinspection JSUnusedGlobalSymbols
     /**
      * @param {string} main
      * @returns {Packer}
@@ -239,6 +255,7 @@ module.exports = class Packer {
         return this;
     }
 
+    // noinspection JSUnusedGlobalSymbols
     /**
      * @param {string} source
      * @param {string} dest
@@ -319,7 +336,7 @@ module.exports = class Packer {
         return allReady.then(() => ({
             mode:      env["NODE_ENV"],
             target:    "node",
-            externals: [ nodeExternals() ],
+            externals: [ nodeExternals(), (/\/migrations\//u) ],
             entry:     this[GenerateEntry](),
             output:    {
                 path:     String(this[myOutdir]),
@@ -328,6 +345,7 @@ module.exports = class Packer {
             devtool: isDev ? "source-map" : undefined,
             module:  {
                 rules: [
+                    rules.lint,
                     rules.css,
                     rules.sass,
                     rules.vue,

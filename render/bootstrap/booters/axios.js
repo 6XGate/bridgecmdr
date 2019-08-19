@@ -18,5 +18,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import axios from "axios";
 
+/* eslint-disable dot-notation */
+
+// noinspection JSUnresolvedVariable
 axios.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest";
+// noinspection JSUnresolvedVariable
 axios.defaults.headers.common["Accept"] = "application/json";

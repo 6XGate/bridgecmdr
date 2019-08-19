@@ -5,6 +5,7 @@
   "description": "A/V switch and monitor controller",
   "main": "dist/main/index.js",
   "scripts": {
+    "prep": "npm ci && electron-rebuild -w sqlite3 -p",
     "production": "npm run prod",
     "prod": "webpack --env.NODE_ENV=production --env.production --progress --hide-modules --config .build/webpack.config/webpack.config.js",
     "devevlopment": "npm run dev",
@@ -33,6 +34,15 @@
     "copy-webpack-plugin": "^5.0.4",
     "css-loader": "^3.2.0",
     "electron": "^6.0.2",
+    "electron-rebuild": "^1.8.6",
+    "eslint": "^5.16.0",
+    "eslint-config-standard": "^12.0.0",
+    "eslint-loader": "^2.0.0",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-node": "^9.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.0",
+    "eslint-plugin-vue": "^5.2.3",
     "file-loader": "^4.2.0",
     "html-webpack-plugin": "^3.2.0",
     "mini-css-extract-plugin": "^0.8.0",
@@ -55,9 +65,12 @@
     "axios": "^0.19.0",
     "buefy": "^0.8.2",
     "bulma": "^0.7.5",
+    "knex": "^0.19.2",
     "lodash": "^4.17.15",
     "ow": "^0.13.2",
+    "sqlite3": "^4.1.0",
     "vue": "^2.6.10",
-    "vue-router": "^3.1.2"
+    "vue-router": "^3.1.2",
+    "xdg-basedir": "^4.0.0"
   }
 }

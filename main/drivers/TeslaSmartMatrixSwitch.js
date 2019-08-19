@@ -21,14 +21,14 @@ import Driver from "../components/Driver";
 /**
  * @final
  */
-export default class TeslaSmartMatrixSwitch {
+export default class TeslaSmartMatrixSwitch extends Driver {
     /**
      * @returns {DriverDescriptor}
      */
     static about() {
         return {
-            guid: "91D5BC95-A8E2-4F58-BCAC-A77BA1054D61",
-            title: "TelsaSmart-compatible matrix switch",
-        }
+            guid:  "91D5BC95-A8E2-4F58-BCAC-A77BA1054D61",
+            title: "TeslaSmart-compatible matrix switch",
+        };
     }
 }

@@ -21,7 +21,7 @@ import Driver from "../components/Driver";
 /**
  * @final
  */
-export default class SonySerialBroadcastMonitor {
+export default class SonySerialBroadcastMonitor extends Driver {
     /**
      * @returns {DriverDescriptor}
      */
@@ -29,6 +29,6 @@ export default class SonySerialBroadcastMonitor {
         return {
             guid:  "8626D6D3-C211-4D21-B5CC-F5E3B50D9FF0",
             title: "Sony BVM RS-485 controllable monitor",
-        }
+        };
     }
 }

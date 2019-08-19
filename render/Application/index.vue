@@ -26,5 +26,5 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 <script>
     export default {
         name: "Application",
-    }
+    };
 </script>

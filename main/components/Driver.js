@@ -16,9 +16,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-const fs   = require("fs");
-const path = require("path");
-
 const theRegistry    = Symbol("[[Driver Registry]]");
 const myConfig       = Symbol("[[Driver Configuration]]");
 const myCapabilities = Symbol("[[Device Capabilities]]");
@@ -58,14 +55,23 @@ export default class Driver {
     /**
      * Registers a new driver.
      *
-     * @param {string}            guid  The GUID for looking up the driver.
-     * @param {string}            title The user-friendly title of the driver.
-     * @param {DriverConstructor} ctor  The driver construct or class.
+     * @param {DriverConstructor} driver The driver construct or class.
      *
      * @returns {void}
      */
-    static register(guid, title, ctor) {
-        Driver[theRegistry][guid] = { guid, title, ctor };
+    static register(driver) {
+        /** @type {DriverDescriptor} */
+        const about = driver.about();
+        /** @type {string} */
+        const guid = about.guid;
+        /** @type {string} */
+        const title = about.title;
+
+        if (Driver[theRegistry].hasOwnProperty(guid)) {
+            throw new ReferenceError(`Driver already to ${guid}`);
+        }
+
+        Driver[theRegistry][guid] = { guid, title, ctor: driver };
     }
 
     /**
@@ -84,6 +90,7 @@ export default class Driver {
         /** @type {DriverRegistration} */
         const entry = Driver[theRegistry][guid];
 
+        // eslint-disable-next-line new-cap
         return new entry.ctor(configuration);
     }
 
@@ -111,6 +118,7 @@ export default class Driver {
      *
      * @returns {void}
      */
+    // eslint-disable-next-line class-methods-use-this
     setTie(inputChannel, videoOutputChannel, audioOutputChannel) {
         // Abstract method.
     }
@@ -120,6 +128,7 @@ export default class Driver {
      *
      * @abstract
      */
+    // eslint-disable-next-line class-methods-use-this
     powerOn() {
         // Abstract method.
     }
@@ -129,6 +138,7 @@ export default class Driver {
      *
      * @abstract
      */
+    // eslint-disable-next-line class-methods-use-this
     powerOff() {
         // Abstract method.
     }
@@ -138,14 +148,7 @@ export default class Driver {
 /** @type {DriverRegistration} */
 Driver[theRegistry] = {};
 
-// Automatic registration of modules in the drivers folder.
-const baseUri  = path.join("..", "drivers");
-const basePath = path.resolve(__dirname, baseUri);
-fs.readdirSync(basePath).forEach(function (entry) {
-    /** @type {DriverConstructor} */
-    const driver = require(path.join(baseUri, entry));
-    /** @type {DriverDescriptor} */
-    const about = driver.about();
-
-    Driver.register(about.guid, about.title, driver);
-});
+// Now we register our known drivers.
+Driver.register(require("../drivers/TeslaSmartMatrixSwitch").default);
+Driver.register(require("../drivers/ExtronMatrixSwitch").default);
+Driver.register(require("../drivers/SonySerialBroadcastMonitor").default);
