@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-const packer = require("./.build/webpack.config/electron-packer");
+const packer = require("./build/packer");
 
 packer.main.
     js("./main/index.js").

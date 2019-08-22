@@ -21,7 +21,7 @@ import Driver from "../components/Driver";
 /**
  * @final
  */
-export default class ExtronMatrixSwitch extends Driver {
+module.exports = class ExtronMatrixSwitch extends Driver {
     /**
      * @returns {DriverDescriptor}
      */

@@ -16,9 +16,17 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-const Packer = require("./Packer");
+const path   = require("path");
+const packer = require("./packer");
 
-module.exports = {
-    main:   new Packer(),
-    render: new Packer(),
-};
+// TODO: Resolve the packer configuration rather than hard-code it.
+const packerConfigPath = "..";
+
+// Require the simplified configuration for it's side-effects on the packer.
+require(path.join(packerConfigPath, "webpack.packer"));
+
+// Now export our functions.
+module.exports = env => Promise.all([
+    packer.main.generate(env),
+    packer.render.generate(env),
+]);

@@ -21,14 +21,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
  * Common modules.
  */
 const path          = require("path");
-const readJson      = require('read-package-json');
-const nodeExternals = require('webpack-node-externals');
+const readJson      = require("read-package-json");
+const nodeExternals = require("webpack-node-externals");
 
 /*
  * =====================================================================================================================
  * Plug-ins
  */
-const CopyPlugin           = require('copy-webpack-plugin');
+const CopyPlugin           = require("copy-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const HtmlWebpackPlugin    = require("html-webpack-plugin");
 const VueLoaderPlugin      = require("vue-loader/lib/plugin");
@@ -37,6 +37,7 @@ const VueLoaderPlugin      = require("vue-loader/lib/plugin");
  * =====================================================================================================================
  * Specials
  */
+// eslint-disable-next-line dot-notation
 const isDev = process.env["NODE_ENV"] !== "development";
 
 /*
@@ -45,7 +46,7 @@ const isDev = process.env["NODE_ENV"] !== "development";
  */
 
 // TODO: Resolve the packer configuration rather than hard-code it.
-const packerConfigPath = "../..";
+const packerConfigPath = "..";
 
 /** @type {string} */
 let productName;
@@ -57,9 +58,11 @@ const allReady = Promise.all([
             function cb_(error, data) {
                 if (error) {
                     reject(error);
+
                     return;
                 }
 
+                // eslint-disable-next-line dot-notation
                 productName = data["productName"];
                 resolve(productName);
             })),
@@ -70,32 +73,32 @@ const allReady = Promise.all([
  * Common configuration
  */
 const esLintLoader = {
-    loader:  "eslint-loader",
+    loader: "eslint-loader",
 };
 
 const vueLoader = {
-    loader: "vue-loader",
+    loader:  "vue-loader",
     options: {
         optimizeSSR: false,
     },
 };
 
 const styleLoader = {
-    loader: MiniCssExtractPlugin.loader,
+    loader:  MiniCssExtractPlugin.loader,
     options: {
         // None specified...
     },
 };
 
 const cssLoader = {
-    loader: "css-loader",
+    loader:  "css-loader",
     options: {
         // None specified...
     },
 };
 
 const resolveUrlLoader = {
-    loader: "resolve-url-loader",
+    loader:  "resolve-url-loader",
     options: {
         keepQuery: true,
     },
@@ -111,12 +114,11 @@ const sassLoader = {
 };
 
 const fileLoader = {
-    loader: "file-loader",
+    loader:  "file-loader",
     options: {
         name: "assets/[contenthash].[ext]",
     },
 };
-
 
 /*
  * =====================================================================================================================
@@ -125,11 +127,9 @@ const fileLoader = {
 const rules = {
     lint: {
         enforce: "pre",
-        test: (/\.(js|vue)$/u),
+        test:    (/\.(js|vue)$/u),
         exclude: (/node_modules/u),
-        use:  [
-            esLintLoader,
-        ],
+        use:     [esLintLoader],
     },
     css: {
         test: (/\.css$/u),
@@ -149,21 +149,15 @@ const rules = {
     },
     vue: {
         test: (/\.vue$/u),
-        use: [
-            vueLoader,
-        ],
+        use:  [vueLoader],
     },
     images: {
         test: (/\.(png|svg|jpg|gif)$/u),
-        use: [
-            fileLoader,
-        ],
+        use:  [fileLoader],
     },
     fonts: {
         test: (/\.(woff|woff2|eot|ttf|otf)$/u),
-        use: [
-            fileLoader,
-        ],
+        use:  [fileLoader],
     },
 };
 
@@ -185,7 +179,7 @@ const mySass   = Symbol("[[Main SCSS Style Sheet]]");
 const GenerateEntry   = Symbol("Generate Entry-Point");
 const GeneratePlugins = Symbol("Generate Plug-in List");
 
-module.exports = class Packer {
+class Packer {
     constructor() {
         /** @type {string} */
         this[myOutdir] = "";
@@ -273,7 +267,7 @@ module.exports = class Packer {
      * @returns {EntryStatic}
      */
     [GenerateEntry]() {
-        const entries = [ String(this[myEntry]) ];
+        const entries = [String(this[myEntry])];
 
         const styles = String(this[myStyles]);
         if (styles.length > 0) {
@@ -320,7 +314,7 @@ module.exports = class Packer {
                     {
                         from: assets[key],
                         to:   path.resolve(packerConfigPath, outdir, key),
-                    }
+                    },
                 ]));
             }
         }
@@ -334,11 +328,21 @@ module.exports = class Packer {
      */
     generate(env) {
         return allReady.then(() => ({
+            // eslint-disable-next-line dot-notation
             mode:      env["NODE_ENV"],
             target:    "node",
-            externals: [ nodeExternals(), (/\/migrations\//u) ],
-            entry:     this[GenerateEntry](),
-            output:    {
+            externals: [
+                nodeExternals({
+                    modulesFromFile: {
+                    // Anything in development dependencies are expected to be packed or used for packing.
+                        exclude: ["devDependencies"],
+                        // Anything in standard dependencies are expected not be packed for any number of reasons.
+                        include: ["dependencies"],
+                    },
+                }),
+            ],
+            entry:  this[GenerateEntry](),
+            output: {
                 path:     String(this[myOutdir]),
                 filename: "index.js",
             },
@@ -351,12 +355,17 @@ module.exports = class Packer {
                     rules.vue,
                     rules.images,
                     rules.fonts,
-                ]
+                ],
             },
             plugins: this[GeneratePlugins](),
             resolve: {
-                extensions: [".wasm", ".mjs", ".js", ".vue"],
+                extensions: [ ".wasm", ".mjs", ".js", ".vue" ],
             },
         }));
     }
-};
+}
+
+Packer.main   = new Packer();
+Packer.render = new Packer();
+
+module.exports = Packer;

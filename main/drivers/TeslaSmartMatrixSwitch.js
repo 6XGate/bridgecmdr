@@ -21,7 +21,7 @@ import Driver from "../components/Driver";
 /**
  * @final
  */
-export default class TeslaSmartMatrixSwitch extends Driver {
+module.exports = class TeslaSmartMatrixSwitch extends Driver {
     /**
      * @returns {DriverDescriptor}
      */
@@ -31,4 +31,4 @@ export default class TeslaSmartMatrixSwitch extends Driver {
             title: "TeslaSmart-compatible matrix switch",
         };
     }
-}
+};

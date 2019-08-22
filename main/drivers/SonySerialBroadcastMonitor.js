@@ -21,7 +21,7 @@ import Driver from "../components/Driver";
 /**
  * @final
  */
-export default class SonySerialBroadcastMonitor extends Driver {
+module.exports = class SonySerialBroadcastMonitor extends Driver {
     /**
      * @returns {DriverDescriptor}
      */
@@ -31,4 +31,4 @@ export default class SonySerialBroadcastMonitor extends Driver {
             title: "Sony BVM RS-485 controllable monitor",
         };
     }
-}
+};

@@ -149,6 +149,6 @@ export default class Driver {
 Driver[theRegistry] = {};
 
 // Now we register our known drivers.
-Driver.register(require("../drivers/TeslaSmartMatrixSwitch").default);
-Driver.register(require("../drivers/ExtronMatrixSwitch").default);
-Driver.register(require("../drivers/SonySerialBroadcastMonitor").default);
+Driver.register(require("../drivers/TeslaSmartMatrixSwitch"));
+Driver.register(require("../drivers/ExtronMatrixSwitch"));
+Driver.register(require("../drivers/SonySerialBroadcastMonitor"));
