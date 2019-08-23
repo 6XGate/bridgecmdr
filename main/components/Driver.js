@@ -16,10 +16,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-const theRegistry    = Symbol("[[Driver Registry]]");
-const myConfig       = Symbol("[[Driver Configuration]]");
-const myCapabilities = Symbol("[[Device Capabilities]]");
-
 /**
  * @typedef {{
  *     guid:  string,
@@ -34,17 +30,14 @@ const myCapabilities = Symbol("[[Device Capabilities]]");
 /**
  * @typedef {{
  *     about(): DriverDescriptor,
- *     new(DriverConfiguration): Driver,
+ *     new(config: DriverConfiguration): Driver,
  * }} DriverConstructor
  */
 
 /**
- * @typedef {{
- *     guid:  string,
- *     title: string,
- *     ctor:  DriverConstructor
- * }} DriverRegistration
+ * @type {Map<string, DriverConstructor>}
  */
+const driverRegistry = new Map();
 
 /**
  * Provides information about and means for operating a switchable device.
@@ -55,56 +48,89 @@ export default class Driver {
     /**
      * Registers a new driver.
      *
-     * @param {DriverConstructor} driver The driver construct or class.
+     * @param {DriverConstructor} driver The driver construct or class
      *
      * @returns {void}
      */
     static register(driver) {
-        /** @type {DriverDescriptor} */
-        const about = driver.about();
-        /** @type {string} */
-        const guid = about.guid;
-        /** @type {string} */
-        const title = about.title;
+        // TODO: ow validation
 
-        if (Driver[theRegistry].hasOwnProperty(guid)) {
+        const guid = driver.about().guid;
+        if (driverRegistry.has(guid)) {
             throw new ReferenceError(`Driver already to ${guid}`);
         }
 
-        Driver[theRegistry][guid] = { guid, title, ctor: driver };
+        driverRegistry.set(guid, driver);
     }
 
     /**
-     * Finds a driver.
+     * Loads a driver.
      *
-     * @param {string}              guid
-     * @param {DriverConfiguration} configuration
+     * @param {string}              guid   The GUID that identifies the driver to be loaded
+     * @param {DriverConfiguration} config The configuration for the switchable
      *
      * @returns {Driver}
      */
-    static load(guid, configuration) {
-        if (!Driver[theRegistry].hasOwnProperty(guid)) {
+    static load(guid, config) {
+        // TODO: ow validation
+
+        if (!driverRegistry.has(guid)) {
             throw new Error(`No such driver with GUID "${guid}"`);
         }
 
-        /** @type {DriverRegistration} */
-        const entry = Driver[theRegistry][guid];
+        const driver = driverRegistry.get(guid);
 
         // eslint-disable-next-line new-cap
-        return new entry.ctor(configuration);
+        return new driver(config);
     }
 
     /**
      * Initializes a new instance of the Driver class
      *
-     * @param {DriverConfiguration} configuration
-     * @param {DriverCapabilities}  capabilities
+     * @param {DriverConfiguration} config       The device configuration for the driver
+     * @param {DriverCapabilities}  capabilities The capabilities of the driver
      */
-    constructor(configuration, capabilities) {
-        /** @type {DriverConfiguration} */
-        this[myConfig]       = configuration;
-        /** @type {DriverCapabilities} */
-        this[myCapabilities] = capabilities;
+    constructor(config, capabilities) {
+        // TODO: ow validation
+
+        /**
+         * @type {DriverConfiguration}
+         * @readonly
+         */
+        this.configuration = config;
+
+        /**
+         * @type {DriverCapabilities}
+         * @readonly
+         */
+        this.capabilities = capabilities;
+
+        // Ensure all current properties are read-only.
+        Object.freeze(this);
+    }
+
+    /**
+     * Gets the GUID for the driver.
+     *
+     * @abstract
+     *
+     * @returns {string}
+     */
+    // eslint-disable-next-line class-methods-use-this
+    get guid() {
+        // Abstract method.
+    }
+
+    /**
+     * Gets the title of the driver.
+     *
+     * @abstract
+     *
+     * @returns {string}
+     */
+    // eslint-disable-next-line class-methods-use-this
+    get title() {
+        // Abstract method.
     }
 
     /**
@@ -127,6 +153,8 @@ export default class Driver {
      * Powers on the switch or monitor.
      *
      * @abstract
+     *
+     * @returns {void}
      */
     // eslint-disable-next-line class-methods-use-this
     powerOn() {
@@ -137,16 +165,14 @@ export default class Driver {
      * Powers off the switch or monitor.
      *
      * @abstract
+     *
+     * @returns {void}
      */
     // eslint-disable-next-line class-methods-use-this
     powerOff() {
         // Abstract method.
     }
 }
-
-// Initialize the registry.
-/** @type {DriverRegistration} */
-Driver[theRegistry] = {};
 
 // Now we register our known drivers.
 Driver.register(require("../drivers/TeslaSmartMatrixSwitch"));

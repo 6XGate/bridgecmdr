@@ -18,6 +18,38 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import Switchable from "./Switchable";
 
-export default class Tie {
+/**
+ * @typedef {{
+ *     video: number,
+ *     audio: number,
+ * }} TieOutput
+ */
 
+/**
+ * Represents a routing tie.
+ */
+export default class Tie {
+    /**
+     * Initializes a new instance of the Tie class.
+     *
+     * @param {string} switchGuid         The switch identifier for error reporting
+     * @param {number} inputChannel       The input channel for the tie.
+     * @param {number} videoOutputChannel The video output channel for the tie.
+     * @param {number} audioOutputChannel The audio output channel for the tie.
+     */
+    constructor(switchGuid, inputChannel, videoOutputChannel, audioOutputChannel) {
+        // TODO: ow validation
+
+        /** @type {Switchable} */
+        this.switch = Switchable.find(switchGuid);
+        /** @type {number} */
+        this.input  = inputChannel;
+        /** @type {TieOutput} */
+        this.output = Object.freeze({
+            video: videoOutputChannel,
+            audio: audioOutputChannel,
+        });
+
+        Object.freeze(this);
+    }
 }

@@ -21,4 +21,5 @@ import Tie from "./Tie";
 export default class Source {
     static register() { }
     static find() { }
+    static load() { }
 }
