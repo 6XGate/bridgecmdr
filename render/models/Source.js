@@ -24,8 +24,10 @@ import db from "../support/database";
  * @property {string} title
  * @property          image
  *
+ * @param {Knex} [trx=db]
+ *
  * @returns {Knex.QueryBuilder<Source, {}>}
  */
-const Source = () => db("sources");
+const Source = (trx = db) => db("sources");
 
 export default Source;

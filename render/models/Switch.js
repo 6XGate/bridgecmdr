@@ -25,8 +25,10 @@ import db from "../support/database";
  * @property {string}              title
  * @property {DriverConfiguration} config
  *
+ * @param {Knex} [trx=db]
+ *
  * @returns {Knex.QueryBuilder<Switch, {}>}
  */
-const Switch = () => db("switches");
+const Switch = (trx = db) => trx("switches");
 
 export default Switch;

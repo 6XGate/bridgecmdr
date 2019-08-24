@@ -27,8 +27,10 @@ import db from "../support/database";
  * @property {number} video_output_channel
  * @property {number} audio_output_channel
  *
+ * @param {Knex} [trx=db]
+ *
  * @returns {Knex.QueryBuilder<Tie, {}>}
  */
-const Tie = () => db("ties");
+const Tie = (trx = db) => db("ties");
 
 export default Tie;

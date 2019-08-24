@@ -14,3 +14,4 @@ contenthash
 outdir
 wasm
 knex
+guids

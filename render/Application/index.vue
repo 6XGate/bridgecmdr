@@ -26,6 +26,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     import VueRouter    from "vue-router";
     import HomePage     from "./HomePage";
     import SettingsPage from "./SettingsPage";
+    import SwitchList   from "./SettingsPage/SwitchList";
 
     /**
      * @param {string} path
@@ -50,8 +51,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
     const router = new VueRouter({
         routes: [
-            makeRoute("home",     "/",         HomePage),
-            makeRoute("settings", "/settings", SettingsPage),
+            makeRoute("home",     "/",                  HomePage),
+            makeRoute("settings", "/settings",          SettingsPage),
+            makeRoute("switches", "/settings/switches", SwitchList),
         ],
     });
 
