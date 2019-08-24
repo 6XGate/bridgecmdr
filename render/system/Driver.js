@@ -34,9 +34,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
  * }} DriverConstructor
  */
 
-/**
- * @type {Map<string, DriverConstructor>}
- */
+/** @type {Map<string, DriverConstructor>} */
 const driverRegistry = new Map();
 
 /**
@@ -55,7 +53,7 @@ export default class Driver {
     static register(driver) {
         // TODO: ow validation
 
-        const guid = driver.about().guid;
+        const guid = String(driver.about().guid).toUpperCase();
         if (driverRegistry.has(guid)) {
             throw new ReferenceError(`Driver already to ${guid}`);
         }
@@ -74,6 +72,7 @@ export default class Driver {
     static load(guid, config) {
         // TODO: ow validation
 
+        guid = String(guid).toUpperCase();
         if (!driverRegistry.has(guid)) {
             throw new Error(`No such driver with GUID "${guid}"`);
         }
@@ -173,8 +172,3 @@ export default class Driver {
         // Abstract method.
     }
 }
-
-// Now we register our known drivers.
-Driver.register(require("../drivers/TeslaSmartMatrixSwitch"));
-Driver.register(require("../drivers/ExtronMatrixSwitch"));
-Driver.register(require("../drivers/SonySerialBroadcastMonitor"));

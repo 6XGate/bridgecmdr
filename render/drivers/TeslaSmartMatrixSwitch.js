@@ -16,23 +16,19 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-const path       = require("path");
-const xdgBasedir = require("xdg-basedir");
+import Driver from "../system/Driver";
 
-// noinspection SpellCheckingInspection
-/** @type {string} */
-const configBaseDir = path.resolve(xdgBasedir.config, "org.sleepingcats.bridgecmdr");
-/** @type {string} */
-const settingsDatabase = path.resolve(configBaseDir, "settings.db");
-
-module.exports = {
-    client:     "sqlite3",
-    connection: {
-        filename: settingsDatabase,
-    },
-    migrations: {
-        directory: "./migrations",
-        tableName: "migrations",
-    },
-    useNullAsDefault: true,
+/**
+ * @final
+ */
+export default class TeslaSmartMatrixSwitch extends Driver {
+    /**
+     * @returns {DriverDescriptor}
+     */
+    static about() {
+        return {
+            guid:  "91D5BC95-A8E2-4F58-BCAC-A77BA1054D61",
+            title: "TeslaSmart-compatible matrix switch",
+        };
+    }
 };

@@ -16,23 +16,17 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-const path       = require("path");
-const xdgBasedir = require("xdg-basedir");
+// The main driver module.
+import Driver from "../../system/Driver";
+// The available drivers.
+import ExtronMatrixSwitch         from "../../drivers/ExtronMatrixSwitch";
+import SonySerialBroadcastMonitor from "../../drivers/SonySerialBroadcastMonitor";
+import TeslaSmartMatrixSwitch     from "../../drivers/TeslaSmartMatrixSwitch";
 
-// noinspection SpellCheckingInspection
-/** @type {string} */
-const configBaseDir = path.resolve(xdgBasedir.config, "org.sleepingcats.bridgecmdr");
-/** @type {string} */
-const settingsDatabase = path.resolve(configBaseDir, "settings.db");
+// Now we register our known drivers.
+Driver.register(ExtronMatrixSwitch);
+Driver.register(SonySerialBroadcastMonitor);
+Driver.register(TeslaSmartMatrixSwitch);
 
-module.exports = {
-    client:     "sqlite3",
-    connection: {
-        filename: settingsDatabase,
-    },
-    migrations: {
-        directory: "./migrations",
-        tableName: "migrations",
-    },
-    useNullAsDefault: true,
-};
+// This module is resolved once it executes.
+export default Promise.resolve();

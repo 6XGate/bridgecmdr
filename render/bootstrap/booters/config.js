@@ -16,23 +16,26 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-const path       = require("path");
-const xdgBasedir = require("xdg-basedir");
+import database    from "./database";
+import SwitchModel from "../../models/Switch";
+import Driver      from "../../system/Driver";
+import Switch      from "../../system/Switch";
 
-// noinspection SpellCheckingInspection
-/** @type {string} */
-const configBaseDir = path.resolve(xdgBasedir.config, "org.sleepingcats.bridgecmdr");
-/** @type {string} */
-const settingsDatabase = path.resolve(configBaseDir, "settings.db");
+async function loadConfiguration() {
+    await database;
 
-module.exports = {
-    client:     "sqlite3",
-    connection: {
-        filename: settingsDatabase,
-    },
-    migrations: {
-        directory: "./migrations",
-        tableName: "migrations",
-    },
-    useNullAsDefault: true,
-};
+    // Get the switches in the database.
+    const switches = await SwitchModel();
+    for (const model of switches) {
+        try {
+            const driver = Driver.load(model.driver_guid, JSON.parse(model.config));
+            Switch.add(model.guid, model.title, driver);
+        } catch (error) {
+            console.error(error);
+        }
+
+        console.log(model);
+    }
+}
+
+export default loadConfiguration();

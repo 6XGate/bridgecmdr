@@ -16,12 +16,12 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Driver from "../components/Driver";
+import Driver from "../system/Driver";
 
 /**
  * @final
  */
-module.exports = class SonySerialBroadcastMonitor extends Driver {
+export default class SonySerialBroadcastMonitor extends Driver {
     /**
      * @returns {DriverDescriptor}
      */

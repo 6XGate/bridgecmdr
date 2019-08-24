@@ -16,23 +16,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-const path       = require("path");
-const xdgBasedir = require("xdg-basedir");
+import knex       from "knex";
+import config     from "../../knexfile";
 
-// noinspection SpellCheckingInspection
-/** @type {string} */
-const configBaseDir = path.resolve(xdgBasedir.config, "org.sleepingcats.bridgecmdr");
-/** @type {string} */
-const settingsDatabase = path.resolve(configBaseDir, "settings.db");
-
-module.exports = {
-    client:     "sqlite3",
-    connection: {
-        filename: settingsDatabase,
-    },
-    migrations: {
-        directory: "./migrations",
-        tableName: "migrations",
-    },
-    useNullAsDefault: true,
-};
+// Now, we can export the database connection.
+export default knex(config);

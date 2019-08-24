@@ -16,19 +16,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Driver from "../components/Driver";
+import "lodash";
 
-/**
- * @final
- */
-module.exports = class ExtronMatrixSwitch extends Driver {
-    /**
-     * @returns {DriverDescriptor}
-     */
-    static about() {
-        return {
-            guid:  "4C8F2838-C91D-431E-84DD-3666D14A6E2C",
-            title: "ExtronMatrixSwitch SIS-compatible matrix switch",
-        };
-    }
-};
+// Remove lodash from the global object so that it must be imported.
+delete window._;
+
+// This module is resolved once it executes.
+export default Promise.resolve();

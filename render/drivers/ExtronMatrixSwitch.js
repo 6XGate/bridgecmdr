@@ -16,19 +16,19 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Driver from "../components/Driver";
+import Driver from "../system/Driver";
 
 /**
  * @final
  */
-module.exports = class TeslaSmartMatrixSwitch extends Driver {
+export default class ExtronMatrixSwitch extends Driver {
     /**
      * @returns {DriverDescriptor}
      */
     static about() {
         return {
-            guid:  "91D5BC95-A8E2-4F58-BCAC-A77BA1054D61",
-            title: "TeslaSmart-compatible matrix switch",
+            guid:  "4C8F2838-C91D-431E-84DD-3666D14A6E2C",
+            title: "ExtronMatrixSwitch SIS-compatible matrix switch",
         };
     }
 };

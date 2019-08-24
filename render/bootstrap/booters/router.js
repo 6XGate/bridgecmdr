@@ -20,3 +20,6 @@ import Vue       from "vue";
 import VueRouter from "vue-router";
 
 Vue.use(VueRouter);
+
+// This module is resolved once it executes.
+export default Promise.resolve();

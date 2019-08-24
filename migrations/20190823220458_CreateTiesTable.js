@@ -22,9 +22,15 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
  * @returns {Knex.SchemaBuilder}
  */
 exports.up = function (knex) {
-    return knex.schema.createTable("store", function (table) {
-        table.string("key").notNullable().primary();
-        table.string("value").notNullable();
+    return knex.schema.createTable("ties", function (table) {
+        table.uuid("guid").notNullable().primary();
+        table.uuid("source_guid").notNullable();
+        table.uuid("switch_guid").notNullable();
+        table.integer("input_channel").notNullable();
+        table.integer("video_output_channel");
+        table.integer("audio_output_channel");
+
+        table.unique([ "source_guid", "switch_guid" ]);
     });
 
     // TODO: Parse old PiAvSwitchController settings for relevant values.
@@ -36,5 +42,5 @@ exports.up = function (knex) {
  * @returns {Knex.SchemaBuilder}
  */
 exports.down = function (knex) {
-    return knex.schema.dropTable("store");
+    return knex.schema.dropTable("ties");
 };

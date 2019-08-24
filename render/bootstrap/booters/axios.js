@@ -24,3 +24,6 @@ import axios from "axios";
 axios.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest";
 // noinspection JSUnresolvedVariable
 axios.defaults.headers.common["Accept"] = "application/json";
+
+// This module is resolved once it executes.
+export default Promise.resolve();

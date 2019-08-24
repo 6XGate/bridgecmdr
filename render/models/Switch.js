@@ -16,23 +16,17 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-const path       = require("path");
-const xdgBasedir = require("xdg-basedir");
+import db from "../support/database";
 
-// noinspection SpellCheckingInspection
-/** @type {string} */
-const configBaseDir = path.resolve(xdgBasedir.config, "org.sleepingcats.bridgecmdr");
-/** @type {string} */
-const settingsDatabase = path.resolve(configBaseDir, "settings.db");
+/**
+ * @typedef {Object} Switch
+ * @property {string}              guid
+ * @property {string}              driver_guid
+ * @property {string}              title
+ * @property {DriverConfiguration} config
+ *
+ * @returns {Knex.QueryBuilder<Switch, {}>}
+ */
+const Switch = () => db("switches");
 
-module.exports = {
-    client:     "sqlite3",
-    connection: {
-        filename: settingsDatabase,
-    },
-    migrations: {
-        directory: "./migrations",
-        tableName: "migrations",
-    },
-    useNullAsDefault: true,
-};
+export default Switch;

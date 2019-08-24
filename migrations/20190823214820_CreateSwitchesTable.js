@@ -16,23 +16,27 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-const path       = require("path");
-const xdgBasedir = require("xdg-basedir");
+/**
+ * @param {Knex} knex
+ *
+ * @returns {Knex.SchemaBuilder}
+ */
+exports.up = function (knex) {
+    return knex.schema.createTable("switches", function (table) {
+        table.uuid("guid").notNullable().primary();
+        table.uuid("driver_guid").notNullable().index();
+        table.string("title").notNullable().unique();
+        table.json("config").notNullable();
+    });
 
-// noinspection SpellCheckingInspection
-/** @type {string} */
-const configBaseDir = path.resolve(xdgBasedir.config, "org.sleepingcats.bridgecmdr");
-/** @type {string} */
-const settingsDatabase = path.resolve(configBaseDir, "settings.db");
+    // TODO: Parse old PiAvSwitchController settings for relevant values.
+};
 
-module.exports = {
-    client:     "sqlite3",
-    connection: {
-        filename: settingsDatabase,
-    },
-    migrations: {
-        directory: "./migrations",
-        tableName: "migrations",
-    },
-    useNullAsDefault: true,
+/**
+ * @param {Knex} knex
+ *
+ * @returns {Knex.SchemaBuilder}
+ */
+exports.down = function (knex) {
+    return knex.schema.dropTable("switches");
 };

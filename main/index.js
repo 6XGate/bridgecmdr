@@ -17,13 +17,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { app, BrowserWindow } from "electron";
-import "../foundation/database";
 
 // We only want to allow a single window.
 let window = null;
 
 function createWindow() {
-    const Driver = require("./components/Driver").default;
+    const Driver = require("../render/system/Driver").default;
     console.log(Driver.load);
 
     window = new BrowserWindow({

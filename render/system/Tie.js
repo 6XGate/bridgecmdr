@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Switchable from "./Switchable";
+import Switch from "./Switch";
 
 /**
  * @typedef {{
@@ -40,8 +40,8 @@ export default class Tie {
     constructor(switchGuid, inputChannel, videoOutputChannel, audioOutputChannel) {
         // TODO: ow validation
 
-        /** @type {Switchable} */
-        this.switch = Switchable.find(switchGuid);
+        /** @type {Switch} */
+        this.switch = Switch.find(switchGuid);
         /** @type {number} */
         this.input  = inputChannel;
         /** @type {TieOutput} */

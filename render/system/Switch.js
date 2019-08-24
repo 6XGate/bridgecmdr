@@ -16,18 +16,67 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Driver from "./Driver";
+// import Driver from "./Driver";
+
+/** @type {Map<string, Switch>} */
+const knownSwitches = new Map();
 
 /**
  * Provides information for and a means to operate a switchable device.
  */
-export default class Switchable {
-    static register() { /* TODO */ }
-    static load() { /* TODO */ }
-    static find(guid) { /* TODO */ }
+export default class Switch {
+    /**
+     * Adds a switch to the known switches registry.
+     *
+     * @param {string} guid
+     * @param {string} title
+     * @param {Driver} driver
+     *
+     * @returns {Switch}
+     */
+    static add(guid, title, driver) {
+        // TODO: ow validation
+
+        guid = String(guid).toUpperCase();
+        if (knownSwitches.has(guid)) {
+            throw new ReferenceError(`Cannot register switch "${title}" to GUID ${guid}, it is already used`);
+        }
+
+        const newSwitch = new Switch(guid, title, driver);
+        knownSwitches.set(guid, newSwitch);
+
+        return newSwitch;
+    }
 
     /**
-     * Initializes a new instance of the Switchable class.
+     * Unregisters all known switches.
+     *
+     * @returns {void}
+     */
+    static clear() {
+        knownSwitches.clear();
+    }
+
+    /**
+     * Gets a known switch.
+     *
+     * @param {string} guid
+     *
+     * @returns {Switch}
+     */
+    static find(guid) {
+        // TODO: ow validation
+
+        guid = String(guid).toUpperCase();
+        if (!knownSwitches.has(guid)) {
+            throw new ReferenceError(`No switch is registered for "${guid}"`);
+        }
+
+        return knownSwitches.get(guid);
+    }
+
+    /**
+     * Initializes a new instance of the Switch class.
      *
      * @param {string} guid   The identifier used when referencing the switchable device
      * @param {string} title  The title to display for the switchable device
@@ -58,13 +107,15 @@ export default class Switchable {
     /**
      * Sets input and output ties.
      *
-     * @param inputChannel       The input channel of the tie
-     * @param videoOutputChannel The output video channel of the tie
-     * @param audioOutputChannel The output audio channel of the tie
+     * @param {number} inputChannel       The input channel of the tie
+     * @param {number} videoOutputChannel The output video channel of the tie
+     * @param {number} audioOutputChannel The output audio channel of the tie
      *
      * @returns {void}
      */
     setTie(inputChannel, videoOutputChannel, audioOutputChannel) {
+        // TODO: ow validation
+
         this.driver.setTie(inputChannel, videoOutputChannel, audioOutputChannel);
     }
 

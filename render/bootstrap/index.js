@@ -16,10 +16,12 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import "lodash";
-import "./booters/axios";
-import "./booters/router";
-import "./booters/buefy";
-
-// Remove lodash from the global object so that it must be imported.
-delete window._;
+export default Promise.all([
+    require("./booters/database"),
+    require("./booters/drivers"),
+    require("./booters/config"),
+    require("./booters/lodash"),
+    require("./booters/axios"),
+    require("./booters/router"),
+    require("./booters/buefy"),
+]);

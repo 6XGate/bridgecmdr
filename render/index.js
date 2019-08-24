@@ -17,11 +17,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 // Application scaffolding
-import "./bootstrap";
+import booting     from  "./bootstrap";
 import Vue         from "vue";
 import Application from "./Application";
 
 // The main application instance.
 const theApp = Symbol("[[Application Root]]");
-window.addEventListener("DOMContentLoaded", () =>
-    (window[theApp] = new Vue(Application).$mount("#root")));
+window.addEventListener("DOMContentLoaded", async () => {
+    await booting;
+    window[theApp] = new Vue(Application).$mount("#root");
+});

@@ -65,3 +65,6 @@ Vue.component("BUpload",         require("buefy/src/components/upload/Upload"));
 
 // Finally, ensure Buefy is allowed to do all root initialization.
 Vue.use(Buefy);
+
+// This module is resolved once it executes.
+export default Promise.resolve();
