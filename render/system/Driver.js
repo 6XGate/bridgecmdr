@@ -16,6 +16,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import _ from "lodash";
+
 /**
  * @typedef {{
  *     guid:  string,
@@ -43,6 +45,17 @@ const driverRegistry = new Map();
  * @abstract
  */
 export default class Driver {
+    /**
+     * Gets basic data about all the drivers in the registry.
+     *
+     * @returns {DriverDescriptor[]}
+     */
+    static all() {
+        _.map(driverRegistry.values(), function (entry) {
+            return entry.about();
+        });
+    }
+
     /**
      * Registers a new driver.
      *

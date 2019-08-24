@@ -16,12 +16,15 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import _           from "lodash";
 import database    from "./database";
-import SwitchModel from "../../models/Switch";
-import Driver      from "../../system/Driver";
-import Switch      from "../../system/Switch";
 import SourceModel from "../../models/Source";
-import Source from "../../system/Source";
+import SwitchModel from "../../models/Switch";
+import TieModel    from "../../models/Tie";
+import Driver      from "../../system/Driver";
+import Source      from "../../system/Source";
+import Switch      from "../../system/Switch";
+import Tie         from "../../system/Tie";
 
 async function loadConfiguration() {
     await database;
@@ -39,13 +42,39 @@ async function loadConfiguration() {
         console.log(model);
     }
 
-    // TODO: Query the ties. We can do this once and map the source GUIDs.
+    // Gets the ties from the database.
+    /** @type {Map<string, Tie[]>} */
+    const tieMap = new Map();
+    const ties   = await TieModel();
+    for (const model of ties) {
+        try {
+            /** @type {string} */
+            const guid = String(model.source_guid).toUpperCase();
+            /** @type {Tie[]} */
+            const tieSet = tieMap.has(guid) ? tieMap.get(guid) : [];
+            tieSet.push(new Tie(model.switch_guid, model.input_channel,
+                model.video_output_channel, model.audio_output_channel));
+
+            tieMap.set(guid, tieSet);
+        } catch (error) {
+            console.log(error);
+        }
+
+        console.log(model);
+    }
 
     // Get the source from the database.
     const sources = await SourceModel();
     for (const model of sources) {
         try {
-            Source.add(model.guid, model.title, model.image);
+            const guid = String(model.guid).toUpperCase();
+            let tieSet = tieMap.get(guid);
+            if (_.isNil(tieSet)) {
+                console.warn(`Source "${model.title}" has no ties`);
+                tieSet = [];
+            }
+
+            Source.add(guid, model.title, model.image, tieSet);
         } catch (error) {
             console.log(error);
         }

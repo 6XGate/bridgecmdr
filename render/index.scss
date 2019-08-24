@@ -19,6 +19,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 @import "~@mdi/font/scss/materialdesignicons";
 @import "~bulma/sass/utilities/functions";
 
+$gap: 16px;
+$tablet: 768px + (2 * $gap);
+$desktop: 768px + (2 * $gap);
+
 // Customize Buefy/Bulma colors
 // Using: https://material.io/resources/color/#!/?view.left=0&view.right=0&primary.color=455A64&secondary.color=1A237E
 // Material color palette: #455A64

@@ -18,13 +18,45 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 <template>
     <div>
-        <h1>Hello, world!!!</h1>
-        <p>Hello</p>
+        <router-view/>
     </div>
 </template>
 
 <script>
+    import VueRouter    from "vue-router";
+    import HomePage     from "./HomePage";
+    import SettingsPage from "./SettingsPage";
+
+    /**
+     * @param {string} path
+     *
+     * @returns {boolean}
+     */
+    function hasProps(path) {
+        return path.includes(":");
+    }
+
+    /**
+     * @param {string}           path
+     * @param {string}           name
+     * @param {ComponentOptions} component
+     * @param {RouteConfig[]}    [children=undefined]
+     *
+     * @returns {RouteConfig}
+     */
+    function makeRoute(name, path, component, children = undefined) {
+        return { name, path, component, props: hasProps(path), children };
+    }
+
+    const router = new VueRouter({
+        routes: [
+            makeRoute("home",     "/",         HomePage),
+            makeRoute("settings", "/settings", SettingsPage),
+        ],
+    });
+
     export default {
         name: "Application",
+        router,
     };
 </script>
