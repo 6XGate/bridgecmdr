@@ -20,11 +20,13 @@ import database    from "./database";
 import SwitchModel from "../../models/Switch";
 import Driver      from "../../system/Driver";
 import Switch      from "../../system/Switch";
+import SourceModel from "../../models/Source";
+import Source from "../../system/Source";
 
 async function loadConfiguration() {
     await database;
 
-    // Get the switches in the database.
+    // Get the switches from the database.
     const switches = await SwitchModel();
     for (const model of switches) {
         try {
@@ -32,6 +34,20 @@ async function loadConfiguration() {
             Switch.add(model.guid, model.title, driver);
         } catch (error) {
             console.error(error);
+        }
+
+        console.log(model);
+    }
+
+    // TODO: Query the ties. We can do this once and map the source GUIDs.
+
+    // Get the source from the database.
+    const sources = await SourceModel();
+    for (const model of sources) {
+        try {
+            Source.add(model.guid, model.title, model.image);
+        } catch (error) {
+            console.log(error);
         }
 
         console.log(model);

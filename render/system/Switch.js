@@ -102,6 +102,9 @@ export default class Switch {
          * @readonly
          */
         this.driver = driver;
+
+        // Ensure all current properties are read-only.
+        Object.freeze(this);
     }
 
     /**
@@ -111,29 +114,29 @@ export default class Switch {
      * @param {number} videoOutputChannel The output video channel of the tie
      * @param {number} audioOutputChannel The output audio channel of the tie
      *
-     * @returns {void}
+     * @returns {Promise<void>}
      */
     setTie(inputChannel, videoOutputChannel, audioOutputChannel) {
         // TODO: ow validation
 
-        this.driver.setTie(inputChannel, videoOutputChannel, audioOutputChannel);
+        return this.driver.setTie(inputChannel, videoOutputChannel, audioOutputChannel);
     }
 
     /**
      * Powers off the switchable device.
      *
-     * @returns {void}
+     * @returns {Promise<void>}
      */
     powerOn() {
-        this.driver.powerOn();
+        return this.driver.powerOn();
     }
 
     /**
      * Powers off the switchable device.
      *
-     * @returns {void}
+     * @returns {Promise<void>}
      */
     powerOff() {
-        this.driver.powerOff();
+        return this.driver.powerOff();
     }
 }

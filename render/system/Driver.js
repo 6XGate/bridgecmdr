@@ -141,11 +141,12 @@ export default class Driver {
      * @param {number} videoOutputChannel The output video channel to tie.
      * @param {number} audioOutputChannel The output audio channel to tie.
      *
-     * @returns {void}
+     * @returns {Promise<void>}
      */
     // eslint-disable-next-line class-methods-use-this
     setTie(inputChannel, videoOutputChannel, audioOutputChannel) {
         // Abstract method.
+        return Promise.resolve();
     }
 
     /**
@@ -153,11 +154,12 @@ export default class Driver {
      *
      * @abstract
      *
-     * @returns {void}
+     * @returns {Promise<void>}
      */
     // eslint-disable-next-line class-methods-use-this
     powerOn() {
         // Abstract method.
+        return Promise.resolve();
     }
 
     /**
@@ -165,10 +167,11 @@ export default class Driver {
      *
      * @abstract
      *
-     * @returns {void}
+     * @returns {Promise<void>}
      */
     // eslint-disable-next-line class-methods-use-this
     powerOff() {
         // Abstract method.
+        return Promise.resolve();
     }
 }
