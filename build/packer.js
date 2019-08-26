@@ -76,6 +76,13 @@ const esLintLoader = {
     loader: "eslint-loader",
 };
 
+const typeScriptLoader = {
+    loader:  "ts-loader",
+    options: {
+        appendTsSuffixTo: [(/\.vue$/u)],
+    },
+};
+
 const vueLoader = {
     loader:  "vue-loader",
     options: {
@@ -127,9 +134,13 @@ const fileLoader = {
 const rules = {
     lint: {
         enforce: "pre",
-        test:    (/\.(js|vue)$/u),
+        test:    (/\.(js|ts)$/u),
         exclude: (/node_modules/u),
         use:     [esLintLoader],
+    },
+    typeScript: {
+        test: (/\.ts$/u),
+        use:  [typeScriptLoader],
     },
     css: {
         test: (/\.css$/u),
@@ -350,6 +361,7 @@ class Packer {
             module:  {
                 rules: [
                     rules.lint,
+                    rules.typeScript,
                     rules.css,
                     rules.sass,
                     rules.vue,
@@ -359,7 +371,7 @@ class Packer {
             },
             plugins: this[GeneratePlugins](),
             resolve: {
-                extensions: [ ".wasm", ".mjs", ".js", ".vue" ],
+                extensions: [ ".wasm", ".vue", ".ts", ".mjs", ".js" ],
             },
         }));
     }

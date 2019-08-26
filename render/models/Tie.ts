@@ -16,14 +16,17 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import axios from "axios";
+import Knex from "knex";
+import db from "../support/database";
 
-/* eslint-disable dot-notation */
+const Tie = (trx: Knex<Tie> = db) => trx("ties");
+interface Tie {
+    guid:                 string;
+    source_guid:          string;
+    switch_guid:          string;
+    input_channel:        number;
+    video_output_channel: number;
+    audio_output_channel: number;
+}
 
-// noinspection JSUnresolvedVariable
-axios.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest";
-// noinspection JSUnresolvedVariable
-axios.defaults.headers.common["Accept"] = "application/json";
-
-// This module is resolved once it executes.
-export default Promise.resolve();
+export default Tie;

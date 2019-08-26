@@ -16,18 +16,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import db from "../support/database";
+import Knex from "knex";
+import db   from "../support/database";
 
-/**
- * @typedef {Object} Source
- * @property {string} guid
- * @property {string} title
- * @property          image
- *
- * @param {Knex} [trx=db]
- *
- * @returns {Knex.QueryBuilder<Source, {}>}
- */
-const Source = (trx = db) => db("sources");
+const Source = (trx: Knex<Source> = db) => trx("sources");
+interface Source {
+    guid:  string;
+    title: string;
+    image: any;
+}
 
 export default Source;

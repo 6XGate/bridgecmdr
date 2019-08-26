@@ -16,19 +16,15 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Driver from "../system/Driver";
+import Knex from "knex";
+import db   from "../support/database";
 
-/**
- * @final
- */
-export default class SonySerialBroadcastMonitor extends Driver {
-    /**
-     * @returns {DriverDescriptor}
-     */
-    static about() {
-        return {
-            guid:  "8626D6D3-C211-4D21-B5CC-F5E3B50D9FF0",
-            title: "Sony BVM RS-485 controllable monitor",
-        };
-    }
-};
+const Switch = (trx: Knex<Switch> = db) => trx("switches");
+interface Switch {
+    guid:        string;
+    driver_guid: string;
+    title:       string;
+    config:      string;
+}
+
+export default Switch;

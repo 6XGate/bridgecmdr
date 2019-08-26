@@ -16,21 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import db from "../support/database";
+import knex       from "knex";
 
-/**
- * @interface {Object} Tie
- * @property {string} guid
- * @property {string} source_guid
- * @property {string} switch_guid
- * @property {number} input_channel
- * @property {number} video_output_channel
- * @property {number} audio_output_channel
- *
- * @param {Knex} [trx=db]
- *
- * @returns {Knex.QueryBuilder<Tie, {}>}
- */
-const Tie = (trx = db) => db("ties");
-
-export default Tie;
+// Now, we can export the database connection.
+export default knex(require("../../knexfile"));

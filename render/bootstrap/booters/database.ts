@@ -16,31 +16,22 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import fs     from "fs";
-import path   from "path";
-import db     from "../../support/database";
-import config from "../../../knexfile";
+import fs   from "fs";
+import path from "path";
+import db   from "../../support/database";
 
-/**
- * @param {string|Buffer|URL} dirPath
- *
- * @returns {Promise<void>}
- */
-function makeDir(dirPath) {
-    return new Promise(function (resolve, reject) {
+function makeDir(dirPath: string|Buffer|URL): Promise<void> {
+    return new Promise(function (resolve, reject): void {
         fs.mkdir(dirPath, { recursive: true }, function (error) {
             error ? reject(error) : resolve();
         });
     });
 }
 
-/**
- * @returns {Promise<void>}
- */
-async function readyConfigDatabase() {
+async function readyConfigDatabase(): Promise<void> {
     try {
         // Get the configuration directory and ensure it exists.
-        const databaseBaseDir = path.dirname(config.connection.filename);
+        const databaseBaseDir = path.dirname(require("../../../knexfile").connection.filename);
         await makeDir(databaseBaseDir);
 
         // Run any pending migrations.

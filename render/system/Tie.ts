@@ -18,33 +18,34 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import Switch from "./Switch";
 
-/**
- * @typedef {{
- *     video: number,
- *     audio: number,
- * }} TieOutput
- */
+interface TieOutput {
+    video: number;
+    audio: number;
+}
 
 /**
  * Represents a routing tie.
  */
 export default class Tie {
+    public readonly switch: Switch;
+
+    public readonly input: number;
+
+    public readonly output: Readonly<TieOutput>;
+
     /**
      * Initializes a new instance of the Tie class.
      *
-     * @param {string} switchGuid         The switch identifier for error reporting
-     * @param {number} inputChannel       The input channel for the tie.
-     * @param {number} videoOutputChannel The video output channel for the tie.
-     * @param {number} audioOutputChannel The audio output channel for the tie.
+     * @param switchGuid         The switch identifier for error reporting
+     * @param inputChannel       The input channel for the tie.
+     * @param videoOutputChannel The video output channel for the tie.
+     * @param audioOutputChannel The audio output channel for the tie.
      */
-    constructor(switchGuid, inputChannel, videoOutputChannel, audioOutputChannel) {
+    constructor(switchGuid: string, inputChannel: number, videoOutputChannel: number, audioOutputChannel: number) {
         // TODO: ow validation
 
-        /** @type {Switch} */
         this.switch = Switch.find(switchGuid);
-        /** @type {number} */
         this.input  = inputChannel;
-        /** @type {TieOutput} */
         this.output = Object.freeze({
             video: videoOutputChannel,
             audio: audioOutputChannel,

@@ -17,43 +17,32 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <template>
-    <div>
-        <router-view/>
-    </div>
+    <router-view/>
 </template>
 
-<script>
-    import VueRouter    from "vue-router";
-    import HomePage     from "./HomePage";
-    import SettingsPage from "./SettingsPage";
-    import SwitchList   from "./SettingsPage/SwitchList";
+<script lang="ts">
+    import Vue, { VueConstructor }    from "vue";
+    import VueRouter, { RouteConfig } from "vue-router";
+    import HomePage                   from "./pages/HomePage.vue";
+    import SettingsPage               from "./pages/settings/MainPage.vue";
+    import SwitchList                 from "./pages/settings/SwitchList.vue";
+    import SwitchEditor               from "./pages/settings/SwitchEditor.vue";
 
-    /**
-     * @param {string} path
-     *
-     * @returns {boolean}
-     */
-    function hasProps(path) {
+    function hasProps(path: string): boolean {
         return path.includes(":");
     }
 
-    /**
-     * @param {string}           path
-     * @param {string}           name
-     * @param {ComponentOptions} component
-     * @param {RouteConfig[]}    [children=undefined]
-     *
-     * @returns {RouteConfig}
-     */
-    function makeRoute(name, path, component, children = undefined) {
+    type Component = VueConstructor<Vue>;
+    function makeRoute(name: string, path: string, component: Component, children?: RouteConfig[]): RouteConfig {
         return { name, path, component, props: hasProps(path), children };
     }
 
     const router = new VueRouter({
         routes: [
-            makeRoute("home",     "/",                  HomePage),
-            makeRoute("settings", "/settings",          SettingsPage),
-            makeRoute("switches", "/settings/switches", SwitchList),
+            makeRoute("home",     "/",                             HomePage),
+            makeRoute("settings", "/settings",                     SettingsPage),
+            makeRoute("switches", "/settings/switches",            SwitchList),
+            makeRoute("switch",   "/settings/switches/:subjectId", SwitchEditor),
         ],
     });
 

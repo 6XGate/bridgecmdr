@@ -16,19 +16,12 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import db from "../support/database";
+import axios from "axios";
 
-/**
- * @typedef {Object} Switch
- * @property {string}              guid
- * @property {string}              driver_guid
- * @property {string}              title
- * @property {DriverConfiguration} config
- *
- * @param {Knex} [trx=db]
- *
- * @returns {Knex.QueryBuilder<Switch, {}>}
- */
-const Switch = (trx = db) => trx("switches");
+// eslint-disable-next-line dot-notation
+axios.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest";
+// eslint-disable-next-line dot-notation
+axios.defaults.headers.common["Accept"] = "application/json";
 
-export default Switch;
+// This module is resolved once it executes.
+export default Promise.resolve();

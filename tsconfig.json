@@ -1,0 +1,33 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "inlineSourceMap": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "newLine": "LF",
+    "pretty": true,
+    "outDir": "./dist/ts/",
+    "target": "es2018",
+
+    "allowJs": false,
+    "alwaysStrict": true,
+    "allowSyntheticDefaultImports": true,
+    "checkJs": false,
+    "disableSizeLimit": true,
+    "emitBOM": false,
+    "esModuleInterop": false,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noEmitHelpers": true,
+    "noEmitOnError": true,
+    "noErrorTruncation": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "strict": true
+  },
+  "typeAcquisition": {
+    "enable": true,
+    "include": ["vue-shims.d.ts"]
+  }
+}

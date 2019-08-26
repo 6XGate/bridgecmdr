@@ -15,13 +15,14 @@
     </settings-panel>
 </template>
 
-<script>
-    import SettingsPanel from "../../components/SettingsPanel";
+<script lang="ts">
+    import Vue           from "vue";
+    import SettingsPanel from "../../../components/SettingsPanel.vue";
 
-    export default {
+    export default Vue.extend({
         name:       "SettingsPage",
         components: {
             SettingsPanel,
         },
-    };
+    });
 </script>

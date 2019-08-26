@@ -16,19 +16,21 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Driver from "../system/Driver";
+// app scaffolding
+import booting     from  "./bootstrap";
+import Vue         from "vue";
+import Application from "./app/Application.vue";
 
-/**
- * @final
- */
-export default class ExtronMatrixSwitch extends Driver {
-    /**
-     * @returns {DriverDescriptor}
-     */
-    static about() {
-        return {
-            guid:  "4C8F2838-C91D-431E-84DD-3666D14A6E2C",
-            title: "ExtronMatrixSwitch SIS-compatible matrix switch",
-        };
+// We need to declare the new property for window.
+declare global {
+    interface Window {
+        theApp: Vue;
     }
-};
+}
+
+// The main application instance.
+// const theApp: symbol = Symbol("[[app Root]]");
+window.addEventListener("DOMContentLoaded", async () => {
+    await booting;
+    window.theApp = new Vue(Application).$mount("#root");
+});

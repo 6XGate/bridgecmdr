@@ -16,8 +16,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-/** @type {Map<string, Source>} */
-const knownSources = new Map();
+import Tie from "./Tie";
+
+const knownSources = new Map<string, Source>();
 
 /**
  * Provides information about and a means to select a source.
@@ -26,12 +27,12 @@ export default class Source {
     /**
      * Registers a new known source.
      *
-     * @param {string} guid
-     * @param {string} title
-     * @param          image
-     * @param {Tie[]}  ties
+     * @param guid
+     * @param title
+     * @param image
+     * @param ties
      */
-    static add(guid, title, image, ties) {
+    static add(guid: string, title: string, image: any, ties: Tie[]): Source {
         // TODO: ow validation
 
         guid = String(guid).toUpperCase();
@@ -48,64 +49,52 @@ export default class Source {
     /**
      * Clears all known sources.
      */
-    static clear() {
+    static clear(): void {
         knownSources.clear();
     }
 
     /**
      * Finds a known source.
      *
-     * @param {string} guid
-     *
-     * @returns {Source}
+     * @param guid
      */
-    static find(guid) {
+    static find(guid: string): Source {
         // TODO: ow validation
 
         guid = String(guid).toUpperCase();
-        if (!knownSources.has(guid)) {
+        const source = knownSources.get(guid);
+        if (source === undefined) {
             throw new ReferenceError(`No source is registered for "${guid}"`);
         }
 
-        return knownSources.get(guid);
+        return source;
     }
+
+    public readonly guid: string;
+
+    public readonly title: string;
+
+    public readonly image: any;
+
+    public readonly ties: Readonly<Tie[]>;
 
     /**
      * Initializes a new instance of the Source class.
      *
-     * @param {string} guid  The GUID that identifies the source.
-     * @param {string} title The title for the source.
-     * @param          image An image to represent the source.
-     * @param {Tie[]}  ties  The ties needed for switching to the source.
+     * @param guid  The GUID that identifies the source.
+     * @param title The title for the source.
+     * @param image An image to represent the source.
+     * @param ties  The ties needed for switching to the source.
      */
-    constructor(guid, title, image, ties) {
+    constructor(guid: string, title: string, image: any, ties: Tie[]) {
         // TODO: ow validation
 
-        /**
-         * @type {string}
-         * @readonly
-         */
-        this.guid = guid;
-
-        /**
-         * @type {string}
-         * @readonly
-         */
+        this.guid  = guid;
         this.title = title;
 
         // TODO: Figure out type.
-
-        /**
-         * @type {any}
-         * @readonly
-         */
         this.image = image;
-
-        /**
-         * @type {Tie[]}
-         * @readonly
-         */
-        this.ties = Object.freeze(ties);
+        this.ties  = Object.freeze(ties);
 
         // Ensure all current properties are read-only.
         Object.freeze(this);
@@ -113,17 +102,13 @@ export default class Source {
 
     /**
      * Connect the channel ties to select the source.
-     *
-     * @returns {Promise<void>}
      */
-    select() {
-        /** @type {Promise<void>[]} */
-        const promises = [];
+    select(): Promise<void> {
+        const promises: Promise<void>[] = [];
         for (const tie of this.ties) {
             promises.push(tie.switch.setTie(tie.input, tie.output.video, tie.output.audio));
         }
 
-        // noinspection JSValidateTypes
-        return Promise.all(promises);
+        return Promise.all(promises).then(() => undefined);
     }
 }

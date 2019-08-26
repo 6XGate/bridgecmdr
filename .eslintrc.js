@@ -1,31 +1,40 @@
-{
-    "root": true,
+module.exports = {
+    root: true,
 
-    "env": {
+    env: {
         "shared-node-browser": true,
-        "browser": true,
-        "worker": true,
-        "node": true,
-        "es6": true
+        browser: true,
+        worker: true,
+        node: true,
+        es6: true,
     },
-    "extends": [
-        "plugin:vue/essential",
-        "standard"
+    plugins: [
+        "@typescript-eslint",
+        "import",
     ],
-    "globals": {
+    extends: [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:import/typescript",
+        "plugin:import/warnings",
+        "plugin:import/errors",
+        "plugin:node/recommended",
+    ],
+    globals: {
         "Atomics": "readonly",
-        "SharedArrayBuffer": "readonly"
+        "SharedArrayBuffer": "readonly",
     },
-    "parserOptions": {
-        "ecmaVersion": 2018,
-        "sourceType": "module"
+    parser: "@typescript-eslint/parser",
+    parserOptions: {
+        ecmaVersion: 2018,
+        sourceType: "module",
     },
-    "plugins": [
-        "vue"
-    ],
-    "rules": {
+    rules: {
         "no-await-in-loop": "error",
         "no-template-curly-in-string": "error",
+        "no-console": "off",
+
 
         "accessor-pairs": "error",
         "array-callback-return": "error",
@@ -71,8 +80,8 @@
         "no-throw-literal": "error",
         "no-unmodified-loop-condition": "error",
         "no-unused-expressions": ["warn", {
-            "allowShortCircuit": true,
-            "allowTernary": true
+            allowShortCircuit: true,
+            allowTernary: true,
         }],
         "no-useless-call": "error",
         "no-useless-concat": "error",
@@ -83,7 +92,9 @@
         "require-await": "error",
         "require-unicode-regexp": "error",
         "wrap-iife": ["error", "inside"],
-        "yoda": ["error", "never", { "exceptRange": true }],
+        "yoda": ["error", "never", {
+            exceptRange: true,
+        }],
 
 
         "no-label-var": "error",
@@ -91,9 +102,13 @@
         "no-use-before-define": "error",
 
 
+        "no-process-env": "off",
+        "no-process-exit": "off",
+
+
         "array-bracket-newline": ["error", { "multiline": true }],
         "array-bracket-spacing": ["error", "always" , {
-            "singleValue": false
+            singleValue: false,
         }],
         "array-element-newline": ["error", "consistent"],
         "block-spacing": "error",
@@ -105,21 +120,30 @@
         "func-call-spacing": ["error", "never"],
         "func-name-matching": "warn",
         "indent": ["error", 4, {
-            "SwitchCase": 1
+            SwitchCase: 1,
         }],
         "key-spacing": ["error", {
-            "afterColon": true,
-            "align": "value"
+            afterColon: true,
+            align: "value",
         }],
         "keyword-spacing": ["error", {
-            "before": true,
-            "after": true
+            before: true,
+            after: true,
         }],
         "linebreak-style": ["error", "unix"],
         "lines-between-class-members": ["error", "always", {
-            "exceptAfterSingleLine": true
+            exceptAfterSingleLine: true,
         }],
-        "new-cap": "error",
+        "new-cap": ["error", {
+            capIsNewExceptions: [
+                "Source",
+                "SourceModel",
+                "Switch",
+                "SwitchModel",
+                "Tie",
+                "TieModel",
+            ],
+        }],
         "new-parens": "error",
         "no-array-constructor": "error",
         "no-continue": "warn",
@@ -131,27 +155,34 @@
         "no-new-object": "error",
         "no-trailing-spaces": "error",
         "no-unneeded-ternary": "warn",
-        "object-curly-newline": ["error", { "multiline": true, "consistent": true }],
+        "object-curly-newline": ["error", {
+            multiline: true,
+            consistent: true,
+        }],
         "object-curly-spacing": ["error", "always"],
-        "object-property-newline": ["error", { "allowAllPropertiesOnSameLine": true }],
+        "object-property-newline": ["error", {
+            allowAllPropertiesOnSameLine: true,
+        }],
         "one-var": ["error", "never"],
         "operator-linebreak": ["error", "after"],
-        "padding-line-between-statements": ["error",
-            { "blankLine": "always", "prev": "*", "next": "return" }
-        ],
+        "padding-line-between-statements": ["error", {
+            blankLine: "always",
+            prev: "*",
+            next: "return",
+        }],
         "prefer-object-spread": "warn",
         "quote-props": ["error", "consistent"],
         "quotes": ["error", "double", {
-            "avoidEscape": true
+            avoidEscape: true,
         }],
         "semi": ["error", "always"],
         "semi-spacing": "error",
         "semi-style": "error",
         "space-before-blocks": "error",
         "space-before-function-paren": ["error", {
-            "anonymous": "always",
-            "named": "never",
-            "asyncArrow": "always"
+            anonymous: "always",
+            named: "never",
+            asyncArrow: "always",
         }],
         "space-in-parens": "error",
         "space-infix-ops": "error",
@@ -166,7 +197,9 @@
         "arrow-parens": ["error", "as-needed"],
         "arrow-spacing": "error",
         "generator-star-spacing": "error",
-        "no-confusing-arrow": ["error", {"allowParens": true}],
+        "no-confusing-arrow": ["error", {
+            allowParens: true,
+        }],
         "no-useless-computed-key": "warn",
         "no-useless-constructor": "error",
         "no-useless-rename": "error",
@@ -182,23 +215,21 @@
         "yield-star-spacing": "error",
 
 
+        "@typescript-eslint/no-var-requires": "off",
+        "@typescript-eslint/explicit-function-return-type": "off",
+        "@typescript-eslint/no-explicit-any": "off",
+
+
         "import/first": "off",
         "import/extensions": ["error", "never", {
-            "gql": "always"
+            "vue": "always",
         }],
 
 
-        "vue/script-indent": ["error", 4, {
-            "baseIndent": 1,
-            "switchCase": 1
-        }]
+        "node/no-unsupported-features/es-syntax": "off",
+        "node/no-unpublished-require": "off",
+        "node/no-missing-require": ["error", {
+            tryExtensions: [".js", ".ts"],
+        }],
     },
-    "overrides": [
-        {
-            "files": ["*.vue"],
-            "rules": {
-                "indent": "off"
-            }
-        }
-    ]
-}
+};

@@ -19,21 +19,18 @@
     </div>
 </template>
 
-<script>
-    export default {
+<script lang="ts">
+    import Vue from "vue";
+
+    export default Vue.extend({
         name:  "SettingsPanel",
         props: {
             title: { required: true, type: String },
         },
-        // data: function () {
-        //     return {
-        //         myTitle: title ?
-        //     };
-        // },
         methods: {
             onBackClicked() {
                 this.$router.back();
             },
         },
-    };
+    });
 </script>

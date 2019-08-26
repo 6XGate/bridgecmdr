@@ -16,10 +16,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-// import Driver from "./Driver";
+import Driver from "./Driver";
 
-/** @type {Map<string, Switch>} */
-const knownSwitches = new Map();
+const knownSwitches = new Map<string, Switch>();
 
 /**
  * Provides information for and a means to operate a switchable device.
@@ -28,13 +27,11 @@ export default class Switch {
     /**
      * Adds a switch to the known switches registry.
      *
-     * @param {string} guid
-     * @param {string} title
-     * @param {Driver} driver
-     *
-     * @returns {Switch}
+     * @param guid   The identifier used when referencing the switchable device
+     * @param title  The title to display for the switchable device
+     * @param driver The driver for the switchable device
      */
-    static add(guid, title, driver) {
+    static add(guid: string, title: string, driver: Driver): Switch {
         // TODO: ow validation
 
         guid = String(guid).toUpperCase();
@@ -50,57 +47,44 @@ export default class Switch {
 
     /**
      * Unregisters all known switches.
-     *
-     * @returns {void}
      */
-    static clear() {
+    static clear(): void {
         knownSwitches.clear();
     }
 
     /**
      * Gets a known switch.
-     *
-     * @param {string} guid
-     *
-     * @returns {Switch}
      */
-    static find(guid) {
+    static find(guid: string): Switch {
         // TODO: ow validation
 
         guid = String(guid).toUpperCase();
-        if (!knownSwitches.has(guid)) {
+        const $switch = knownSwitches.get(guid);
+        if ($switch === undefined) {
             throw new ReferenceError(`No switch is registered for "${guid}"`);
         }
 
-        return knownSwitches.get(guid);
+        return $switch;
     }
+
+    public readonly guid: string;
+
+    public readonly title: string;
+
+    public readonly driver: Driver;
 
     /**
      * Initializes a new instance of the Switch class.
      *
-     * @param {string} guid   The identifier used when referencing the switchable device
-     * @param {string} title  The title to display for the switchable device
-     * @param {Driver} driver The driver for the switchable device
+     * @param guid   The identifier used when referencing the switchable device
+     * @param title  The title to display for the switchable device
+     * @param driver The driver for the switchable device
      */
-    constructor(guid, title, driver) {
+    constructor(guid: string, title: string, driver: Driver) {
         // TODO: ow validation
 
-        /**
-         * @type {string}
-         * @readonly
-         */
-        this.guid = guid;
-
-        /**
-         * @type {string}
-         * @readonly
-         */
-        this.title = title;
-
-        /**
-         * @type {Driver}
-         * @readonly
-         */
+        this.guid   = guid;
+        this.title  = title;
         this.driver = driver;
 
         // Ensure all current properties are read-only.
@@ -110,13 +94,11 @@ export default class Switch {
     /**
      * Sets input and output ties.
      *
-     * @param {number} inputChannel       The input channel of the tie
-     * @param {number} videoOutputChannel The output video channel of the tie
-     * @param {number} audioOutputChannel The output audio channel of the tie
-     *
-     * @returns {Promise<void>}
+     * @param inputChannel       The input channel of the tie
+     * @param videoOutputChannel The output video channel of the tie
+     * @param audioOutputChannel The output audio channel of the tie
      */
-    setTie(inputChannel, videoOutputChannel, audioOutputChannel) {
+    setTie(inputChannel: number, videoOutputChannel: number, audioOutputChannel: number): Promise<void> {
         // TODO: ow validation
 
         return this.driver.setTie(inputChannel, videoOutputChannel, audioOutputChannel);
@@ -127,7 +109,7 @@ export default class Switch {
      *
      * @returns {Promise<void>}
      */
-    powerOn() {
+    powerOn(): Promise<void> {
         return this.driver.powerOn();
     }
 
@@ -136,7 +118,7 @@ export default class Switch {
      *
      * @returns {Promise<void>}
      */
-    powerOff() {
+    powerOff(): Promise<void> {
         return this.driver.powerOff();
     }
 }

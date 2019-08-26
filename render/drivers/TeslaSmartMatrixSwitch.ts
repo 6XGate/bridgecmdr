@@ -16,19 +16,41 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Driver from "../system/Driver";
+import Driver, { DriverCapabilities, DriverConfiguration, DriverDescriptor } from "../system/Driver";
 
-/**
- * @final
- */
 export default class TeslaSmartMatrixSwitch extends Driver {
-    /**
-     * @returns {DriverDescriptor}
-     */
-    static about() {
+    static about(): DriverDescriptor {
         return {
             guid:  "91D5BC95-A8E2-4F58-BCAC-A77BA1054D61",
             title: "TeslaSmart-compatible matrix switch",
         };
     }
-};
+
+    get guid(): string {
+        return TeslaSmartMatrixSwitch.about().guid;
+    }
+
+    get title(): string {
+        return TeslaSmartMatrixSwitch.about().title;
+    }
+
+    constructor(config: DriverConfiguration) {
+        super(config, DriverCapabilities.DEFAULT);
+    }
+
+    setTie(inputChannel: number, videoOutputChannel: number, audioOutputChannel: number): Promise<void> {
+        console.log(inputChannel);
+        console.log(videoOutputChannel);
+        console.log(audioOutputChannel);
+
+        return Promise.resolve();
+    }
+
+    powerOn(): Promise<void> {
+        return Promise.resolve();
+    }
+
+    powerOff(): Promise<void> {
+        return Promise.resolve();
+    }
+}

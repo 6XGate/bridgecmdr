@@ -19,12 +19,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 const packer = require("./build/packer");
 
 packer.main.
-    js("./main/index.js").
+    js("./main/index.ts").
     // assets("./main/assets", "assets").
     output("./dist/main");
 
 packer.render.
     html("./render/index.ejs").
-    js("./render/index.js").
+    js("./render/index.ts").
     sass("./render/index.scss").
     output("./dist/render");
