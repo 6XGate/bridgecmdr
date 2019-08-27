@@ -16,22 +16,22 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Driver, { DriverCapabilities, DriverConfiguration, DriverDescriptor } from "../system/Driver";
+import Driver, { DriverCapabilities, DriverConfiguration, DriverDescriptor } from "../system/driver";
 
-export default class TeslaSmartMatrixSwitch extends Driver {
+export default class SonySerialMonitor extends Driver {
     static about(): DriverDescriptor {
         return {
-            guid:  "91D5BC95-A8E2-4F58-BCAC-A77BA1054D61",
-            title: "TeslaSmart-compatible matrix switch",
+            guid:  "8626D6D3-C211-4D21-B5CC-F5E3B50D9FF0",
+            title: "Sony RS-485 controllable monitor",
         };
     }
 
     get guid(): string {
-        return TeslaSmartMatrixSwitch.about().guid;
+        return SonySerialMonitor.about().guid;
     }
 
     get title(): string {
-        return TeslaSmartMatrixSwitch.about().title;
+        return SonySerialMonitor.about().title;
     }
 
     constructor(config: DriverConfiguration) {

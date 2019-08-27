@@ -18,13 +18,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import _           from "lodash";
 import database    from "./database";
-import SourceModel from "../../models/Source";
-import SwitchModel from "../../models/Switch";
-import TieModel    from "../../models/Tie";
-import Driver      from "../../system/Driver";
-import Source      from "../../system/Source";
-import Switch      from "../../system/Switch";
-import Tie         from "../../system/Tie";
+import SourceModel from "../../models/source";
+import SwitchModel from "../../models/switch";
+import TieModel    from "../../models/tie";
+import Driver      from "../../system/driver";
+import Source      from "../../system/source";
+import Switch      from "../../system/switch";
+import Tie         from "../../system/tie";
 
 async function loadConfiguration() {
     await database;
@@ -33,7 +33,7 @@ async function loadConfiguration() {
     const switches = await SwitchModel();
     for (const model of switches) {
         try {
-            const driver = Driver.load(model.driver_guid, JSON.parse(model.config));
+            const driver = Driver.load(model.driver_guid, JSON.parse(model.config as string));
             Switch.add(model.guid, model.title, driver);
         } catch (error) {
             console.error(error);

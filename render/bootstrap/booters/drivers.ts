@@ -17,15 +17,15 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 // The main driver module.
-import Driver from "../../system/Driver";
+import Driver from "../../system/driver";
 // The available drivers.
-import ExtronMatrixSwitch         from "../../drivers/ExtronMatrixSwitch";
-import SonySerialBroadcastMonitor from "../../drivers/SonySerialBroadcastMonitor";
-import TeslaSmartMatrixSwitch     from "../../drivers/TeslaSmartMatrixSwitch";
+import ExtronMatrixSwitch         from "../../drivers/extron-matrix-switch";
+import SonySerialMonitor from "../../drivers/sony-serial--monitor";
+import TeslaSmartMatrixSwitch     from "../../drivers/tesla-smart-matrix-switch";
 
 // Now we register our known drivers.
 Driver.register(ExtronMatrixSwitch);
-Driver.register(SonySerialBroadcastMonitor);
+Driver.register(SonySerialMonitor);
 Driver.register(TeslaSmartMatrixSwitch);
 
 // This module is resolved once it executes.

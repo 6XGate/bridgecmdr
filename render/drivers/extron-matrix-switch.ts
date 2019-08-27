@@ -16,26 +16,26 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Driver, { DriverCapabilities, DriverConfiguration, DriverDescriptor } from "../system/Driver";
+import Driver, { DriverCapabilities, DriverConfiguration, DriverDescriptor } from "../system/driver";
 
-export default class SonySerialBroadcastMonitor extends Driver {
+export default class ExtronMatrixSwitch extends Driver {
     static about(): DriverDescriptor {
         return {
-            guid:  "8626D6D3-C211-4D21-B5CC-F5E3B50D9FF0",
-            title: "Sony RS-485 controllable BVM monitor",
+            guid:  "4C8F2838-C91D-431E-84DD-3666D14A6E2C",
+            title: "Extron SIS-compatible matrix switch",
         };
     }
 
     get guid(): string {
-        return SonySerialBroadcastMonitor.about().guid;
+        return ExtronMatrixSwitch.about().guid;
     }
 
     get title(): string {
-        return SonySerialBroadcastMonitor.about().title;
+        return ExtronMatrixSwitch.about().title;
     }
 
     constructor(config: DriverConfiguration) {
-        super(config, DriverCapabilities.DEFAULT);
+        super(config, DriverCapabilities.CAN_DECOUPLE_AUDIO_OUTPUT | DriverCapabilities.HAS_MULTIPLE_OUTPUTS);
     }
 
     setTie(inputChannel: number, videoOutputChannel: number, audioOutputChannel: number): Promise<void> {

@@ -24,7 +24,7 @@ interface Switch {
     guid:        string;
     driver_guid: string;
     title:       string;
-    config:      string;
+    config:      string|{ [key: string]: (boolean|number|string) };
 }
 
 export default Switch;

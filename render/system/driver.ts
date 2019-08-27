@@ -33,7 +33,7 @@ export interface DriverDescriptor {
 }
 
 export interface DriverConfiguration {
-    [key: string]: any;
+    [key: string]: (boolean|number|string);
 }
 
 export interface DriverConstructor {

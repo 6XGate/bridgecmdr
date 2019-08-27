@@ -16,7 +16,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-@import "~@mdi/font/scss/materialdesignicons";
 @import "~bulma/sass/utilities/functions";
 
 $gap: 16px;
@@ -55,3 +54,4 @@ $link-focus-border: $link;
 
 @import "~bulma";
 @import "~buefy/src/scss/buefy";
+@import "~@mdi/font/scss/materialdesignicons";

@@ -24,4 +24,5 @@ export default Promise.all([
     require("./booters/axios"),
     require("./booters/router"),
     require("./booters/buefy"),
+    require("./booters/validation"),
 ]);

@@ -16,26 +16,26 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Driver, { DriverCapabilities, DriverConfiguration, DriverDescriptor } from "../system/Driver";
+import Driver, { DriverCapabilities, DriverConfiguration, DriverDescriptor } from "../system/driver";
 
-export default class ExtronMatrixSwitch extends Driver {
+export default class TeslaSmartMatrixSwitch extends Driver {
     static about(): DriverDescriptor {
         return {
-            guid:  "4C8F2838-C91D-431E-84DD-3666D14A6E2C",
-            title: "Extron SIS-compatible matrix switch",
+            guid:  "91D5BC95-A8E2-4F58-BCAC-A77BA1054D61",
+            title: "TeslaSmart-compatible matrix switch",
         };
     }
 
     get guid(): string {
-        return ExtronMatrixSwitch.about().guid;
+        return TeslaSmartMatrixSwitch.about().guid;
     }
 
     get title(): string {
-        return ExtronMatrixSwitch.about().title;
+        return TeslaSmartMatrixSwitch.about().title;
     }
 
     constructor(config: DriverConfiguration) {
-        super(config, DriverCapabilities.CAN_DECOUPLE_AUDIO_OUTPUT | DriverCapabilities.HAS_MULTIPLE_OUTPUTS);
+        super(config, DriverCapabilities.DEFAULT);
     }
 
     setTie(inputChannel: number, videoOutputChannel: number, audioOutputChannel: number): Promise<void> {

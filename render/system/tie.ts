@@ -16,9 +16,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Switch from "./Switch";
+import Switch from "./switch";
 
-interface TieOutput {
+export interface TieOutput {
     video: number;
     audio: number;
 }
