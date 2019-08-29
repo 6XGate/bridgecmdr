@@ -27,18 +27,14 @@
 </template>
 
 <script lang="ts">
-    import Vue           from "vue";
-    import { Location }  from "vue-router";
-    import modals        from "../../../components/modals";
-    import SettingsPanel from "../../../components/SettingsPanel.vue";
-    import Switch        from "../../../models/switch";
-    import switches      from "../../../controller/switches";
+    import Vue          from "vue";
+    import { Location } from "vue-router";
+    import modals       from "../../../components/modals";
+    import switches     from "../../../controller/switches";
+    import Switch       from "../../../models/switch";
 
     export default Vue.extend({
-        name:       "SwitchList",
-        components: {
-            SettingsPanel,
-        },
+        name: "SwitchList",
         data: function () {
             return {
                 switches: <Switch[]>[],
@@ -46,7 +42,18 @@
         },
         methods: {
             async refresh(): Promise<void> {
-                this.switches = await switches.all();
+                try {
+                    this.switches = await switches.all();
+                } catch (error) {
+                    await modals.alert(this, {
+                        type:   "is-danger",
+                        icon:   "alert-circle",
+                        title:  "Unable to list switches",
+                        message: error,
+                    });
+
+                    this.$router.back();
+                }
             },
             toNewSwitch(): Location {
                 return { name: "switch", params: { "subjectId": "new" } };
@@ -66,8 +73,17 @@
                 });
 
                 if (remove) {
-                    await switches.remove(row.guid);
-                    this.refresh();
+                    try {
+                        await switches.remove(row.guid);
+                        this.refresh();
+                    } catch (error) {
+                        await modals.alert(this, {
+                            type:   "is-danger",
+                            icon:   "alert-circle",
+                            title:  "Unable to remove switch",
+                            message: error,
+                        });
+                    }
                 }
             },
         },
@@ -76,9 +92,3 @@
         },
     });
 </script>
-
-<style lang="scss" scoped>
-    .panel-level {
-        display: block;
-    }
-</style>

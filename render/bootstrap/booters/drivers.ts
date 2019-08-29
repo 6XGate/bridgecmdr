@@ -20,7 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import Driver from "../../system/driver";
 // The available drivers.
 import ExtronMatrixSwitch         from "../../drivers/extron-matrix-switch";
-import SonySerialMonitor from "../../drivers/sony-serial--monitor";
+import SonySerialMonitor          from "../../drivers/sony-serial--monitor";
 import TeslaSmartMatrixSwitch     from "../../drivers/tesla-smart-matrix-switch";
 
 // Now we register our known drivers.

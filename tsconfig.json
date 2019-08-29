@@ -24,6 +24,7 @@
     "noErrorTruncation": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
+    "resolveJsonModule": false,
     "strict": true
   },
   "typeAcquisition": {

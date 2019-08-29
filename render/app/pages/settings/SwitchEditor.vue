@@ -33,12 +33,12 @@
 </template>
 
 <script lang="ts">
-    import _             from "lodash";
-    import Vue           from "vue";
-    import SettingsPanel from "../../../components/SettingsPanel.vue";
-    import Driver        from "../../../system/driver";
-    import Switch        from "../../../models/switch";
-    import switches      from "../../../controller/switches";
+    import _        from "lodash";
+    import Vue      from "vue";
+    import switches from "../../../controller/switches";
+    import modals   from "../../../components/modals";
+    import Switch   from "../../../models/switch";
+    import Driver   from "../../../system/driver";
 
     const NEW_SWITCH: Switch = {
         guid:        "",
@@ -48,10 +48,7 @@
     };
 
     export default Vue.extend({
-        name:       "SwitchEditor",
-        components: {
-            SettingsPanel,
-        },
+        name:  "SwitchEditor",
         props: {
             subjectId: { required: true, type: String },
         },
@@ -68,26 +65,44 @@
         },
         methods: {
             async onSaveClicked() {
-                if (this.subject) {
-                    if (this.subject.guid === "") {
-                        await switches.add(this.subject.driver_guid, this.subject.title, this.subject.config);
-                        this.$router.back();
-                    } else {
-                        // TODO: Updated
+                try {
+                    if (this.subject) {
+                        if (this.subject.guid === "") {
+                            await switches.add(this.subject);
+                            this.$router.back();
+                        } else {
+                            await switches.update(this.subject);
+                            this.$router.back();
+                        }
                     }
+                } catch (error) {
+                    await modals.alert(this, {
+                        type:   "is-danger",
+                        icon:   "alert-circle",
+                        title:  "Unable to edit switch",
+                        message: error,
+                    });
                 }
-
-                console.log("Save clicked, but not implemented");
-            }
+            },
         },
         async mounted() {
-            const subjects = this.subjectId !== "new" ? await switches.get(this.subjectId) : [ _.clone(NEW_SWITCH) ];
-            _(subjects).each(row => row.config = typeof row.config === "string" ? JSON.parse(row.config) : row.config);
+            try {
+                const subjects = this.subjectId !== "new" ? await switches.get(this.subjectId) : [_.clone(NEW_SWITCH)];
 
-            if (subjects.length > 0) {
-                this.subject = subjects[0];
-            } else {
-                // TODO: Display error...
+                if (subjects.length > 0) {
+                    this.subject = subjects[0];
+                } else {
+                    // noinspection ExceptionCaughtLocallyJS
+                    throw new ReferenceError(`Switch "${this.subjectId}" not found`);
+                }
+            } catch (error) {
+                await modals.alert(this, {
+                    type:   "is-danger",
+                    icon:   "alert-circle",
+                    title:  "Unable to edit switch",
+                    message: error,
+                });
+
                 this.$router.back();
             }
         },

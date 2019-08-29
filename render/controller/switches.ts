@@ -5,12 +5,32 @@ import Tie                     from "../models/tie";
 import db                      from "../support/database";
 import { DriverConfiguration } from "../system/driver";
 
+export function ensureConfigParsed(row: Switch): Switch {
+    row.config = _.isString(row.config) ? JSON.parse(row.config as string) as DriverConfiguration :
+        row.config as DriverConfiguration;
+
+    return row;
+}
+
+export function ensureAllConfigsParsed(rows: Switch[]): Switch[] {
+    return _(rows).each(row => ensureConfigParsed(row)).value();
+}
+
+function ensureReadyToSave(row: Switch): Switch {
+    row.guid = row.guid.toUpperCase();
+    // eslint-disable-next-line @typescript-eslint/camelcase
+    row.driver_guid = row.driver_guid.toUpperCase();
+    row.config      = _.isString(row.config) ? row.config as string : JSON.stringify(row.config);
+
+    return row;
+}
+
 export default {
     /**
      * Gets all the switches
      */
     all(): Promise<Switch[]> {
-        return Switch().then(rows => rows);
+        return Switch().then(rows => ensureAllConfigsParsed(rows));
     },
 
     /**
@@ -19,30 +39,31 @@ export default {
     get(...guids: string[]): Promise<Switch[]> {
         // TODO: ow validation
 
-        return Switch().whereIn("guid", guids).then(rows => rows);
+        return Switch().whereIn("guid", _.map(guids, guid => guid.toUpperCase())).
+            then(rows => ensureAllConfigsParsed(rows));
     },
 
     /**
      * Adds a new switch.
      */
-    async add(driverGuid: string, title: string, config: string|DriverConfiguration): Promise<Switch> {
+    async add(row: Switch): Promise<Switch> {
         // TODO: ow validation
 
-        const guid = String(uuid()).toUpperCase();
-        // eslint-disable-next-line @typescript-eslint/camelcase
-        const driver_guid = String(driverGuid).toUpperCase();
+        row.guid = uuid();
+        await Switch().insert(ensureReadyToSave(row));
 
-        const newRow: Switch = {
-            guid,
-            // eslint-disable-next-line @typescript-eslint/camelcase
-            driver_guid,
-            title,
-            config: typeof config === "string" ? config : JSON.stringify(config),
-        };
+        return row;
+    },
 
-        await Switch().insert(newRow);
+    /**
+     * Updates an existing switch.
+     */
+    async update(row: Switch): Promise<Switch> {
+        // TODO: ow validation
 
-        return newRow;
+        await Switch().update(ensureReadyToSave(row)).where("guid", row.guid.toUpperCase());
+
+        return row;
     },
 
     /**

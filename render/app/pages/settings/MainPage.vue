@@ -16,13 +16,9 @@
 </template>
 
 <script lang="ts">
-    import Vue           from "vue";
-    import SettingsPanel from "../../../components/SettingsPanel.vue";
+    import Vue from "vue";
 
     export default Vue.extend({
         name:       "SettingsPage",
-        components: {
-            SettingsPanel,
-        },
     });
 </script>

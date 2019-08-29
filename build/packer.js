@@ -176,12 +176,13 @@ const rules = {
  * =====================================================================================================================
  * Packer private field symbols
  */
-const myOutdir = Symbol("[[Output Directory]]");
-const myHtml   = Symbol("[[HTML Template]]");
-const myEntry  = Symbol("[[Entry Point]]");
-const myAssets = Symbol("[[Raw Assets]]");
-const myStyles = Symbol("[[Main Style Sheet]]");
-const mySass   = Symbol("[[Main SCSS Style Sheet]]");
+const myOutdir     = Symbol("[[Output Directory]]");
+const myHtml       = Symbol("[[HTML Template]]");
+const myEntry      = Symbol("[[Entry Point]]");
+const myAssets     = Symbol("[[Raw Assets]]");
+const myStyles     = Symbol("[[Main Style Sheet]]");
+const mySass       = Symbol("[[Main SCSS Style Sheet]]");
+const myGlobalSass = Symbol("[[Global SCSS Style Sheet]]");
 
 /*
  * =====================================================================================================================
@@ -204,6 +205,8 @@ class Packer {
         this[mySass] = "";
         /** @type {string} */
         this[myAssets] = {};
+        /** @type {string} */
+        this[myGlobalSass] = "";
     }
 
     /**
@@ -252,10 +255,14 @@ class Packer {
     // noinspection JSUnusedGlobalSymbols
     /**
      * @param {string} main
+     * @param {string} [global=undefined]
      * @returns {Packer}
      */
-    sass(main) {
-        this[mySass] = path.resolve(__dirname, packerConfigPath, main);
+    sass(main, global = undefined) {
+        this[mySass]       = path.resolve(__dirname, packerConfigPath, main);
+        if (global && String(global).length > 0) {
+            this[myGlobalSass] = path.resolve(__dirname, packerConfigPath, global);
+        }
 
         return this;
     }
@@ -290,6 +297,11 @@ class Packer {
             entries.push(sass);
         }
 
+        const globalSass = String(this[myGlobalSass]);
+        if (globalSass.length > 0) {
+            sassLoader.options.data = `@import "${globalSass}";`;
+        }
+
         return { "index": entries };
     }
 
@@ -302,7 +314,10 @@ class Packer {
                 filename:      "[name].css",
                 chunkFilename: "[id].css",
             }),
-            new VueLoaderPlugin(),
+            new VueLoaderPlugin({
+                // eslint-disable-next-line dot-notation
+                productionMode: process.env["NODE_ENV"] === "production",
+            }),
         ];
 
         const outdir = String(this[myOutdir]);
