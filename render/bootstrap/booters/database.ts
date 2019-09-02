@@ -16,29 +16,18 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import fs   from "fs";
-import path from "path";
-import db   from "../../support/database";
+import PouchDB from "pouchdb-browser";
+import Find    from "pouchdb-find";
 
-function makeDir(dirPath: string|Buffer|URL): Promise<void> {
-    return new Promise(function (resolve, reject): void {
-        fs.mkdir(dirPath, { recursive: true }, function (error) {
-            error ? reject(error) : resolve();
-        });
-    });
-}
+PouchDB.
+    plugin(Find);
 
-async function readyConfigDatabase(): Promise<void> {
-    try {
-        // Get the configuration directory and ensure it exists.
-        const databaseBaseDir = path.dirname(require("../../../knexfile").connection.filename);
-        await makeDir(databaseBaseDir);
+import switches from "../../controller/switches";
+import sources from "../../controller/sources";
+import ties from "../../controller/ties";
 
-        // Run any pending migrations.
-        await db.migrate.latest();
-    } catch (error) {
-        console.log(error);
-    }
-}
-
-export default readyConfigDatabase();
+export default Promise.all([
+    switches.boot(),
+    sources.boot(),
+    ties.boot(),
+]);

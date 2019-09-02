@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Driver, { DriverCapabilities, DriverConfiguration, DriverDescriptor } from "../system/driver";
+import Driver, { DriverCapabilities, DriverConfiguration, DriverDescriptor } from "../support/system/driver";
 
 export default class SonySerialMonitor extends Driver {
     static about(): DriverDescriptor {

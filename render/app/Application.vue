@@ -25,6 +25,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     import VueRouter, { RouteConfig } from "vue-router";
     import HomePage                   from "./pages/HomePage.vue";
     import SettingsPage               from "./pages/settings/MainPage.vue";
+    import SourceList                 from "./pages/settings/SourceList.vue";
+    import SourceEditor               from "./pages/settings/SourceEditor.vue";
     import SwitchList                 from "./pages/settings/SwitchList.vue";
     import SwitchEditor               from "./pages/settings/SwitchEditor.vue";
 
@@ -41,6 +43,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         routes: [
             makeRoute("home",     "/",                             HomePage),
             makeRoute("settings", "/settings",                     SettingsPage),
+            makeRoute("sources",  "/settings/sources/",            SourceList),
+            makeRoute("source",   "/settings/sources/:subjectId",  SourceEditor),
             makeRoute("switches", "/settings/switches",            SwitchList),
             makeRoute("switch",   "/settings/switches/:subjectId", SwitchEditor),
         ],

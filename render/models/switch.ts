@@ -16,15 +16,11 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Knex from "knex";
-import db   from "../support/database";
+import Model                   from "../support/model";
+import { DriverConfiguration } from "../support/system/driver";
 
-const Switch = (trx: Knex<Switch> = db) => trx("switches");
-interface Switch {
-    guid:        string;
-    driver_guid: string;
-    title:       string;
-    config:      string|{ [key: string]: (boolean|number|string) };
+export default interface Switch extends Model{
+    driverId: string;
+    title:    string;
+    config:   DriverConfiguration;
 }
-
-export default Switch;

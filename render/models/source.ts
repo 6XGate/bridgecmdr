@@ -16,14 +16,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Knex from "knex";
-import db   from "../support/database";
+import Model from "../support/model";
 
-const Source = (trx: Knex<Source> = db) => trx("sources");
-interface Source {
-    guid:  string;
+export default interface Source extends Model {
     title: string;
-    image: any;
+    image: string;
 }
-
-export default Source;

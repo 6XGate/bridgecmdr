@@ -16,25 +16,24 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import _           from "lodash";
-import database    from "./database";
-import SourceModel from "../../models/source";
-import SwitchModel from "../../models/switch";
-import TieModel    from "../../models/tie";
-import Driver      from "../../system/driver";
-import Source      from "../../system/source";
-import Switch      from "../../system/switch";
-import Tie         from "../../system/tie";
+import _        from "lodash";
+import database from "./database";
+import switches from "../../controller/switches";
+import sources  from "../../controller/sources";
+import ties     from "../../controller/ties";
+import Driver   from "../../support/system/driver";
+import Source   from "../../support/system/source";
+import Switch   from "../../support/system/switch";
+import Tie      from "../../support/system/tie";
 
-async function loadConfiguration() {
+async function loadConfiguration(): Promise<void> {
     await database;
 
     // Get the switches from the database.
-    const switches = await SwitchModel();
-    for (const model of switches) {
+    for (const model of await switches.all()) {
         try {
-            const driver = Driver.load(model.driver_guid, JSON.parse(model.config as string));
-            Switch.add(model.guid, model.title, driver);
+            const driver = Driver.load(model.driverId, model.config);
+            Switch.add(model._id, model.title, driver);
         } catch (error) {
             console.error(error);
         }
@@ -43,17 +42,15 @@ async function loadConfiguration() {
     }
 
     // Gets the ties from the database.
-    /** @type {Map<string, Tie[]>} */
-    const tieMap = new Map();
-    const ties   = await TieModel();
-    for (const model of ties) {
+    const tieMap = new Map<string, Tie[]>();
+    for (const model of await ties.all()) {
         try {
             /** @type {string} */
-            const guid = String(model.source_guid).toUpperCase();
+            const guid = model.sourceId.toUpperCase();
             /** @type {Tie[]} */
-            const tieSet = tieMap.has(guid) ? tieMap.get(guid) : [];
-            tieSet.push(new Tie(model.switch_guid, model.input_channel,
-                model.video_output_channel, model.audio_output_channel));
+            const tieSet = tieMap.get(guid) || [];
+            tieSet.push(new Tie(model.switchId, model.inputChannel,
+                model.outputChannels.video, model.outputChannels.audio));
 
             tieMap.set(guid, tieSet);
         } catch (error) {
@@ -64,17 +61,16 @@ async function loadConfiguration() {
     }
 
     // Get the source from the database.
-    const sources = await SourceModel();
-    for (const model of sources) {
+    for (const model of await sources.all()) {
         try {
-            const guid = String(model.guid).toUpperCase();
-            let tieSet = tieMap.get(guid);
+            const id = model._id.toUpperCase();
+            let tieSet = tieMap.get(id);
             if (_.isNil(tieSet)) {
                 console.warn(`Source "${model.title}" has no ties`);
                 tieSet = [];
             }
 
-            Source.add(guid, model.title, model.image, tieSet);
+            Source.add(id, model.title, model.image, tieSet);
         } catch (error) {
             console.log(error);
         }

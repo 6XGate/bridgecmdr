@@ -29,7 +29,6 @@ declare global {
 }
 
 // The main application instance.
-// const theApp: symbol = Symbol("[[app Root]]");
 window.addEventListener("DOMContentLoaded", async () => {
     await booting;
     window.theApp = new Vue(Application).$mount("#root");

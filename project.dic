@@ -15,3 +15,5 @@ outdir
 wasm
 knex
 guids
+startkey
+endkey

@@ -1,3 +1,21 @@
+<!--
+BridgeCmdr - A/V switch and monitor controller
+Copyright (C) 2019 Matthew Holder
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
 <template>
     <settings-panel title="Switches">
         <template slot="end">
@@ -7,7 +25,7 @@
         </template>
         <section class="section">
             <div class="panel">
-                <router-link v-for="row of switches" :key="row.guid" class="panel-block panel-level"
+                <router-link v-for="row of switches" :key="row._id" class="panel-block panel-level"
                              :to="toExistingSwitch(row)">
                     <div class="level">
                         <div class="level-left">
@@ -56,10 +74,10 @@
                 }
             },
             toNewSwitch(): Location {
-                return { name: "switch", params: { "subjectId": "new" } };
+                return { name: "switch", params: { subjectId: "new" } };
             },
             toExistingSwitch(row: Switch): Location {
-                return { name: "switch", params: { "subjectId": row.guid } };
+                return { name: "switch", params: { subjectId: row._id } };
             },
             async onDeleteClicked(row: Switch): Promise<void> {
                 const remove = await modals.confirm(this, {
@@ -74,7 +92,7 @@
 
                 if (remove) {
                     try {
-                        await switches.remove(row.guid);
+                        await switches.remove(row._id);
                         this.refresh();
                     } catch (error) {
                         await modals.alert(this, {

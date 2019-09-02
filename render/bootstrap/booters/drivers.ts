@@ -17,7 +17,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 // The main driver module.
-import Driver from "../../system/driver";
+import Driver from "../../support/system/driver";
 // The available drivers.
 import ExtronMatrixSwitch         from "../../drivers/extron-matrix-switch";
 import SonySerialMonitor          from "../../drivers/sony-serial--monitor";

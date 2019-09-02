@@ -1,58 +1,40 @@
-import _      from "lodash";
-import uuid   from "uuid/v4";
-import Source from "../models/source";
-import Tie    from "../models/tie";
-import db     from "../support/database";
+/*
+BridgeCmdr - A/V switch and monitor controller
+Copyright (C) 2019 Matthew Holder
 
-export default {
-    /**
-     * Gets all sources.
-     */
-    all(): Promise<Source[]> {
-        return Source().then(rows => rows);
-    },
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-    /**
-     * Gets the specified sources.
-     */
-    get(...guids: string[]): Promise<Source[]> {
-        // TODO: ow validation
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-        guids = _.map(guids, guid => guid.toUpperCase());
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
 
-        return Source().whereIn("guid", guids).then(rows => rows);
-    },
+import Source                   from "../models/source";
+import Controller, { Document } from "../support/controller";
+// import Tie     from "../models/tie";
 
-    /**
-     * Adds a new source.
-     */
-    async add(title: string, image: any): Promise<Source> {
-        // TODO: ow validation
+class SourceController extends Controller<Source> {
+    public constructor() {
+        super("sources");
+    }
 
-        const guid = uuid().toUpperCase();
+    // eslint-disable-next-line class-methods-use-this
+    protected beforeUpdate(row: Source, doc: Document<Source>): void {
+        doc.title = row.title;
+        doc.image = row.image;
+    }
 
-        const newRow: Source = {
-            guid,
-            title,
-            image,
-        };
+    // eslint-disable-next-line class-methods-use-this
+    protected afterRemove(_doc: Document<Source>): void {
+        // TODO: Remove all ties for this source.
+    }
+}
 
-        await Source().insert(newRow);
-
-        return newRow;
-    },
-
-    /**
-     * Removes the specified sources.
-     */
-    remove(...guids: string[]): Promise<void> {
-        // TODO: ow validation
-
-        guids = _.map(guids, guid => guid.toUpperCase());
-
-        return db.transaction(async function (trx) {
-            await Tie(trx).whereIn("source_guid", guids).delete();
-            await Source(trx).whereIn("guid", guids).delete();
-        });
-    },
-};
+export default new SourceController();

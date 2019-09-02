@@ -31,11 +31,12 @@ module.exports = {
         sourceType: "module",
     },
     rules: {
+        // # Possible Errors
         "no-await-in-loop": "error",
         "no-template-curly-in-string": "error",
         "no-console": "off",
 
-
+        // # Best Practices
         "accessor-pairs": "error",
         "array-callback-return": "error",
         "block-scoped-var": "error",
@@ -51,7 +52,6 @@ module.exports = {
         "no-caller": "error",
         "no-div-regex": "error",
         "no-else-return": "error",
-        "no-empty-function": "error",
         "no-eq-null": "error",
         "no-eval": "error",
         "no-extend-native": "error",
@@ -89,23 +89,21 @@ module.exports = {
         "no-void": "error",
         "prefer-promise-reject-errors": "warn",
         "radix": ["error", "as-needed"],
-        "require-await": "error",
         "require-unicode-regexp": "error",
         "wrap-iife": ["error", "inside"],
         "yoda": ["error", "never", {
             exceptRange: true,
         }],
 
-
+        // # Variables
         "no-label-var": "error",
         "no-shadow": "warn",
-        "no-use-before-define": "error",
 
-
+        // # Node.js and CommonJS
         "no-process-env": "off",
         "no-process-exit": "off",
 
-
+        // # Stylistic Issues
         "array-bracket-newline": ["error", { "multiline": true }],
         "array-bracket-spacing": ["error", "always" , {
             singleValue: false,
@@ -175,7 +173,6 @@ module.exports = {
         "quotes": ["error", "double", {
             avoidEscape: true,
         }],
-        "semi": ["error", "always"],
         "semi-spacing": "error",
         "semi-style": "error",
         "space-before-blocks": "error",
@@ -192,7 +189,7 @@ module.exports = {
         "unicode-bom": ["error", "never"],
         "wrap-regex": "warn",
 
-
+        // # ECMAScript 6
         "arrow-body-style": ["error", "as-needed"],
         "arrow-parens": ["error", "as-needed"],
         "arrow-spacing": "error",
@@ -214,10 +211,15 @@ module.exports = {
         "template-curly-spacing": ["error", "never"],
         "yield-star-spacing": "error",
 
-
+        // # TypeScript
         "@typescript-eslint/no-var-requires": "off",
-        "@typescript-eslint/explicit-function-return-type": "off",
-        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/explicit-function-return-type": ["error", {
+            allowExpressions: true,
+        }],
+        // "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/semi": ["error", "always"],"@typescript-eslint/no-unused-vars": ["error", {
+            argsIgnorePattern: "^_",
+        }],
 
 
         "import/first": "off",

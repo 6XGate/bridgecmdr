@@ -16,17 +16,13 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Knex from "knex";
-import db from "../support/database";
+import Model         from "../support/model";
+import { TieOutput } from "../support/system/tie";
 
-const Tie = (trx: Knex<Tie> = db) => trx("ties");
-interface Tie {
-    guid:                 string;
-    source_guid:          string;
-    switch_guid:          string;
-    input_channel:        number;
-    video_output_channel: number;
-    audio_output_channel: number;
+export default interface Tie extends Model {
+    _id:            string;
+    sourceId:       string;
+    switchId:       string;
+    inputChannel:   number;
+    outputChannels: TieOutput;
 }
-
-export default Tie;
