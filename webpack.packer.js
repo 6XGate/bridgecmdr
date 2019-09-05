@@ -16,15 +16,23 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-const packer = require("./build/packer");
+const packer              = require("./build/packer");
+const VuetifyLoaderPlugin = require("vuetify-loader/lib/plugin");
 
 packer.main.
     js("./main/index.ts").
-    // assets("./main/assets", "assets").
     output("./dist/main");
 
 packer.render.
     html("./render/index.ejs").
     js("./render/index.ts").
     sass("./render/index.scss").
-    output("./dist/render");
+    output("./dist/render").
+    plugin(new VuetifyLoaderPlugin()).
+    loader("vue", {
+        options: {
+            transformAssetUrls: {
+                "v-img": [ "src", "lazy-src" ],
+            },
+        },
+    });

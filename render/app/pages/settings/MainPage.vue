@@ -18,18 +18,28 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 <template>
     <settings-panel title="General">
-        <section class="section">
-            <nav class="panel">
-                <router-link class="panel-block" :to="{ name: 'sources' }">
-                    <span class="panel-icon"><i class="mdi mdi-gamepad-variant"></i></span>
-                    <span>Sources</span>
-                </router-link>
-                <router-link class="panel-block" :to="{ name: 'switches' }">
-                    <span class="panel-icon"><i class="mdi mdi-video-switch"></i></span>
-                    <span>Switches</span>
-                </router-link>
-            </nav>
-        </section>
+        <v-row align="center" justify="center">
+            <v-col>
+                <v-list>
+                    <v-list-item :to="{ name: 'sources' }">
+                        <v-list-item-icon>
+                            <v-icon>mdi-gamepad-variant</v-icon>
+                        </v-list-item-icon>
+                        <v-list-item-content>
+                            Sources
+                        </v-list-item-content>
+                    </v-list-item>
+                    <v-list-item :to="{ name: 'switches' }">
+                        <v-list-item-icon>
+                            <v-icon>mdi-video-switch</v-icon>
+                        </v-list-item-icon>
+                        <v-list-item-content>
+                            Switches
+                        </v-list-item-content>
+                    </v-list-item>
+                </v-list>
+            </v-col>
+        </v-row>
     </settings-panel>
 </template>
 
@@ -37,6 +47,25 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     import Vue from "vue";
 
     export default Vue.extend({
-        name:       "SettingsPage",
+        name: "SettingsPage",
+        data: function () {
+            return {
+                width:  0,
+                height: 0,
+            };
+        },
+        methods: {
+            onResize() {
+                const dimensions = {
+                    width:  window.document.documentElement.clientWidth,
+                    height: window.document.documentElement.clientHeight,
+                };
+
+                console.log(dimensions);
+
+                this.width  = dimensions.width - this.$vuetify.application.left - this.$vuetify.application.right;
+                this.height = dimensions.height - this.$vuetify.application.top - this.$vuetify.application.bottom;
+            },
+        },
     });
 </script>

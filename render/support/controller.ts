@@ -71,6 +71,13 @@ export default abstract class Controller<T extends Model> {
     }
 
     /**
+     * Compacts the database.
+     */
+    public compact(): Promise<void> {
+        return this.db.compact().then(() => undefined);
+    }
+
+    /**
      * Provides a means to tap into the database interface directly.
      */
     public query<Result>(callback: (db: PouchDB.Database<T>) => Promise<Result>): Promise<Result> {
@@ -106,7 +113,7 @@ export default abstract class Controller<T extends Model> {
         } : {});
     }
 
-    public async add(row: T, ...attachments: File[]): Promise<T> {
+    public async add(row: T, ...attachments: File[]): Promise<Document<T>> {
         // TODO: ow validation
 
         row._id = uuid().toUpperCase();
@@ -119,7 +126,7 @@ export default abstract class Controller<T extends Model> {
         return this.get(row._id);
     }
 
-    public async update(row: T, ...attachments: File[]): Promise<T> {
+    public async update(row: T, ...attachments: File[]): Promise<Document<T>> {
         // TODO: ow validation
 
         const id = row._id;

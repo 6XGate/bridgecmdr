@@ -18,34 +18,32 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 <template>
     <validation-observer ref="validator" v-slot="{ valid }" slim>
-        <settings-panel :title="title">
-            <template slot="end">
-                <b-navbar-item v-if="valid" tag="a" @click.native.stop="onSaveClicked">
-                    Save
-                </b-navbar-item>
+        <settings-panel :title="title" back-icon="mdi-close">
+            <template slot="app-bar">
+                <v-toolbar-items>
+                    <v-btn text :disabled="!valid" @click="onSaveClicked">Save</v-btn>
+                </v-toolbar-items>
             </template>
-
-            <form action="" class="section">
-                <validation-provider name="title" :rules="{ required: true }" v-slot="{ errors, invalid }" slim>
-                    <b-field label="Name" horizontal
-                             :type="invalid ? 'is-danger' : undefined"
-                             :message="invalid ? errors[0] : undefined">
-                        <b-input name="title" type="text" v-model="subject.title"/>
-                    </b-field>
-                </validation-provider>
-                <validation-provider name="driver" :rules="{ required: true }" v-slot="{ errors, invalid  }" slim>
-                    <b-field label="Driver" horizontal
-                             :type="invalid ? 'is-danger' : undefined"
-                             :message="invalid ? errors[0] : undefined">
-                        <b-select v-model="subject.driverId">
-                            <option v-for="driver of drivers" :key="driver.guid" :value="driver.guid">
-                                {{ driver.title }}
-                            </option>
-                        </b-select>
-                    </b-field>
-                </validation-provider>
-                <!-- TODO Driver specific configuration components will go here -->
-            </form>
+            <v-row>
+                <v-col>
+                    <v-form>
+                        <validation-provider v-slot="{ errors, invalid }" name="title"
+                                             :rules="{ required: true }" slim>
+                            <v-text-field v-model="subject.title" label="Name" :error="invalid" filled
+                                          :error-count="invalid ? errors.length : 0"
+                                          :error-messages="invalid ? errors[0] : undefined"/>
+                        </validation-provider>
+                        <validation-provider v-slot="{ errors, invalid }" name="driver"
+                                             :rules="{ required: true }" slim>
+                            <v-select v-model="subject.driverId" label="Driver" :error="invalid" filled
+                                      :items="drivers" item-value="guid" item-text="title"
+                                      :error-count="invalid ? errors.length : 0"
+                                      :error-messages="invalid ? errors[0] : undefined"/>
+                        </validation-provider>
+                    </v-form>
+                </v-col>
+            </v-row>
+            <!-- TODO Driver specific configuration components will go here -->
         </settings-panel>
     </validation-observer>
 </template>
@@ -54,16 +52,22 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     import _                       from "lodash";
     import Vue, { VueConstructor } from "vue";
     import switches                from "../../../controller/switches";
-    import modals                  from "../../../components/modals";
     import Switch                  from "../../../models/switch";
     import Driver                  from "../../../support/system/driver";
     import { ValidationObserver }  from "vee-validate";
 
     const NEW_SWITCH: Switch = {
-        _id:         "",
+        _id:      "",
         driverId: "",
-        title:       "",
-        config:      {},
+        title:    "",
+        config:   {},
+    };
+
+    const LOADING_SWITCH: Switch = {
+        _id:      "loading",
+        driverId: "",
+        title:    "Loading...",
+        config:   {},
     };
 
     type Validator = InstanceType<typeof ValidationObserver>;
@@ -83,7 +87,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         data() {
             return {
                 drivers: Driver.all(),
-                subject: <Switch|null>null,
+                subject: _.clone(LOADING_SWITCH),
             };
         },
         computed: {
@@ -96,7 +100,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             },
         },
         methods: {
-            onSaveClicked() {
+            onSaveClicked(): void {
                 this.$nextTick(async () => {
                     try {
                         if (this.subject) {
@@ -109,17 +113,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                             }
                         }
                     } catch (error) {
-                        await modals.alert(this, {
-                            type:   "is-danger",
-                            icon:   "alert-circle",
-                            title:  "Unable to edit switch",
-                            message: error,
+                        const ex = error as Error;
+                        await this.$modals.alert({
+                            main:      "Unable to edit switch",
+                            secondary: ex.message,
                         });
                     }
                 });
             },
         },
-        mounted() {
+        mounted(): void {
             this.$nextTick(async () => {
                 try {
                     this.subject = this.subjectId !== "new" ? await switches.get(this.subjectId) : _.clone(NEW_SWITCH);
@@ -127,14 +130,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                         this.$nextTick(() =>  this.$refs.validator.validate());
                     }
                 } catch (error) {
-                    const message = error.name === "not_found" ?
+                    const ex = error as Error;
+                    const message = ex.name === "not_found" ?
                         `Switch "${this.subjectId}" not found` :
-                        error.message;
-                    await modals.alert(this, {
-                        type:  "is-danger",
-                        icon:  "alert-circle",
-                        title: "Unable to edit switch",
-                        message,
+                        ex.message;
+                    await this.$modals.alert({
+                        main:      "Unable to edit switch",
+                        secondary: message,
                     });
 
                     this.$router.back();

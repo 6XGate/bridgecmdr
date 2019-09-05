@@ -17,18 +17,30 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <template>
-    <router-view/>
+    <v-app id="bridgecmdr">
+        <router-view/>
+        <alert-modal ref="alert"/>
+        <confirm-modal ref="confirm"/>
+    </v-app>
 </template>
 
 <script lang="ts">
     import Vue, { VueConstructor }    from "vue";
     import VueRouter, { RouteConfig } from "vue-router";
+    import Vuetify                    from "vuetify";
     import HomePage                   from "./pages/HomePage.vue";
     import SettingsPage               from "./pages/settings/MainPage.vue";
     import SourceList                 from "./pages/settings/SourceList.vue";
     import SourceEditor               from "./pages/settings/SourceEditor.vue";
     import SwitchList                 from "./pages/settings/SwitchList.vue";
     import SwitchEditor               from "./pages/settings/SwitchEditor.vue";
+
+    import {
+        AlertModal,
+        AlertModalOptions,
+        ConfirmModal,
+        ConfirmModalOptions,
+    } from "../components/modals";
 
     function hasProps(path: string): boolean {
         return path.includes(":");
@@ -50,8 +62,34 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         ],
     });
 
-    export default {
+    const vuetify = new Vuetify({
+        icons: {
+            iconfont: "mdi",
+        },
+    });
+
+    interface References {
+        $refs: {
+            alert:   AlertModal;
+            confirm: ConfirmModal;
+        };
+    }
+
+    const vue = Vue as VueConstructor<Vue & References>;
+    export default vue.extend({
         name: "Application",
+        mounted() {
+            Vue.prototype.$modals = {
+                alert:   (options: AlertModalOptions) => this.$refs.alert.open(options),
+                confirm: (options: ConfirmModalOptions) => this.$refs.confirm.open(options),
+            };
+        },
+        vuetify,
         router,
-    };
+    });
 </script>
+
+<style lang="scss">
+    @import "~@mdi/font";
+    @import '~vuetify/src/styles/styles';
+</style>

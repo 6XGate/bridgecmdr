@@ -17,17 +17,30 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <template>
-    <b-button @click="onSettingsClicked">Settings</b-button>
+    <div>
+        <v-content>
+            <v-container>
+                <v-row>
+                    <v-col>
+                    </v-col>
+                </v-row>
+            </v-container>
+        </v-content>
+        <v-btn color="cyan" fab fixed bottom right :to="toSettings()">
+            <v-icon>mdi-wrench</v-icon>
+        </v-btn>
+    </div>
 </template>
 
 <script lang="ts">
-    import Vue from "vue";
+    import Vue          from "vue";
+    import { Location } from "vue-router";
 
     export default Vue.extend({
         name:    "HomePage",
         methods: {
-            onSettingsClicked() {
-                this.$router.push({ name: "settings" });
+            toSettings(): Location {
+                return { name: "settings" };
             },
         },
     });

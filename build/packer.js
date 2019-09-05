@@ -20,6 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
  * =====================================================================================================================
  * Common modules.
  */
+const _             = require("lodash");
 const path          = require("path");
 const readJson      = require("read-package-json");
 const nodeExternals = require("webpack-node-externals");
@@ -70,119 +71,18 @@ const allReady = Promise.all([
 
 /*
  * =====================================================================================================================
- * Common configuration
- */
-const esLintLoader = {
-    loader: "eslint-loader",
-};
-
-const typeScriptLoader = {
-    loader:  "ts-loader",
-    options: {
-        appendTsSuffixTo: [(/\.vue$/u)],
-    },
-};
-
-const vueLoader = {
-    loader:  "vue-loader",
-    options: {
-        optimizeSSR: false,
-    },
-};
-
-const styleLoader = {
-    loader:  MiniCssExtractPlugin.loader,
-    options: {
-        // None specified...
-    },
-};
-
-const cssLoader = {
-    loader:  "css-loader",
-    options: {
-        // None specified...
-    },
-};
-
-const resolveUrlLoader = {
-    loader:  "resolve-url-loader",
-    options: {
-        keepQuery: true,
-    },
-};
-
-const sassLoader = {
-    loader:  "sass-loader",
-    options: {
-        sourceMap:         isDev,
-        sourceMapContents: false,
-        implementation:    require("sass"),
-    },
-};
-
-const fileLoader = {
-    loader:  "file-loader",
-    options: {
-        name: "assets/[contenthash].[ext]",
-    },
-};
-
-/*
- * =====================================================================================================================
- * Common rules
- */
-const rules = {
-    lint: {
-        enforce: "pre",
-        test:    (/\.(js|ts)$/u),
-        exclude: (/node_modules/u),
-        use:     [esLintLoader],
-    },
-    typeScript: {
-        test: (/\.ts$/u),
-        use:  [typeScriptLoader],
-    },
-    css: {
-        test: (/\.css$/u),
-        use:  [
-            styleLoader,
-            cssLoader,
-        ],
-    },
-    sass: {
-        test: (/\.scss$/u),
-        use:  [
-            styleLoader,
-            cssLoader,
-            resolveUrlLoader,
-            sassLoader,
-        ],
-    },
-    vue: {
-        test: (/\.vue$/u),
-        use:  [vueLoader],
-    },
-    images: {
-        test: (/\.(png|svg|jpg|gif)$/u),
-        use:  [fileLoader],
-    },
-    fonts: {
-        test: (/\.(woff|woff2|eot|ttf|otf)$/u),
-        use:  [fileLoader],
-    },
-};
-
-/*
- * =====================================================================================================================
  * Packer private field symbols
  */
-const myOutdir     = Symbol("[[Output Directory]]");
-const myHtml       = Symbol("[[HTML Template]]");
-const myEntry      = Symbol("[[Entry Point]]");
-const myAssets     = Symbol("[[Raw Assets]]");
-const myStyles     = Symbol("[[Main Style Sheet]]");
-const mySass       = Symbol("[[Main SCSS Style Sheet]]");
-const myGlobalSass = Symbol("[[Global SCSS Style Sheet]]");
+const myRules   = Symbol("[[Rules]]");
+const myLoaders = Symbol("[[Loaders]]");
+const myOutdir  = Symbol("[[Output Directory]]");
+const myHtml    = Symbol("[[HTML Template]]");
+const myEntry   = Symbol("[[Entry Point]]");
+const myAssets  = Symbol("[[Raw Assets]]");
+const myStyles  = Symbol("[[Main Style Sheet]]");
+const mySass    = Symbol("[[Main SCSS Style Sheet]]");
+const myPlugins = Symbol("[[Extra Plugins]]");
+const myExtras  = Symbol("[[Extra configuration]]");
 
 /*
  * =====================================================================================================================
@@ -193,6 +93,106 @@ const GeneratePlugins = Symbol("Generate Plug-in List");
 
 class Packer {
     constructor() {
+        /** @type {{[string]: RuleSetUseItem}} Common configuration */
+        const loaders = {
+            esLint: {
+                loader: "eslint-loader",
+            },
+            typeScript: {
+                loader:  "ts-loader",
+                options: {
+                    appendTsSuffixTo: [(/\.vue$/u)],
+                },
+            },
+            vue: {
+                loader:  "vue-loader",
+                options: {
+                    optimizeSSR: false,
+                },
+            },
+            style: {
+                loader:  MiniCssExtractPlugin.loader,
+                options: {
+                    // None specified...
+                },
+            },
+            css: {
+                loader:  "css-loader",
+                options: {
+                    // None specified...
+                },
+            },
+            resolveUrl: {
+                loader:  "resolve-url-loader",
+                options: {
+                    keepQuery: true,
+                },
+            },
+            sass: {
+                loader:  "sass-loader",
+                options: {
+                    sourceMap:         isDev,
+                    sourceMapContents: false,
+                    implementation:    require("sass"),
+                    sassOptions:       {
+                        fiber: require("fibers"),
+                    },
+                },
+            },
+            file: {
+                loader:  "file-loader",
+                options: {
+                    name: "assets/[contenthash].[ext]",
+                },
+            },
+        };
+
+        /** @type {{[string]: RuleSetRule}} Common rules */
+        const rules = {
+            lint: {
+                enforce: "pre",
+                test:    (/\.(js|ts|vue)$/u),
+                exclude: (/node_modules/u),
+                use:     [loaders.esLint],
+            },
+            typeScript: {
+                test: (/\.ts$/u),
+                use:  [loaders.typeScript],
+            },
+            css: {
+                test: (/\.css$/u),
+                use:  [
+                    loaders.style,
+                    loaders.css,
+                ],
+            },
+            sass: {
+                test: (/\.s[ac]ss$/u),
+                use:  [
+                    loaders.style,
+                    loaders.css,
+                    loaders.resolveUrl,
+                    loaders.sass,
+                ],
+            },
+            vue: {
+                test: (/\.vue$/u),
+                use:  [loaders.vue],
+            },
+            images: {
+                test: (/\.(png|svg|jpg|gif)$/u),
+                use:  [loaders.file],
+            },
+            fonts: {
+                test: (/\.(woff|woff2|eot|ttf|otf)$/u),
+                use:  [loaders.file],
+            },
+        };
+
+        /** @type {{[string]: RuleSetUse}} */
+        this[myLoaders] = loaders;
+        /** @type {{[string]: RuleSetRule}} */
+        this[myRules] = rules;
         /** @type {string} */
         this[myOutdir] = "";
         /** @type {string} */
@@ -205,8 +205,10 @@ class Packer {
         this[mySass] = "";
         /** @type {string} */
         this[myAssets] = {};
-        /** @type {string} */
-        this[myGlobalSass] = "";
+        /** @type {(WebpackPluginInstance | WebpackPluginFunction)[]} */
+        this[myPlugins] = [];
+        /** @type {Partial<WebpackOptions>} */
+        this[myExtras] = {};
     }
 
     /**
@@ -255,14 +257,10 @@ class Packer {
     // noinspection JSUnusedGlobalSymbols
     /**
      * @param {string} main
-     * @param {string} [global=undefined]
      * @returns {Packer}
      */
-    sass(main, global = undefined) {
-        this[mySass]       = path.resolve(__dirname, packerConfigPath, main);
-        if (global && String(global).length > 0) {
-            this[myGlobalSass] = path.resolve(__dirname, packerConfigPath, global);
-        }
+    sass(main) {
+        this[mySass] = path.resolve(__dirname, packerConfigPath, main);
 
         return this;
     }
@@ -277,6 +275,66 @@ class Packer {
         this[myAssets] = {
             [dest]: path.resolve(__dirname, packerConfigPath, source),
         };
+
+        return this;
+    }
+
+    /**
+     * @param {WebpackPluginInstance | WebpackPluginFunction} plugin
+     * @returns {Packer}
+     */
+    plugin(plugin) {
+        this[myPlugins].push(plugin);
+
+        return this;
+    }
+
+    /**
+     * @param {Partial<WebpackOptions>} more
+     * @returns {Packer}
+     */
+    merge(more) {
+        this[myExtras] = more;
+
+        return this;
+    }
+
+    /**
+     * @param {string}                          name
+     * @param {Extract<RuleSetUseItem, Object>} changes
+     * @returns {Packer}
+     */
+    loader(name, changes) {
+        if (_.isObject(changes)) {
+            const loader = this[myLoaders][name];
+            if (loader) {
+                this[myLoaders][name] = _.merge(loader, changes);
+            } else {
+                throw new ReferenceError("`name` does references a known built-in loader");
+            }
+        } else {
+            throw new TypeError("`changes` must be a single `RuleSetUseItem` object");
+        }
+
+        return this;
+    }
+
+    /**
+     * @param {string}      name
+     * @param {RuleSetRule} changes
+     * @returns {Packer}
+     */
+    rule(name, changes) {
+        if (_.isObject(changes)) {
+            const rule = this[myRules][name];
+            if (rule) {
+                this[myRules][name] = _.merge(rule, changes);
+            } else {
+                this[myRules][name] = rule;
+            }
+        } else {
+            throw new TypeError("`changes` must be a single `RuleSetRule` object");
+        }
 
         return this;
     }
@@ -297,19 +355,14 @@ class Packer {
             entries.push(sass);
         }
 
-        const globalSass = String(this[myGlobalSass]);
-        if (globalSass.length > 0) {
-            sassLoader.options.data = `@import "${globalSass}";`;
-        }
-
         return { "index": entries };
     }
 
     /**
-     * @returns {WebpackPluginInstance[]}
+     * @returns {(WebpackPluginInstance|WebpackPluginFunction)[]}
      */
     [GeneratePlugins]() {
-        const plugins = [
+        const plugins = this[myPlugins].concat([
             new MiniCssExtractPlugin({
                 filename:      "[name].css",
                 chunkFilename: "[id].css",
@@ -318,7 +371,7 @@ class Packer {
                 // eslint-disable-next-line dot-notation
                 productionMode: process.env["NODE_ENV"] === "production",
             }),
-        ];
+        ]);
 
         const outdir = String(this[myOutdir]);
 
@@ -350,13 +403,25 @@ class Packer {
 
     /**
      * @param {Object.<string, string>} env
+     * @param {string}                  target
      * @return {Promise<WebpackOptions>}
      */
-    generate(env) {
-        return allReady.then(() => ({
+    generate(env, target) {
+        return allReady.then(() => _.merge({
             // eslint-disable-next-line dot-notation
-            mode:      env["NODE_ENV"],
-            target:    "node",
+            mode:   env["NODE_ENV"],
+            target: target,
+            stats:  {
+                builtAt:      false, // Don't need to know when it was built.
+                children:     false, // Don't need to see all the children.
+                chunks:       false, // Don't really need to know the chunks.
+                chunkGroups:  false, // Don't really need to know the chunk groups.
+                chunkModules: false, // Don't need to know the modules in a chunk.
+                chunkOrigins: false, // Don't really need to know the chunk origins.
+                hash:         false, // Don't really need to know the hash.
+                modules:      false, // Don't need to know the modules.
+                reasons:      false, // Don't need to know why modules are included.
+            },
             externals: [
                 nodeExternals({
                     modulesFromFile: {
@@ -375,20 +440,20 @@ class Packer {
             devtool: isDev ? "source-map" : undefined,
             module:  {
                 rules: [
-                    rules.lint,
-                    rules.typeScript,
-                    rules.css,
-                    rules.sass,
-                    rules.vue,
-                    rules.images,
-                    rules.fonts,
+                    this[myRules].lint,
+                    this[myRules].typeScript,
+                    this[myRules].css,
+                    this[myRules].sass,
+                    this[myRules].vue,
+                    this[myRules].images,
+                    this[myRules].fonts,
                 ],
             },
             plugins: this[GeneratePlugins](),
             resolve: {
                 extensions: [ ".wasm", ".vue", ".ts", ".mjs", ".js" ],
             },
-        }));
+        }, this[myExtras]));
     }
 }
 

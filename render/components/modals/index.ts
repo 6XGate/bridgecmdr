@@ -16,57 +16,41 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Vue from "vue";
-import { DialogConfig } from "buefy/types/components";
+import Vue                     from "vue";
+import { CombinedVueInstance } from "vue/types/vue";
 
-export default {
-    alert(parent: Vue, params: DialogConfig): Promise<void> {
-        return new Promise<void>(function (resolve) {
-            const confirmText = params.confirmText || "Dismiss";
+type ModalComponent<Methods> = CombinedVueInstance<Vue, {}, Methods, {}, {}>;
 
-            params = {
-                type:      params.type,
-                title:     params.title,
-                message:   params.message,
-                hasIcon:   Boolean(params.icon),
-                icon:      params.icon,
-                iconPack:  params.iconPack,
-                size:      params.size,
-                animation: params.animation,
-                canCancel: true,
-                scroll:    params.scroll,
-                onConfirm: () => resolve(),
-                onCancel:  () => resolve(),
-                confirmText,
-            };
+export interface ModalOptions {
+    maxWidth?: number;
+}
 
-            parent.$buefy.dialog.confirm(params);
-        });
-    },
+export interface AlertModalOptions extends ModalOptions {
+    main:         string;
+    secondary?:   string;
+    dismissText?: string;
+}
 
-    confirm(parent: Vue, params: DialogConfig): Promise<boolean> {
-        return new Promise<boolean>(function (resolve) {
-            const confirmText = params.confirmText || "Yes";
-            const cancelText  = params.cancelText  || "No";
+export interface ConfirmModalOptions extends ModalOptions {
+    main:         string;
+    secondary?:   string;
+    confirmText?: string;
+    rejectText?:  string;
+}
 
-            params = {
-                type:      params.type,
-                title:     params.title,
-                message:   params.message,
-                hasIcon:   Boolean(params.icon),
-                icon:      params.icon,
-                iconPack:  params.iconPack,
-                size:      params.size,
-                animation: params.animation,
-                canCancel: ["button"],
-                scroll:    params.scroll,
-                onConfirm: () => resolve(true),
-                onCancel:  () => resolve(false),
-                confirmText,
-                cancelText,
-            };
+export type AlertModal = ModalComponent<{
+    open(options: AlertModalOptions): Promise<void>;
+}>;
 
-            parent.$buefy.dialog.confirm(params);
-        });
-    },
-};
+export type ConfirmModal = ModalComponent<{
+    open(options: ConfirmModalOptions): Promise<boolean>;
+}>;
+
+declare module "vue/types/vue" {
+    interface Vue {
+        $modals: {
+            alert(options: AlertModalOptions): Promise<void>;
+            confirm(options: ConfirmModalOptions): Promise<boolean>;
+        };
+    }
+}

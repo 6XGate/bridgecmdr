@@ -23,7 +23,7 @@ export default Promise.all([
     require("./booters/lodash"),
     require("./booters/axios"),
     require("./booters/router"),
-    require("./booters/buefy"),
+    require("./booters/vuetify"),
     require("./booters/components"),
     require("./booters/validation"),
 ]);

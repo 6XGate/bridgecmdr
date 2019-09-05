@@ -24,7 +24,8 @@
     "noErrorTruncation": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "strict": true
+    "strict": true,
+    "types": ["vuetify"]
   },
   "typeAcquisition": {
     "enable": true,

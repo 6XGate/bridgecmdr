@@ -18,39 +18,39 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 <template>
     <validation-observer ref="validator" v-slot="{ valid }" slim>
-        <settings-panel :title="title">
-            <template slot="end">
-                <b-navbar-item v-if="valid" tag="a" @click.native.stop="onSaveClicked">
-                    Save
-                </b-navbar-item>
+        <settings-panel :title="title" back-icon="mdi-close">
+            <template slot="app-bar">
+                <v-toolbar-items>
+                    <v-btn text :disabled="!valid" @click="onSaveClicked">Save</v-btn>
+                </v-toolbar-items>
             </template>
-
-            <form action="" class="section">
-                <validation-provider name="title" :rules="{ required: true }" v-slot="{ errors, invalid }" slim>
-                    <b-field label="Name" horizontal
-                             :type="invalid ? 'is-danger' : undefined"
-                             :message="invalid ? errors[0] : undefined">
-                        <b-input type="text" v-model="subject.title"/>
-                    </b-field>
-                </validation-provider>
-                <validation-provider name="image" :rules="{ required: true }" v-slot="{ errors, invalid }" slim>
-                    <b-field label="Image" horizontal
-                             :type="invalid ? 'is-danger' : undefined"
-                             :message="invalid ? errors[0] : undefined">
-                        <b-upload type="file" v-model="attachment" @input="onChangeImage" drag-drop>
-                            <section class="section">
-                                <div class="content has-text-centered">
-                                    <p><b-icon icon="upload" size="is-large"/></p>
-                                    <p>Drop your image here or click to upload</p>
-                                </div>
-                            </section>
-                        </b-upload>
-                        <b-field>
-                            <img :src="image" alt="icon" :class="{ 'is-invisible': image === null }"/>
-                        </b-field>
-                    </b-field>
-                </validation-provider>
-            </form>
+            <v-row>
+                <v-col>
+                    <form action="" class="section">
+                        <validation-provider v-slot="{ errors, invalid }" name="title"
+                                             :rules="{ required: true }" slim>
+                            <v-text-field v-model="subject.title" label="Name" :error="invalid" filled
+                                          :error-count="invalid ? errors.length : 0"
+                                          :error-messages="invalid ? errors[0] : undefined"/>
+                        </validation-provider>
+                        <validation-provider v-slot="{ errors, invalid }" name="image"
+                                             :rules="{ required: true }" slim>
+                            <v-file-input v-model="attachment" label="Image" :error="invalid" filled
+                                          :error-count="invalid ? errors.length : 0"
+                                          :error-messages="invalid ? errors[0] : undefined"
+                                          prepend-icon="mdi-camera" @change="onChangeImage"/>
+                            <v-col>
+                                <v-row>
+                                    <v-card tile>
+                                        <v-img v-show="image" lazy-src="~@mdi/svg/svg/video-input-hdmi.svg"
+                                               :src="image" max-width="128px" max-height="128px"/>
+                                    </v-card>
+                                </v-row>
+                            </v-col>
+                        </validation-provider>
+                    </form>
+                </v-col>
+            </v-row>
         </settings-panel>
     </validation-observer>
 </template>
@@ -59,7 +59,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     import _                       from "lodash";
     import Vue, { VueConstructor } from "vue";
     import { ValidationObserver }  from "vee-validate";
-    import modals                  from "../../../components/modals";
     import sources                 from "../../../controller/sources";
     import Source                  from "../../../models/source";
     import { Document }            from "../../../support/controller";
@@ -81,7 +80,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     interface References {
         $refs: {
             validator: Validator;
-        }
+        };
     }
 
     const vue = Vue as VueConstructor<Vue & References>;
@@ -94,7 +93,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             return {
                 subject:    _.clone(LOADING_SOURCE),
                 attachment: null as File|null,
-                image:      null as string|null,
+                image:      "no/such/image",
             };
         },
         computed: {
@@ -107,7 +106,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             },
         },
         methods: {
-            onSaveClicked() {
+            onSaveClicked(): void {
                 this.$nextTick(async () => {
                     try {
                         if (this.subject !== null && this.attachment !== null) {
@@ -120,16 +119,15 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                             }
                         }
                     } catch (error) {
-                        await modals.alert(this, {
-                            type:   "is-danger",
-                            icon:   "alert-circle",
-                            title:  "Unable to edit switch",
-                            message: error,
+                        const ex = error as Error;
+                        await this.$modals.alert({
+                            main:      "Unable to edit switch",
+                            secondary: ex.message,
                         });
                     }
                 });
             },
-            onChangeImage(file: File) {
+            onChangeImage(file: File): void {
                 const reader = new FileReader();
                 reader.onload = () => {
                     if (this.subject !== null) {
@@ -138,22 +136,21 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                     }
                 };
 
-                reader.readAsDataURL(file)
+                reader.readAsDataURL(file);
             },
         },
-        mounted() {
+        mounted(): void {
             this.$nextTick(async () => {
                 try {
                     const subject: Document<Source>|Source = this.subjectId !== "new" ?
                         await sources.get(this.subjectId) :
                         _.clone(NEW_SOURCE);
-                    const attachments = (<Document<Source>>subject)._attachments;
-                    if (attachments) {
+                    const attachments = (subject as Document<Source>)._attachments;
+                    if (!_.isNil(attachments)) {
                         const attachment = attachments[subject.image] as PouchDB.Core.FullAttachment;
                         if (attachment) {
-                            this.attachment = new File([attachment.data as Blob], subject.image, {
-                                type: attachment.content_type,
-                            });
+                            this.attachment = new File([attachment.data as Blob], subject.image,
+                                                       { type: attachment.content_type });
 
                             this.onChangeImage(this.attachment);
                         }
@@ -164,14 +161,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                         this.$nextTick(() => this.$refs.validator.validate());
                     }
                 } catch (error) {
-                    const message = error.name === "not_found" ?
+                    const ex = error as Error;
+                    const message = ex.name === "not_found" ?
                         `Source "${this.subjectId}" not found` :
-                        error.message;
-                    await modals.alert(this, {
-                        type:  "is-danger",
-                        icon:  "alert-circle",
-                        title: "Unable to edit switch",
-                        message,
+                        ex.message;
+                    await this.$modals.alert({
+                        main:      "Unable to edit switch",
+                        secondary: message,
                     });
 
                     this.$router.back();

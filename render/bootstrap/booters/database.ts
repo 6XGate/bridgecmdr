@@ -16,9 +16,11 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import _       from "lodash";
 import PouchDB from "pouchdb-browser";
 import Find    from "pouchdb-find";
 
+// Initialize the database library.
 PouchDB.
     plugin(Find);
 
@@ -26,8 +28,19 @@ import switches from "../../controller/switches";
 import sources from "../../controller/sources";
 import ties from "../../controller/ties";
 
-export default Promise.all([
-    switches.boot(),
-    sources.boot(),
-    ties.boot(),
-]);
+async function databaseBootUp(): Promise<void> {
+    // The controllers
+    const controllers = [
+        switches,
+        sources,
+        ties,
+    ];
+
+    // Boot up the controllers.
+    await Promise.all(_(controllers).map(controller => controller.boot()).value());
+
+    // Compact the databases.
+    await Promise.all(_(controllers).map(controller => controller.compact()).value());
+}
+
+export default databaseBootUp();

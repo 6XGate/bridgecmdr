@@ -18,36 +18,31 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 <template>
     <settings-panel title="Switches">
-        <template slot="end">
-            <b-navbar-item tag="router-link" :to="toNewSwitch()">
-                <b-icon icon="plus"/>
-            </b-navbar-item>
+        <v-row>
+            <v-col>
+                <v-list>
+                    <v-list-item v-for="row of switches" :key="row._id" :to="toExistingSwitch(row)">
+                        <v-list-item-content v-text="row.title"/>
+                        <v-list-item-action>
+                            <v-btn icon @click.prevent="onDeleteClicked(row)">
+                                <v-icon color="red">mdi-delete</v-icon>
+                            </v-btn>
+                        </v-list-item-action>
+                    </v-list-item>
+                </v-list>
+            </v-col>
+        </v-row>
+        <template slot="post-content">
+            <v-btn color="cyan" fab fixed bottom right :to="toNewSwitch()">
+                <v-icon>mdi-plus</v-icon>
+            </v-btn>
         </template>
-        <section class="section">
-            <div class="panel">
-                <router-link v-for="row of switches" :key="row._id" class="panel-block panel-level"
-                             :to="toExistingSwitch(row)">
-                    <div class="level">
-                        <div class="level-left">
-                            <div class="level-item">{{ row.title }}</div>
-                        </div>
-                        <div class="level-right">
-                            <div class="level-item">
-                                <b-button icon-left="delete" type="is-danger"
-                                          @click.prevent.stop="onDeleteClicked(row)"/>
-                            </div>
-                        </div>
-                    </div>
-                </router-link>
-            </div>
-        </section>
     </settings-panel>
 </template>
 
 <script lang="ts">
     import Vue          from "vue";
     import { Location } from "vue-router";
-    import modals       from "../../../components/modals";
     import switches     from "../../../controller/switches";
     import Switch       from "../../../models/switch";
 
@@ -55,19 +50,24 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         name: "SwitchList",
         data: function () {
             return {
-                switches: <Switch[]>[],
+                switches: [] as Switch[],
+                width:    0,
+                height:   0,
             };
         },
         methods: {
+            onResize() {
+                this.width  = window.innerWidth - this.$vuetify.application.left - this.$vuetify.application.right;
+                this.height = window.innerHeight - this.$vuetify.application.top - this.$vuetify.application.bottom;
+            },
             async refresh(): Promise<void> {
                 try {
                     this.switches = await switches.all();
                 } catch (error) {
-                    await modals.alert(this, {
-                        type:   "is-danger",
-                        icon:   "alert-circle",
-                        title:  "Unable to list switches",
-                        message: error,
+                    const ex = error as Error;
+                    await this.$modals.alert({
+                        main:      "Unable to list switches",
+                        secondary: ex.message,
                     });
 
                     this.$router.back();
@@ -80,14 +80,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 return { name: "switch", params: { subjectId: row._id } };
             },
             async onDeleteClicked(row: Switch): Promise<void> {
-                const remove = await modals.confirm(this, {
-                    type:        "is-danger",
-                    icon:        "close-octagon",
-                    title:       "Do you want to remove this switch?",
-                    message:     `You are about to remove "${row.title}"`,
+                const remove = await this.$modals.confirm({
+                    main:        "Do you want to remove this switch?",
+                    secondary:   `You are about to remove "${row.title}"`,
                     confirmText: "Remove",
-                    cancelText:  "Keep",
-                    focusOn:     "cancel",
+                    rejectText:  "Keep",
                 });
 
                 if (remove) {
@@ -95,11 +92,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                         await switches.remove(row._id);
                         this.refresh();
                     } catch (error) {
-                        await modals.alert(this, {
-                            type:   "is-danger",
-                            icon:   "alert-circle",
-                            title:  "Unable to remove switch",
-                            message: error,
+                        const ex = error as Error;
+                        await this.$modals.alert({
+                            main:      "Unable to remove switch",
+                            secondary: ex.message,
                         });
                     }
                 }

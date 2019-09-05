@@ -18,22 +18,19 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 <template>
     <div>
-        <b-navbar type="is-primary">
-            <template slot="start">
-                <b-navbar-item tag="a" @click.native.stop="onBackClicked">
-                    <b-icon icon="arrow-left"/>
-                </b-navbar-item>
-                <b-navbar-item tag="span">
-                    {{ title }}
-                </b-navbar-item>
-            </template>
-            <template slot="end">
-                <slot name="end"/>
-            </template>
-        </b-navbar>
-        <div class="content">
-            <slot/>
-        </div>
+        <v-app-bar app color="indigo" dark>
+            <v-btn icon @click="onBackClicked"><v-icon>{{ backIcon }}</v-icon></v-btn>
+            <v-toolbar-title>{{ title }}</v-toolbar-title>
+            <div class="flex-grow-1"></div>
+            <slot name="app-bar"/>
+        </v-app-bar>
+        <slot name="pre-content"/>
+        <v-content>
+            <v-container fluid class="fill-height">
+                <slot/>
+            </v-container>
+        </v-content>
+        <slot name="post-content"/>
     </div>
 </template>
 
@@ -43,7 +40,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     export default Vue.extend({
         name:  "SettingsPanel",
         props: {
-            title: { required: true, type: String },
+            title:    { type: String, required: true },
+            backIcon: { type: String, default: "mdi-arrow-left" },
         },
         methods: {
             onBackClicked() {

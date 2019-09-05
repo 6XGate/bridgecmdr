@@ -18,76 +18,113 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 <template>
     <settings-panel title="Sources">
-        <template slot="end">
-            <b-navbar-item tag="router-link" :to="toNewSource()">
-                <b-icon icon="plus"/>
-            </b-navbar-item>
+        <v-row>
+            <v-col>
+                <v-list>
+                    <v-list-item v-for="row of sources" :key="row._id" :to="toExistingSource(row)">
+                        <v-list-item-avatar>
+                            <v-img :src="images[row.image]"/>
+                        </v-list-item-avatar>
+                        <v-list-item-content v-text="row.title"/>
+                        <v-list-item-action>
+                            <v-btn icon @click.prevent="onDeleteClicked(row)">
+                                <v-icon color="red">mdi-delete</v-icon>
+                            </v-btn>
+                        </v-list-item-action>
+                    </v-list-item>
+                </v-list>
+            </v-col>
+        </v-row>
+        <template slot="post-content">
+            <v-btn color="cyan" fab fixed bottom right :to="toNewSource()">
+                <v-icon>mdi-plus</v-icon>
+            </v-btn>
         </template>
-        <section class="section">
-            <div class="panel">
-                <router-link v-for="row of sources" :key="row._id" class="panel-block panel-level"
-                             :to="toExistingSource(row)">
-                    <div class="level">
-                        <div class="level-left">
-                            <div class="level-item">{{ row.title }}</div>
-                        </div>
-                        <div class="level-right">
-                            <div class="level-item">
-                                <b-button label="Edit Ties" type="is-primary"/>
-                            </div>
-                            <div class="level-item">
-                                <b-button icon-left="delete" type="is-danger"
-                                          @click.prevent.stop="onDeleteClicked(row)"/>
-                            </div>
-                        </div>
-                    </div>
-                </router-link>
-            </div>
-        </section>
     </settings-panel>
 </template>
 
 
 <script lang="ts">
+    import _            from "lodash";
     import Vue          from "vue";
     import { Location } from "vue-router";
-    import modals       from "../../../components/modals";
     import sources      from "../../../controller/sources";
     import Source       from "../../../models/source";
+    import { Document } from "../../../support/controller";
 
     export default Vue.extend({
         name: "SourceList",
         data: function () {
             return {
-                sources: <Source[]>[],
+                sources: [] as Document<Source>[],
+                images:  {} as { [id: string]: string },
             };
         },
         methods: {
-            async refresh(): Promise<void> {
-                this.sources = await sources.all();
-            },
-            async onDeleteClicked(row: Source): Promise<void> {
-                const remove = await modals.confirm(this, {
-                    type:        "is-danger",
-                    icon:        "close-octagon",
-                    title:       "Do you want to remove this source?",
-                    message:     `You are about to remove "${row.title}"`,
-                    confirmText: "Remove",
-                    cancelText:  "Keep",
-                    focusOn:     "cancel",
-                });
+            refresh(): void {
+                this.$nextTick(async () => {
+                    this.sources = await sources.all();
+                    try {
+                        await Promise.all(_(this.sources).map(source => {
+                            if (source._attachments) {
+                                const name = source.image;
+                                if (source._attachments[name]) {
+                                    const attachment = source._attachments[name] as PouchDB.Core.FullAttachment;
 
-                if (remove) {
-                    await sources.remove(row._id);
-                    this.refresh();
-                }
+                                    return new Promise(resolve => {
+                                        const reader = new FileReader();
+                                        reader.onload = () => {
+                                            this.$set(this.images, source.image, reader.result as string);
+                                            resolve();
+                                        };
+
+                                        reader.readAsDataURL(attachment.data as Blob);
+                                    });
+                                }
+                            }
+
+                            return Promise.resolve();
+                        }).value());
+                    } catch (error) {
+                        const ex = error as Error;
+                        await this.$modals.alert({
+                            main:      "Unable to list sources",
+                            secondary: ex.message,
+                        });
+
+                        this.$router.back();
+                    }
+                });
+            },
+            onDeleteClicked(row: Source): void {
+                this.$nextTick(async () => {
+                    const remove = await this.$modals.confirm({
+                        main:        "Do you want to remove this source?",
+                        secondary:   `You are about to remove "${row.title}"`,
+                        confirmText: "Remove",
+                        rejectText:  "Keep",
+                    });
+
+                    if (remove) {
+                        try {
+                            await sources.remove(row._id);
+                            this.refresh();
+                        } catch (error) {
+                            const ex = error as Error;
+                            await this.$modals.alert({
+                                main:      "Unable to remove source",
+                                secondary: ex.message,
+                            });
+                        }
+                    }
+                });
             },
             toNewSource(): Location {
                 return { name: "source", params: { subjectId: "new" } };
             },
             toExistingSource(row: Source): Location {
                 return { name: "source", params: { subjectId: row._id } };
-            }
+            },
         },
         mounted() {
             this.refresh();

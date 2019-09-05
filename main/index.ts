@@ -29,6 +29,8 @@ function createWindow(): void {
         },
     });
 
+    window.removeMenu();
+
     window.loadFile("dist/render/index.html").
         then((): void => console.log("Starting BridgeCmdr...")).
         catch((error: Error): void => {

@@ -27,6 +27,6 @@ require(path.join(packerConfigPath, "webpack.packer"));
 
 // Now export our functions.
 module.exports = env => Promise.all([
-    packer.main.generate(env),
-    packer.render.generate(env),
+    packer.main.generate(env, "electron-main"),
+    packer.render.generate(env, "electron-renderer"),
 ]);
