@@ -17,56 +17,61 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <template>
-    <validation-observer ref="validator" v-slot="{ valid }" slim>
-        <settings-panel :title="title" back-icon="mdi-close">
-            <template slot="app-bar">
-                <v-toolbar-items>
-                    <v-btn text :disabled="!valid" @click="onSaveClicked">Save</v-btn>
-                </v-toolbar-items>
-            </template>
-            <v-row>
-                <v-col>
-                    <v-form>
-                        <validation-provider v-slot="{ errors, invalid }" name="title"
-                                             :rules="{ required: true }" slim>
-                            <v-text-field v-model="subject.title" label="Name" :error="invalid" filled
-                                          :error-count="invalid ? errors.length : 0"
-                                          :error-messages="invalid ? errors[0] : undefined"/>
-                        </validation-provider>
-                        <validation-provider v-slot="{ errors, invalid }" name="driver"
-                                             :rules="{ required: true }" slim>
-                            <v-select v-model="subject.driverId" label="Driver" :error="invalid" filled
-                                      :items="drivers" item-value="guid" item-text="title"
-                                      :error-count="invalid ? errors.length : 0"
-                                      :error-messages="invalid ? errors[0] : undefined"/>
-                        </validation-provider>
-                    </v-form>
-                </v-col>
-            </v-row>
-            <!-- TODO Driver specific configuration components will go here -->
-        </settings-panel>
-    </validation-observer>
+    <div>
+        <slot name="activators" :edit="editSwitch" :create="newSwitch"/>
+        <v-dialog v-model="open" fullscreen hide-overlay :transition="transition">
+            <validation-observer ref="validator" v-slot="{ valid }" slim>
+                <v-card tile>
+                    <v-toolbar>
+                        <v-btn icon @click="open = false"><v-icon>mdi-close</v-icon></v-btn>
+                        <v-toolbar-title>{{ title }}</v-toolbar-title>
+                        <div class="flex-grow-1"></div>
+                        <v-toolbar-items>
+                            <v-btn text :disabled="!valid" @click="onSaveClicked">Save</v-btn>
+                        </v-toolbar-items>
+                    </v-toolbar>
+                    <v-card-text>
+                        <v-row>
+                            <v-col>
+                                <v-form>
+                                    <validation-provider v-slot="{ errors, invalid }" name="title"
+                                                         :rules="{ required: true }" slim>
+                                        <v-text-field v-model="subject.title" label="Name" :error="invalid"
+                                                      filled :error-count="invalid ? errors.length : 0"
+                                                      :error-messages="invalid ? errors[0] : undefined"/>
+                                    </validation-provider>
+                                    <validation-provider v-slot="{ errors, invalid }" name="driver"
+                                                         :rules="{ required: true }" slim>
+                                        <v-select v-model="subject.driverId" label="Driver" :error="invalid"
+                                                  :items="drivers" item-value="guid" item-text="title"
+                                                  filled :error-count="invalid ? errors.length : 0"
+                                                  :error-messages="invalid ? errors[0] : undefined"/>
+                                    </validation-provider>
+                                </v-form>
+                            </v-col>
+                        </v-row>
+                        <v-row>
+                            <!-- TODO Driver specific configuration components will go here -->
+                        </v-row>
+                    </v-card-text>
+                </v-card>
+            </validation-observer>
+        </v-dialog>
+    </div>
 </template>
 
 <script lang="ts">
     import _                       from "lodash";
     import Vue, { VueConstructor } from "vue";
+    import { ValidationObserver }  from "vee-validate";
     import switches                from "../../../controller/switches";
     import Switch                  from "../../../models/switch";
     import Driver                  from "../../../support/system/driver";
-    import { ValidationObserver }  from "vee-validate";
 
-    const NEW_SWITCH: Switch = {
+    const EMPTY_SWITCH: Switch = {
         _id:      "",
         driverId: "",
         title:    "",
-        config:   {},
-    };
-
-    const LOADING_SWITCH: Switch = {
-        _id:      "loading",
-        driverId: "",
-        title:    "Loading...",
         config:   {},
     };
 
@@ -82,35 +87,42 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     export default vue.extend({
         name:  "SwitchEditor",
         props: {
-            subjectId: { required: true, type: String },
+            transition: { type: String, default: "dialog-transition" },
         },
         data() {
             return {
+                open:    false,
                 drivers: Driver.all(),
-                subject: _.clone(LOADING_SWITCH),
+                subject: _.clone(EMPTY_SWITCH),
             };
         },
         computed: {
             title(): string {
-                if (this.subject !== null) {
-                    return this.subject._id.length > 0 ? "Edit switch" : "New switch";
-                }
-
-                return "Loading...";
+                return this.subject._id.length > 0 ? "Edit switch" : "New switch";
             },
         },
         methods: {
+            newSwitch(): void {
+                this.$nextTick(async () => {
+                    await this.readySubject(_.clone(EMPTY_SWITCH));
+                    this.open = true;
+                    requestAnimationFrame(() => this.$refs.validator.reset());
+                });
+            },
+            editSwitch(subject: Switch): void {
+                this.$nextTick(async () => {
+                    await this.readySubject(subject);
+                    this.open = true;
+                    requestAnimationFrame(() => this.$refs.validator.validate());
+                });
+            },
             onSaveClicked(): void {
                 this.$nextTick(async () => {
                     try {
-                        if (this.subject) {
-                            if (this.subject._id === "") {
-                                await switches.add(this.subject);
-                                this.$router.back();
-                            } else {
-                                await switches.update(this.subject);
-                                this.$router.back();
-                            }
+                        if (this.subject._id === "") {
+                            await switches.add(this.subject);
+                        } else {
+                            await switches.update(this.subject);
                         }
                     } catch (error) {
                         const ex = error as Error;
@@ -119,29 +131,17 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                             secondary: ex.message,
                         });
                     }
+
+                    this.open    = false;
+                    this.subject = _.clone(EMPTY_SWITCH);
+                    this.$nextTick(() => this.$emit("done"));
                 });
             },
-        },
-        mounted(): void {
-            this.$nextTick(async () => {
-                try {
-                    this.subject = this.subjectId !== "new" ? await switches.get(this.subjectId) : _.clone(NEW_SWITCH);
-                    if (this.subjectId !== "new") {
-                        this.$nextTick(() =>  this.$refs.validator.validate());
-                    }
-                } catch (error) {
-                    const ex = error as Error;
-                    const message = ex.name === "not_found" ?
-                        `Switch "${this.subjectId}" not found` :
-                        ex.message;
-                    await this.$modals.alert({
-                        main:      "Unable to edit switch",
-                        secondary: message,
-                    });
+            readySubject(subject: Switch): Promise<void> {
+                this.subject = subject;
 
-                    this.$router.back();
-                }
-            });
+                return Promise.resolve();
+            },
         },
     });
 </script>

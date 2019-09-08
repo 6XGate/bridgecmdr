@@ -22,7 +22,6 @@ export default Promise.all([
     require("./booters/config"),
     require("./booters/lodash"),
     require("./booters/axios"),
-    require("./booters/router"),
     require("./booters/vuetify"),
     require("./booters/components"),
     require("./booters/validation"),

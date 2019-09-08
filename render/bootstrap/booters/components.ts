@@ -16,12 +16,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Vue           from "vue";
-import SettingsPanel from "../../components/SettingsPanel.vue";
-import AlertModal    from "../../components/modals/alert.vue";
-import ConfirmModal  from "../../components/modals/confirm.vue";
+import Vue          from "vue";
+import AlertModal   from "../../components/modals/alert.vue";
+import ConfirmModal from "../../components/modals/confirm.vue";
 
-Vue.component("SettingsPanel", SettingsPanel);
 Vue.component("AlertModal",    AlertModal);
 Vue.component("ConfirmModal",  ConfirmModal);
 

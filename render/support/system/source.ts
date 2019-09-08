@@ -32,7 +32,7 @@ export default class Source {
      * @param image
      * @param ties
      */
-    static add(guid: string, title: string, image: any, ties: Tie[]): Source {
+    static add(guid: string, title: string, image: Blob, ties: Tie[]): Source {
         // TODO: ow validation
 
         guid = String(guid).toUpperCase();
@@ -74,7 +74,7 @@ export default class Source {
 
     public readonly title: string;
 
-    public readonly image: any;
+    public readonly image: Blob;
 
     public readonly ties: Readonly<Tie[]>;
 
@@ -86,13 +86,11 @@ export default class Source {
      * @param image An image to represent the source.
      * @param ties  The ties needed for switching to the source.
      */
-    constructor(guid: string, title: string, image: any, ties: Tie[]) {
+    constructor(guid: string, title: string, image: Blob, ties: Tie[]) {
         // TODO: ow validation
 
         this.guid  = guid;
         this.title = title;
-
-        // TODO: Figure out type.
         this.image = image;
         this.ties  = Object.freeze(ties);
 

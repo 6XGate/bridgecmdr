@@ -17,74 +17,73 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <template>
-    <settings-panel title="Sources">
-        <v-row>
-            <v-col>
-                <v-list>
-                    <v-list-item v-for="row of sources" :key="row._id" :to="toExistingSource(row)">
-                        <v-list-item-avatar>
-                            <v-img :src="images[row.image]"/>
-                        </v-list-item-avatar>
-                        <v-list-item-content v-text="row.title"/>
-                        <v-list-item-action>
-                            <v-btn icon @click.prevent="onDeleteClicked(row)">
-                                <v-icon color="red">mdi-delete</v-icon>
-                            </v-btn>
-                        </v-list-item-action>
-                    </v-list-item>
-                </v-list>
-            </v-col>
-        </v-row>
-        <template slot="post-content">
-            <v-btn color="cyan" fab fixed bottom right :to="toNewSource()">
-                <v-icon>mdi-plus</v-icon>
-            </v-btn>
-        </template>
-    </settings-panel>
+    <div>
+        <slot name="activator" :on="{ click: openList }"/>
+        <v-dialog v-model="open" fullscreen hide-overlay :transition="transition">
+            <v-card tile>
+                <v-toolbar>
+                    <v-btn icon @click="open = false"><v-icon>mdi-arrow-left</v-icon></v-btn>
+                    <v-toolbar-title>Switches</v-toolbar-title>
+                </v-toolbar>
+                <v-card-text>
+                    <source-editor #activators="{ edit, create }" transition="slide-x-transition" @done="refresh">
+                        <v-list>
+                            <v-list-item v-for="row of sources" :key="row._id" @click="edit(row)">
+                                <v-list-item-avatar>
+                                    <v-img :src="images[row._id]"/>
+                                </v-list-item-avatar>
+                                <v-list-item-content v-text="row.title"/>
+                                <v-list-item-action>
+                                    <v-btn icon @click.prevent.stop="onDeleteClicked(row)">
+                                        <v-icon>mdi-delete</v-icon>
+                                    </v-btn>
+                                </v-list-item-action>
+                            </v-list-item>
+                        </v-list>
+                        <v-btn color="primary" class="primaryText--text" fab fixed bottom right @click="create">
+                            <v-icon>mdi-plus</v-icon>
+                        </v-btn>
+                    </source-editor>
+                </v-card-text>
+            </v-card>
+        </v-dialog>
+    </div>
 </template>
 
-
 <script lang="ts">
-    import _            from "lodash";
     import Vue          from "vue";
-    import { Location } from "vue-router";
+    import SourceEditor from "./SourceEditor.vue";
     import sources      from "../../../controller/sources";
     import Source       from "../../../models/source";
-    import { Document } from "../../../support/controller";
+    import * as helpers from "../../../support/helpers";
 
     export default Vue.extend({
-        name: "SourceList",
+        name:       "SourceList",
+        components: {
+            SourceEditor,
+        },
+        props: {
+            transition: { type: String, default: "dialog-transition" },
+        },
         data: function () {
             return {
-                sources: [] as Document<Source>[],
+                open:    false,
+                sources: [] as Source[],
                 images:  {} as { [id: string]: string },
             };
         },
         methods: {
+            openList() {
+                this.open = true;
+                this.refresh();
+            },
             refresh(): void {
                 this.$nextTick(async () => {
-                    this.sources = await sources.all();
                     try {
-                        await Promise.all(_(this.sources).map(source => {
-                            if (source._attachments) {
-                                const name = source.image;
-                                if (source._attachments[name]) {
-                                    const attachment = source._attachments[name] as PouchDB.Core.FullAttachment;
-
-                                    return new Promise(resolve => {
-                                        const reader = new FileReader();
-                                        reader.onload = () => {
-                                            this.$set(this.images, source.image, reader.result as string);
-                                            resolve();
-                                        };
-
-                                        reader.readAsDataURL(attachment.data as Blob);
-                                    });
-                                }
-                            }
-
-                            return Promise.resolve();
-                        }).value());
+                        this.sources = await sources.all();
+                        for (const source of this.sources) {
+                            helpers.toDataUrl(source.image).then(url => this.$set(this.images, source._id, url));
+                        }
                     } catch (error) {
                         const ex = error as Error;
                         await this.$modals.alert({
@@ -92,7 +91,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                             secondary: ex.message,
                         });
 
-                        this.$router.back();
+                        this.open = false;
                     }
                 });
             },
@@ -119,15 +118,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                     }
                 });
             },
-            toNewSource(): Location {
-                return { name: "source", params: { subjectId: "new" } };
-            },
-            toExistingSource(row: Source): Location {
-                return { name: "source", params: { subjectId: row._id } };
-            },
-        },
-        mounted() {
-            this.refresh();
         },
     });
 </script>

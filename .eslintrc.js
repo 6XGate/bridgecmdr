@@ -203,7 +203,6 @@ module.exports = {
             allowParens: true,
         }],
         "no-useless-computed-key": "warn",
-        "no-useless-constructor": "error",
         "no-useless-rename": "error",
         "no-var": "error",
         "prefer-const": "warn",
@@ -217,6 +216,7 @@ module.exports = {
         "yield-star-spacing": "error",
 
         // # TypeScript
+        "@typescript-eslint/no-useless-constructor": "error",
         "@typescript-eslint/no-var-requires": "off",
         "@typescript-eslint/explicit-function-return-type": ["error", {
             allowExpressions: true,

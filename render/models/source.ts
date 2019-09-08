@@ -20,5 +20,5 @@ import Model from "../support/model";
 
 export default interface Source extends Model {
     title: string;
-    image: string;
+    image: File;
 }

@@ -1,0 +1,77 @@
+<!--
+BridgeCmdr - A/V switch and monitor controller
+Copyright (C) 2019 Matthew Holder
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<template>
+    <div>
+        <slot name="activator" :on="{ click: () => open = true }"/>
+        <v-dialog v-model="open" fullscreen hide-overlay :transition="transition">
+            <v-card tile>
+                <v-toolbar>
+                    <v-btn icon @click="open = false"><v-icon>mdi-arrow-left</v-icon></v-btn>
+                    <v-toolbar-title>Settings</v-toolbar-title>
+                </v-toolbar>
+                <v-card-text>
+                    <v-list>
+                        <source-list transition="slide-x-transition" #activator="{ on }">
+                            <v-list-item v-on="on">
+                                <v-list-item-avatar>
+                                    <v-icon class="blue white--text">mdi-gamepad-variant</v-icon>
+                                </v-list-item-avatar>
+                                <v-list-item-content>
+                                    Sources
+                                </v-list-item-content>
+                            </v-list-item>
+                        </source-list>
+                        <switch-list transition="slide-x-transition" #activator="{ on }">
+                            <v-list-item v-on="on">
+                                <v-list-item-avatar>
+                                    <v-icon class="red darken-2 white--text">mdi-video-switch</v-icon>
+                                </v-list-item-avatar>
+                                <v-list-item-content>
+                                    Switches
+                                </v-list-item-content>
+                            </v-list-item>
+                        </switch-list>
+                    </v-list>
+                </v-card-text>
+            </v-card>
+        </v-dialog>
+    </div>
+</template>
+
+<script lang="ts">
+    import Vue        from "vue";
+    import SourceList from "./settings/SourceList.vue";
+    import SwitchList from "./settings/SwitchList.vue";
+
+    export default Vue.extend({
+        name:       "SettingsPage",
+        components: {
+            SourceList,
+            SwitchList,
+        },
+        props: {
+            transition: { type: String,  default: "dialog-transition" },
+        },
+        data: function () {
+            return {
+                open: false,
+            };
+        },
+    });
+</script>

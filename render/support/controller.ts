@@ -16,162 +16,69 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import _       from "lodash";
-import uuid    from "uuid/v4";
-import PouchDB from "pouchdb-browser";
-import Model   from "./model";
+import _                                         from "lodash";
+import Model                                     from "./model";
+import Store, { GetDocument, Document, Indices } from "./store";
 
-type IndexFields  = string[];
-type IndexList    = IndexFields[];
-type NamedIndices = { [name: string]: IndexFields };
-type Indices      = IndexList|NamedIndices;
-
-export type ExistingDocument<T> = PouchDB.Core.ExistingDocument<T & PouchDB.Core.AllDocsMeta>;
-export type Document<T>         = PouchDB.Core.Document<T> & PouchDB.Core.GetMeta;
-
-export default abstract class Controller<T extends Model> {
-    private readonly db: PouchDB.Database<T>;
-    private readonly namedIndices:  Map<string, IndexFields>;
-    private readonly basicIndices: IndexFields[];
+export default abstract class Controller<T extends Model, Doc extends T|Document<{}> = T> {
+    protected readonly store: Store<Doc>;
 
     protected constructor(name: string, ...indicesBlocks: Indices[]) {
         // TODO: ow validation
 
-        this.db = new PouchDB<T>(name);
-        this.namedIndices = new Map<string, IndexFields>();
-        this.basicIndices = [];
-        for (const indices of indicesBlocks) {
-            if (indices instanceof Array) {
-                this.basicIndices.push(...indices);
-            } else {
-                for (const key in indices) {
-                    if (indices.hasOwnProperty(key)) {
-                        this.namedIndices.set(key, indices[key]);
-                    }
-                }
-            }
-        }
+        this.store = new Store<Doc>(name, ...indicesBlocks);
     }
 
     /**
      * Provides a means to boot up the database for indices.
      */
-    public async boot(): Promise<void> {
-        const waits = [] as Promise<void>[];
-
-        for (const fields of this.basicIndices) {
-            waits.push(this.db.createIndex({ index: { fields } }).then(() => undefined));
-        }
-
-        for (const [ name, fields ] of this.namedIndices) {
-            waits.push(this.db.createIndex({ index: { fields, name } }).then(() => undefined));
-        }
-
-        await Promise.all(waits);
+    public boot(): Promise<void> {
+        return this.store.boot();
     }
 
     /**
      * Compacts the database.
      */
     public compact(): Promise<void> {
-        return this.db.compact().then(() => undefined);
-    }
-
-    /**
-     * Provides a means to tap into the database interface directly.
-     */
-    public query<Result>(callback: (db: PouchDB.Database<T>) => Promise<Result>): Promise<Result> {
-        return callback(this.db);
+        return this.store.compact();
     }
 
     /**
      * Gets all records from the database.
      */
-    public async all(): Promise<ExistingDocument<T>[]> {
-        const response = await this.db.allDocs({
-            // eslint-disable-next-line @typescript-eslint/camelcase
-            include_docs: true,
-            attachments:  true,
-            binary:       true,
-            // Since we use GUIDs, the first character will be between these values.
-            startkey:     "0",
-            endkey:       "[",
-        });
-
-        return _(response.rows).map(row => row.doc as ExistingDocument<T>).value();
+    public all(): Promise<T[]> {
+        return this.store.all() as Promise<T[]>;
     }
 
     /**
      * Gets the specified record from the database.
      */
-    public get(id: string, attachments = true): Promise<Document<T>> {
-        // TODO: ow validation
-
-        return this.db.get<T>(id, attachments ? {
-            attachments: true,
-            binary:      true,
-        } : {});
+    public get(id: string): Promise<T> {
+        return this.store.get(id) as Promise<T>;
     }
 
-    public async add(row: T, ...attachments: File[]): Promise<Document<T>> {
-        // TODO: ow validation
-
-        row._id = uuid().toUpperCase();
-
-        await this.db.put(row);
-        if (attachments.length > 0) {
-            await this.addAttachments(row._id, attachments);
-        }
-
-        return this.get(row._id);
+    /**
+     * Adds a new record to the database.
+     */
+    public add(record: T): Promise<T> {
+        return this.store.add(record as Doc) as Promise<T>;
     }
 
-    public async update(row: T, ...attachments: File[]): Promise<Document<T>> {
-        // TODO: ow validation
+    /**
+     * Updates a record in the database.
+     */
+    public async update(record: T): Promise<T> {
+        const doc = await this.store.get(record._id);
 
-        const id = row._id;
-
-        const doc = await this.get(id);
-        this.beforeUpdate(row, doc);
-
-        await this.db.put(doc);
-        if (attachments.length > 0) {
-            await this.addAttachments(id, attachments);
-        }
-
-        return this.get(id);
+        return this.store.update(_.tap(record as GetDocument<Doc>, value => {
+            value._rev = doc._rev;
+        })) as Promise<T>;
     }
 
-    public async remove(id: string): Promise<void> {
-        // TODO: ow validation
-
-        const doc = await this.get(id, false);
-
-        this.beforeRemove(doc);
-        await this.db.remove(doc);
-        this.afterRemove(doc);
-    }
-
-    protected abstract beforeUpdate(_row: T, _doc: Document<T>): void;
-
-    // eslint-disable-next-line class-methods-use-this
-    protected beforeRemove(_doc: Document<T>): void {
-        // Does nothing, overridable.
-    }
-
-    // eslint-disable-next-line class-methods-use-this
-    protected afterRemove(_doc: Document<T>): void {
-        // Does nothing, overridable.
-    }
-
-    protected async addAttachments(id: string, attachments: File[]): Promise<void> {
-        const waits = [] as Promise<void>[];
-        for (const attachment of attachments) {
-            waits.push(this.get(id).
-                then(doc => this.db.putAttachment(id, attachment.name, doc._rev, attachment, attachment.type)).
-                then(() => undefined));
-        }
-
-        await Promise.all(waits).then(() => undefined);
+    /**
+     * Removes a record from the database.
+     */
+    public remove(id: string): Promise<void> {
+        return this.store.remove(id);
     }
 }

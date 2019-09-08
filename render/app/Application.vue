@@ -18,22 +18,26 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 <template>
     <v-app id="bridgecmdr">
-        <router-view/>
+        <v-content>
+            <v-container>
+                &nbsp;
+            </v-container>
+        </v-content>
+        <settings-page transition="dialog-bottom-transition" #activator="{ on }">
+            <v-btn color="secondary" class="secondaryText--text" fab fixed bottom right v-on="on">
+                <v-icon>mdi-wrench</v-icon>
+            </v-btn>
+        </settings-page>
         <alert-modal ref="alert"/>
         <confirm-modal ref="confirm"/>
     </v-app>
 </template>
 
 <script lang="ts">
-    import Vue, { VueConstructor }    from "vue";
-    import VueRouter, { RouteConfig } from "vue-router";
-    import Vuetify                    from "vuetify";
-    import HomePage                   from "./pages/HomePage.vue";
-    import SettingsPage               from "./pages/settings/MainPage.vue";
-    import SourceList                 from "./pages/settings/SourceList.vue";
-    import SourceEditor               from "./pages/settings/SourceEditor.vue";
-    import SwitchList                 from "./pages/settings/SwitchList.vue";
-    import SwitchEditor               from "./pages/settings/SwitchEditor.vue";
+    import Vue, { VueConstructor } from "vue";
+    import Vuetify                 from "vuetify";
+    import colors                  from "vuetify/lib/util/colors";
+    import SettingsPage            from "./pages/SettingsPage.vue";
 
     import {
         AlertModal,
@@ -42,29 +46,27 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         ConfirmModalOptions,
     } from "../components/modals";
 
-    function hasProps(path: string): boolean {
-        return path.includes(":");
-    }
-
-    type Component = VueConstructor<Vue>;
-    function makeRoute(name: string, path: string, component: Component, children?: RouteConfig[]): RouteConfig {
-        return { name, path, component, props: hasProps(path), children };
-    }
-
-    const router = new VueRouter({
-        routes: [
-            makeRoute("home",     "/",                             HomePage),
-            makeRoute("settings", "/settings",                     SettingsPage),
-            makeRoute("sources",  "/settings/sources/",            SourceList),
-            makeRoute("source",   "/settings/sources/:subjectId",  SourceEditor),
-            makeRoute("switches", "/settings/switches",            SwitchList),
-            makeRoute("switch",   "/settings/switches/:subjectId", SwitchEditor),
-        ],
-    });
-
     const vuetify = new Vuetify({
         icons: {
             iconfont: "mdi",
+        },
+        theme: {
+            themes: {
+                light: {
+                    primary:       colors.indigo.base,
+                    secondary:     colors.indigo.lighten3,
+                    accent:        colors.teal.lighten5,
+                    primaryText:   "#FFFFFF",
+                    secondaryText: "#000000",
+                },
+                dark: {
+                    primary:       colors.indigo.base,
+                    secondary:     colors.indigo.lighten3,
+                    accent:        colors.teal.darken4,
+                    primaryText:   "#FFFFFF",
+                    secondaryText: "#000000",
+                },
+            },
         },
     });
 
@@ -77,7 +79,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
     const vue = Vue as VueConstructor<Vue & References>;
     export default vue.extend({
-        name: "Application",
+        name:       "Application",
+        components: {
+            SettingsPage,
+        },
         mounted() {
             Vue.prototype.$modals = {
                 alert:   (options: AlertModalOptions) => this.$refs.alert.open(options),
@@ -85,7 +90,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             };
         },
         vuetify,
-        router,
     });
 </script>
 

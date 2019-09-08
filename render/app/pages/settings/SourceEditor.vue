@@ -17,42 +17,52 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <template>
-    <validation-observer ref="validator" v-slot="{ valid }" slim>
-        <settings-panel :title="title" back-icon="mdi-close">
-            <template slot="app-bar">
-                <v-toolbar-items>
-                    <v-btn text :disabled="!valid" @click="onSaveClicked">Save</v-btn>
-                </v-toolbar-items>
-            </template>
-            <v-row>
-                <v-col>
-                    <form action="" class="section">
-                        <validation-provider v-slot="{ errors, invalid }" name="title"
-                                             :rules="{ required: true }" slim>
-                            <v-text-field v-model="subject.title" label="Name" :error="invalid" filled
-                                          :error-count="invalid ? errors.length : 0"
-                                          :error-messages="invalid ? errors[0] : undefined"/>
-                        </validation-provider>
-                        <validation-provider v-slot="{ errors, invalid }" name="image"
-                                             :rules="{ required: true }" slim>
-                            <v-file-input v-model="attachment" label="Image" :error="invalid" filled
-                                          :error-count="invalid ? errors.length : 0"
-                                          :error-messages="invalid ? errors[0] : undefined"
-                                          prepend-icon="mdi-camera" @change="onChangeImage"/>
+    <div>
+        <slot name="activators" :edit="editSource" :create="newSource"/>
+        <v-dialog v-model="open" fullscreen hide-overlay :transition="transition">
+            <validation-observer ref="validator" v-slot="{ valid }" slim>
+                <v-card tile>
+                    <v-toolbar>
+                        <v-btn icon @click="open = false"><v-icon>mdi-close</v-icon></v-btn>
+                        <v-toolbar-title>{{ title }}</v-toolbar-title>
+                        <div class="flex-grow-1"></div>
+                        <v-toolbar-items>
+                            <v-btn text :disabled="!valid" @click="onSaveClicked">Save</v-btn>
+                        </v-toolbar-items>
+                    </v-toolbar>
+                    <v-card-text>
+                        <v-row>
                             <v-col>
-                                <v-row>
-                                    <v-card tile>
-                                        <v-img v-show="image" lazy-src="~@mdi/svg/svg/video-input-hdmi.svg"
-                                               :src="image" max-width="128px" max-height="128px"/>
-                                    </v-card>
-                                </v-row>
+                                <v-form>
+                                    <validation-provider v-slot="{ errors, invalid }" name="title"
+                                                         :rules="{ required: true }" slim>
+                                        <v-text-field v-model="subject.title" label="Name" :error="invalid"
+                                                      filled :error-count="invalid ? errors.length : 0"
+                                                      :error-messages="invalid ? errors[0] : undefined"/>
+                                    </validation-provider>
+                                    <validation-provider v-slot="{ errors, invalid }" name="image"
+                                                         :rules="{ required: true }" slim>
+                                        <v-file-input v-model="subject.image" label="Image" :error="invalid"
+                                                      filled :error-count="invalid ? errors.length : 0"
+                                                      :error-messages="invalid ? errors[0] : undefined"
+                                                      prepend-icon="mdi-camera" @change="onChangeImage"/>
+                                        <v-row>
+                                            <v-col cols="2">
+                                                <v-card tile>
+                                                    <v-img v-show="image" lazy-src="~@mdi/svg/svg/video-input-hdmi.svg"
+                                                           :src="image" max-width="128px" max-height="128px"/>
+                                                </v-card>
+                                            </v-col>
+                                        </v-row>
+                                    </validation-provider>
+                                </v-form>
                             </v-col>
-                        </validation-provider>
-                    </form>
-                </v-col>
-            </v-row>
-        </settings-panel>
-    </validation-observer>
+                        </v-row>
+                    </v-card-text>
+                </v-card>
+            </validation-observer>
+        </v-dialog>
+    </div>
 </template>
 
 <script lang="ts">
@@ -61,18 +71,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     import { ValidationObserver }  from "vee-validate";
     import sources                 from "../../../controller/sources";
     import Source                  from "../../../models/source";
-    import { Document }            from "../../../support/controller";
+    import * as helpers            from "../../../support/helpers";
 
-    const NEW_SOURCE: Source = {
+    const EMPTY_SOURCE: Source = {
         _id:   "",
         title: "",
-        image: "",
-    };
-
-    const LOADING_SOURCE: Source = {
-        _id:   "loading",
-        title: "Loading...",
-        image: "",
+        image: new File([], "none"),
     };
 
     type Validator = InstanceType<typeof ValidationObserver>;
@@ -87,36 +91,42 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     export default vue.extend({
         name:  "SourceEditor",
         props: {
-            subjectId: { required: true, type: String },
+            transition: { type: String,  default: "dialog-transition" },
         },
         data: function () {
             return {
-                subject:    _.clone(LOADING_SOURCE),
-                attachment: null as File|null,
-                image:      "no/such/image",
+                open:    false,
+                subject: _.clone(EMPTY_SOURCE),
+                image:   "no/such/image",
             };
         },
         computed: {
             title(): string {
-                if (this.subject !== null) {
-                    return this.subject._id.length > 0 ? "Edit source" : "Add source";
-                }
-
-                return "Loading...";
+                return this.subject._id.length > 0 ? "Edit source" : "Add source";
             },
         },
         methods: {
+            newSource(): void {
+                this.$nextTick(async () => {
+                    await this.readySubject(_.clone(EMPTY_SOURCE));
+                    this.open = true;
+                    requestAnimationFrame(() => this.$refs.validator.reset());
+                });
+            },
+            editSource(subject: Source): void {
+                this.$nextTick(async () => {
+                    await this.readySubject(subject);
+                    this.open = true;
+                    requestAnimationFrame(() => this.$refs.validator.validate());
+                });
+            },
             onSaveClicked(): void {
                 this.$nextTick(async () => {
                     try {
-                        if (this.subject !== null && this.attachment !== null) {
-                            if (this.subject._id === "") {
-                                await sources.add(this.subject, this.attachment);
-                                this.$router.back();
-                            } else {
-                                await sources.update(this.subject, this.attachment);
-                                this.$router.back();
-                            }
+                        if (this.subject._id === "") {
+                            await sources.add(this.subject);
+                        } else {
+                            await sources.update(this.subject);
                         }
                     } catch (error) {
                         const ex = error as Error;
@@ -125,54 +135,22 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                             secondary: ex.message,
                         });
                     }
+
+                    this.open    = false;
+                    this.subject = _.clone(EMPTY_SOURCE);
+                    this.$nextTick(() => this.$emit("done"));
                 });
             },
             onChangeImage(file: File): void {
-                const reader = new FileReader();
-                reader.onload = () => {
-                    if (this.subject !== null) {
-                        this.subject.image = file.name;
-                        this.image = reader.result as string;
-                    }
-                };
-
-                reader.readAsDataURL(file);
+                this.updateAttachment(file);
             },
-        },
-        mounted(): void {
-            this.$nextTick(async () => {
-                try {
-                    const subject: Document<Source>|Source = this.subjectId !== "new" ?
-                        await sources.get(this.subjectId) :
-                        _.clone(NEW_SOURCE);
-                    const attachments = (subject as Document<Source>)._attachments;
-                    if (!_.isNil(attachments)) {
-                        const attachment = attachments[subject.image] as PouchDB.Core.FullAttachment;
-                        if (attachment) {
-                            this.attachment = new File([attachment.data as Blob], subject.image,
-                                                       { type: attachment.content_type });
-
-                            this.onChangeImage(this.attachment);
-                        }
-                    }
-
-                    this.subject = subject;
-                    if (this.subjectId !== "new") {
-                        this.$nextTick(() => this.$refs.validator.validate());
-                    }
-                } catch (error) {
-                    const ex = error as Error;
-                    const message = ex.name === "not_found" ?
-                        `Source "${this.subjectId}" not found` :
-                        ex.message;
-                    await this.$modals.alert({
-                        main:      "Unable to edit switch",
-                        secondary: message,
-                    });
-
-                    this.$router.back();
-                }
-            });
+            async updateAttachment(blob: Blob): Promise<void> {
+                this.image = await helpers.toDataUrl(blob);
+            },
+            async readySubject(subject: Source): Promise<void> {
+                this.subject = subject;
+                await this.updateAttachment(subject.image);
+            },
         },
     });
 </script>

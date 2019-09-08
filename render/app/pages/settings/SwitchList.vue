@@ -17,48 +17,60 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <template>
-    <settings-panel title="Switches">
-        <v-row>
-            <v-col>
-                <v-list>
-                    <v-list-item v-for="row of switches" :key="row._id" :to="toExistingSwitch(row)">
-                        <v-list-item-content v-text="row.title"/>
-                        <v-list-item-action>
-                            <v-btn icon @click.prevent="onDeleteClicked(row)">
-                                <v-icon color="red">mdi-delete</v-icon>
-                            </v-btn>
-                        </v-list-item-action>
-                    </v-list-item>
-                </v-list>
-            </v-col>
-        </v-row>
-        <template slot="post-content">
-            <v-btn color="cyan" fab fixed bottom right :to="toNewSwitch()">
-                <v-icon>mdi-plus</v-icon>
-            </v-btn>
-        </template>
-    </settings-panel>
+    <div>
+        <slot name="activator" :on="{ click: openList }"/>
+        <v-dialog v-model="open" fullscreen hide-overlay :transition="transition">
+            <v-card tile>
+                <v-toolbar>
+                    <v-btn icon @click="open = false"><v-icon>mdi-arrow-left</v-icon></v-btn>
+                    <v-toolbar-title>Switches</v-toolbar-title>
+                </v-toolbar>
+                <v-card-text>
+                    <switch-editor #activators="{ edit, create }" transition="slide-x-transition" @done="refresh">
+                        <v-list>
+                            <v-list-item v-for="row of switches" :key="row._id" @click="edit(row)">
+                                <v-list-item-content v-text="row.title"/>
+                                <v-list-item-action>
+                                    <v-btn icon @click.prevent.stop="onDeleteClicked(row)">
+                                        <v-icon>mdi-delete</v-icon>
+                                    </v-btn>
+                                </v-list-item-action>
+                            </v-list-item>
+                        </v-list>
+                        <v-btn color="primary" class="primaryText--text" fab fixed bottom right @click="create">
+                            <v-icon>mdi-plus</v-icon>
+                        </v-btn>
+                    </switch-editor>
+                </v-card-text>
+            </v-card>
+        </v-dialog>
+    </div>
 </template>
 
 <script lang="ts">
     import Vue          from "vue";
-    import { Location } from "vue-router";
+    import SwitchEditor from "./SwitchEditor.vue";
     import switches     from "../../../controller/switches";
     import Switch       from "../../../models/switch";
 
     export default Vue.extend({
-        name: "SwitchList",
+        name:       "SwitchList",
+        components: {
+            SwitchEditor,
+        },
+        props: {
+            transition: { type: String,  default: "dialog-transition" },
+        },
         data: function () {
             return {
+                open:     false,
                 switches: [] as Switch[],
-                width:    0,
-                height:   0,
             };
         },
         methods: {
-            onResize() {
-                this.width  = window.innerWidth - this.$vuetify.application.left - this.$vuetify.application.right;
-                this.height = window.innerHeight - this.$vuetify.application.top - this.$vuetify.application.bottom;
+            openList(): void {
+                this.open = true;
+                this.refresh();
             },
             async refresh(): Promise<void> {
                 try {
@@ -70,14 +82,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                         secondary: ex.message,
                     });
 
-                    this.$router.back();
+                    this.open = false;
                 }
-            },
-            toNewSwitch(): Location {
-                return { name: "switch", params: { subjectId: "new" } };
-            },
-            toExistingSwitch(row: Switch): Location {
-                return { name: "switch", params: { subjectId: row._id } };
             },
             async onDeleteClicked(row: Switch): Promise<void> {
                 const remove = await this.$modals.confirm({
@@ -100,9 +106,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                     }
                 }
             },
-        },
-        mounted() {
-            this.refresh();
         },
     });
 </script>

@@ -16,8 +16,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Switch                   from "../models/switch";
-import Controller, { Document } from "../support/controller";
+import Switch     from "../models/switch";
+import Controller from "../support/controller";
 // import Tie     from "../models/tie";
 
 class SwitchController extends Controller<Switch> {
@@ -25,17 +25,9 @@ class SwitchController extends Controller<Switch> {
         super("switches");
     }
 
-    // eslint-disable-next-line class-methods-use-this
-    protected beforeUpdate(row: Switch, doc: Document<Switch>): void {
-        // eslint-disable-next-line @typescript-eslint/camelcase
-        doc.driverId = row.driverId;
-        doc.title    = row.title;
-        doc.config   = row.config;
-    }
-
-    // eslint-disable-next-line class-methods-use-this
-    protected afterRemove(_doc: Document<Switch>): void {
-        // TODO: Remove all ties for this source.
+    public remove(id: string): Promise<void> {
+        // TODO: Remove all ties for the switch.
+        return this.store.remove(id);
     }
 }
 

@@ -16,33 +16,25 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Tie                                        from "../models/tie";
-import Controller, { ExistingDocument, Document } from "../support/controller";
+import Tie        from "../models/tie";
+import Controller from "../support/controller";
 
 class TieController extends Controller<Tie> {
     public constructor() {
         super("ties", {
             sourceId: ["sourceId"],
+            switchId: ["switchId"],
         });
     }
 
-    public forSource(id: string): Promise<ExistingDocument<Tie>[]> {
-        return this.query(async function (db: PouchDB.Database<Tie>): Promise<ExistingDocument<Tie>[]> {
+    public forSource(id: string): Promise<Tie[]> {
+        return this.store.query(async function (db: PouchDB.Database<Tie>): Promise<Tie[]> {
             const response = await db.find({
                 selector: { sourceId: id },
             });
 
             return response.docs;
         });
-    }
-
-    // eslint-disable-next-line class-methods-use-this
-    protected beforeUpdate(row: Tie, doc: Document<Tie>): void {
-        doc.sourceId             = row.sourceId;
-        doc.switchId             = row.switchId;
-        doc.inputChannel         = row.inputChannel;
-        doc.outputChannels.video = row.outputChannels.video;
-        doc.outputChannels.audio = row.outputChannels.audio;
     }
 }
 
