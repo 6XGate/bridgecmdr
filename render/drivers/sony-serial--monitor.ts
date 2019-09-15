@@ -18,11 +18,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import Driver, { DriverCapabilities, DriverConfiguration, DriverDescriptor } from "../support/system/driver";
 
+const capabilities = DriverCapabilities.NONE;
+
 export default class SonySerialMonitor extends Driver {
     static about(): DriverDescriptor {
         return {
             guid:  "8626D6D3-C211-4D21-B5CC-F5E3B50D9FF0",
             title: "Sony RS-485 controllable monitor",
+            capabilities,
         };
     }
 
@@ -35,7 +38,7 @@ export default class SonySerialMonitor extends Driver {
     }
 
     constructor(config: DriverConfiguration) {
-        super(config, DriverCapabilities.DEFAULT);
+        super(config, capabilities);
     }
 
     setTie(inputChannel: number, videoOutputChannel: number, audioOutputChannel: number): Promise<void> {

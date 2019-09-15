@@ -19,27 +19,29 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 <template>
     <div>
         <slot name="activator" :on="{ click: openList }"/>
-        <v-dialog v-model="open" fullscreen hide-overlay :transition="transition">
+        <v-dialog v-model="visible" fullscreen hide-overlay :transition="transition">
             <v-card tile>
-                <v-toolbar>
-                    <v-btn icon @click="open = false"><v-icon>mdi-arrow-left</v-icon></v-btn>
+                <v-app-bar>
+                    <v-btn icon @click="visible = false"><v-icon>mdi-arrow-left</v-icon></v-btn>
                     <v-toolbar-title>Switches</v-toolbar-title>
-                </v-toolbar>
+                </v-app-bar>
                 <v-card-text>
                     <source-editor #activators="{ edit, create }" transition="slide-x-transition" @done="refresh">
-                        <v-list>
-                            <v-list-item v-for="row of sources" :key="row._id" @click="edit(row)">
-                                <v-list-item-avatar>
-                                    <v-img :src="images[row._id]"/>
-                                </v-list-item-avatar>
-                                <v-list-item-content v-text="row.title"/>
-                                <v-list-item-action>
-                                    <v-btn icon @click.prevent.stop="onDeleteClicked(row)">
-                                        <v-icon>mdi-delete</v-icon>
-                                    </v-btn>
-                                </v-list-item-action>
-                            </v-list-item>
-                        </v-list>
+                        <source-page #activator="{ open }" transition="slide-x-transition" @edit="edit">
+                            <v-list>
+                                <v-list-item v-for="row of sources" :key="row._id" @click="open(row)">
+                                    <v-list-item-avatar>
+                                        <v-img :src="images[row._id]"/>
+                                    </v-list-item-avatar>
+                                    <v-list-item-content v-text="row.title"/>
+                                    <v-list-item-action>
+                                        <v-btn icon @click.prevent.stop="onDeleteClicked(row)">
+                                            <v-icon>mdi-delete</v-icon>
+                                        </v-btn>
+                                    </v-list-item-action>
+                                </v-list-item>
+                            </v-list>
+                        </source-page>
                         <v-btn color="primary" class="primaryText--text" fab fixed bottom right @click="create">
                             <v-icon>mdi-plus</v-icon>
                         </v-btn>
@@ -53,6 +55,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import Vue          from "vue";
     import SourceEditor from "./SourceEditor.vue";
+    import SourcePage   from "./SourcePage.vue";
     import sources      from "../../../controller/sources";
     import Source       from "../../../models/source";
     import * as helpers from "../../../support/helpers";
@@ -61,20 +64,21 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         name:       "SourceList",
         components: {
             SourceEditor,
+            SourcePage,
         },
         props: {
             transition: { type: String, default: "dialog-transition" },
         },
         data: function () {
             return {
-                open:    false,
+                visible: false,
                 sources: [] as Source[],
                 images:  {} as { [id: string]: string },
             };
         },
         methods: {
             openList() {
-                this.open = true;
+                this.visible = true;
                 this.refresh();
             },
             refresh(): void {
@@ -91,7 +95,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                             secondary: ex.message,
                         });
 
-                        this.open = false;
+                        this.visible = false;
                     }
                 });
             },

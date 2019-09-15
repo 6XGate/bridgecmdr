@@ -18,11 +18,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import Driver, { DriverCapabilities, DriverConfiguration, DriverDescriptor } from "../support/system/driver";
 
+const capabilities =
+    DriverCapabilities.HAS_MULTIPLE_OUTPUTS |
+    DriverCapabilities.CAN_DECOUPLE_AUDIO_OUTPUT;
+
 export default class ExtronMatrixSwitch extends Driver {
     static about(): DriverDescriptor {
         return {
             guid:  "4C8F2838-C91D-431E-84DD-3666D14A6E2C",
             title: "Extron SIS-compatible matrix switch",
+            capabilities,
         };
     }
 
@@ -35,7 +40,7 @@ export default class ExtronMatrixSwitch extends Driver {
     }
 
     constructor(config: DriverConfiguration) {
-        super(config, DriverCapabilities.CAN_DECOUPLE_AUDIO_OUTPUT | DriverCapabilities.HAS_MULTIPLE_OUTPUTS);
+        super(config, capabilities);
     }
 
     setTie(inputChannel: number, videoOutputChannel: number, audioOutputChannel: number): Promise<void> {

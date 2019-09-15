@@ -19,29 +19,29 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 <template>
     <div>
         <slot name="activators" :edit="editSource" :create="newSource"/>
-        <v-dialog v-model="open" fullscreen hide-overlay :transition="transition">
+        <v-dialog v-model="visible" fullscreen hide-overlay :transition="transition">
             <validation-observer ref="validator" v-slot="{ valid }" slim>
                 <v-card tile>
-                    <v-toolbar>
-                        <v-btn icon @click="open = false"><v-icon>mdi-close</v-icon></v-btn>
+                    <v-app-bar>
+                        <v-btn icon @click="visible = false"><v-icon>mdi-close</v-icon></v-btn>
                         <v-toolbar-title>{{ title }}</v-toolbar-title>
                         <div class="flex-grow-1"></div>
                         <v-toolbar-items>
                             <v-btn text :disabled="!valid" @click="onSaveClicked">Save</v-btn>
                         </v-toolbar-items>
-                    </v-toolbar>
+                    </v-app-bar>
                     <v-card-text>
                         <v-row>
                             <v-col>
                                 <v-form>
                                     <validation-provider v-slot="{ errors, invalid }" name="title"
-                                                         :rules="{ required: true }" slim>
+                                                         rules="required" slim>
                                         <v-text-field v-model="subject.title" label="Name" :error="invalid"
                                                       filled :error-count="invalid ? errors.length : 0"
                                                       :error-messages="invalid ? errors[0] : undefined"/>
                                     </validation-provider>
                                     <validation-provider v-slot="{ errors, invalid }" name="image"
-                                                         :rules="{ required: true }" slim>
+                                                         rules="required|mimes:image/*" slim>
                                         <v-file-input v-model="subject.image" label="Image" :error="invalid"
                                                       filled :error-count="invalid ? errors.length : 0"
                                                       :error-messages="invalid ? errors[0] : undefined"
@@ -95,7 +95,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         },
         data: function () {
             return {
-                open:    false,
+                visible: false,
                 subject: _.clone(EMPTY_SOURCE),
                 image:   "no/such/image",
             };
@@ -109,14 +109,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             newSource(): void {
                 this.$nextTick(async () => {
                     await this.readySubject(_.clone(EMPTY_SOURCE));
-                    this.open = true;
+                    this.visible = true;
                     requestAnimationFrame(() => this.$refs.validator.reset());
                 });
             },
             editSource(subject: Source): void {
                 this.$nextTick(async () => {
                     await this.readySubject(subject);
-                    this.open = true;
+                    this.visible = true;
                     requestAnimationFrame(() => this.$refs.validator.validate());
                 });
             },
@@ -136,20 +136,20 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                         });
                     }
 
-                    this.open    = false;
+                    this.visible = false;
                     this.subject = _.clone(EMPTY_SOURCE);
                     this.$nextTick(() => this.$emit("done"));
                 });
             },
             onChangeImage(file: File): void {
-                this.updateAttachment(file);
+                this.updateImageUrl(file);
             },
-            async updateAttachment(blob: Blob): Promise<void> {
+            async updateImageUrl(blob: Blob): Promise<void> {
                 this.image = await helpers.toDataUrl(blob);
             },
             async readySubject(subject: Source): Promise<void> {
                 this.subject = subject;
-                await this.updateAttachment(subject.image);
+                await this.updateImageUrl(subject.image);
             },
         },
     });

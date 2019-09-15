@@ -16,18 +16,18 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Switch     from "../models/switch";
 import Controller from "../support/controller";
-// import Tie     from "../models/tie";
+import Switch     from "../models/switch";
+import ties       from "./ties";
 
 class SwitchController extends Controller<Switch> {
     public constructor() {
         super("switches");
     }
 
-    public remove(id: string): Promise<void> {
-        // TODO: Remove all ties for the switch.
-        return this.store.remove(id);
+    public async remove(id: string): Promise<void> {
+        await this.store.remove(id);
+        await Promise.all((await ties.forSwitch(id)).map(tie => ties.remove(tie._id)));
     }
 }
 

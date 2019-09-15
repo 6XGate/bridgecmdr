@@ -19,8 +19,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import Vue          from "vue";
 import AlertModal   from "../../components/modals/alert.vue";
 import ConfirmModal from "../../components/modals/confirm.vue";
+import NumberInput  from "../../components/NumberInput";
 
-Vue.component("AlertModal",    AlertModal);
-Vue.component("ConfirmModal",  ConfirmModal);
+Vue.component("AlertModal",   AlertModal);
+Vue.component("ConfirmModal", ConfirmModal);
+
+Vue.component("NumberInput",  NumberInput);
 
 export default Promise.resolve();

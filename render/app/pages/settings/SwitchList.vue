@@ -19,12 +19,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 <template>
     <div>
         <slot name="activator" :on="{ click: openList }"/>
-        <v-dialog v-model="open" fullscreen hide-overlay :transition="transition">
+        <v-dialog v-model="visible" fullscreen hide-overlay :transition="transition">
             <v-card tile>
-                <v-toolbar>
-                    <v-btn icon @click="open = false"><v-icon>mdi-arrow-left</v-icon></v-btn>
+                <v-app-bar>
+                    <v-btn icon @click="visible = false"><v-icon>mdi-arrow-left</v-icon></v-btn>
                     <v-toolbar-title>Switches</v-toolbar-title>
-                </v-toolbar>
+                </v-app-bar>
                 <v-card-text>
                     <switch-editor #activators="{ edit, create }" transition="slide-x-transition" @done="refresh">
                         <v-list>
@@ -63,13 +63,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         },
         data: function () {
             return {
-                open:     false,
+                visible:  false,
                 switches: [] as Switch[],
             };
         },
         methods: {
             openList(): void {
-                this.open = true;
+                this.visible = true;
                 this.refresh();
             },
             async refresh(): Promise<void> {
@@ -82,7 +82,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                         secondary: ex.message,
                     });
 
-                    this.open = false;
+                    this.visible = false;
                 }
             },
             async onDeleteClicked(row: Switch): Promise<void> {

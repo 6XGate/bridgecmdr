@@ -18,11 +18,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import Driver, { DriverCapabilities, DriverConfiguration, DriverDescriptor } from "../support/system/driver";
 
+const capabilities = DriverCapabilities.NONE;
+
 export default class TeslaSmartMatrixSwitch extends Driver {
     static about(): DriverDescriptor {
         return {
             guid:  "91D5BC95-A8E2-4F58-BCAC-A77BA1054D61",
             title: "TeslaSmart-compatible matrix switch",
+            capabilities,
         };
     }
 
@@ -35,7 +38,7 @@ export default class TeslaSmartMatrixSwitch extends Driver {
     }
 
     constructor(config: DriverConfiguration) {
-        super(config, DriverCapabilities.DEFAULT);
+        super(config, capabilities);
     }
 
     setTie(inputChannel: number, videoOutputChannel: number, audioOutputChannel: number): Promise<void> {

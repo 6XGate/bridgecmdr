@@ -19,29 +19,29 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 <template>
     <div>
         <slot name="activators" :edit="editSwitch" :create="newSwitch"/>
-        <v-dialog v-model="open" fullscreen hide-overlay :transition="transition">
+        <v-dialog v-model="visible" fullscreen hide-overlay :transition="transition">
             <validation-observer ref="validator" v-slot="{ valid }" slim>
                 <v-card tile>
-                    <v-toolbar>
-                        <v-btn icon @click="open = false"><v-icon>mdi-close</v-icon></v-btn>
+                    <v-app-bar>
+                        <v-btn icon @click="visible = false"><v-icon>mdi-close</v-icon></v-btn>
                         <v-toolbar-title>{{ title }}</v-toolbar-title>
                         <div class="flex-grow-1"></div>
                         <v-toolbar-items>
                             <v-btn text :disabled="!valid" @click="onSaveClicked">Save</v-btn>
                         </v-toolbar-items>
-                    </v-toolbar>
+                    </v-app-bar>
                     <v-card-text>
                         <v-row>
                             <v-col>
                                 <v-form>
                                     <validation-provider v-slot="{ errors, invalid }" name="title"
-                                                         :rules="{ required: true }" slim>
+                                                         rules="required" slim>
                                         <v-text-field v-model="subject.title" label="Name" :error="invalid"
                                                       filled :error-count="invalid ? errors.length : 0"
                                                       :error-messages="invalid ? errors[0] : undefined"/>
                                     </validation-provider>
                                     <validation-provider v-slot="{ errors, invalid }" name="driver"
-                                                         :rules="{ required: true }" slim>
+                                                         rules="required" slim>
                                         <v-select v-model="subject.driverId" label="Driver" :error="invalid"
                                                   :items="drivers" item-value="guid" item-text="title"
                                                   filled :error-count="invalid ? errors.length : 0"
@@ -91,7 +91,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         },
         data() {
             return {
-                open:    false,
+                visible: false,
                 drivers: Driver.all(),
                 subject: _.clone(EMPTY_SWITCH),
             };
@@ -105,14 +105,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             newSwitch(): void {
                 this.$nextTick(async () => {
                     await this.readySubject(_.clone(EMPTY_SWITCH));
-                    this.open = true;
+                    this.visible = true;
                     requestAnimationFrame(() => this.$refs.validator.reset());
                 });
             },
             editSwitch(subject: Switch): void {
                 this.$nextTick(async () => {
                     await this.readySubject(subject);
-                    this.open = true;
+                    this.visible = true;
                     requestAnimationFrame(() => this.$refs.validator.validate());
                 });
             },
@@ -132,7 +132,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                         });
                     }
 
-                    this.open    = false;
+                    this.visible = false;
                     this.subject = _.clone(EMPTY_SWITCH);
                     this.$nextTick(() => this.$emit("done"));
                 });

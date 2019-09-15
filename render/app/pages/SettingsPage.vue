@@ -21,16 +21,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         <slot name="activator" :on="{ click: () => open = true }"/>
         <v-dialog v-model="open" fullscreen hide-overlay :transition="transition">
             <v-card tile>
-                <v-toolbar>
+                <v-app-bar>
                     <v-btn icon @click="open = false"><v-icon>mdi-arrow-left</v-icon></v-btn>
                     <v-toolbar-title>Settings</v-toolbar-title>
-                </v-toolbar>
+                </v-app-bar>
                 <v-card-text>
                     <v-list>
                         <source-list transition="slide-x-transition" #activator="{ on }">
                             <v-list-item v-on="on">
-                                <v-list-item-avatar>
-                                    <v-icon class="blue white--text">mdi-gamepad-variant</v-icon>
+                                <v-list-item-avatar color="blue">
+                                    <v-icon class="white--text">mdi-gamepad-variant</v-icon>
                                 </v-list-item-avatar>
                                 <v-list-item-content>
                                     Sources
@@ -39,8 +39,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                         </source-list>
                         <switch-list transition="slide-x-transition" #activator="{ on }">
                             <v-list-item v-on="on">
-                                <v-list-item-avatar>
-                                    <v-icon class="red darken-2 white--text">mdi-video-switch</v-icon>
+                                <v-list-item-avatar color="red darken-2">
+                                    <v-icon class="white--text">mdi-video-switch</v-icon>
                                 </v-list-item-avatar>
                                 <v-list-item-content>
                                     Switches

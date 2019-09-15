@@ -22,14 +22,18 @@ import _ from "lodash";
  * Indicates a device's capabilities.
  */
 export enum DriverCapabilities {
-    DEFAULT                   = 0,
+    /** The device has no extended capabilities. */
+    NONE                      = 0,
+    /** The device has multiple output channels. */
     HAS_MULTIPLE_OUTPUTS      = 1 << 0,
+    /** The device support sending the audio output to a different channel. */
     CAN_DECOUPLE_AUDIO_OUTPUT = 1 << 1,
 }
 
 export interface DriverDescriptor {
-    guid:  string;
-    title: string;
+    guid:         string;
+    title:        string;
+    capabilities: DriverCapabilities;
 }
 
 export interface DriverConfiguration {

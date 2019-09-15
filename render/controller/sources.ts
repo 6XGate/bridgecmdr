@@ -17,10 +17,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 import _            from "lodash";
-import Source       from "../models/source";
-import { Document } from "../support/store";
 import Controller   from "../support/controller";
-// import Tie     from "../models/tie";
+import { Document } from "../support/store";
+import Source       from "../models/source";
+import ties from "./ties";
 
 type SourceDocument = Document<{
     title: string;
@@ -95,9 +95,9 @@ class SourceController extends Controller<Source, SourceDocument> {
         };
     }
 
-    public remove(id: string): Promise<void> {
-        // TODO: Remove all ties for the source.
-        return this.store.remove(id);
+    public async remove(id: string): Promise<void> {
+        await this.store.remove(id);
+        await Promise.all((await ties.forSource(id)).map(tie => ties.remove(tie._id)));
     }
 }
 
