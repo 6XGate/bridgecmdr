@@ -32,7 +32,7 @@ async function loadConfiguration(): Promise<void> {
     // Get the switches from the database.
     for (const model of await switches.all()) {
         try {
-            const driver = Driver.load(model.driverId, model.config);
+            const driver = Driver.load(model.driverId, model.path);
             Switch.add(model._id, model.title, driver);
         } catch (error) {
             console.error(error);

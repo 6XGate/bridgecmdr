@@ -23,7 +23,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <v-card tile>
                 <v-app-bar>
                     <v-btn icon @click="visible = false"><v-icon>mdi-arrow-left</v-icon></v-btn>
-                    <v-toolbar-title>Switches</v-toolbar-title>
+                    <v-toolbar-title>Sources</v-toolbar-title>
                 </v-app-bar>
                 <v-card-text>
                     <source-editor #activators="{ edit, create }" transition="slide-x-transition" @done="refresh">

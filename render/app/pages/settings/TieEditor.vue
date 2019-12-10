@@ -78,10 +78,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     import _                                                from "lodash";
     import Vue, { VueConstructor }                          from "vue";
     import { ValidationObserver }                           from "vee-validate";
+    import ties                                             from "../../../controller/ties";
     import switches                                         from "../../../controller/switches";
     import Switch                                           from "../../../models/switch";
     import Tie                                              from "../../../models/tie";
     import Driver, { DriverCapabilities, DriverDescriptor } from "../../../support/system/driver";
+    import Source from "../../../models/source";
 
     const EMPTY_TIE: Tie = {
         _id:            "",
@@ -160,10 +162,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 this.switches = await switches.all();
                 this.drivers  = Driver.all();
             },
-            newTie() {
+            newTie(source: Source) {
                 this.$nextTick(async () => {
-                    await this.readySubject(_.clone(EMPTY_TIE));
+                    const subject = _.clone(EMPTY_TIE);
+                    subject.sourceId = source._id;
+
+                    await this.readySubject(subject);
                     this.visible = true;
+                    requestAnimationFrame(() => this.$refs.validator.reset());
                 });
             },
             editTie(subject: Tie) {
@@ -173,8 +179,26 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 });
             },
             onSaveClicked() {
-                // TODO
-                this.visible = false;
+                this.$nextTick(async () => {
+                    try {
+                        console.log(this.subject);
+                        if (this.subject._id === "") {
+                            await ties.add(this.subject);
+                        } else {
+                            await ties.update(this.subject);
+                        }
+                    } catch (error) {
+                        const ex = error as Error;
+                        await this.$modals.alert({
+                            main:      "Unable to edit switch",
+                            secondary: ex.message,
+                        });
+                    }
+
+                    this.visible = false;
+                    this.subject = _.clone(EMPTY_TIE);
+                    this.$nextTick(() => this.$emit("done"));
+                });
             },
             async readySubject(subject: Tie): Promise<void> {
                 await this.refresh();

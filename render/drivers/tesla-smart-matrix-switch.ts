@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Driver, { DriverCapabilities, DriverConfiguration, DriverDescriptor } from "../support/system/driver";
+import Driver, { DriverCapabilities, DriverDescriptor } from "../support/system/driver";
 
 const capabilities = DriverCapabilities.NONE;
 
@@ -37,8 +37,8 @@ export default class TeslaSmartMatrixSwitch extends Driver {
         return TeslaSmartMatrixSwitch.about().title;
     }
 
-    constructor(config: DriverConfiguration) {
-        super(config, capabilities);
+    constructor(path: string) {
+        super(path, capabilities);
     }
 
     setTie(inputChannel: number, videoOutputChannel: number, audioOutputChannel: number): Promise<void> {

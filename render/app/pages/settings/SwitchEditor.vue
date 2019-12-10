@@ -47,6 +47,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                                                   filled :error-count="invalid ? errors.length : 0"
                                                   :error-messages="invalid ? errors[0] : undefined"/>
                                     </validation-provider>
+                                    <validation-provider v-slot="{ errors, invalid }" name="path"
+                                                         rules="required" slim>
+                                        <!-- TODO Format, and file for path, validation -->
+                                        <v-text-field v-model="subject.path" label="Path/IP" :error="invalid"
+                                                      filled :error-count="invalid ? errors.length : 0"
+                                                      :error-messages="invalid ? errors[0] : undefined"/>
+                                    </validation-provider>
                                 </v-form>
                             </v-col>
                         </v-row>
@@ -72,7 +79,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         _id:      "",
         driverId: "",
         title:    "",
-        config:   {},
+        path:     "",
     };
 
     type Validator = InstanceType<typeof ValidationObserver>;

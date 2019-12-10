@@ -16,11 +16,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Model                   from "../support/model";
-import { DriverConfiguration } from "../support/system/driver";
+import Model from "../support/model";
 
 export default interface Switch extends Model{
     driverId: string;
     title:    string;
-    config:   DriverConfiguration;
+    path:     string;
 }

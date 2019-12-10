@@ -36,13 +36,9 @@ export interface DriverDescriptor {
     capabilities: DriverCapabilities;
 }
 
-export interface DriverConfiguration {
-    [key: string]: (boolean|number|string);
-}
-
 export interface DriverConstructor {
     about(): DriverDescriptor;
-    new(config: DriverConfiguration): Driver;
+    new(path: string): Driver;
 }
 
 const driverRegistry = new Map<string, DriverConstructor>();
@@ -79,10 +75,10 @@ export default abstract class Driver {
     /**
      * Loads a driver.
      *
-     * @param guid   The GUID that identifies the driver to be loaded
-     * @param config The configuration for the switchable
+     * @param guid The GUID that identifies the driver to be loaded
+     * @param path The path to the device
      */
-    static load(guid: string, config: DriverConfiguration): Driver {
+    static load(guid: string, path: string): Driver {
         // TODO: ow validation
 
         guid = String(guid).toUpperCase();
@@ -92,23 +88,23 @@ export default abstract class Driver {
         }
 
         // eslint-disable-next-line new-cap
-        return new driver(config);
+        return new driver(path);
     }
 
-    public readonly configuration: DriverConfiguration;
+    public readonly path: string;
 
     public readonly capabilities: DriverCapabilities;
 
     /**
      * Initializes a new instance of the Driver class
      *
-     * @param config       The device configuration for the driver
+     * @param path         The path to the device
      * @param capabilities The capabilities of the driver
      */
-    constructor(config: DriverConfiguration, capabilities: DriverCapabilities) {
+    constructor(path: string, capabilities: DriverCapabilities) {
         // TODO: ow validation
 
-        this.configuration = config;
+        this.path          = path;
         this.capabilities  = capabilities;
 
         // Ensure all current properties are read-only.

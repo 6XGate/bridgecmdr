@@ -29,7 +29,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                         <v-btn text @click="onEditClicked">Edit</v-btn>
                     </v-toolbar-items>
                 </v-app-bar>
-                <tie-editor #activators="{ edit, create }">
+                <tie-editor #activators="{ edit, create }" @done="refresh">
                     <v-list>
                         <v-list-item two-line>
                             <v-list-item-content>
@@ -46,7 +46,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                             </v-list-item-content>
                         </v-list-item>
                     </v-list>
-                    <v-btn color="primary" fab fixed bottom right @click="create">
+                    <v-btn color="primary" fab fixed bottom right @click="() => create(subject)">
                         <v-icon class="primaryText--text">mdi-plus</v-icon>
                     </v-btn>
                 </tie-editor>
@@ -91,8 +91,18 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         },
         methods: {
             async refresh(): Promise<void> {
-                this.ties     = await ties.forSource(this.subject._id);
-                this.switches = _(await switches.all()).map(row => [ row._id, row ]).fromPairs().value();
+                try {
+                    this.ties     = await ties.forSource(this.subject._id);
+                    this.switches = _(await switches.all()).map(row => [ row._id, row ]).fromPairs().value();
+                } catch (error) {
+                    const ex = error as Error;
+                    await this.$modals.alert({
+                        main:      "Unable to list switches",
+                        secondary: ex.message,
+                    });
+
+                    this.visible = false;
+                }
             },
             openSource(subject: Source): void {
                 this.$nextTick(async () => {
