@@ -140,21 +140,17 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             },
             audioOutputRules(): Record<string, unknown> {
                 // eslint-disable-next-line @typescript-eslint/camelcase
-                return this.showVideoOutput ? { required: true, min_value: 1 } : {};
+                return this.showAudioOutput ? { required: true, min_value: 1 } : {};
             },
             showVideoOutput(): boolean {
-                if (this.driver) {
-                    return Boolean(this.driver.capabilities & DriverCapabilities.HAS_MULTIPLE_OUTPUTS);
-                }
-
-                return false;
+                return this.driver ?
+                    Boolean(this.driver.capabilities & DriverCapabilities.HAS_MULTIPLE_OUTPUTS) :
+                    false;
             },
             showAudioOutput(): boolean {
-                if (this.showVideoOutput && this.driver) {
-                    return Boolean(this.driver.capabilities & DriverCapabilities.CAN_DECOUPLE_AUDIO_OUTPUT);
-                }
-
-                return false;
+                return (this.showVideoOutput && this.driver) ?
+                    Boolean(this.driver.capabilities & DriverCapabilities.CAN_DECOUPLE_AUDIO_OUTPUT) :
+                    false;
             },
         },
         methods: {
@@ -167,6 +163,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                     const subject = _.clone(EMPTY_TIE);
                     subject.sourceId = source._id;
 
+                    console.log(subject);
                     await this.readySubject(subject);
                     this.visible = true;
                     requestAnimationFrame(() => this.$refs.validator.reset());
@@ -174,8 +171,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             },
             editTie(subject: Tie) {
                 this.$nextTick(async () => {
-                    await this.readySubject(subject);
+                    console.log(subject);
+                    await this.readySubject(_.clone(subject));
                     this.visible = true;
+                    requestAnimationFrame(() => this.$refs.validator.validate());
                 });
             },
             onSaveClicked() {
@@ -203,6 +202,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             async readySubject(subject: Tie): Promise<void> {
                 await this.refresh();
                 this.subject = subject;
+                console.log(subject);
             },
         },
     });

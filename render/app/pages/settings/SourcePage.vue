@@ -39,10 +39,27 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                             <v-list-item-avatar size="64" tile><v-img :src="image"/></v-list-item-avatar>
                         </v-list-item>
                         <!-- The ties -->
-                        <v-list-item v-for="row of ties" :key="row._id" two-line>
+                        <v-list-item v-for="row of ties" :key="row._id" two-line @click="edit(row)">
                             <v-list-item-content>
-                                <v-list-item-title>switches[row.switchId].title</v-list-item-title>
-                                <v-list-item-subtitle>Inputs and/or driver name</v-list-item-subtitle>
+                                <v-list-item-title>{{ getSwitchTitleForTie(row) }}</v-list-item-title>
+                                <v-list-item-subtitle>
+                                    <span v-if="getTieInputChannel(row)">
+                                        <span class="mdi mdi-import"/>
+                                        <span>{{ getTieInputChannel(row) }}</span>
+                                    </span>
+                                    <span v-if="getTieOutputVideoChannel(row)">
+                                        <span class="mdi mdi-export"/>
+                                        <span v-if="getTieOutputVideoChannel(row)">{{ getTieOutputVideoChannel(row) }}</span>
+                                    </span>
+                                    <span v-if="getTieOutputAudioChannel(row)">
+                                        <span class="mdi mdi-volume-medium"/>
+                                        <span v-if="getTieOutputAudioChannel(row)">{{ getTieOutputAudioChannel(row) }}</span>
+                                    </span>
+                                    <span v-if="getDriverTitleForTie(row)">
+                                        <span class="mdi mdi-settings"/>
+                                        <span>{{ getDriverTitleForTie(row) }}</span>
+                                    </span>
+                                </v-list-item-subtitle>
                             </v-list-item-content>
                         </v-list-item>
                     </v-list>
@@ -65,6 +82,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     import Switch       from "../../../models/switch";
     import Tie          from "../../../models/tie";
     import * as helpers from "../../../support/helpers";
+    import Driver from "../../../support/system/driver";
 
     const EMPTY_SOURCE: Source = {
         _id:   "",
@@ -85,11 +103,30 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 visible:  false,
                 subject:  _.clone(EMPTY_SOURCE),
                 image:    "no/such/image",
+                drivers:  Driver.all(),
                 switches: {} as { [id: string]: Switch },
                 ties:     [] as Tie[],
             };
         },
         methods: {
+            getSwitchTitleForTie(row: Tie) {
+                return row && this.switches[row.switchId] && this.switches[row.switchId].title;
+            },
+            getTieInputChannel(row: Tie) {
+                return row && row.inputChannel;
+            },
+            getTieOutputVideoChannel(row: Tie) {
+                return row && row.outputChannels && row.outputChannels.video;
+            },
+            getTieOutputAudioChannel(row: Tie) {
+                return row && row.outputChannels && row.outputChannels.audio;
+            },
+            getDriverTitleForTie(row: Tie) {
+                const switcher = this.switches[row.switchId];
+                const driver   = switcher && _.find(this.drivers, _driver => _driver.guid === switcher.driverId);
+
+                return driver && driver.title;
+            },
             async refresh(): Promise<void> {
                 try {
                     this.ties     = await ties.forSource(this.subject._id);

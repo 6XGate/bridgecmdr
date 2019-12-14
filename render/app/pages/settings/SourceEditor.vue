@@ -115,7 +115,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             },
             editSource(subject: Source): void {
                 this.$nextTick(async () => {
-                    await this.readySubject(subject);
+                    await this.readySubject(_.clone(subject));
                     this.visible = true;
                     requestAnimationFrame(() => this.$refs.validator.validate());
                 });
