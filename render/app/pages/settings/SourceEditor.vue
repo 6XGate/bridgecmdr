@@ -49,8 +49,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                                         <v-row>
                                             <v-col cols="2">
                                                 <v-card tile>
-                                                    <v-img v-show="image" lazy-src="~@mdi/svg/svg/video-input-hdmi.svg"
-                                                           :src="image" max-width="128px" max-height="128px"/>
+                                                    <v-img v-show="image" max-width="128px" max-height="128px"
+                                                           lazy-src="~@mdi/svg/svg/video-input-hdmi.svg"
+                                                           :src="image"/>
                                                 </v-card>
                                             </v-col>
                                         </v-row>
@@ -96,7 +97,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         data: function () {
             return {
                 visible: false,
-                subject: _.clone(EMPTY_SOURCE),
+                subject: _.cloneDeep(EMPTY_SOURCE),
                 image:   "no/such/image",
             };
         },
@@ -108,14 +109,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         methods: {
             newSource(): void {
                 this.$nextTick(async () => {
-                    await this.readySubject(_.clone(EMPTY_SOURCE));
+                    await this.readySubject(_.cloneDeep(EMPTY_SOURCE));
                     this.visible = true;
                     requestAnimationFrame(() => this.$refs.validator.reset());
                 });
             },
             editSource(subject: Source): void {
                 this.$nextTick(async () => {
-                    await this.readySubject(_.clone(subject));
+                    await this.readySubject(_.cloneDeep(subject));
                     this.visible = true;
                     requestAnimationFrame(() => this.$refs.validator.validate());
                 });
@@ -137,7 +138,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                     }
 
                     this.visible = false;
-                    this.subject = _.clone(EMPTY_SOURCE);
+                    this.subject = _.cloneDeep(EMPTY_SOURCE);
                     this.$nextTick(() => this.$emit("done"));
                 });
             },

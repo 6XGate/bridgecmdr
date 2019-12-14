@@ -131,10 +131,9 @@ class Packer {
             sass: {
                 loader:  "sass-loader",
                 options: {
-                    sourceMap:         isDev,
-                    sourceMapContents: false,
-                    implementation:    require("sass"),
-                    sassOptions:       {
+                    sourceMap:      isDev,
+                    implementation: require("sass"),
+                    sassOptions:    {
                         fiber: require("fibers"),
                     },
                 },

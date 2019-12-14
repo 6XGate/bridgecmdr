@@ -235,8 +235,12 @@ module.exports = {
         // # Node
         "node/no-unsupported-features/es-syntax": "off",
         "node/no-unpublished-require": "off",
+        "node/no-unpublished-import": "off",
         "node/no-missing-require": ["error", {
-            tryExtensions: [".js", ".ts"],
+            tryExtensions: [".js", ".ts", ".d.ts"],
+        }],
+        "node/no-missing-import": ["error", {
+            tryExtensions: [".js", ".ts", ".d.ts"],
         }],
 
         // # Vue

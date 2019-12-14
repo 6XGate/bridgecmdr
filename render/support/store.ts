@@ -30,7 +30,7 @@ export default class Store<Doc extends {}> {
                 this.basicIndices.push(...indices);
             } else {
                 for (const key in indices) {
-                    if (indices.hasOwnProperty(key)) {
+                    if (Object.prototype.hasOwnProperty.call(indices, key)) {
                         this.namedIndices.set(key, indices[key]);
                     }
                 }

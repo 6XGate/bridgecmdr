@@ -100,7 +100,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             return {
                 visible: false,
                 drivers: Driver.all(),
-                subject: _.clone(EMPTY_SWITCH),
+                subject: _.cloneDeep(EMPTY_SWITCH),
             };
         },
         computed: {
@@ -111,14 +111,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         methods: {
             newSwitch(): void {
                 this.$nextTick(async () => {
-                    await this.readySubject(_.clone(EMPTY_SWITCH));
+                    await this.readySubject(_.cloneDeep(EMPTY_SWITCH));
                     this.visible = true;
                     requestAnimationFrame(() => this.$refs.validator.reset());
                 });
             },
             editSwitch(subject: Switch): void {
                 this.$nextTick(async () => {
-                    await this.readySubject(_.clone(subject));
+                    await this.readySubject(_.cloneDeep(subject));
                     this.visible = true;
                     requestAnimationFrame(() => this.$refs.validator.validate());
                 });
@@ -140,7 +140,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                     }
 
                     this.visible = false;
-                    this.subject = _.clone(EMPTY_SWITCH);
+                    this.subject = _.cloneDeep(EMPTY_SWITCH);
                     this.$nextTick(() => this.$emit("done"));
                 });
             },

@@ -27,7 +27,7 @@ Vue.component("ValidationObserver", ValidationObserver);
 const rules = require("vee-validate/dist/rules") as { [rule: string]: ValidationRule };
 const en    = require("vee-validate/dist/locale/en.json") as { messages: { [rule: string]: ValidationMessageTemplate } };
 for (const rule in rules) {
-    if (rules.hasOwnProperty(rule)) {
+    if (Object.prototype.hasOwnProperty.call(rules, rule)) {
         extend(rule, {
             ...rules[rule],
             message: en.messages[rule],

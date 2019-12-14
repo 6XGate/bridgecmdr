@@ -113,7 +113,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         data: function () {
             return {
                 visible:  false,
-                subject:  _.clone(EMPTY_TIE),
+                subject:  _.cloneDeep(EMPTY_TIE),
                 switches: [] as Switch[],
                 drivers:  [] as DriverDescriptor[],
             };
@@ -160,10 +160,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             },
             newTie(source: Source) {
                 this.$nextTick(async () => {
-                    const subject = _.clone(EMPTY_TIE);
+                    const subject = _.cloneDeep(EMPTY_TIE);
                     subject.sourceId = source._id;
 
-                    console.log(subject);
                     await this.readySubject(subject);
                     this.visible = true;
                     requestAnimationFrame(() => this.$refs.validator.reset());
@@ -171,8 +170,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             },
             editTie(subject: Tie) {
                 this.$nextTick(async () => {
-                    console.log(subject);
-                    await this.readySubject(_.clone(subject));
+                    await this.readySubject(_.cloneDeep(subject));
                     this.visible = true;
                     requestAnimationFrame(() => this.$refs.validator.validate());
                 });
@@ -180,7 +178,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             onSaveClicked() {
                 this.$nextTick(async () => {
                     try {
-                        console.log(this.subject);
                         if (this.subject._id === "") {
                             await ties.add(this.subject);
                         } else {
@@ -195,14 +192,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                     }
 
                     this.visible = false;
-                    this.subject = _.clone(EMPTY_TIE);
+                    this.subject = _.cloneDeep(EMPTY_TIE);
                     this.$nextTick(() => this.$emit("done"));
                 });
             },
             async readySubject(subject: Tie): Promise<void> {
                 await this.refresh();
                 this.subject = subject;
-                console.log(subject);
             },
         },
     });

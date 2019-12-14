@@ -72,6 +72,11 @@ const NumberInput = Vue.extend({
             current: this.value,
         };
     },
+    watch: {
+        value: function (value) {
+            this.current = value;
+        },
+    },
     methods: {
         button(slot: string, icon: string, click: () => void, create: CreateElement): VNode {
             const attrs = {

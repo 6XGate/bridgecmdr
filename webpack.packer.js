@@ -32,7 +32,11 @@ packer.render.
     loader("vue", {
         options: {
             transformAssetUrls: {
-                "v-img": [ "src", "lazy-src" ],
+                "video":  [ "src", "poster" ],
+                "source": "src",
+                "img":    "src",
+                "image":  "xlink:href",
+                "v-img":  "src",
             },
         },
     });

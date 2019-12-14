@@ -23,7 +23,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 &nbsp;
             </v-container>
         </v-content>
-        <settings-page transition="dialog-bottom-transition" #activator="{ on }">
+        <settings-page #activator="{ on }" transition="dialog-bottom-transition">
             <v-btn color="secondary" class="secondaryText--text" fab fixed bottom right v-on="on">
                 <v-icon>mdi-wrench</v-icon>
             </v-btn>
