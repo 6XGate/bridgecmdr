@@ -19,7 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 <template>
     <div>
         <slot name="activator" :open="openSource"/>
-        <v-dialog v-model="visible" fullscreen hide-overlay :transition="transition">
+        <v-dialog v-model="visible" persistent fullscreen hide-overlay :transition="transition">
             <v-card tile>
                 <v-app-bar>
                     <v-btn icon @click="visible = false"><v-icon>mdi-arrow-left</v-icon></v-btn>
@@ -61,6 +61,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                                     </span>
                                 </v-list-item-subtitle>
                             </v-list-item-content>
+                            <v-list-item-action>
+                                <v-btn icon @click.prevent.stop="onDeleteClicked(row)">
+                                    <v-icon>mdi-delete</v-icon>
+                                </v-btn>
+                            </v-list-item-action>
                         </v-list-item>
                     </v-list>
                     <v-btn color="primary" fab fixed bottom right @click="() => create(subject)">
@@ -82,7 +87,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     import Switch       from "../../../models/switch";
     import Tie          from "../../../models/tie";
     import * as helpers from "../../../support/helpers";
-    import Driver from "../../../support/system/driver";
+    import Driver       from "../../../support/system/driver";
 
     const EMPTY_SOURCE: Source = {
         _id:   "",
@@ -150,6 +155,30 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             onEditClicked(): void {
                 this.$emit("edit", this.subject);
                 this.visible = false;
+            },
+            onDeleteClicked(row: Tie): void {
+                this.$nextTick(async () => {
+                    const remove = await this.$modals.confirm({
+                        main:        "Do you want to remove this tie?",
+                        secondary:   `You are about to remove the tie for "${this.getSwitchTitleForTie(row)}"`,
+                        confirmText: "Remove",
+                        rejectText:  "Keep",
+                    });
+
+                    if (remove) {
+                        try {
+                            await ties.remove(row._id);
+                        } catch (error) {
+                            const ex = error as Error;
+                            await this.$modals.alert({
+                                main:      "Unable to remove tie",
+                                secondary: ex.message,
+                            });
+                        }
+
+                        await this.refresh();
+                    }
+                });
             },
             async updateImageUrl(blob: Blob): Promise<void> {
                 this.image = await helpers.toDataUrl(blob);

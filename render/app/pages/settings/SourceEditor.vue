@@ -19,7 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 <template>
     <div>
         <slot name="activators" :edit="editSource" :create="newSource"/>
-        <v-dialog v-model="visible" fullscreen hide-overlay :transition="transition">
+        <v-dialog v-model="visible" persistent fullscreen hide-overlay :transition="transition">
             <validation-observer ref="validator" v-slot="{ valid }" slim>
                 <v-card tile>
                     <v-app-bar>
@@ -50,8 +50,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                                             <v-col cols="2">
                                                 <v-card tile>
                                                     <v-img v-show="image" max-width="128px" max-height="128px"
-                                                           lazy-src="~@mdi/svg/svg/video-input-hdmi.svg"
-                                                           :src="image"/>
+                                                           :class="imageClasses" :src="image"/>
                                                 </v-card>
                                             </v-col>
                                         </v-row>
@@ -70,6 +69,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     import _                       from "lodash";
     import Vue, { VueConstructor } from "vue";
     import { ValidationObserver }  from "vee-validate";
+    import hdmiIcon                from "@mdi/svg/svg/video-input-hdmi.svg";
     import sources                 from "../../../controller/sources";
     import Source                  from "../../../models/source";
     import * as helpers            from "../../../support/helpers";
@@ -98,12 +98,15 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             return {
                 visible: false,
                 subject: _.cloneDeep(EMPTY_SOURCE),
-                image:   "no/such/image",
+                image:   hdmiIcon,
             };
         },
         computed: {
             title(): string {
                 return this.subject._id.length > 0 ? "Edit source" : "Add source";
+            },
+            imageClasses(): string[] {
+                return this.image !== hdmiIcon ? [] : ["faded"];
             },
         },
         methods: {
@@ -146,7 +149,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 this.updateImageUrl(file);
             },
             async updateImageUrl(blob: Blob): Promise<void> {
-                this.image = await helpers.toDataUrl(blob);
+                this.image = blob.size > 0 ? await helpers.toDataUrl(blob) : hdmiIcon;
             },
             async readySubject(subject: Source): Promise<void> {
                 this.subject = subject;
@@ -155,3 +158,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         },
     });
 </script>
+
+<style lang="scss" scoped>
+    .faded {
+        opacity: 0.5;
+        filter: blur(2px);
+    }
+</style>

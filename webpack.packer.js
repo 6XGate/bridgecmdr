@@ -36,7 +36,7 @@ packer.render.
                 "source": "src",
                 "img":    "src",
                 "image":  "xlink:href",
-                "v-img":  "src",
+                "v-img":  [ "src" , "lazy-src" ],
             },
         },
     });

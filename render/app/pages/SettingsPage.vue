@@ -19,7 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 <template>
     <div>
         <slot name="activator" :on="{ click: () => open = true }"/>
-        <v-dialog v-model="open" fullscreen hide-overlay :transition="transition">
+        <v-dialog v-model="open" persistent fullscreen hide-overlay :transition="transition">
             <v-card tile>
                 <v-app-bar>
                     <v-btn icon @click="open = false"><v-icon>mdi-arrow-left</v-icon></v-btn>

@@ -19,7 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 <template>
     <div>
         <slot name="activator" :on="{ click: openList }"/>
-        <v-dialog v-model="visible" fullscreen hide-overlay :transition="transition">
+        <v-dialog v-model="visible" persistent fullscreen hide-overlay :transition="transition">
             <v-card tile>
                 <v-app-bar>
                     <v-btn icon @click="visible = false"><v-icon>mdi-arrow-left</v-icon></v-btn>
@@ -81,23 +81,21 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 this.visible = true;
                 this.refresh();
             },
-            refresh(): void {
-                this.$nextTick(async () => {
-                    try {
-                        this.sources = await sources.all();
-                        for (const source of this.sources) {
-                            helpers.toDataUrl(source.image).then(url => this.$set(this.images, source._id, url));
-                        }
-                    } catch (error) {
-                        const ex = error as Error;
-                        await this.$modals.alert({
-                            main:      "Unable to list sources",
-                            secondary: ex.message,
-                        });
-
-                        this.visible = false;
+            async refresh(): Promise<void> {
+                try {
+                    this.sources = await sources.all();
+                    for (const source of this.sources) {
+                        helpers.toDataUrl(source.image).then(url => this.$set(this.images, source._id, url));
                     }
-                });
+                } catch (error) {
+                    const ex = error as Error;
+                    await this.$modals.alert({
+                        main:      "Unable to list sources",
+                        secondary: ex.message,
+                    });
+
+                    this.visible = false;
+                }
             },
             onDeleteClicked(row: Source): void {
                 this.$nextTick(async () => {
@@ -111,7 +109,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                     if (remove) {
                         try {
                             await sources.remove(row._id);
-                            this.refresh();
                         } catch (error) {
                             const ex = error as Error;
                             await this.$modals.alert({
@@ -119,6 +116,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                                 secondary: ex.message,
                             });
                         }
+
+                        this.refresh();
                     }
                 });
             },

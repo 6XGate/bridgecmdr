@@ -19,7 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 <template>
     <div>
         <slot name="activators" :edit="editSwitch" :create="newSwitch"/>
-        <v-dialog v-model="visible" fullscreen hide-overlay :transition="transition">
+        <v-dialog v-model="visible" persistent fullscreen hide-overlay :transition="transition">
             <validation-observer ref="validator" v-slot="{ valid }" slim>
                 <v-card tile>
                     <v-app-bar>
