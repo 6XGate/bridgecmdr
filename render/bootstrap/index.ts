@@ -19,7 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 export default Promise.all([
     require("./booters/database"),
     require("./booters/drivers"),
-    require("./booters/config"),
     require("./booters/lodash"),
     require("./booters/axios"),
     require("./booters/vuetify"),

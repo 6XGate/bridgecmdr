@@ -20,11 +20,20 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     <v-app id="bridgecmdr">
         <v-content>
             <v-container>
-                &nbsp;
+                <v-row no-gutters>
+                    <v-col cols="auto">
+                        <v-row justify="start" no-gutters>
+                            <v-card v-for="button of buttons" :key="button.key" class="ma-3" :class="button.classes"
+                                    tile @click="() => button.activate()">
+                                <v-img :src="button.image" width="128px" height="128px"/>
+                            </v-card>
+                        </v-row>
+                    </v-col>
+                </v-row>
             </v-container>
         </v-content>
-        <settings-page #activator="{ on }" transition="dialog-bottom-transition">
-            <v-btn color="secondary" class="secondaryText--text" fab fixed bottom right v-on="on">
+        <settings-page #activator="{ open }" transition="dialog-bottom-transition" @done="refresh">
+            <v-btn color="secondary" class="secondaryText--text" fab fixed bottom right @click="open">
                 <v-icon>mdi-wrench</v-icon>
             </v-btn>
         </settings-page>
@@ -38,6 +47,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     import Vuetify                 from "vuetify";
     import colors                  from "vuetify/lib/util/colors";
     import SettingsPage            from "./pages/SettingsPage.vue";
+    import config                  from "../support/system/config";
 
     import {
         AlertModal,
@@ -45,6 +55,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         ConfirmModal,
         ConfirmModalOptions,
     } from "../components/modals";
+    import Source from "../support/system/source";
+    import * as helpers from "../support/helpers";
 
     const vuetify = new Vuetify({
         icons: {
@@ -77,17 +89,89 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         };
     }
 
+    interface ButtonStyles {
+        "blue-grey": boolean;
+        "lighten-5": boolean;
+    }
+
+    class Button {
+        public readonly key: string;
+        public readonly image: string;
+        public readonly label: string;
+        public readonly activate: () => Promise<void>;
+        public classes: ButtonStyles = {
+            "blue-grey": false,
+            "lighten-5": false,
+        };
+
+        public constructor(source: Source, imageUrl: string, activated: (button: Button) => void) {
+            this.key      = source.guid;
+            this.image    = imageUrl;
+            this.label    = source.title;
+            this.activate = async () => {
+                await source.select();
+                activated(this);
+                this.classes["blue-grey"] = true;
+                this.classes["lighten-5"] = true;
+            };
+        }
+
+        public deactivate(): void {
+            this.classes["blue-grey"] = false;
+            this.classes["lighten-5"] = false;
+        }
+    }
+
+    async function makeButtons(activated: (button: Button) => void): Promise<Button[]> {
+        await config.load();
+        const sources = Source.all();
+        const images  = await Promise.all(sources.map(source => helpers.toDataUrl(source.image)));
+        const buttons = [] as Button[];
+        for (let i = 0; i !== sources.length; ++i) {
+            const source = sources[i];
+            const image  = images[i];
+
+            buttons.push(new Button(source, image, activated));
+        }
+
+        return buttons;
+    }
+
     const vue = Vue as VueConstructor<Vue & References>;
     export default vue.extend({
         name:       "Application",
         components: {
             SettingsPage,
         },
+        data: function () {
+            return {
+                buttons:      [] as Button[],
+                activeButton: null as Button|null,
+            };
+        },
+        methods: {
+            async refresh() {
+                this.buttons = [];
+                await config.reload();
+                this.buttons = await makeButtons(button => this.onButtonActivated(button));
+            },
+            onButtonActivated(button: Button) {
+                if (this.activeButton) {
+                    this.activeButton.deactivate();
+                }
+
+                this.activeButton = button;
+            },
+        },
         mounted() {
             Vue.prototype.$modals = {
                 alert:   (options: AlertModalOptions) => this.$refs.alert.open(options),
                 confirm: (options: ConfirmModalOptions) => this.$refs.confirm.open(options),
             };
+
+            this.$nextTick(async () => {
+                this.buttons = await makeButtons(button => this.onButtonActivated(button));
+            });
         },
         vuetify,
     });

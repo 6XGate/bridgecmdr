@@ -17,17 +17,19 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 import _        from "lodash";
-import database from "./database";
-import switches from "../../controller/switches";
+import Driver   from "./driver";
+import Source   from "./source";
+import Switch   from "./switch";
+import Tie      from "./tie";
+import database from "../../bootstrap/booters/database";
 import sources  from "../../controller/sources";
+import switches from "../../controller/switches";
 import ties     from "../../controller/ties";
-import Driver   from "../../support/system/driver";
-import Source   from "../../support/system/source";
-import Switch   from "../../support/system/switch";
-import Tie      from "../../support/system/tie";
 
 async function loadConfiguration(): Promise<void> {
     await database;
+    Switch.clear();
+    Source.clear();
 
     // Get the switches from the database.
     for (const model of await switches.all()) {
@@ -79,4 +81,15 @@ async function loadConfiguration(): Promise<void> {
     }
 }
 
-export default loadConfiguration();
+let loaded: Promise<void> = loadConfiguration();
+
+export default {
+    load(): Promise<void> {
+        return loaded;
+    },
+    reload(): Promise<void> {
+        loaded = loadConfiguration();
+
+        return loaded;
+    },
+};

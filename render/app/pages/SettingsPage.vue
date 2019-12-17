@@ -18,11 +18,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 <template>
     <div>
-        <slot name="activator" :on="{ click: () => open = true }"/>
+        <slot name="activator" :open="() => open = true"/>
         <v-dialog v-model="open" persistent fullscreen hide-overlay :transition="transition">
             <v-card tile>
                 <v-app-bar>
-                    <v-btn icon @click="open = false"><v-icon>mdi-arrow-left</v-icon></v-btn>
+                    <v-btn icon @click="done"><v-icon>mdi-arrow-left</v-icon></v-btn>
                     <v-toolbar-title>Settings</v-toolbar-title>
                 </v-app-bar>
                 <v-card-text>
@@ -72,6 +72,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             return {
                 open: false,
             };
+        },
+        methods: {
+            done() {
+                this.open = false;
+                this.$emit("done");
+            },
         },
     });
 </script>

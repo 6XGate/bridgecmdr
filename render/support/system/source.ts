@@ -25,6 +25,13 @@ const knownSources = new Map<string, Source>();
  */
 export default class Source {
     /**
+     * Gets all the known sources.
+     */
+    static all(): Source[] {
+        return Array.from(knownSources.values());
+    }
+
+    /**
      * Registers a new known source.
      *
      * @param guid
