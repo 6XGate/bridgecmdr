@@ -130,8 +130,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         for (let i = 0; i !== sources.length; ++i) {
             const source = sources[i];
             const image  = images[i];
-
-            buttons.push(new Button(source, image, activated));
+            if (source.ties.length > 0) {
+                buttons.push(new Button(source, image, activated));
+            }
         }
 
         return buttons;

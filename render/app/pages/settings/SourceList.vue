@@ -18,7 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 <template>
     <div>
-        <slot name="activator" :on="{ click: openList }"/>
+        <slot name="activator" :open="openList"/>
         <v-dialog v-model="visible" persistent fullscreen hide-overlay :transition="transition">
             <v-card tile>
                 <v-app-bar>

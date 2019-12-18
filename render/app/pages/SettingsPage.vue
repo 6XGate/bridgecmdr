@@ -27,8 +27,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 </v-app-bar>
                 <v-card-text>
                     <v-list>
-                        <source-list #activator="{ on }" transition="slide-x-transition">
-                            <v-list-item v-on="on">
+                        <source-list #activator="{ open }" transition="slide-x-transition">
+                            <v-list-item @click="open">
                                 <v-list-item-avatar color="blue">
                                     <v-icon class="white--text">mdi-gamepad-variant</v-icon>
                                 </v-list-item-avatar>
@@ -37,8 +37,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                                 </v-list-item-content>
                             </v-list-item>
                         </source-list>
-                        <switch-list #activator="{ on }" transition="slide-x-transition">
-                            <v-list-item v-on="on">
+                        <switch-list #activator="{ open }" transition="slide-x-transition">
+                            <v-list-item @click="open">
                                 <v-list-item-avatar color="red darken-2">
                                     <v-icon class="white--text">mdi-video-switch</v-icon>
                                 </v-list-item-avatar>

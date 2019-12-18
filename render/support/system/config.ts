@@ -39,8 +39,6 @@ async function loadConfiguration(): Promise<void> {
         } catch (error) {
             console.error(error);
         }
-
-        console.log(model);
     }
 
     // Gets the ties from the database.
@@ -58,8 +56,6 @@ async function loadConfiguration(): Promise<void> {
         } catch (error) {
             console.log(error);
         }
-
-        console.log(model);
     }
 
     // Get the source from the database.
@@ -76,8 +72,6 @@ async function loadConfiguration(): Promise<void> {
         } catch (error) {
             console.log(error);
         }
-
-        console.log(model);
     }
 }
 
