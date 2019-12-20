@@ -47,13 +47,31 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                                                   filled :error-count="invalid ? errors.length : 0"
                                                   :error-messages="invalid ? errors[0] : undefined"/>
                                     </validation-provider>
-                                    <validation-provider v-slot="{ errors, invalid }" name="path"
-                                                         rules="required" slim>
-                                        <!-- TODO Format, and file for path, validation -->
-                                        <v-text-field v-model="subject.path" label="Path/IP" :error="invalid"
-                                                      filled :error-count="invalid ? errors.length : 0"
-                                                      :error-messages="invalid ? errors[0] : undefined"/>
-                                    </validation-provider>
+                                    <div>{{ path }}</div>
+                                    <v-row>
+                                        <v-col cols="3">
+                                            <v-select v-model="location" label="Type"
+                                                      :items="locations" item-value="value" item-text="label"
+                                                      filled/>
+                                        </v-col>
+                                        <v-col cols="9">
+                                            <validation-provider #default="{ errors, invalid }" :name="pathName"
+                                                                 rules="required" slim>
+                                                <v-text-field v-show="location !== DeviceLocation.PORT" v-model="path"
+                                                              :label="pathLabel" :error="invalid" filled
+                                                              :error-count="invalid ? errors.length : 0"
+                                                              :error-messages="invalid ? errors[0] : undefined"/>
+                                            </validation-provider>
+                                            <validation-provider #default="{ errors, invalid }" :name="pathName"
+                                                                 :rules="portRules" slim>
+                                                <v-select v-show="location === DeviceLocation.PORT" v-model="path"
+                                                          :label="pathLabel" :error="invalid" :items="ports"
+                                                          item-value="comName" item-text="comName" filled
+                                                          :error-count="invalid ? errors.length : 0"
+                                                          :error-messages="invalid ? errors[0] : undefined"/>
+                                            </validation-provider>
+                                        </v-col>
+                                    </v-row>
                                 </v-form>
                             </v-col>
                         </v-row>
@@ -69,6 +87,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 <script lang="ts">
     import _                       from "lodash";
+    import SerialPort              from "serialport";
     import Vue, { VueConstructor } from "vue";
     import { ValidationObserver }  from "vee-validate";
     import switches                from "../../../controller/switches";
@@ -79,7 +98,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         _id:      "",
         driverId: "",
         title:    "",
-        path:     "",
+        path:     "port:",
     };
 
     type Validator = InstanceType<typeof ValidationObserver>;
@@ -90,6 +109,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         };
     }
 
+    enum DeviceLocation {
+        PATH = 0,
+        PORT = 1,
+        IP   = 2,
+    }
+
     const vue = Vue as VueConstructor<Vue & References>;
     export default vue.extend({
         name:  "SwitchEditor",
@@ -98,14 +123,47 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         },
         data() {
             return {
-                visible: false,
-                drivers: Driver.all(),
-                subject: _.cloneDeep(EMPTY_SWITCH),
+                DeviceLocation,
+                visible:   false,
+                drivers:   Driver.all(),
+                subject:   _.cloneDeep(EMPTY_SWITCH),
+                ports:     [] as SerialPort.PortInfo[],
+                location:  DeviceLocation.PATH,
+                path:      "",
+                locations: [
+                    { value: DeviceLocation.PATH, label: "Path" },
+                    { value: DeviceLocation.PORT, label: "Port" },
+                    { value: DeviceLocation.IP,   label: "IP/Host" },
+                ],
             };
         },
         computed: {
             title(): string {
                 return this.subject._id.length > 0 ? "Edit switch" : "New switch";
+            },
+            pathLabel(): string {
+                return _.upperFirst(this.pathName);
+            },
+            pathName(): string {
+                switch (this.location) {
+                case DeviceLocation.PATH:
+                    return "path";
+                case DeviceLocation.PORT:
+                    return "serial port";
+                case DeviceLocation.IP:
+                    return "IP address or host name";
+                default:
+                    throw Error("Impossible device location");
+                }
+            },
+            portRules(): Record<string, unknown> {
+                return {
+                    required: true,
+                    oneOf:    this.validPorts,
+                };
+            },
+            validPorts(): string[] {
+                return this.ports.map(port => port.comName);
             },
         },
         methods: {
@@ -126,6 +184,18 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             onSaveClicked(): void {
                 this.$nextTick(async () => {
                     try {
+                        this.subject.path = (() => {
+                            if (this.location === DeviceLocation.IP) {
+                                return `ip:${this.path}`;
+                            }
+
+                            if (this.location === DeviceLocation.PORT) {
+                                return `port:${this.path}`;
+                            }
+
+                            return this.path;
+                        })();
+
                         if (this.subject._id === "") {
                             await switches.add(this.subject);
                         } else {
@@ -144,10 +214,31 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                     this.$nextTick(() => this.$emit("done"));
                 });
             },
-            readySubject(subject: Switch): Promise<void> {
-                this.subject = subject;
+            async readySubject(subject: Switch): Promise<void> {
+                this.ports    = await SerialPort.list();
+                this.subject  = subject;
+                this.location = (() => {
+                    if (subject.path.startsWith("ip:")) {
+                        return DeviceLocation.IP;
+                    }
 
-                return Promise.resolve();
+                    if (subject.path.startsWith("port:")) {
+                        return DeviceLocation.PORT;
+                    }
+
+                    return DeviceLocation.PATH;
+                })();
+                this.path = (() => {
+                    if (subject.path.startsWith("ip:")) {
+                        return subject.path.substr(3);
+                    }
+
+                    if (subject.path.startsWith("port:")) {
+                        return subject.path.substr(5);
+                    }
+
+                    return subject.path;
+                })();
             },
         },
     });
