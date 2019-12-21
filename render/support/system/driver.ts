@@ -38,7 +38,7 @@ export interface DriverDescriptor {
 
 export interface DriverConstructor {
     about(): DriverDescriptor;
-    new(path: string): Driver;
+    load(path: string): Promise<Driver>;
 }
 
 const driverRegistry = new Map<string, DriverConstructor>();
@@ -78,7 +78,7 @@ export default abstract class Driver {
      * @param guid The GUID that identifies the driver to be loaded
      * @param path The path to the device
      */
-    static load(guid: string, path: string): Driver {
+    static load(guid: string, path: string): Promise<Driver> {
         // TODO: ow validation
 
         guid = String(guid).toUpperCase();
@@ -88,23 +88,17 @@ export default abstract class Driver {
         }
 
         // eslint-disable-next-line new-cap
-        return new driver(path);
+        return driver.load(path);
     }
-
-    public readonly path: string;
 
     public readonly capabilities: DriverCapabilities;
 
     /**
      * Initializes a new instance of the Driver class
      *
-     * @param path         The path to the device
      * @param capabilities The capabilities of the driver
      */
-    constructor(path: string, capabilities: DriverCapabilities) {
-        // TODO: ow validation
-
-        this.path          = path;
+    constructor(capabilities: DriverCapabilities) {
         this.capabilities  = capabilities;
 
         // Ensure all current properties are read-only.

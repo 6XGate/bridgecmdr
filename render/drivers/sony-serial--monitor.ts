@@ -16,44 +16,76 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Driver, { DriverCapabilities, DriverDescriptor } from "../support/system/driver";
+import stream                                                                  from "stream";
+import Driver, { DriverCapabilities, DriverDescriptor }                        from "../support/system/driver";
+import { openStream, SerialBits, SerialParity, SerialStopBits, writeToStream } from "../support/stream";
+import { Address, AddressKind, Command, CommandBlock }                         from "../support/specialized/sony-bvm-support";
 
 const capabilities = DriverCapabilities.NONE;
+const about        = Object.freeze({
+    guid:  "8626D6D3-C211-4D21-B5CC-F5E3B50D9FF0",
+    title: "Sony RS-485 controllable monitor",
+    capabilities,
+});
 
 export default class SonySerialMonitor extends Driver {
-    static about(): DriverDescriptor {
-        return {
-            guid:  "8626D6D3-C211-4D21-B5CC-F5E3B50D9FF0",
-            title: "Sony RS-485 controllable monitor",
-            capabilities,
-        };
+    private connection: stream.Duplex;
+
+    public static about(): DriverDescriptor {
+        return about;
     }
 
-    get guid(): string {
-        return SonySerialMonitor.about().guid;
+    public static async load(path: string): Promise<Driver> {
+        const connection = await openStream(path, {
+            baudReat: 38400,
+            bits:     SerialBits.EIGHT,
+            parity:   SerialParity.ODD,
+            stopBits: SerialStopBits.ONE,
+        });
+
+        return new SonySerialMonitor(connection);
     }
 
-    get title(): string {
-        return SonySerialMonitor.about().title;
+    // eslint-disable-next-line class-methods-use-this
+    public get guid(): string {
+        return about.guid;
     }
 
-    constructor(path: string) {
-        super(path, capabilities);
+    // eslint-disable-next-line class-methods-use-this
+    public get title(): string {
+        return about.title;
     }
 
-    setTie(inputChannel: number, videoOutputChannel: number, audioOutputChannel: number): Promise<void> {
-        console.log(inputChannel);
-        console.log(videoOutputChannel);
-        console.log(audioOutputChannel);
+    private constructor(connection: stream.Duplex) {
+        super(capabilities);
+        this.connection = connection;
 
-        return Promise.resolve();
+        // TODO: Other situation handlers...
+        connection.on("data", data => console.debug(`DEBUG: ${about.title}: return: ${data}`));
+        connection.on("error", error => console.error(`ERROR: ${about.title}: ${error}`));
     }
 
-    powerOn(): Promise<void> {
-        return Promise.resolve();
+    public setTie(inputChannel: number): Promise<void> {
+        console.log(`Sony BVM: ${inputChannel}`);
+
+        return this.sendCommand(Command.SET_CHANNEL, 1, inputChannel);
     }
 
-    powerOff(): Promise<void> {
-        return Promise.resolve();
+    public powerOn(): Promise<void> {
+        return this.sendCommand(Command.POWER_ON);
+    }
+
+    public powerOff(): Promise<void> {
+        return this.sendCommand(Command.POWER_OFF);
+    }
+
+    private sendCommand(command: Command, arg0 = -1, arg1 = -1): Promise<void> {
+        const source = new Address(AddressKind.ALL, 0);
+        const destination = new Address(AddressKind.ALL, 0);
+
+        const block = new CommandBlock(destination, source, command, arg0, arg1);
+        const packet = block.package();
+
+        return writeToStream(this.connection, packet.package());
     }
 }

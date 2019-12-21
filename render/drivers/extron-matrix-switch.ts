@@ -16,46 +16,73 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Driver, { DriverCapabilities, DriverDescriptor } from "../support/system/driver";
+import stream                                                                  from "stream";
+import Driver, { DriverCapabilities, DriverDescriptor }                        from "../support/system/driver";
+import { openStream, SerialBits, SerialParity, SerialStopBits, writeToStream } from "../support/stream";
 
 const capabilities =
     DriverCapabilities.HAS_MULTIPLE_OUTPUTS |
     DriverCapabilities.CAN_DECOUPLE_AUDIO_OUTPUT;
+const about = {
+    guid:  "4C8F2838-C91D-431E-84DD-3666D14A6E2C",
+    title: "Extron SIS-compatible matrix switch",
+    capabilities,
+};
 
 export default class ExtronMatrixSwitch extends Driver {
-    static about(): DriverDescriptor {
-        return {
-            guid:  "4C8F2838-C91D-431E-84DD-3666D14A6E2C",
-            title: "Extron SIS-compatible matrix switch",
-            capabilities,
-        };
+    private connection: stream.Duplex;
+
+    public static about(): DriverDescriptor {
+        return about;
     }
 
-    get guid(): string {
-        return ExtronMatrixSwitch.about().guid;
+    public static async load(path: string): Promise<Driver> {
+        const connection = await openStream(path, {
+            baudReat: 9600,
+            bits:     SerialBits.EIGHT,
+            parity:   SerialParity.NONE,
+            stopBits: SerialStopBits.ONE,
+        });
+
+        return Promise.resolve(new ExtronMatrixSwitch(connection));
     }
 
-    get title(): string {
-        return ExtronMatrixSwitch.about().title;
+    // eslint-disable-next-line class-methods-use-this
+    public get guid(): string {
+        return about.guid;
     }
 
-    constructor(path: string) {
-        super(path, capabilities);
+    // eslint-disable-next-line class-methods-use-this
+    public get title(): string {
+        return about.title;
     }
 
-    setTie(inputChannel: number, videoOutputChannel: number, audioOutputChannel: number): Promise<void> {
-        console.log(inputChannel);
-        console.log(videoOutputChannel);
-        console.log(audioOutputChannel);
+    private constructor(connection: stream.Duplex) {
+        super(capabilities);
+        this.connection = connection;
 
+        // TODO: Other situation handlers...
+        connection.on("data", data => console.debug(`DEBUG: ${about.title}: return: ${data}`));
+        connection.on("error", error => console.error(`ERROR: ${about.title}: ${error}`));
+    }
+
+    public setTie(inputChannel: number, videoOutputChannel: number, audioOutputChannel: number): Promise<void> {
+        console.log(`Extron SIS: ${inputChannel}, ${videoOutputChannel}, ${audioOutputChannel}`);
+
+        const videoCommand = `${inputChannel}*${videoOutputChannel}%`;
+        const audioCommand = `${inputChannel}*${audioOutputChannel}$`;
+        const command      = `${videoCommand}\r\n${audioCommand}\r\n`;
+
+        return writeToStream(this.connection, command);
+    }
+
+    // eslint-disable-next-line class-methods-use-this
+    public powerOn(): Promise<void> {
         return Promise.resolve();
     }
 
-    powerOn(): Promise<void> {
-        return Promise.resolve();
-    }
-
-    powerOff(): Promise<void> {
+    // eslint-disable-next-line class-methods-use-this
+    public powerOff(): Promise<void> {
         return Promise.resolve();
     }
 }

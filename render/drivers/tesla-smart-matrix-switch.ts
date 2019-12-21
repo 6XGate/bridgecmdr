@@ -19,41 +19,46 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import Driver, { DriverCapabilities, DriverDescriptor } from "../support/system/driver";
 
 const capabilities = DriverCapabilities.NONE;
+const about        = {
+    guid:  "91D5BC95-A8E2-4F58-BCAC-A77BA1054D61",
+    title: "TeslaSmart-compatible matrix switch",
+    capabilities,
+};
 
 export default class TeslaSmartMatrixSwitch extends Driver {
-    static about(): DriverDescriptor {
-        return {
-            guid:  "91D5BC95-A8E2-4F58-BCAC-A77BA1054D61",
-            title: "TeslaSmart-compatible matrix switch",
-            capabilities,
-        };
+    public static about(): DriverDescriptor {
+        return about;
     }
 
-    get guid(): string {
-        return TeslaSmartMatrixSwitch.about().guid;
+    public static load(path: string): Promise<Driver> {
+        return Promise.resolve(new TeslaSmartMatrixSwitch(path));
     }
 
-    get title(): string {
-        return TeslaSmartMatrixSwitch.about().title;
+    // eslint-disable-next-line class-methods-use-this
+    public get guid(): string {
+        return about.guid;
     }
 
-    constructor(path: string) {
-        super(path, capabilities);
+    // eslint-disable-next-line class-methods-use-this
+    public get title(): string {
+        return about.title;
     }
 
-    setTie(inputChannel: number, videoOutputChannel: number, audioOutputChannel: number): Promise<void> {
-        console.log(inputChannel);
-        console.log(videoOutputChannel);
-        console.log(audioOutputChannel);
+    private constructor(_path: string) {
+        super(capabilities);
+    }
+
+    public setTie(inputChannel: number): Promise<void> {
+        console.log(`Tesla: ${inputChannel}`);
 
         return Promise.resolve();
     }
 
-    powerOn(): Promise<void> {
+    public powerOn(): Promise<void> {
         return Promise.resolve();
     }
 
-    powerOff(): Promise<void> {
+    public powerOff(): Promise<void> {
         return Promise.resolve();
     }
 }
