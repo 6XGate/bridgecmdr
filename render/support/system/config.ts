@@ -61,7 +61,7 @@ async function loadConfiguration(): Promise<void> {
 
             tieMap.set(guid, tieSet);
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
     }
 
@@ -77,7 +77,7 @@ async function loadConfiguration(): Promise<void> {
 
             Source.add(id, model.title, model.image, tieSet);
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
     }
 }

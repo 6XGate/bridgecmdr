@@ -112,8 +112,6 @@ export class Packet {
         this.data.copy(buffer, pos); pos += size;
         buffer.writeUInt8(checksum, pos); pos += 1;
 
-        console.log(buffer);
-
         return buffer;
     }
 }

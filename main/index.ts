@@ -29,6 +29,7 @@ function createWindow(): void {
         },
     });
 
+    window.setFullScreen(true);
     window.removeMenu();
 
     window.loadFile("dist/render/index.html").

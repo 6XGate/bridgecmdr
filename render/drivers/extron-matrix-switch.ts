@@ -87,10 +87,12 @@ export default class ExtronMatrixSwitch extends Driver {
         return Promise.resolve();
     }
 
-    public unload(): Promise<void> {
-        return new Promise((resolve, reject) => {
+    public async unload(): Promise<void> {
+        await new Promise((resolve, reject) => {
             this.connection.once("error", error => reject(error));
             this.connection.end(() => resolve());
         });
+
+        this.connection.destroy();
     }
 }

@@ -46,6 +46,7 @@ export function openStream(path: string, options = defaultOptions): Promise<stre
             dataBits: options.bits,
             stopBits: options.stopBits,
             parity:   options.parity,
+            lock:     false,
         };
 
         path = path.substr(5);
@@ -63,7 +64,7 @@ export function openStream(path: string, options = defaultOptions): Promise<stre
         return new Promise((resolve, reject) => {
             const socket = new net.Socket();
             const ctx    = {
-                connect: () => { resolve(); ctx.done(); },
+                connect: () => { resolve(socket); ctx.done(); },
                 error:   (error: Error) => { reject(error); ctx.done(); },
                 done:    () => {
                     socket.removeListener("connect", ctx.connect);
