@@ -114,14 +114,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 this.$nextTick(async () => {
                     await this.readySubject(_.cloneDeep(EMPTY_SOURCE));
                     this.visible = true;
-                    requestAnimationFrame(() => this.$refs.validator.reset());
                 });
             },
             editSource(subject: Source): void {
                 this.$nextTick(async () => {
                     await this.readySubject(_.cloneDeep(subject));
                     this.visible = true;
-                    requestAnimationFrame(() => this.$refs.validator.validate());
                 });
             },
             onSaveClicked(): void {

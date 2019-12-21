@@ -127,20 +127,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             driver(): DriverDescriptor|undefined {
                 return _(this.drivers).find(row => row.guid === _(this.switcher).get("driverId"));
             },
-            videoOutputName(): string {
-                return this.showAudioOutput ? "output channel" : "video output channel";
-            },
-            videoOutputLabel(): string {
-                return this.showAudioOutput ? "Output" : "Video output";
-            },
-            videoOutputRules(): Record<string, unknown> {
-                // eslint-disable-next-line @typescript-eslint/camelcase
-                return this.showVideoOutput ? { required: true, min_value: 1 } : {};
-            },
-            audioOutputRules(): Record<string, unknown> {
-                // eslint-disable-next-line @typescript-eslint/camelcase
-                return this.showAudioOutput ? { required: true, min_value: 1 } : {};
-            },
             showVideoOutput(): boolean {
                 return this.driver ?
                     Boolean(this.driver.capabilities & DriverCapabilities.HAS_MULTIPLE_OUTPUTS) :
@@ -150,6 +136,20 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 return (this.showVideoOutput && this.driver) ?
                     Boolean(this.driver.capabilities & DriverCapabilities.CAN_DECOUPLE_AUDIO_OUTPUT) :
                     false;
+            },
+            videoOutputName(): string {
+                return this.showAudioOutput ? "video output channel" : "output channel";
+            },
+            videoOutputLabel(): string {
+                return this.showAudioOutput ? "Video output" : "Output";
+            },
+            videoOutputRules(): Record<string, unknown> {
+                // eslint-disable-next-line @typescript-eslint/camelcase
+                return this.showVideoOutput ? { required: true, min_value: 1 } : {};
+            },
+            audioOutputRules(): Record<string, unknown> {
+                // eslint-disable-next-line @typescript-eslint/camelcase
+                return this.showAudioOutput ? { required: true, min_value: 1 } : {};
             },
         },
         methods: {
@@ -164,14 +164,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
                     await this.readySubject(subject);
                     this.visible = true;
-                    requestAnimationFrame(() => this.$refs.validator.reset());
                 });
             },
             editTie(subject: Tie) {
                 this.$nextTick(async () => {
                     await this.readySubject(_.cloneDeep(subject));
                     this.visible = true;
-                    requestAnimationFrame(() => this.$refs.validator.validate());
                 });
             },
             onSaveClicked() {

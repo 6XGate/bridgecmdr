@@ -47,7 +47,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                                                   filled :error-count="invalid ? errors.length : 0"
                                                   :error-messages="invalid ? errors[0] : undefined"/>
                                     </validation-provider>
-                                    <div>{{ path }}</div>
                                     <v-row>
                                         <v-col cols="3">
                                             <v-select v-model="location" label="Type"
@@ -115,6 +114,42 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         IP   = 2,
     }
 
+    function rebuildPath(location: DeviceLocation, path: string): string {
+        if (location === DeviceLocation.IP) {
+            return `ip:${path}`;
+        }
+
+        if (location === DeviceLocation.PORT) {
+            return `port:${path}`;
+        }
+
+        return path;
+    }
+
+    function getLocationFromPath(path: string): DeviceLocation {
+        if (path.startsWith("ip:")) {
+            return DeviceLocation.IP;
+        }
+
+        if (path.startsWith("port:")) {
+            return DeviceLocation.PORT;
+        }
+
+        return DeviceLocation.PATH;
+    }
+
+    function getSubPathFromPath(path: string): string {
+        if (path.startsWith("ip:")) {
+            return path.substr(3);
+        }
+
+        if (path.startsWith("port:")) {
+            return path.substr(5);
+        }
+
+        return path;
+    }
+
     const vue = Vue as VueConstructor<Vue & References>;
     export default vue.extend({
         name:  "SwitchEditor",
@@ -156,11 +191,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                     throw Error("Impossible device location");
                 }
             },
-            portRules(): Record<string, unknown> {
-                return {
+            portRules(): Record<string, unknown>|undefined {
+                return this.location === DeviceLocation.PORT ? {
                     required: true,
                     oneOf:    this.validPorts,
-                };
+                } : undefined;
             },
             validPorts(): string[] {
                 return this.ports.map(port => port.comName);
@@ -171,31 +206,18 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 this.$nextTick(async () => {
                     await this.readySubject(_.cloneDeep(EMPTY_SWITCH));
                     this.visible = true;
-                    requestAnimationFrame(() => this.$refs.validator.reset());
                 });
             },
             editSwitch(subject: Switch): void {
                 this.$nextTick(async () => {
                     await this.readySubject(_.cloneDeep(subject));
                     this.visible = true;
-                    requestAnimationFrame(() => this.$refs.validator.validate());
                 });
             },
             onSaveClicked(): void {
                 this.$nextTick(async () => {
                     try {
-                        this.subject.path = (() => {
-                            if (this.location === DeviceLocation.IP) {
-                                return `ip:${this.path}`;
-                            }
-
-                            if (this.location === DeviceLocation.PORT) {
-                                return `port:${this.path}`;
-                            }
-
-                            return this.path;
-                        })();
-
+                        this.subject.path = rebuildPath(this.location, this.path);
                         if (this.subject._id === "") {
                             await switches.add(this.subject);
                         } else {
@@ -217,28 +239,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             async readySubject(subject: Switch): Promise<void> {
                 this.ports    = await SerialPort.list();
                 this.subject  = subject;
-                this.location = (() => {
-                    if (subject.path.startsWith("ip:")) {
-                        return DeviceLocation.IP;
-                    }
-
-                    if (subject.path.startsWith("port:")) {
-                        return DeviceLocation.PORT;
-                    }
-
-                    return DeviceLocation.PATH;
-                })();
-                this.path = (() => {
-                    if (subject.path.startsWith("ip:")) {
-                        return subject.path.substr(3);
-                    }
-
-                    if (subject.path.startsWith("port:")) {
-                        return subject.path.substr(5);
-                    }
-
-                    return subject.path;
-                })();
+                this.location = getLocationFromPath(subject.path);
+                this.path     = getSubPathFromPath(subject.path);
             },
         },
     });
