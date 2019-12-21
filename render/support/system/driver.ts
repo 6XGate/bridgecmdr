@@ -102,7 +102,7 @@ export default abstract class Driver {
         this.capabilities  = capabilities;
 
         // Ensure all current properties are read-only.
-        Object.freeze(this);
+        // Object.freeze(this);
     }
 
     /**

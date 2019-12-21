@@ -109,7 +109,7 @@ export class Packet {
 
         buffer.writeUInt8(this.type, pos); pos += 1;
         buffer.writeUInt8(size, pos); pos += 1;
-        buffer.compare(this.data, pos, pos + size, 0, size); pos += size;
+        buffer.copy(this.data, pos); pos += size;
         buffer.writeUInt8(checksum, pos); pos += 1;
 
         return buffer;
