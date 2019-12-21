@@ -28,6 +28,11 @@ import ties     from "../../controller/ties";
 
 async function loadConfiguration(): Promise<void> {
     await database;
+
+    // First ensure all existing switches are unloaded.
+    await Promise.all(Switch.all().map(_switch => _switch.unload()));
+
+    // Now clear all the sources and switches.
     Switch.clear();
     Source.clear();
 

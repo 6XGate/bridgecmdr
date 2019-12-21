@@ -23,7 +23,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 <v-row no-gutters>
                     <v-col cols="auto">
                         <v-row justify="start" no-gutters>
-                            <v-card v-for="button of buttons" :key="button.key" class="ma-3" :class="button.classes"
+                            <v-card v-for="button of buttons" :key="button.key" class="ma-1" :class="button.classes"
                                     tile @click="() => button.activate()">
                                 <v-img :src="button.image" width="128px" height="128px"/>
                             </v-card>

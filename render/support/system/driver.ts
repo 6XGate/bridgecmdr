@@ -134,4 +134,9 @@ export default abstract class Driver {
      * Powers off the switch or monitor.
      */
     abstract powerOff(): Promise<void>;
+
+    /**
+     * Closes the device to which the driver is attached.
+     */
+    abstract unload(): Promise<void>;
 }

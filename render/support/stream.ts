@@ -1,4 +1,5 @@
 import _          from "lodash";
+import net        from "net";
 import stream     from "stream";
 import SerialPort from "serialport";
 
@@ -53,6 +54,27 @@ export function openStream(path: string, options = defaultOptions): Promise<stre
             const port = new SerialPort(path, serialOptions, error => {
                 error ? reject(error) : resolve(port);
             });
+        });
+    }
+
+    if (path.startsWith("ip:")) {
+        path = path.substr(3);
+
+        return new Promise((resolve, reject) => {
+            const socket = new net.Socket();
+            const ctx    = {
+                connect: () => { resolve(); ctx.done(); },
+                error:   (error: Error) => { reject(error); ctx.done(); },
+                done:    () => {
+                    socket.removeListener("connect", ctx.connect);
+                    socket.removeListener("error", ctx.error);
+                },
+            };
+
+            socket.once("connect", ctx.connect);
+            socket.once("error", ctx.error);
+
+            socket.connect(23, path);
         });
     }
 

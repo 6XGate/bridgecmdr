@@ -60,6 +60,7 @@ export default class ExtronMatrixSwitch extends Driver {
     private constructor(connection: stream.Duplex) {
         super(capabilities);
         this.connection = connection;
+        connection.setEncoding("ascii");
 
         // TODO: Other situation handlers...
         connection.on("data", data => console.debug(`DEBUG: ${about.title}: return: ${data}`));
@@ -84,5 +85,12 @@ export default class ExtronMatrixSwitch extends Driver {
     // eslint-disable-next-line class-methods-use-this
     public powerOff(): Promise<void> {
         return Promise.resolve();
+    }
+
+    public unload(): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.connection.once("error", error => reject(error));
+            this.connection.end(() => resolve());
+        });
     }
 }

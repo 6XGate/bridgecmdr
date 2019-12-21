@@ -79,6 +79,13 @@ export default class SonySerialMonitor extends Driver {
         return this.sendCommand(Command.POWER_OFF);
     }
 
+    public unload(): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.connection.once("error", error => reject(error));
+            this.connection.end(() => resolve());
+        });
+    }
+
     private sendCommand(command: Command, arg0 = -1, arg1 = -1): Promise<void> {
         const source = new Address(AddressKind.ALL, 0);
         const destination = new Address(AddressKind.ALL, 0);

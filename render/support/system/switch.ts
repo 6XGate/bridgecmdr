@@ -25,6 +25,13 @@ const knownSwitches = new Map<string, Switch>();
  */
 export default class Switch {
     /**
+     * Gets all the known switches.
+     */
+    static all(): Switch[] {
+        return Array.from(knownSwitches.values());
+    }
+
+    /**
      * Adds a switch to the known switches registry.
      *
      * @param guid   The identifier used when referencing the switchable device
@@ -106,8 +113,6 @@ export default class Switch {
 
     /**
      * Powers off the switchable device.
-     *
-     * @returns {Promise<void>}
      */
     powerOn(): Promise<void> {
         return this.driver.powerOn();
@@ -115,10 +120,15 @@ export default class Switch {
 
     /**
      * Powers off the switchable device.
-     *
-     * @returns {Promise<void>}
      */
     powerOff(): Promise<void> {
         return this.driver.powerOff();
+    }
+
+    /**
+     * Unloads the driver for the switch.
+     */
+    unload(): Promise<void> {
+        return this.driver.unload();
     }
 }

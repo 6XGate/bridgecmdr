@@ -54,11 +54,18 @@ export default class TeslaSmartMatrixSwitch extends Driver {
         return Promise.resolve();
     }
 
+    // eslint-disable-next-line class-methods-use-this
     public powerOn(): Promise<void> {
         return Promise.resolve();
     }
 
+    // eslint-disable-next-line class-methods-use-this
     public powerOff(): Promise<void> {
+        return Promise.resolve();
+    }
+
+    // eslint-disable-next-line class-methods-use-this
+    public unload(): Promise<void> {
         return Promise.resolve();
     }
 }
