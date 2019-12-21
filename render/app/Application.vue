@@ -18,7 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 <template>
     <v-app id="bridgecmdr">
-        <v-content>
+        <v-content class="black">
             <v-container>
                 <v-row no-gutters>
                     <v-col cols="auto">
@@ -32,11 +32,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 </v-row>
             </v-container>
         </v-content>
-        <settings-page #activator="{ open }" transition="dialog-bottom-transition" @done="refresh">
-            <v-btn color="secondary" class="secondaryText--text" fab fixed bottom right @click="open">
-                <v-icon>mdi-wrench</v-icon>
+        <v-layout row class="ma-3 text-right fab-container">
+            <v-btn color="red" class="mx-2 secondaryText--text" fab @click="powerOff">
+                <v-icon>mdi-power</v-icon>
             </v-btn>
-        </settings-page>
+            <settings-page #activator="{ open }" transition="dialog-bottom-transition" @done="refresh">
+                <v-btn color="secondary" class="mx-2 secondaryText--text" fab @click="open">
+                    <v-icon>mdi-wrench</v-icon>
+                </v-btn>
+            </settings-page>
+        </v-layout>
         <alert-modal ref="alert"/>
         <confirm-modal ref="confirm"/>
     </v-app>
@@ -47,6 +52,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     import Vuetify                 from "vuetify";
     import colors                  from "vuetify/lib/util/colors";
     import SettingsPage            from "./pages/SettingsPage.vue";
+    import Switch                  from "../support/system/switch";
     import config                  from "../support/system/config";
 
     import {
@@ -90,6 +96,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     }
 
     interface ButtonStyles {
+        "white":     boolean;
         "blue-grey": boolean;
         "lighten-5": boolean;
     }
@@ -100,6 +107,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         public readonly label: string;
         public readonly activate: () => Promise<void>;
         public classes: ButtonStyles = {
+            "white":     false,
             "blue-grey": false,
             "lighten-5": false,
         };
@@ -111,12 +119,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             this.activate = async () => {
                 await source.select();
                 activated(this);
+                this.classes.white        = false;
                 this.classes["blue-grey"] = true;
                 this.classes["lighten-5"] = true;
             };
         }
 
         public deactivate(): void {
+            this.classes.white        = true;
             this.classes["blue-grey"] = false;
             this.classes["lighten-5"] = false;
         }
@@ -156,6 +166,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 await config.reload();
                 this.buttons = await makeButtons(button => this.onButtonActivated(button));
             },
+            async powerOff() {
+                await Promise.all(Switch.all().map(_switch => _switch.powerOff()));
+                window.close();
+            },
             onButtonActivated(button: Button) {
                 if (this.activeButton) {
                     this.activeButton.deactivate();
@@ -181,4 +195,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 <style lang="scss">
     @import "~@mdi/font";
     @import '~vuetify/src/styles/styles';
+
+    .fab-container {
+        position: fixed;
+        bottom: 0;
+        right: 0;
+    }
 </style>
