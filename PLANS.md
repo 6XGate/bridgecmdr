@@ -1,6 +1,7 @@
 Next milestone
 
 - GUI to configure switches, ties, and sources.
+- Debian/Raspbian package.
 
 2nd milestone
 
