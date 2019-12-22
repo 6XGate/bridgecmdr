@@ -39,9 +39,12 @@ function createWindow(): void {
             process.exit(1);
         });
 
-    window.webContents.openDevTools({
-        mode: "undocked",
-    });
+    // eslint-disable-next-line dot-notation
+    if (process.env["NODE_ENV"] !== "production") {
+        window.webContents.openDevTools({
+            mode: "undocked",
+        });
+    }
 
     window.on("closed", (): void => {
         // The window was closed, so we want to dereference it to indicate the interface is no longer running.  This is
@@ -52,7 +55,7 @@ function createWindow(): void {
 
 app.on("ready", (): void => {
     // eslint-disable-next-line dot-notation
-    if (process.env["NODE_DEV"] !== "production") {
+    if (process.env["NODE_ENV"] !== "production") {
         require("./devtools");
     }
 
