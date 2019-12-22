@@ -19,17 +19,19 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 <template>
     <div>
         <slot name="activators" :edit="editTie" :create="newTie"/>
-        <v-dialog v-model="visible" persistent fullscreen hide-overlay :transition="transition">
+        <v-dialog v-model="visible" persistent fullscreen hide-overlay scrollable :transition="transition">
             <validation-observer ref="validator" v-slot="{ valid }" slim>
                 <v-card tile>
-                    <v-app-bar>
-                        <v-btn icon @click="visible = false"><v-icon>mdi-close</v-icon></v-btn>
-                        <v-toolbar-title>{{ title }}</v-toolbar-title>
-                        <div class="flex-grow-1"></div>
-                        <v-toolbar-items>
-                            <v-btn text :disabled="!valid" @click="onSaveClicked">Save</v-btn>
-                        </v-toolbar-items>
-                    </v-app-bar>
+                    <div>
+                        <v-toolbar>
+                            <v-btn icon @click="visible = false"><v-icon>mdi-close</v-icon></v-btn>
+                            <v-toolbar-title>{{ title }}</v-toolbar-title>
+                            <div class="flex-grow-1"></div>
+                            <v-toolbar-items>
+                                <v-btn text :disabled="!valid" @click="onSaveClicked">Save</v-btn>
+                            </v-toolbar-items>
+                        </v-toolbar>
+                    </div>
                     <v-card-text>
                         <v-row>
                             <v-col>

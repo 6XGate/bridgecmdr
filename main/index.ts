@@ -29,8 +29,10 @@ function createWindow(): void {
         },
     });
 
-    window.setFullScreen(true);
     window.removeMenu();
+    if (process.env["NODE_ENV"] === "production") {
+        window.setFullScreen(true);
+    }
 
     window.loadFile("dist/render/index.html").
         then((): void => console.log("Starting BridgeCmdr...")).

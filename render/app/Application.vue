@@ -98,7 +98,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     interface ButtonStyles {
         "white":     boolean;
         "blue-grey": boolean;
-        "lighten-5": boolean;
+        "lighten-4": boolean;
     }
 
     class Button {
@@ -108,8 +108,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         public readonly activate: () => Promise<void>;
         public classes: ButtonStyles = {
             "white":     false,
-            "blue-grey": false,
-            "lighten-5": false,
+            "blue-grey": true,
+            "lighten-4": true,
         };
 
         public constructor(source: Source, imageUrl: string, activated: (button: Button) => void) {
@@ -119,16 +119,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             this.activate = async () => {
                 await source.select();
                 activated(this);
-                this.classes.white        = false;
-                this.classes["blue-grey"] = true;
-                this.classes["lighten-5"] = true;
+                this.classes.white        = true;
+                this.classes["blue-grey"] = false;
+                this.classes["lighten-4"] = false;
             };
         }
 
         public deactivate(): void {
-            this.classes.white        = true;
-            this.classes["blue-grey"] = false;
-            this.classes["lighten-5"] = false;
+            this.classes.white        = false;
+            this.classes["blue-grey"] = true;
+            this.classes["lighten-4"] = true;
         }
     }
 
@@ -140,9 +140,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         for (let i = 0; i !== sources.length; ++i) {
             const source = sources[i];
             const image  = images[i];
-            if (source.ties.length > 0) {
-                buttons.push(new Button(source, image, activated));
-            }
+            //if (source.ties.length > 0) {
+            buttons.push(new Button(source, image, activated));
+            //}
         }
 
         return buttons;

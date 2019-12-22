@@ -19,59 +19,63 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 <template>
     <div>
         <slot name="activator" :open="openSource"/>
-        <v-dialog v-model="visible" persistent fullscreen hide-overlay :transition="transition">
+        <v-dialog v-model="visible" persistent fullscreen hide-overlay scrollable :transition="transition">
             <v-card tile>
-                <v-app-bar>
-                    <v-btn icon @click="visible = false"><v-icon>mdi-arrow-left</v-icon></v-btn>
-                    <v-toolbar-title>{{ subject.title }}</v-toolbar-title>
-                    <div class="flex-grow-1"></div>
-                    <v-toolbar-items>
-                        <v-btn text @click="onEditClicked">Edit</v-btn>
-                    </v-toolbar-items>
-                </v-app-bar>
-                <tie-editor #activators="{ edit, create }" @done="refresh">
-                    <v-list>
-                        <v-list-item two-line>
-                            <v-list-item-content>
-                                <v-list-item-title class="headline">{{ subject.title }}</v-list-item-title>
-                                <v-list-item-subtitle>Source</v-list-item-subtitle>
-                            </v-list-item-content>
-                            <v-list-item-avatar size="64" tile><v-img :src="image"/></v-list-item-avatar>
-                        </v-list-item>
-                        <!-- The ties -->
-                        <v-list-item v-for="row of ties" :key="row._id" two-line @click="edit(row)">
-                            <v-list-item-content>
-                                <v-list-item-title>{{ getSwitchTitleForTie(row) }}</v-list-item-title>
-                                <v-list-item-subtitle>
-                                    <span v-if="getTieInputChannel(row)">
-                                        <span class="mdi mdi-import"/>
-                                        <span>{{ getTieInputChannel(row) }}</span>
-                                    </span>
-                                    <span v-if="getTieOutputVideoChannel(row)">
-                                        <span class="mdi mdi-export"/>
-                                        <span v-if="getTieOutputVideoChannel(row)">{{ getTieOutputVideoChannel(row) }}</span>
-                                    </span>
-                                    <span v-if="getTieOutputAudioChannel(row)">
-                                        <span class="mdi mdi-volume-medium"/>
-                                        <span v-if="getTieOutputAudioChannel(row)">{{ getTieOutputAudioChannel(row) }}</span>
-                                    </span>
-                                    <span v-if="getDriverTitleForTie(row)">
-                                        <span class="mdi mdi-settings"/>
-                                        <span>{{ getDriverTitleForTie(row) }}</span>
-                                    </span>
-                                </v-list-item-subtitle>
-                            </v-list-item-content>
-                            <v-list-item-action>
-                                <v-btn icon @click.prevent.stop="onDeleteClicked(row)">
-                                    <v-icon>mdi-delete</v-icon>
-                                </v-btn>
-                            </v-list-item-action>
-                        </v-list-item>
-                    </v-list>
-                    <v-btn color="primary" fab fixed bottom right @click="() => create(subject)">
-                        <v-icon class="primaryText--text">mdi-plus</v-icon>
-                    </v-btn>
-                </tie-editor>
+                <div>
+                    <v-toolbar>
+                        <v-btn icon @click="visible = false"><v-icon>mdi-arrow-left</v-icon></v-btn>
+                        <v-toolbar-title>{{ subject.title }}</v-toolbar-title>
+                        <div class="flex-grow-1"></div>
+                        <v-toolbar-items>
+                            <v-btn text @click="onEditClicked">Edit</v-btn>
+                        </v-toolbar-items>
+                    </v-toolbar>
+                </div>
+                <v-card-text>
+                    <tie-editor #activators="{ edit, create }" @done="refresh">
+                        <v-list>
+                            <v-list-item two-line>
+                                <v-list-item-content>
+                                    <v-list-item-title class="headline">{{ subject.title }}</v-list-item-title>
+                                    <v-list-item-subtitle>Source</v-list-item-subtitle>
+                                </v-list-item-content>
+                                <v-list-item-avatar size="64" tile><v-img :src="image"/></v-list-item-avatar>
+                            </v-list-item>
+                            <!-- The ties -->
+                            <v-list-item v-for="row of ties" :key="row._id" two-line @click="edit(row)">
+                                <v-list-item-content>
+                                    <v-list-item-title>{{ getSwitchTitleForTie(row) }}</v-list-item-title>
+                                    <v-list-item-subtitle>
+                                        <span v-if="getTieInputChannel(row)">
+                                            <span class="mdi mdi-import"/>
+                                            <span>{{ getTieInputChannel(row) }}</span>
+                                        </span>
+                                        <span v-if="getTieOutputVideoChannel(row)">
+                                            <span class="mdi mdi-export"/>
+                                            <span v-if="getTieOutputVideoChannel(row)">{{ getTieOutputVideoChannel(row) }}</span>
+                                        </span>
+                                        <span v-if="getTieOutputAudioChannel(row)">
+                                            <span class="mdi mdi-volume-medium"/>
+                                            <span v-if="getTieOutputAudioChannel(row)">{{ getTieOutputAudioChannel(row) }}</span>
+                                        </span>
+                                        <span v-if="getDriverTitleForTie(row)">
+                                            <span class="mdi mdi-settings"/>
+                                            <span>{{ getDriverTitleForTie(row) }}</span>
+                                        </span>
+                                    </v-list-item-subtitle>
+                                </v-list-item-content>
+                                <v-list-item-action>
+                                    <v-btn icon @click.prevent.stop="onDeleteClicked(row)">
+                                        <v-icon>mdi-delete</v-icon>
+                                    </v-btn>
+                                </v-list-item-action>
+                            </v-list-item>
+                        </v-list>
+                        <v-btn color="primary" fab fixed bottom right @click="() => create(subject)">
+                            <v-icon class="primaryText--text">mdi-plus</v-icon>
+                        </v-btn>
+                    </tie-editor>
+                </v-card-text>
             </v-card>
         </v-dialog>
     </div>

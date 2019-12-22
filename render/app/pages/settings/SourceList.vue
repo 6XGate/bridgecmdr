@@ -19,12 +19,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 <template>
     <div>
         <slot name="activator" :open="openList"/>
-        <v-dialog v-model="visible" persistent fullscreen hide-overlay :transition="transition">
+        <v-dialog v-model="visible" persistent fullscreen hide-overlay scrollable :transition="transition">
             <v-card tile>
-                <v-app-bar>
-                    <v-btn icon @click="visible = false"><v-icon>mdi-arrow-left</v-icon></v-btn>
-                    <v-toolbar-title>Sources</v-toolbar-title>
-                </v-app-bar>
+                <div>
+                    <v-toolbar>
+                        <v-btn icon @click="visible = false"><v-icon>mdi-arrow-left</v-icon></v-btn>
+                        <v-toolbar-title>Sources</v-toolbar-title>
+                    </v-toolbar>
+                </div>
                 <v-card-text>
                     <source-editor #activators="{ edit, create }" transition="slide-x-transition" @done="refresh">
                         <source-page #activator="{ open }" transition="slide-x-transition" @edit="edit">
