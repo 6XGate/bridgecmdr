@@ -16,6 +16,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+
 /*
  * =====================================================================================================================
  * Common modules.
@@ -387,7 +389,7 @@ class Packer {
 
         const assets = this[myAssets];
         for (const key in assets) {
-            if (assets.hasOwnProperty(key)) {
+            if (Object.prototype.hasOwnProperty.call(assets, key)) {
                 plugins.push(new CopyPlugin([
                     {
                         from: assets[key],
