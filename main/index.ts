@@ -30,7 +30,7 @@ function createWindow(): void {
     });
 
     window.removeMenu();
-    if (process.env["NODE_ENV"] === "production") {
+    if (process.env.NODE_ENV === "production") {
         window.setFullScreen(true);
     }
 
@@ -41,8 +41,7 @@ function createWindow(): void {
             process.exit(1);
         });
 
-    // eslint-disable-next-line dot-notation
-    if (process.env["NODE_ENV"] !== "production") {
+    if (process.env.NODE_ENV !== "production") {
         window.webContents.openDevTools({
             mode: "undocked",
         });
@@ -55,9 +54,14 @@ function createWindow(): void {
     });
 }
 
+process.on("SIGTERM", () => {
+    if (window !== null) {
+        window.close();
+    }
+});
+
 app.on("ready", (): void => {
-    // eslint-disable-next-line dot-notation
-    if (process.env["NODE_ENV"] !== "production") {
+    if (process.env.NODE_ENV !== "production") {
         require("./devtools");
     }
 

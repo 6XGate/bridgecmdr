@@ -52,17 +52,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     import Vuetify                 from "vuetify";
     import colors                  from "vuetify/lib/util/colors";
     import SettingsPage            from "./pages/SettingsPage.vue";
+    import * as helpers            from "../support/helpers";
+    import Source                  from "../support/system/source";
     import Switch                  from "../support/system/switch";
     import config                  from "../support/system/config";
-
     import {
         AlertModal,
         AlertModalOptions,
         ConfirmModal,
         ConfirmModalOptions,
     } from "../components/modals";
-    import Source from "../support/system/source";
-    import * as helpers from "../support/helpers";
 
     const vuetify = new Vuetify({
         icons: {
@@ -140,9 +139,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         for (let i = 0; i !== sources.length; ++i) {
             const source = sources[i];
             const image  = images[i];
-            //if (source.ties.length > 0) {
-            buttons.push(new Button(source, image, activated));
-            //}
+            if (source.ties.length > 0) {
+                buttons.push(new Button(source, image, activated));
+            }
         }
 
         return buttons;
@@ -168,6 +167,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             },
             async powerOff() {
                 await Promise.all(Switch.all().map(_switch => _switch.powerOff()));
+                await helpers.signalShutdown();
                 window.close();
             },
             onButtonActivated(button: Button) {
