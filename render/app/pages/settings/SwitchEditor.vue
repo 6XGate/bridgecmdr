@@ -67,7 +67,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                                                                  :rules="portRules" slim>
                                                 <v-select v-show="location === DeviceLocation.PORT" v-model="path"
                                                           :label="pathLabel" :error="invalid" :items="ports"
-                                                          item-value="comName" item-text="comName" filled
+                                                          item-value="path" item-text="label" filled
                                                           :error-count="invalid ? errors.length : 0"
                                                           :error-messages="invalid ? errors[0] : undefined"/>
                                             </validation-provider>
@@ -95,6 +95,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     import Switch                  from "../../../models/switch";
     import Driver                  from "../../../support/system/driver";
 
+    interface SerialDevice {
+        label: string;
+        path:  string;
+    }
+
     const EMPTY_SWITCH: Switch = {
         _id:      "",
         driverId: "",
@@ -114,6 +119,56 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         PATH = 0,
         PORT = 1,
         IP   = 2,
+    }
+
+    function generateLabel(port: SerialPort.PortInfo): string {
+        if (!port.pnpId) {
+            return port.comName;
+        }
+
+        let labelParts = port.pnpId.split("-");
+        if (labelParts.length < 3) {
+            return port.comName;
+        }
+
+        for (;;) {
+            const part = _.last(labelParts) as string;
+            if ((/^port\d+$/u).test(part)) {
+                labelParts.pop();
+            } else if ((/^if\d+$/u).test(part)) {
+                labelParts.pop();
+            } else {
+                break;
+            }
+        }
+
+        labelParts = _.tail(labelParts);
+        if (labelParts.length === 0) {
+            return port.comName;
+        }
+
+        return labelParts.join("-").replace(/_/gu, " ");
+    }
+
+    async function makeSerialDeviceList(): Promise<SerialDevice[]> {
+        const ports   = await SerialPort.list();
+        const devices = [] as SerialDevice[];
+        for (const port of ports) {
+            const device = {} as SerialDevice;
+            if (port.pnpId && port.pnpId.length) {
+                // Use the `by-id` path from the PNP-ID.
+                device.label = generateLabel(port);
+                device.path  = `/dev/serial/by-id/${port.pnpId}`;
+            } else {
+                // Just use the port path for the label and path.
+                device.label = port.comName;
+                device.path  = port.comName;
+            }
+
+            devices.push(device);
+        }
+
+        return devices;
     }
 
     function rebuildPath(location: DeviceLocation, path: string): string {
@@ -164,7 +219,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 visible:   false,
                 drivers:   Driver.all(),
                 subject:   _.cloneDeep(EMPTY_SWITCH),
-                ports:     [] as SerialPort.PortInfo[],
+                ports:     [] as SerialDevice[],
                 location:  DeviceLocation.PATH,
                 path:      "",
                 locations: [
@@ -200,7 +255,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 } : undefined;
             },
             validPorts(): string[] {
-                return this.ports.map(port => port.comName);
+                return this.ports.map(port => port.path);
             },
         },
         methods: {
@@ -239,7 +294,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 });
             },
             async readySubject(subject: Switch): Promise<void> {
-                this.ports    = await SerialPort.list();
+                this.ports    = await makeSerialDeviceList();
                 this.subject  = subject;
                 this.location = getLocationFromPath(subject.path);
                 this.path     = getSubPathFromPath(subject.path);
