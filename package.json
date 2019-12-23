@@ -1,9 +1,16 @@
 {
   "name": "bridgecmdr",
+  "productName": "BridgeCmdr",
   "version": "0.1.0",
   "description": "A/V switch and monitor controller",
-  "main": "index.js",
+  "main": "dist/main/index.js",
   "scripts": {
+    "install": "electron-rebuild",
+    "production": "npm run prod",
+    "prod": "webpack --env.NODE_ENV=production --env.production --progress --hide-modules --config build/webpack.config.js",
+    "devevlopment": "npm run dev",
+    "dev": "webpack --env.NODE_ENV=development --env.development --progress --hide-modules --config build/webpack.config.js",
+    "start": "electron .",
     "test": "test.js"
   },
   "repository": {
@@ -22,5 +29,59 @@
   "bugs": {
     "url": "https://github.com/6XGate/bridgecmdr/issues"
   },
-  "homepage": "https://github.com/6XGate/bridgecmdr#readme"
+  "homepage": "https://github.com/6XGate/bridgecmdr#readme",
+  "devDependencies": {
+    "@mdi/font": "^4.7.95",
+    "@mdi/svg": "^4.7.95",
+    "@types/lodash": "^4.14.149",
+    "@types/pouchdb": "^6.4.0",
+    "@types/serialport": "^7.0.4",
+    "@types/uuid": "^3.4.6",
+    "@typescript-eslint/eslint-plugin": "^2.12.0",
+    "@typescript-eslint/parser": "^2.12.0",
+    "@vue/eslint-config-typescript": "^5.0.1",
+    "axios": "^0.19.0",
+    "copy-webpack-plugin": "^5.1.1",
+    "css-loader": "^3.4.0",
+    "electron-rebuild": "^1.8.8",
+    "eslint": "^6.7.2",
+    "eslint-config-standard": "^14.1.0",
+    "eslint-loader": "^3.0.3",
+    "eslint-plugin-import": "^2.19.1",
+    "eslint-plugin-node": "^10.0.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
+    "eslint-plugin-vue": "^6.0.1",
+    "fibers": "^4.0.2",
+    "file-loader": "^5.0.2",
+    "html-webpack-plugin": "^3.2.0",
+    "lodash": "^4.17.15",
+    "mini-css-extract-plugin": "^0.8.2",
+    "pouchdb-browser": "^7.1.1",
+    "pouchdb-find": "^7.1.1",
+    "read-package-json": "^2.1.1",
+    "resolve-url-loader": "^3.1.1",
+    "sass": "^1.23.7",
+    "sass-loader": "^8.0.0",
+    "style-loader": "^1.0.2",
+    "ts-loader": "^6.2.1",
+    "typescript": "^3.7.3",
+    "url-loader": "^3.0.0",
+    "uuid": "^3.3.3",
+    "vee-validate": "^3.2.0",
+    "vue": "^2.6.11",
+    "vue-loader": "^15.8.3",
+    "vue-style-loader": "^4.1.2",
+    "vue-template-compiler": "^2.6.11",
+    "vuetify": "^2.1.15",
+    "vuetify-loader": "^1.4.3",
+    "webpack": "^4.41.4",
+    "webpack-cli": "^3.3.10",
+    "webpack-node-externals": "^1.7.2"
+  },
+  "dependencies": {
+    "electron": "^7.1.7",
+    "serialport": "^8.0.5",
+    "vue-devtools": "^5.1.3"
+  }
 }

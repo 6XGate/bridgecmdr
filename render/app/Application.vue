@@ -1,0 +1,204 @@
+<!--
+BridgeCmdr - A/V switch and monitor controller
+Copyright (C) 2019 Matthew Holder
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<template>
+    <v-app id="bridgecmdr">
+        <v-content class="black">
+            <v-container>
+                <v-row no-gutters>
+                    <v-col cols="auto">
+                        <v-row justify="start" no-gutters>
+                            <v-card v-for="button of buttons" :key="button.key" class="ma-1" :class="button.classes"
+                                    tile @click="() => button.activate()">
+                                <v-img :src="button.image" width="128px" height="128px"/>
+                            </v-card>
+                        </v-row>
+                    </v-col>
+                </v-row>
+            </v-container>
+        </v-content>
+        <v-layout row class="ma-3 text-right fab-container">
+            <v-btn color="red" class="mx-2 secondaryText--text" fab @click="powerOff">
+                <v-icon>mdi-power</v-icon>
+            </v-btn>
+            <settings-page #activator="{ open }" transition="dialog-bottom-transition" @done="refresh">
+                <v-btn color="secondary" class="mx-2 secondaryText--text" fab @click="open">
+                    <v-icon>mdi-wrench</v-icon>
+                </v-btn>
+            </settings-page>
+        </v-layout>
+        <alert-modal ref="alert"/>
+        <confirm-modal ref="confirm"/>
+    </v-app>
+</template>
+
+<script lang="ts">
+    import Vue, { VueConstructor } from "vue";
+    import Vuetify                 from "vuetify";
+    import colors                  from "vuetify/lib/util/colors";
+    import SettingsPage            from "./pages/SettingsPage.vue";
+    import Switch                  from "../support/system/switch";
+    import config                  from "../support/system/config";
+
+    import {
+        AlertModal,
+        AlertModalOptions,
+        ConfirmModal,
+        ConfirmModalOptions,
+    } from "../components/modals";
+    import Source from "../support/system/source";
+    import * as helpers from "../support/helpers";
+
+    const vuetify = new Vuetify({
+        icons: {
+            iconfont: "mdi",
+        },
+        theme: {
+            themes: {
+                light: {
+                    primary:       colors.indigo.base,
+                    secondary:     colors.indigo.lighten3,
+                    accent:        colors.teal.lighten5,
+                    primaryText:   "#FFFFFF",
+                    secondaryText: "#000000",
+                },
+                dark: {
+                    primary:       colors.indigo.base,
+                    secondary:     colors.indigo.lighten3,
+                    accent:        colors.teal.darken4,
+                    primaryText:   "#FFFFFF",
+                    secondaryText: "#000000",
+                },
+            },
+        },
+    });
+
+    interface References {
+        $refs: {
+            alert:   AlertModal;
+            confirm: ConfirmModal;
+        };
+    }
+
+    interface ButtonStyles {
+        "white":     boolean;
+        "blue-grey": boolean;
+        "lighten-4": boolean;
+    }
+
+    class Button {
+        public readonly key: string;
+        public readonly image: string;
+        public readonly label: string;
+        public readonly activate: () => Promise<void>;
+        public classes: ButtonStyles = {
+            "white":     false,
+            "blue-grey": true,
+            "lighten-4": true,
+        };
+
+        public constructor(source: Source, imageUrl: string, activated: (button: Button) => void) {
+            this.key      = source.guid;
+            this.image    = imageUrl;
+            this.label    = source.title;
+            this.activate = async () => {
+                await source.select();
+                activated(this);
+                this.classes.white        = true;
+                this.classes["blue-grey"] = false;
+                this.classes["lighten-4"] = false;
+            };
+        }
+
+        public deactivate(): void {
+            this.classes.white        = false;
+            this.classes["blue-grey"] = true;
+            this.classes["lighten-4"] = true;
+        }
+    }
+
+    async function makeButtons(activated: (button: Button) => void): Promise<Button[]> {
+        await config.load();
+        const sources = Source.all();
+        const images  = await Promise.all(sources.map(source => helpers.toDataUrl(source.image)));
+        const buttons = [] as Button[];
+        for (let i = 0; i !== sources.length; ++i) {
+            const source = sources[i];
+            const image  = images[i];
+            //if (source.ties.length > 0) {
+            buttons.push(new Button(source, image, activated));
+            //}
+        }
+
+        return buttons;
+    }
+
+    const vue = Vue as VueConstructor<Vue & References>;
+    export default vue.extend({
+        name:       "Application",
+        components: {
+            SettingsPage,
+        },
+        data: function () {
+            return {
+                buttons:      [] as Button[],
+                activeButton: null as Button|null,
+            };
+        },
+        methods: {
+            async refresh() {
+                this.buttons = [];
+                await config.reload();
+                this.buttons = await makeButtons(button => this.onButtonActivated(button));
+            },
+            async powerOff() {
+                await Promise.all(Switch.all().map(_switch => _switch.powerOff()));
+                window.close();
+            },
+            onButtonActivated(button: Button) {
+                if (this.activeButton) {
+                    this.activeButton.deactivate();
+                }
+
+                this.activeButton = button;
+            },
+        },
+        mounted() {
+            Vue.prototype.$modals = {
+                alert:   (options: AlertModalOptions) => this.$refs.alert.open(options),
+                confirm: (options: ConfirmModalOptions) => this.$refs.confirm.open(options),
+            };
+
+            this.$nextTick(async () => {
+                this.buttons = await makeButtons(button => this.onButtonActivated(button));
+            });
+        },
+        vuetify,
+    });
+</script>
+
+<style lang="scss">
+    @import "~@mdi/font";
+    @import '~vuetify/src/styles/styles';
+
+    .fab-container {
+        position: fixed;
+        bottom: 0;
+        right: 0;
+    }
+</style>
