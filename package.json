@@ -10,7 +10,7 @@
     "prod": "webpack --env.NODE_ENV=production --env.production --progress --hide-modules --config build/webpack.config.js",
     "devevlopment": "npm run dev",
     "dev": "webpack --env.NODE_ENV=development --env.development --progress --hide-modules --config build/webpack.config.js",
-    "pack": "node electron.packer.js",
+    "pack": "node build/electron.package.js",
     "start": "electron .",
     "test": "test.js",
     "package": "npm run production ; npm run pack"
@@ -48,6 +48,7 @@
     "copy-webpack-plugin": "^5.1.1",
     "css-loader": "^3.4.0",
     "electron": "^7.1.7",
+    "electron-installer-debian": "^2.0.1",
     "electron-packager": "^14.1.1",
     "electron-rebuild": "^1.8.8",
     "electron-unhandled": "^3.0.1",

@@ -16,27 +16,21 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-const packer              = require("./build/webpack-packer");
-const VuetifyLoaderPlugin = require("vuetify-loader/lib/plugin");
+const path             = require("path");
+const packager         = require("./electron-packer");
+const { EXIT_FAILURE } = require("./build.common");
 
-packer.main.
-    js("./main/index.ts").
-    output("./dist/main");
+// TODO: Resolve the packer configuration rather than hard-code it.
+const packerConfigPath = "..";
 
-packer.render.
-    html("./render/index.ejs").
-    js("./render/index.ts").
-    sass("./render/index.scss").
-    output("./dist/render").
-    plugin(new VuetifyLoaderPlugin()).
-    loader("vue", {
-        options: {
-            transformAssetUrls: {
-                "video":  [ "src", "poster" ],
-                "source": "src",
-                "img":    "src",
-                "image":  "xlink:href",
-                "v-img":  [ "src" , "lazy-src" ],
-            },
-        },
+// Require the simplified configuration for it's side-effects on the packer.
+require(path.join(packerConfigPath, "electron.packer"));
+
+packager.package().
+    then(code => {
+        process.exit(code);
+    }).
+    catch(error => {
+        console.error(error);
+        process.exit(EXIT_FAILURE);
     });
