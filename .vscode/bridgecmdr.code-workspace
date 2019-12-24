@@ -1,0 +1,18 @@
+{
+	"folders": [
+		{
+            "name": "BridgeCmdr",
+			"path": "../"
+		}
+	],
+    "settings": {
+        "typescript.tsc.autoDetect": "off"
+    },
+    "extensions": {
+        "recommendations": [
+            "editorconfig.editorconfig",
+            "dbaeumer.vscode-eslint",
+            "octref.vetur"
+        ]
+    }
+}
