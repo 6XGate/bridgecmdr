@@ -387,15 +387,10 @@ class Packer {
         }
 
         const assets = this[myAssets];
-        for (const key in assets) {
-            if (Object.prototype.hasOwnProperty.call(assets, key)) {
-                plugins.push(new CopyPlugin([
-                    {
-                        from: assets[key],
-                        to:   path.resolve(packerConfigPath, outdir, key),
-                    },
-                ]));
-            }
+        if (!_.isEmpty(assets)) {
+            plugins.push(new CopyPlugin(
+                _.map(assets, (src, dest) => ({ from: src, to: path.resolve(packerConfigPath, outdir, dest) })),
+            ));
         }
 
         return plugins;

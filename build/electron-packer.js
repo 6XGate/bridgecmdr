@@ -44,6 +44,17 @@ const archs = {
     },
 };
 
+// callthru, set via the fluent methods.
+// merged, set via a debian(options) call.
+// calculated, set via calculation only.
+// Anything not mentioned will be handled via the debian(options) call or from existing inferred or defined information.
+// TODO: debian-installer: callthru, [options.genericName = this[myAppName]]
+// TODO: debian-installer: callthru, [options.description = package.description]
+// TODO: debian-installer: callthru, [options.maintainer = `${package.author.name} <${package.author.email}>`
+// TODO: debian-installer: callthru, [options.homepage = package.author.url]
+// TODO: both:             callthru, [options.icon], will require some thought to implement...
+// TODO: debian-installer: calculated, options.bin = this[myExeName]
+// TODO: debian-installer: merged, [options.size = calculated size of bundle]
 const myAppName      = Symbol("[[ApplicationName]]");
 const myAppCopyright = Symbol("[[ApplicationCopyright]]");
 const myAppVersion   = Symbol("[[ApplicationVersion]]");
