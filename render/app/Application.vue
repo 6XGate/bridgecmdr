@@ -139,7 +139,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         for (let i = 0; i !== sources.length; ++i) {
             const source = sources[i];
             const image  = images[i];
-            if (source.ties.length > 0) {
+            if (source.ties.length > 0 || process.env.NODE_ENV !== "production") {
                 buttons.push(new Button(source, image, activated));
             }
         }
@@ -167,7 +167,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             },
             async powerOff() {
                 await Promise.all(Switch.all().map(_switch => _switch.powerOff()));
-                await helpers.signalShutdown();
+                if (process.env.NODE_ENV === "production") {
+                    await helpers.signalShutdown();
+                }
+
                 window.close();
             },
             onButtonActivated(button: Button) {
