@@ -30,7 +30,7 @@ const about = {
 };
 
 export default class ExtronMatrixSwitch extends Driver {
-    private connection: stream.Duplex;
+    private readonly connection: stream.Duplex;
 
     public static about(): DriverDescriptor {
         return about;
