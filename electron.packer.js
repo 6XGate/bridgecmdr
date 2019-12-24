@@ -20,7 +20,24 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 const packager = require("./build/electron-packer");
 
-packager.source(".").target("linux", "amd64").
-    ignore(_path => !(_path.startsWith("/dist") ||
-        _path.startsWith("/node_modules") ||
-        _path === "/package.json"));
+packager.source(".").target("linux", "arm").
+    ignore(
+        // In the root, exclude these patterns or paths
+        new RegExp("^/\\.", "u"),
+        new RegExp("^/main", "u"),
+        new RegExp("^/render", "u"),
+        new RegExp("^/build", "u"),
+        new RegExp("^/bridgecmdr$", "u"),
+        new RegExp("^/[^/]+\\.txt$", "u"),
+        new RegExp("^/[^/]+\\.md", "u"),
+        new RegExp("^/[^/]+\\.dic", "u"),
+        new RegExp("^/[^/]+\\.packer\\.js", "u"),
+        new RegExp("^/[^/]+-lock\\.json", "u"),
+
+        // At all levels, exclude these patterns
+        new RegExp("/tsconfig.json$", "u"),
+        new RegExp("\\.ts", "u"),
+    ).
+    installer({
+        productDescription: "Professional Raspberry Pi A/V switch and monitor controller for retro gaming.",
+    });

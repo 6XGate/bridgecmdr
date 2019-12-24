@@ -18,12 +18,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 
-const _        = require("lodash");
-const path     = require("path");
-const readJson = require("read-package-json");
-const packager = require("electron-packager");
+const _         = require("lodash");
+const moment    = require("moment");
+const path      = require("path");
+const readJson  = require("read-package-json");
+const packager  = require("electron-packager");
+const installer = require("electron-installer-debian");
 
 const { EXIT_SUCCESS } = require("./build.common");
+
+const EPOCH = moment.utc("2019-01-01T00:00:00.000");
 
 const archs = {
     ia32: {
@@ -35,7 +39,7 @@ const archs = {
         debian:   "amd64",
     },
     arm: {
-        electron: "arm71",
+        electron: "armv7l",
         debian:   "arm",
     },
     arm64: {
@@ -48,29 +52,30 @@ const archs = {
 // merged, set via a debian(options) call.
 // calculated, set via calculation only.
 // Anything not mentioned will be handled via the debian(options) call or from existing inferred or defined information.
-// TODO: debian-installer: callthru, [options.genericName = this[myAppName]]
-// TODO: debian-installer: callthru, [options.description = package.description]
-// TODO: debian-installer: callthru, [options.maintainer = `${package.author.name} <${package.author.email}>`
-// TODO: debian-installer: callthru, [options.homepage = package.author.url]
 // TODO: both:             callthru, [options.icon], will require some thought to implement...
-// TODO: debian-installer: calculated, options.bin = this[myExeName]
 // TODO: debian-installer: merged, [options.size = calculated size of bundle]
-const myAppName      = Symbol("[[ApplicationName]]");
-const myAppCopyright = Symbol("[[ApplicationCopyright]]");
-const myAppVersion   = Symbol("[[ApplicationVersion]]");
-const myPlatform     = Symbol("[[Platform]]");
-const myArchitecture = Symbol("[[Architecture]]");
-const myExeName      = Symbol("[[ExecutableName]]");
-const mySrcDir       = Symbol("[[SourceDirectory]]");
-const myIntDir       = Symbol("[[IntermediateDirectory]]");
-const myOutDir       = Symbol("[[OutputDirectory]]");
-const myIgnores      = Symbol("[[Ignores]]");
+const myAppName          = Symbol("[[ApplicationName]]");
+const myAppCopyright     = Symbol("[[ApplicationCopyright]]");
+const myAppVersion       = Symbol("[[ApplicationVersion]]");
+const myAppDescription   = Symbol("[[ApplicationDescription]]");
+const myAuthorName       = Symbol("[[AuthorName]]");
+const myAuthorEMail      = Symbol("[[AuthorEMail]]");
+const myHomepage         = Symbol("[[Homepage]]");
+const myPlatform         = Symbol("[[Platform]]");
+const myArchitecture     = Symbol("[[Architecture]]");
+const myExeName          = Symbol("[[ExecutableName]]");
+const mySrcDir           = Symbol("[[SourceDirectory]]");
+const myIntDir           = Symbol("[[IntermediateDirectory]]");
+const myOutDir           = Symbol("[[OutputDirectory]]");
+const myIgnores          = Symbol("[[Ignores]]");
+const myInstallerOptions = Symbol("[[InstallerOptions]]");
 
 const PreCheckConfig       = Symbol("Pre-check Config");
 const PostCheckConfig      = Symbol("Post-check Config");
 const GetPackageInfo       = Symbol("Get Package Info");
 const ApplyPackageDefaults = Symbol("Apply Package Defaults");
 const MakePackagerOptions  = Symbol("Make Packager Options");
+const MakeInstallerOptions = Symbol("Make Installer Options");
 
 function jsonLogger(log, warn, error) {
     log && console.log(log);
@@ -80,34 +85,49 @@ function jsonLogger(log, warn, error) {
 
 class Packager {
     constructor() {
-        this[myAppName]      = "";
-        this[myAppCopyright] = "";
-        this[myAppVersion]   = "";
-        this[myPlatform]     = "";
-        this[myArchitecture] = "";
-        this[myExeName]      = "";
-        this[mySrcDir]       = "";
-        this[myIntDir]       = "";
-        this[myOutDir]       = "";
-        this[myIgnores]      = [];
+        this[myAppName]          = "";
+        this[myAppCopyright]     = "";
+        this[myAppVersion]       = "";
+        this[myAppDescription]   = "";
+        this[myAuthorName]       = "";
+        this[myAuthorEMail]      = "";
+        this[myHomepage]         = "";
+        this[myPlatform]         = "";
+        this[myArchitecture]     = "";
+        this[myExeName]          = "";
+        this[mySrcDir]           = "";
+        this[myIntDir]           = "";
+        this[myOutDir]           = "";
+        this[myIgnores]          = [];
+        this[myInstallerOptions] = {};
     }
 
-    app(name, version) {
-        this[myAppName]    = name;
-        this[myAppVersion] = version;
+    app(name, version, description) {
+        this[myAppName]        = String(name) || "";
+        this[myAppVersion]     = String(version) || "";
+        this[myAppDescription] = String(description) || "";
 
         return this;
     }
 
+    author(name, email) {
+        this[myAuthorName]  = String(name) || "";
+        this[myAuthorEMail] = String(email) || "";
+    }
+
+    homepage(url) {
+        this[myHomepage] = String(url) || "";
+    }
+
     copyright(line) {
-        this[myAppCopyright] = line;
+        this[myAppCopyright] = String(line) || "";
 
         return this;
     }
 
     target(platform, arch) {
-        this[myPlatform]     = platform;
-        this[myArchitecture] = arch;
+        this[myPlatform]     = String(platform) || "";
+        this[myArchitecture] = String(arch) || "";
 
         return this;
     }
@@ -123,32 +143,30 @@ class Packager {
     }
 
     intermediate(_path) {
-        this[myIntDir] = _path;
+        this[myIntDir] = String(_path);
 
         return this;
     }
 
     output(_path, file) {
-        this[myOutDir]  = _path;
-        this[myExeName] = file || "";
+        this[myOutDir]  = String(_path);
+        this[myExeName] = String(file) || "";
 
         return this;
     }
 
-    ignore(rule) {
-        if (_.isString(rule)) {
-            rule = _path => _path === rule;
-        } else if (_.isRegExp(rule)) {
-            rule = _path => rule.test(_path);
+    ignore(...rules) {
+        for (const rule of rules) {
+            if (_.isRegExp(rule)) {
+                this[myIgnores].push(rule);
+            }
         }
 
-        if (_.isFunction(rule)) {
-            this[myIgnores].push(rule);
+        return this;
+    }
 
-            return this;
-        }
-
-        throw new TypeError("Invalid rule type, must be a string, function, or RegExp");
+    installer(options) {
+        this[myInstallerOptions] = _.isObject(options) ? options : {};
     }
 
     [PreCheckConfig]() {
@@ -200,15 +218,17 @@ class Packager {
     }
 
     async [ApplyPackageDefaults]() {
-        const appInfo      = await this[GetPackageInfo]();
-        this[myAppName]    = this[myAppName] || appInfo.productName || appInfo.name || "";
-        this[myAppVersion] = this[myAppVersion] || appInfo.version || "";
-        this[myExeName]    = this[myExeName] || appInfo.name || "";
+        const appInfo          = await this[GetPackageInfo]();
+        this[myAppName]        = this[myAppName] || appInfo.productName || appInfo.name || "";
+        this[myAppVersion]     = this[myAppVersion] || appInfo.version || "";
+        this[myAppDescription] = this[myAppDescription] || appInfo.description || "";
+        this[myAuthorName]     = this[myAuthorName] || appInfo.author.name || "";
+        this[myAuthorEMail]    = this[myAuthorEMail] || appInfo.author.email || "";
+        this[myHomepage]       = this[myHomepage] || appInfo.homepage || appInfo.author.url || "";
+        this[myExeName]        = this[myExeName] || appInfo.name || "";
     }
 
     [MakePackagerOptions](platform, arch) {
-        const ignore   = _path => _path.length > 0 && _.some(this[myIgnores], _rule => _rule(_path));
-
         return {
             dir:            this[mySrcDir],
             appCopyright:   this[myAppCopyright],
@@ -219,7 +239,57 @@ class Packager {
             platform:       platform,
             out:            this[myIntDir],
             overwrite:      true,
-            ignore,
+            ignore:         this[myIgnores],
+        };
+    }
+
+    [MakeInstallerOptions](platform, arch) {
+        const options = this[myInstallerOptions];
+
+        return {
+            // TODO: icon
+            bin:                this[myExeName],
+            dest:               this[myOutDir],
+            name:               this[myExeName],
+            productName:        this[myAppName],
+            genericName:        options.genericName || this[myAppName],
+            description:        _.isEmpty(this[myAppDescription]) ? undefined : this[myAppDescription],
+            productDescription: options.productDescription,
+            version:            this[myAppVersion],
+            section:            options.section,
+            priority:           options.priority,
+            arch:               arch.debian,
+            size:               options.size,
+            depends:            options.depends,
+            recommends:         options.recommends,
+            suggests:           options.suggests,
+            enhances:           options.enhances,
+            preDepends:         options.preDepends,
+            homepage:           _.isEmpty(this[myHomepage]) ? undefined : this[myHomepage],
+            categories:         options.categories,
+            mimeType:           options.mimeType,
+            lintianOverrides:   options.lintianOverrides,
+            scripts:            options.scripts,
+
+            // Get the revision from the merged options or calculate one.
+            revision: options.revision || (() => {
+                const hours = moment.duration(moment.utc().diff(EPOCH)).asHours();
+
+                return String(hours.toFixed());
+            })(),
+
+            // Get the maintainer from it's possible combinations formats.
+            maintainer: (() => {
+                if (!_.isEmpty(this[myAuthorName])) {
+                    return !_.isEmpty(this[myAuthorEMail]) ?
+                        `${this[myAuthorName]} <${this[myAuthorEMail]}>` :
+                        this[myAuthorName];
+                } else if (!_.isEmpty(this[myAuthorEMail])) {
+                    return this[myAuthorEMail];
+                }
+
+                return undefined;
+            })(),
         };
     }
 
@@ -240,12 +310,14 @@ class Packager {
         await this[ApplyPackageDefaults]();
         this[PostCheckConfig]();
 
-        const packagerOptions = this[MakePackagerOptions](platform, arch);
-
-        const bundlePath = _.head(await packager(packagerOptions));
+        const packagerOptions  = this[MakePackagerOptions](platform, arch);
+        const bundlePath       = _.head(await packager(packagerOptions));
         console.log(`Application bundle successfully created at ${bundlePath}`);
 
-        // TODO: Create platform installer.
+        const installerOptions = this[MakeInstallerOptions](platform, arch);
+        installerOptions.src   = bundlePath;
+        await installer(installerOptions);
+        console.log(`Application installer successfully created at ${installerOptions.dest}`);
 
         return EXIT_SUCCESS;
     }
