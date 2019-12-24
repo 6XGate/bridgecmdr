@@ -29,7 +29,7 @@ const about        = Object.freeze({
 });
 
 export default class SonySerialMonitor extends Driver {
-    private connection: stream.Duplex;
+    private readonly connection: stream.Duplex;
 
     public static about(): DriverDescriptor {
         return about;
