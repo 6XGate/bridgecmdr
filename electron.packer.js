@@ -24,6 +24,7 @@ packager.source(".").target("linux", "arm").
     ignore(
         // In the root, exclude these patterns or paths
         new RegExp("^/\\.", "u"),
+        new RegExp("^/out", "u"),
         new RegExp("^/main", "u"),
         new RegExp("^/render", "u"),
         new RegExp("^/build", "u"),

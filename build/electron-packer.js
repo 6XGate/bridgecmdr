@@ -18,12 +18,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 
-const _         = require("lodash");
-const moment    = require("moment");
-const path      = require("path");
-const readJson  = require("read-package-json");
-const packager  = require("electron-packager");
-const installer = require("electron-installer-debian");
+const _           = require("lodash");
+const moment      = require("moment");
+const path        = require("path");
+const readJson    = require("read-package-json");
+const { rebuild } = require("electron-rebuild");
+const packager    = require("electron-packager");
+const installer   = require("electron-installer-debian");
 
 const { EXIT_SUCCESS } = require("./build.common");
 
@@ -240,6 +241,13 @@ class Packager {
             out:            this[myIntDir],
             overwrite:      true,
             ignore:         this[myIgnores],
+            afterCopy:      [
+                (buildPath, electronVersion, _platform, _arch, callback) => {
+                    rebuild({ buildPath, electronVersion, arch: _arch }).
+                        then(() => callback()).
+                        catch(error => callback(error));
+                },
+            ],
         };
     }
 

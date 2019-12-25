@@ -6,6 +6,7 @@
   "main": "dist/main/index.js",
   "scripts": {
     "install": "electron-rebuild",
+    "rebuild": "electron-rebuild",
     "production": "npm run prod",
     "prod": "webpack --env.NODE_ENV=production --env.production --progress --hide-modules --config build/webpack.config.js",
     "devevlopment": "npm run dev",
