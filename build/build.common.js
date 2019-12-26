@@ -16,27 +16,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-const packer              = require("./build/webpack-packer");
-const VuetifyLoaderPlugin = require("vuetify-loader/lib/plugin");
+const EXIT_SUCCESS = 0;
+const EXIT_FAILURE = 1;
 
-packer.main.
-    js("./main/index.ts").
-    output("./dist/main");
-
-packer.render.
-    html("./render/index.ejs").
-    js("./render/index.ts").
-    sass("./render/index.scss").
-    output("./dist/render").
-    plugin(new VuetifyLoaderPlugin()).
-    loader("vue", {
-        options: {
-            transformAssetUrls: {
-                "video":  [ "src", "poster" ],
-                "source": "src",
-                "img":    "src",
-                "image":  "xlink:href",
-                "v-img":  [ "src" , "lazy-src" ],
-            },
-        },
-    });
+module.exports = {
+    EXIT_SUCCESS,
+    EXIT_FAILURE,
+};

@@ -40,8 +40,8 @@ const VueLoaderPlugin      = require("vue-loader/lib/plugin");
  * =====================================================================================================================
  * Specials
  */
-// eslint-disable-next-line dot-notation
-const isDev = process.env["NODE_ENV"] !== "development";
+
+const isDev = process.env.NODE_ENV !== "development";
 
 /*
  * =====================================================================================================================
@@ -369,8 +369,7 @@ class Packer {
                 chunkFilename: "[id].css",
             }),
             new VueLoaderPlugin({
-                // eslint-disable-next-line dot-notation
-                productionMode: process.env["NODE_ENV"] === "production",
+                productionMode: process.env.NODE_ENV === "production",
             }),
         ]);
 
@@ -388,15 +387,10 @@ class Packer {
         }
 
         const assets = this[myAssets];
-        for (const key in assets) {
-            if (Object.prototype.hasOwnProperty.call(assets, key)) {
-                plugins.push(new CopyPlugin([
-                    {
-                        from: assets[key],
-                        to:   path.resolve(packerConfigPath, outdir, key),
-                    },
-                ]));
-            }
+        if (!_.isEmpty(assets)) {
+            plugins.push(new CopyPlugin(
+                _.map(assets, (src, dest) => ({ from: src, to: path.resolve(packerConfigPath, outdir, dest) })),
+            ));
         }
 
         return plugins;
@@ -409,8 +403,7 @@ class Packer {
      */
     generate(env, target) {
         return allReady.then(() => _.merge({
-            // eslint-disable-next-line dot-notation
-            mode:   env["NODE_ENV"],
+            mode:   env.NODE_ENV,
             target: target,
             stats:  {
                 builtAt:      false, // Don't need to know when it was built.

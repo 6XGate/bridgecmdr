@@ -17,7 +17,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 const path   = require("path");
-const packer = require("./packer");
+const packer = require("./webpack-packer");
 
 // TODO: Resolve the packer configuration rather than hard-code it.
 const packerConfigPath = "..";

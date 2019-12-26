@@ -1,30 +1,37 @@
 {
   "name": "bridgecmdr",
   "productName": "BridgeCmdr",
-  "version": "0.1.0",
+  "version": "0.9.0",
   "description": "A/V switch and monitor controller",
   "main": "dist/main/index.js",
   "scripts": {
     "install": "electron-rebuild",
+    "rebuild": "electron-rebuild",
     "production": "npm run prod",
     "prod": "webpack --env.NODE_ENV=production --env.production --progress --hide-modules --config build/webpack.config.js",
     "devevlopment": "npm run dev",
     "dev": "webpack --env.NODE_ENV=development --env.development --progress --hide-modules --config build/webpack.config.js",
+    "pack": "node build/electron.package.js",
     "start": "electron .",
-    "test": "test.js"
+    "test": "test.js",
+    "package": "npm run production ; npm run pack"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/6XGate/bridgecmdr.git"
   },
   "keywords": [
+    "linux",
+    "raspberry-pi",
     "retrogaming",
-    "extron",
     "audio-video",
+    "sony-bmv",
     "sony-pvm",
-    "sony-bmv"
+    "extron"
   ],
-  "author": "Matthew Holder",
+  "author": {
+    "name": "Matthew Holder"
+  },
   "license": "GPL-3.0-or-later",
   "bugs": {
     "url": "https://github.com/6XGate/bridgecmdr/issues"
@@ -43,7 +50,11 @@
     "axios": "^0.19.0",
     "copy-webpack-plugin": "^5.1.1",
     "css-loader": "^3.4.0",
+    "electron": "^7.1.7",
+    "electron-installer-debian": "^2.0.1",
+    "electron-packager": "^14.1.1",
     "electron-rebuild": "^1.8.8",
+    "electron-unhandled": "^3.0.1",
     "eslint": "^6.7.2",
     "eslint-config-standard": "^14.1.0",
     "eslint-loader": "^3.0.3",
@@ -57,6 +68,7 @@
     "html-webpack-plugin": "^3.2.0",
     "lodash": "^4.17.15",
     "mini-css-extract-plugin": "^0.8.2",
+    "moment": "^2.24.0",
     "pouchdb-browser": "^7.1.1",
     "pouchdb-find": "^7.1.1",
     "read-package-json": "^2.1.1",
@@ -70,6 +82,7 @@
     "uuid": "^3.3.3",
     "vee-validate": "^3.2.0",
     "vue": "^2.6.11",
+    "vue-devtools": "^5.1.3",
     "vue-loader": "^15.8.3",
     "vue-style-loader": "^4.1.2",
     "vue-template-compiler": "^2.6.11",
@@ -80,8 +93,6 @@
     "webpack-node-externals": "^1.7.2"
   },
   "dependencies": {
-    "electron": "^7.1.7",
-    "serialport": "^8.0.5",
-    "vue-devtools": "^5.1.3"
+    "serialport": "^8.0.5"
   }
 }

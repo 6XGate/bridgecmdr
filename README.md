@@ -21,7 +21,11 @@ You should have received a copy of the GNU General Public License along with thi
 
 `SPDX-License-Identifier: GPL-3.0-or-later`
 
-### Tools, Frameworks, Libraries, and Assets
+## Installation
+
+> TODO
+
+## Tools, Frameworks, Libraries, and Assets
 
 BridgeCmdr uses the following libraries and frameworks which are available under their respective license.
 
@@ -55,3 +59,41 @@ Finally, the following tools were used to build BridgeCmdr.
         - [Node Fibers](https://github.com/laverdet/node-fibers)
 - [PHPStorm](https://www.jetbrains.com/phpstorm/), but no PHP code was harmed in the making of this software.
 - [VisualStudio Code](https://code.visualstudio.com/)
+
+## Building
+
+### Development
+
+If you want to help with the development of BridgeCmdr, downloading, building, and running the project on a Linux system
+is easy.
+
+1. Download the [source](https://github.com/6XGate/bridgecmdr/archive/master.zip) and extract it.
+2. Open a terminal clone and go to the folder into which source was extracted.
+3. Install the `build-essential` package.
+    - `sudo apt install build-essential -y`
+4. Install the node packages.
+    - `npm ci` or `npm install`
+5. Build the user interface source.
+    - `npm run prod` or `npm run dev`
+
+You should now be able to run the program with `npm run start`.
+
+### Packaging the Installer
+
+Though not optimal, the only way to currently building a package requires a Raspberry Pi with Raspbian and a desktop
+computer running Debian or Ubuntu.  This should change in the future.  Other desktop Linux distributions may work, but
+ it's not tested.
+
+1. Download the [source](https://github.com/6XGate/bridgecmdr/archive/develop.zip) and extract it on both systems.
+2. On both systems; open a terminal clone and go to the folder into which source was extracted.
+3. On both systems; install the `build-essential` package.
+    - `sudo apt install build-essential -y`
+4. On both systems; install the node packages.
+    - `npm ci` or `npm install`
+5. On the desktop system, build the user interface source.
+    - `npm run prod` or `npm run dev`
+6. Copy the `dist` folder from the desktop system to project folder on the Raspberry Pi system.
+7. Package the installer on the Raspberry Pi system.
+    - `npm run pack`
+
+You should now have a Debian package in the `out` folder. This package can be installed with `apt`.
