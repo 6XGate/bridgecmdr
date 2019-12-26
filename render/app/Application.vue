@@ -48,9 +48,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 </template>
 
 <script lang="ts">
+    import { promises as fs }      from "fs";
+    import path                    from "path";
     import Vue, { VueConstructor } from "vue";
     import Vuetify                 from "vuetify";
     import colors                  from "vuetify/lib/util/colors";
+    import xdgBasedir              from "xdg-basedir";
     import SettingsPage            from "./pages/SettingsPage.vue";
     import * as helpers            from "../support/helpers";
     import Source                  from "../support/system/source";
@@ -187,6 +190,55 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 confirm: (options: ConfirmModalOptions) => this.$refs.confirm.open(options),
             };
 
+            // On the first run, check for an auto-start file. Ask the user if they wish to make one.
+            this.$nextTick(async () => {
+                const configDir    = xdgBasedir.config;
+                const doneFirstRun = Number(window.localStorage.getItem("doneFirstRun") || 0);
+                if (doneFirstRun < 1) {
+                    // 1. Auto-start file creation.
+                    if (configDir) {
+                        const autoStartDir = path.resolve(configDir, "autostart");
+                        await fs.mkdir(autoStartDir, { recursive: true });
+
+                        const autoStartFile = "org.sleepingcats.BridgeCmdr.desktop";
+                        const autoStartPath = path.resolve(autoStartDir, autoStartFile);
+
+                        const autoStartExists = await fs.stat(autoStartPath).
+                            then(stat => stat.isFile()).catch(() => false);
+                        if (!autoStartExists) {
+                            const createAutoStart = await this.$modals.confirm({
+                                main:      "Do you want BridgeCmdr to start on boot?",
+                                secondary: "You can start BridgeCmdr when your system starts",
+                            });
+
+                            if (createAutoStart) {
+                                const needsExecProxy = (/electron$/u).test(process.execPath);
+                                const exec = needsExecProxy ?
+                                    path.resolve(window.__dirname, "../../bridgecmdr") :
+                                    "bridgecmdr";
+                                try {
+                                    const entry = await fs.open(autoStartPath, "w", 0o644);
+                                    await entry.write("[Desktop Entry]\n");
+                                    await entry.write("Name=BridgeCmdr\n");
+                                    await entry.write(`Exec=${exec}\n`);
+                                    await entry.write("NoDisplay=true\n");
+                                    await entry.write("Terminal=false\n");
+                                } catch (error) {
+                                    const ex = error as Error;
+                                    await this.$modals.alert({
+                                        main:      "Unable create auto-start entry",
+                                        secondary: ex.message,
+                                    });
+                                }
+                            }
+                        }
+                    }
+
+                    window.localStorage.setItem("doneFirstRun", String(1));
+                }
+            });
+
+            // Load and create the buttons.
             this.$nextTick(async () => {
                 this.buttons = await makeButtons(button => this.onButtonActivated(button));
             });

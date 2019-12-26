@@ -90,7 +90,8 @@
     "vuetify-loader": "^1.4.3",
     "webpack": "^4.41.4",
     "webpack-cli": "^3.3.10",
-    "webpack-node-externals": "^1.7.2"
+    "webpack-node-externals": "^1.7.2",
+    "xdg-basedir": "^4.0.0"
   },
   "dependencies": {
     "serialport": "^8.0.5"
