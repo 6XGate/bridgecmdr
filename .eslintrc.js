@@ -233,6 +233,9 @@ module.exports = {
         }],
 
         // # Node
+        "node/no-unsupported-features/node-builtins": ["error", {
+            "version": ">=12.0.0",
+        }],
         "node/no-unsupported-features/es-syntax": "off",
         "node/no-unpublished-require": "off",
         "node/no-unpublished-import": "off",
@@ -292,4 +295,9 @@ module.exports = {
             },
         }
     ],
+    "settings": {
+        "import/ignore": [
+            /^xdg-basedir$/u,
+        ],
+    },
 };

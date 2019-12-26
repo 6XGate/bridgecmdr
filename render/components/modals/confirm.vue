@@ -36,7 +36,7 @@
         methods: {
             open(options: ConfirmModalOptions): Promise<boolean> {
                 return new Promise<boolean>(resolve => {
-                    this.options = _.defaultTo<ConfirmModalOptions>(options, DEFAULT_OPTIONS);
+                    this.options = _.defaults(options, DEFAULT_OPTIONS);
                     this.resolve = value => {
                         this.dialog = false;
                         resolve(value);
