@@ -29,22 +29,28 @@ You should have received a copy of the GNU General Public License along with thi
 
 BridgeCmdr uses the following libraries and frameworks which are available under their respective license.
 
-| Framework/Library                                       | License                                                                  |
-|---------------------------------------------------------|--------------------------------------------------------------------------|
-| [Electron](https://electronjs.org/)                     | [MIT](https://github.com/electron/electron/blob/master/LICENSE)          |
-| [Vue.js](https://vuejs.org/)                            | [MIT](https://github.com/vuejs/vue/blob/master/LICENSE)                  |
-| [Vuetify](https://vuetifyjs.com/)                       | [MIT](https://github.com/vuetifyjs/vuetify/blob/master/LICENSE.md)       |
-| [PouchDB](https://pouchdb.com/)                         | [Apache 2.0](https://github.com/pouchdb/pouchdb/blob/master/LICENSE)     |
-| [SerialPort](https://serialport.io/)                    | [MIT](https://github.com/serialport/node-serialport/blob/master/LICENSE) |
-| [VeeValidate](https://logaretm.github.io/vee-validate/) | [MIT](https://github.com/logaretm/vee-validate/blob/master/LICENSE)      |
-| [Lodash](https://lodash.com/)                           | [MIT](https://github.com/lodash/lodash/blob/master/LICENSE)              |
-| [Node UUID](https://github.com/kelektiv/node-uuid)      | [MIT](https://github.com/kelektiv/node-uuid/blob/master/LICENSE.md)      |
+| Framework/Library                                                        | License                                                                       |
+|--------------------------------------------------------------------------|-------------------------------------------------------------------------------|
+| [Electron](https://electronjs.org/)                                      | [MIT](https://github.com/electron/electron/blob/master/LICENSE)               |
+| [Vue.js](https://vuejs.org/)                                             | [MIT](https://github.com/vuejs/vue/blob/master/LICENSE)                       |
+| [Vuetify](https://vuetifyjs.com/)                                        | [MIT](https://github.com/vuetifyjs/vuetify/blob/master/LICENSE.md)            |
+| [PouchDB](https://pouchdb.com/)                                          | [Apache 2.0](https://github.com/pouchdb/pouchdb/blob/master/LICENSE)          |
+| [SerialPort](https://serialport.io/)                                     | [MIT](https://github.com/serialport/node-serialport/blob/master/LICENSE)      |
+| [VeeValidate](https://logaretm.github.io/vee-validate/)                  | [MIT](https://github.com/logaretm/vee-validate/blob/master/LICENSE)           |
+| [Lodash](https://lodash.com/)                                            | [MIT](https://github.com/lodash/lodash/blob/master/LICENSE)                   |
+| [Node UUID](https://github.com/kelektiv/node-uuid)                       | [MIT](https://github.com/kelektiv/node-uuid/blob/master/LICENSE.md)           |
+| [electron-unhandled](https://github.com/sindresorhus/electron-unhandled) | [MIT](https://github.com/sindresorhus/electron-unhandled/blob/master/license) |
+| [xdg-basedir](https://github.com/sindresorhus/xdg-basedir)               | [MIT](https://github.com/sindresorhus/xdg-basedir/blob/master/license)        |
+
+Other dependencies not listed are part of one of the above packages and share the same license.
 
 BridgeCmdr also uses the [Material Design Icons](https://dev.materialdesignicons.com/) font and SVG graphics which is
 licensed under the [SIL Open Font License](https://github.com/Templarian/MaterialDesign/blob/master/LICENSE) v1.0.
 
-Finally, the following tools were used to build BridgeCmdr.
+Finally, the following tools or libraries were used to build BridgeCmdr.
 
+- [moment](https://momentjs.com/).
+- [read-package-json](https://github.com/npm/read-package-json).
 - [TypeScript](https://www.typescriptlang.org/)
 - [ESLint](https://eslint.org/), and the following third-party plug-ins;
     - [ESLint Import Plug-in](https://github.com/benmosher/eslint-plugin-import)
@@ -57,8 +63,11 @@ Finally, the following tools were used to build BridgeCmdr.
     - [HTML WebPack Plug-in](https://github.com/jantimon/html-webpack-plugin)
     - [Dart Sass](https://sass-lang.com/dart-sass), and the following third-party plug-ins;
         - [Node Fibers](https://github.com/laverdet/node-fibers)
+- [Electron Installer (Debian)](https://github.com/electron-userland/electron-installer-debian).
 - [PHPStorm](https://www.jetbrains.com/phpstorm/), but no PHP code was harmed in the making of this software.
 - [VisualStudio Code](https://code.visualstudio.com/)
+
+Other tools or licenses not listed are part of one of the above packages.
 
 ## Building
 
@@ -84,6 +93,9 @@ Though not optimal, the only way to currently building a package requires a Rasp
 computer running Debian or Ubuntu.  This should change in the future.  Other desktop Linux distributions may work, but
  it's not tested.
 
+ With a Raspberry Pi 4, given the larger memory configuration, it may be possible to do all of this on the Raspberry Pi
+ system alone.
+
 1. Download the [source](https://github.com/6XGate/bridgecmdr/archive/develop.zip) and extract it on both systems.
 2. On both systems; open a terminal clone and go to the folder into which source was extracted.
 3. On both systems; install the `build-essential` package.
@@ -96,4 +108,4 @@ computer running Debian or Ubuntu.  This should change in the future.  Other des
 7. Package the installer on the Raspberry Pi system.
     - `npm run pack`
 
-You should now have a Debian package in the `out` folder. This package can be installed with `apt`.
+You should now have a Debian package in the `out` folder. This package can be installed with `apt` on the Raspberry Pi.
