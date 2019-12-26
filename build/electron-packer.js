@@ -31,13 +31,17 @@ const { EXIT_SUCCESS } = require("./build.common");
 const EPOCH = moment.utc("2019-01-01T00:00:00.000");
 
 const archs = {
-    ia32: {
+    i386: {
         electron: "ia32",
         debian:   "i386",
     },
     amd64: {
         electron: "x64",
         debian:   "amd64",
+    },
+    armhf: {
+        electron: "armv7l",
+        debian:   "armhf",
     },
     arm: {
         electron: "armv7l",

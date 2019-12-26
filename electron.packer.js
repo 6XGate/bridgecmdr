@@ -20,7 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 const packager = require("./build/electron-packer");
 
-packager.source(".").target("linux", "arm").
+packager.source(".").target("linux", "armhf").
     ignore(
         // In the root, exclude these patterns or paths
         new RegExp("^/\\.", "u"),
