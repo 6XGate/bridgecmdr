@@ -23,7 +23,9 @@ You should have received a copy of the GNU General Public License along with thi
 
 ## Installation
 
-> TODO
+To install BridgeCmdr on the Raspberry Pi, all you need do is download the
+[latest release](https://github.com/6XGate/bridgecmdr/releases) and install it with
+`sudo apt install ./bridgecmdr_<version>-<revision>_armhf.deb -y`
 
 ## Tools, Frameworks, Libraries, and Assets
 
