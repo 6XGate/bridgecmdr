@@ -16,9 +16,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import stream                                                                  from "stream";
-import Driver, { DriverCapabilities, DriverDescriptor }                        from "../support/system/driver";
-import { openStream, SerialBits, SerialParity, SerialStopBits, writeToStream } from "../support/stream";
+import Driver, { DriverCapabilities, DriverDescriptor }         from "../support/system/driver";
+import { openStream, SerialBits, SerialParity, SerialStopBits } from "../support/streams/command";
 
 const capabilities = DriverCapabilities.NONE;
 const about        = {
@@ -28,21 +27,14 @@ const about        = {
 };
 
 export default class TeslaSmartMatrixSwitch extends Driver {
-    private readonly connection: stream.Duplex;
+    private readonly path: string;
 
     public static about(): DriverDescriptor {
         return about;
     }
 
-    public static async load(path: string): Promise<Driver> {
-        const connection = await openStream(path, {
-            baudReat: 9600,
-            bits:     SerialBits.EIGHT,
-            parity:   SerialParity.NONE,
-            stopBits: SerialStopBits.ONE,
-        });
-
-        return new TeslaSmartMatrixSwitch(connection);
+    public static load(path: string): Promise<Driver> {
+        return Promise.resolve(new TeslaSmartMatrixSwitch(path));
     }
 
     // eslint-disable-next-line class-methods-use-this
@@ -55,21 +47,29 @@ export default class TeslaSmartMatrixSwitch extends Driver {
         return about.title;
     }
 
-    private constructor(connection: stream.Duplex) {
+    private constructor(path: string) {
         super(capabilities);
-        this.connection = connection;
-
-        // TODO: Other situation handlers...
-        connection.on("data", data => console.debug(`DEBUG: ${about.title}: return: ${data}`));
-        connection.on("error", error => console.error(`ERROR: ${about.title}: ${error}`));
+        this.path = path;
     }
 
-    public setTie(inputChannel: number): Promise<void> {
+    public async setTie(inputChannel: number): Promise<void> {
         console.log(`Tesla: ${inputChannel}`);
 
         const command = Buffer.from(Uint8Array.from([ 0xAA, 0xBB, 0x03, 0x01, inputChannel, 0xEE ]));
 
-        return writeToStream(this.connection, command);
+        const connection = await openStream(this.path, {
+            baudReat: 9600,
+            bits:     SerialBits.EIGHT,
+            parity:   SerialParity.NONE,
+            stopBits: SerialStopBits.ONE,
+        });
+
+        // TODO: Other situation handlers...
+        connection.on("data", data => console.debug(`DEBUG: ${about.title}: return: ${data}`));
+        connection.on("error", error => console.error(`ERROR: ${about.title}: ${error}`));
+
+        await connection.write(command);
+        await connection.close();
     }
 
     // eslint-disable-next-line class-methods-use-this
@@ -82,12 +82,8 @@ export default class TeslaSmartMatrixSwitch extends Driver {
         return Promise.resolve();
     }
 
-    public async unload(): Promise<void> {
-        await new Promise((resolve, reject) => {
-            this.connection.once("error", error => reject(error));
-            this.connection.end(() => resolve());
-        });
-
-        this.connection.destroy();
+    // eslint-disable-next-line class-methods-use-this
+    public unload(): Promise<void> {
+        return Promise.resolve();
     }
 }
