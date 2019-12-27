@@ -1,8 +1,8 @@
 {
   "name": "bridgecmdr",
   "productName": "BridgeCmdr",
-  "version": "0.9.0",
-  "description": "A/V switch and monitor controller",
+  "version": "1.0.0",
+  "description": "Professional Raspberry Pi A/V switch and monitor controller for retro gaming",
   "main": "dist/main/index.js",
   "scripts": {
     "install": "electron-rebuild",
