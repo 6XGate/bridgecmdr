@@ -16,10 +16,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import stream                                                                  from "stream";
-import Driver, { DriverCapabilities, DriverDescriptor }                        from "../support/system/driver";
-import { openStream, SerialBits, SerialParity, SerialStopBits, writeToStream } from "../support/stream";
-import { Address, AddressKind, Command, CommandBlock }                         from "../support/specialized/sony-bvm-support";
+import Driver, { DriverCapabilities, DriverDescriptor }         from "../support/system/driver";
+import { openStream, SerialBits, SerialParity, SerialStopBits } from "../support/streams/command";
+import { Address, AddressKind, Command, CommandBlock }          from "../support/specialized/sony-bvm-support";
 
 const capabilities = DriverCapabilities.NONE;
 const about        = Object.freeze({
@@ -29,21 +28,14 @@ const about        = Object.freeze({
 });
 
 export default class SonySerialMonitor extends Driver {
-    private readonly connection: stream.Duplex;
+    private readonly path: string;
 
     public static about(): DriverDescriptor {
         return about;
     }
 
-    public static async load(path: string): Promise<Driver> {
-        const connection = await openStream(path, {
-            baudReat: 38400,
-            bits:     SerialBits.EIGHT,
-            parity:   SerialParity.ODD,
-            stopBits: SerialStopBits.ONE,
-        });
-
-        return new SonySerialMonitor(connection);
+    public static load(path: string): Promise<Driver> {
+        return Promise.resolve(new SonySerialMonitor(path));
     }
 
     // eslint-disable-next-line class-methods-use-this
@@ -56,13 +48,9 @@ export default class SonySerialMonitor extends Driver {
         return about.title;
     }
 
-    private constructor(connection: stream.Duplex) {
+    private constructor(path: string) {
         super(capabilities);
-        this.connection = connection;
-
-        // TODO: Other situation handlers...
-        connection.on("data", data => console.debug(`DEBUG: ${about.title}: return: ${data}`));
-        connection.on("error", error => console.error(`ERROR: ${about.title}: ${error}`));
+        this.path = path;
     }
 
     public setTie(inputChannel: number): Promise<void> {
@@ -72,29 +60,41 @@ export default class SonySerialMonitor extends Driver {
     }
 
     public powerOn(): Promise<void> {
+        console.log("Sony BVM: Power On");
+
         return this.sendCommand(Command.POWER_ON);
     }
 
     public powerOff(): Promise<void> {
+        console.log("Sony BVM: Power Off");
+
         return this.sendCommand(Command.POWER_OFF);
     }
 
-    public async unload(): Promise<void> {
-        await new Promise((resolve, reject) => {
-            this.connection.once("error", error => reject(error));
-            this.connection.end(() => resolve());
-        });
-
-        this.connection.destroy();
+    // eslint-disable-next-line class-methods-use-this
+    public unload(): Promise<void> {
+        return Promise.resolve();
     }
 
-    private sendCommand(command: Command, arg0 = -1, arg1 = -1): Promise<void> {
+    private async sendCommand(command: Command, arg0 = -1, arg1 = -1): Promise<void> {
         const source = new Address(AddressKind.ALL, 0);
         const destination = new Address(AddressKind.ALL, 0);
 
         const block = new CommandBlock(destination, source, command, arg0, arg1);
         const packet = block.package();
 
-        return writeToStream(this.connection, packet.package());
+        const connection = await openStream(this.path, {
+            baudReat: 38400,
+            bits:     SerialBits.EIGHT,
+            parity:   SerialParity.ODD,
+            stopBits: SerialStopBits.ONE,
+        });
+
+        // TODO: Other situation handlers...
+        connection.on("data", data => console.debug(`DEBUG: ${about.title}: return: ${data}`));
+        connection.on("error", error => console.error(`ERROR: ${about.title}: ${error}`));
+
+        await connection.write(packet.package());
+        await connection.close();
     }
 }

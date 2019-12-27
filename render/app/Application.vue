@@ -169,7 +169,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 this.buttons = await makeButtons(button => this.onButtonActivated(button));
             },
             async powerOff() {
-                await Promise.all(Switch.all().map(_switch => _switch.powerOff()));
+                try {
+                    await Promise.all(Switch.all().map(_switch => _switch.powerOff()));
+                } catch (error) {
+                    console.error(error);
+                }
+
                 if (process.env.NODE_ENV === "production") {
                     await helpers.signalShutdown();
                 }
