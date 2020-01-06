@@ -20,6 +20,7 @@ import unhandled from "electron-unhandled";
 unhandled();
 
 import { app, BrowserWindow } from "electron";
+import installExtension, { VUEJS_DEVTOOLS } from "electron-devtools-installer";
 
 let window: BrowserWindow|null = null;
 
@@ -65,10 +66,14 @@ process.on("SIGTERM", () => {
 
 app.on("ready", (): void => {
     if (process.env.NODE_ENV !== "production") {
-        require("./devtools");
+        // require("./devtools");
+        installExtension(VUEJS_DEVTOOLS).
+            then(name => { console.log(`Installing ${name}`); }).
+            then(() => { createWindow(); }).
+            catch(error => { console.error(error); });
+    } else {
+        createWindow();
     }
-
-    createWindow();
 });
 
 app.on("window-all-closed", (): void => {

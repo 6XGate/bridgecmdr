@@ -445,7 +445,7 @@ class Packer {
             },
             plugins: this[GeneratePlugins](),
             resolve: {
-                extensions: [ ".wasm", ".vue", ".ts", ".mjs", ".js" ],
+                extensions: [ ".wasm", ".vue", ".ts", ".mjs", ".js", ".json" ],
             },
         }, this[myExtras]));
     }
