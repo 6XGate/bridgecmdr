@@ -4,21 +4,15 @@
     "inlineSourceMap": true,
     "module": "esnext",
     "moduleResolution": "node",
-    "newLine": "LF",
-    "pretty": true,
-    "outDir": "./dist/ts/",
-    "target": "es2018",
+    "target": "esnext",
 
     "allowJs": false,
-    "alwaysStrict": true,
     "allowSyntheticDefaultImports": true,
     "checkJs": false,
     "disableSizeLimit": true,
     "emitBOM": false,
     "esModuleInterop": false,
-    "noImplicitAny": true,
     "noImplicitReturns": true,
-    "noImplicitThis": true,
     "noEmitHelpers": true,
     "noEmitOnError": true,
     "noErrorTruncation": true,
@@ -26,9 +20,5 @@
     "noUnusedParameters": true,
     "strict": true,
     "types": ["vuetify"]
-  },
-  "typeAcquisition": {
-    "enable": true,
-    "include": ["vue-shims.d.ts"]
   }
 }

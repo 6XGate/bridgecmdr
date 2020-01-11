@@ -31,17 +31,22 @@ const nodeExternals = require("webpack-node-externals");
  * =====================================================================================================================
  * Plug-ins
  */
-const CopyPlugin           = require("copy-webpack-plugin");
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const HtmlWebpackPlugin    = require("html-webpack-plugin");
-const VueLoaderPlugin      = require("vue-loader/lib/plugin");
+const CopyPlugin                  = require("copy-webpack-plugin");
+const MiniCssExtractPlugin        = require("mini-css-extract-plugin");
+const FriendlyErrorsWebpackPlugin = require("friendly-errors-webpack-plugin");
+const HtmlWebpackPlugin           = require("html-webpack-plugin");
+const VueLoaderPlugin             = require("vue-loader/lib/plugin");
 
 /*
  * =====================================================================================================================
  * Specials
  */
 
-const isDev = process.env.NODE_ENV !== "development";
+const isProd = process.env.NODE_ENV === "production";
+const isDev  = process.env.NODE_ENV === "development";
+if (!isProd && !isDev) {
+    throw new Error('NODE_ENV must be set to "production" or "development"');
+}
 
 /*
  * =====================================================================================================================
@@ -133,7 +138,7 @@ class Packer {
             sass: {
                 loader:  "sass-loader",
                 options: {
-                    sourceMap:      isDev,
+                    sourceMap:      true,
                     implementation: require("sass"),
                     sassOptions:    {
                         fiber: require("fibers"),
@@ -157,8 +162,9 @@ class Packer {
                 use:     [loaders.esLint],
             },
             typeScript: {
-                test: (/\.ts$/u),
-                use:  [loaders.typeScript],
+                test:    (/\.ts$/u),
+                exclude: (/node_modules/u),
+                use:     [loaders.typeScript],
             },
             css: {
                 test: (/\.css$/u),
@@ -364,6 +370,7 @@ class Packer {
      */
     [GeneratePlugins]() {
         const plugins = this[myPlugins].concat([
+            new FriendlyErrorsWebpackPlugin(),
             new MiniCssExtractPlugin({
                 filename:      "[name].css",
                 chunkFilename: "[id].css",
@@ -381,7 +388,7 @@ class Packer {
                 title:    productName,
                 filename: path.resolve(packerConfigPath, outdir, "index.html"),
                 template: path.resolve(packerConfigPath, html),
-                minify:   isDev,
+                minify:   isProd,
                 // TODO: favicon, meta
             }));
         }
@@ -396,25 +403,35 @@ class Packer {
         return plugins;
     }
 
+    // TODO: Set `.context` and `.stats.context` options.
+
     /**
      * @param {Object.<string, string>} env
      * @param {string}                  target
      * @return {Promise<WebpackOptions>}
      */
-    generate(env, target) {
+    generate(target) {
         return allReady.then(() => _.merge({
-            mode:   env.NODE_ENV,
+            mode:   process.env.NODE_ENV,
             target: target,
             stats:  {
-                builtAt:      false, // Don't need to know when it was built.
-                children:     false, // Don't need to see all the children.
-                chunks:       false, // Don't really need to know the chunks.
-                chunkGroups:  false, // Don't really need to know the chunk groups.
-                chunkModules: false, // Don't need to know the modules in a chunk.
-                chunkOrigins: false, // Don't really need to know the chunk origins.
-                hash:         false, // Don't really need to know the hash.
-                modules:      false, // Don't need to know the modules.
-                reasons:      false, // Don't need to know why modules are included.
+                builtAt:      false,  // Don't need to show when it was built.
+                children:     false,  // Don't need to see all the children.
+                chunks:       false,  // Don't really need to show the chunks.
+                entrypoints:  false,  // Don't really need to show the entry-points.
+                errors:       false,  // Don't display error details, there is a plug-in for that.
+                errorDetails: false,  // Don't display error details, there is a plug-in for that.
+                hash:         false,  // Don't really need to show the hash.
+                modules:      false,  // Don't need to show the modules.
+                performance:  isProd, // Base performance reporting on target environment.
+                publicPath:   false,  // Don't really need to show the public path.
+                reasons:      false,  // Don't need to know why modules are included.
+                source:       false,  // Don't really need to show the source code.
+                timings:      false,  // Don't really need to show the timing information.
+                version:      false,  // Don't really need to show the version information.
+            },
+            performance: {
+                hints: false,
             },
             externals: [
                 nodeExternals({
@@ -445,7 +462,8 @@ class Packer {
             },
             plugins: this[GeneratePlugins](),
             resolve: {
-                extensions: [ ".wasm", ".vue", ".ts", ".mjs", ".js", ".json" ],
+                extensions: [ ".wasm", ".mjs", ".js", ".ts", ".json", ".vue" ],
+                alias:      { "vue$": "vue/dist/vue.esm.js" },
             },
         }, this[myExtras]));
     }
