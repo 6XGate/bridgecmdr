@@ -48,13 +48,15 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 </template>
 
 <script lang="ts">
-    import Vue, { VueConstructor }   from "vue";
+    import Vue                       from "vue";
+    import mixins                    from "vue-typed-mixins";
     import SettingsPage              from "./pages/SettingsPage.vue";
     import vuetify                   from "../config/vuetify";
-    import * as helpers              from "../foundation/helpers";
-    import Switch                    from "../foundation/system/switch";
-    import registry                  from "../foundation/system/registry";
     import { Button, makeDashboard } from "../controllers/dashboard";
+    import withRefs                  from "../foundation/concerns/with-refs";
+    import * as helpers              from "../foundation/helpers";
+    import registry                  from "../foundation/system/registry";
+    import Switch                    from "../foundation/system/switch";
     import doFirstRun                from "../support/first-run";
     import {
         AlertModal,
@@ -63,15 +65,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         ConfirmModalOptions,
     } from "../components/modals";
 
+    type References = {
+        alert:   AlertModal;
+        confirm: ConfirmModal;
+    };
 
-    const vue = Vue as VueConstructor<Vue & {
-        $refs: {
-            alert:   AlertModal;
-            confirm: ConfirmModal;
-        };
-    }>;
-
-    export default vue.extend({
+    export default mixins(withRefs<References>()).extend({
         name:       "Application",
         components: {
             SettingsPage,

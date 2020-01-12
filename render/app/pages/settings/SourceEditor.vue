@@ -66,15 +66,15 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 </template>
 
 <script lang="ts">
-    import _                       from "lodash";
-    import { ValidationObserver }  from "vee-validate";
-    import mixins                  from "vue-typed-mixins";
-    import hdmiIcon                from "@mdi/svg/svg/video-input-hdmi.svg";
-    import sources                 from "../../../controllers/sources";
-    import DoesValidation          from "../../../foundation/concerns/does-valiadtion";
-    import withRefs                from "../../../foundation/concerns/with-refs";
-    import * as helpers            from "../../../foundation/helpers";
-    import Source                  from "../../../models/source";
+    import _                      from "lodash";
+    import { ValidationObserver } from "vee-validate";
+    import mixins                 from "vue-typed-mixins";
+    import hdmiIcon               from "@mdi/svg/svg/video-input-hdmi.svg";
+    import sources                from "../../../controllers/sources";
+    import DoesValidation         from "../../../foundation/concerns/does-valiadtion";
+    import withRefs               from "../../../foundation/concerns/with-refs";
+    import * as helpers           from "../../../foundation/helpers";
+    import Source                 from "../../../models/source";
 
     type Validator  = InstanceType<typeof ValidationObserver>;
     type References = {
