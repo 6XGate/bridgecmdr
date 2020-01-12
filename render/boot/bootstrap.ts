@@ -19,9 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 export default Promise.all([
     require("./modules/database"),
     require("./modules/drivers"),
-    require("./modules/lodash"),
     require("./modules/axios"),
-    require("./modules/vuetify"),
-    require("./modules/components"),
-    require("./modules/validation"),
+    require("./modules/framework"),
 ]);

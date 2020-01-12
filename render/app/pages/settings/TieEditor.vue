@@ -20,7 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     <div>
         <slot name="activators" :edit="editTie" :create="newTie"/>
         <v-dialog v-model="visible" persistent fullscreen hide-overlay scrollable :transition="transition">
-            <validation-observer ref="validator" v-slot="{ valid }" slim>
+            <validation-observer ref="validator" v-slot="{ handleSubmit }" slim>
                 <v-card tile>
                     <div>
                         <v-toolbar>
@@ -28,7 +28,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                             <v-toolbar-title>{{ title }}</v-toolbar-title>
                             <div class="flex-grow-1"></div>
                             <v-toolbar-items>
-                                <v-btn text :disabled="!valid" @click="onSaveClicked">Save</v-btn>
+                                <v-btn text @click="handleSubmit(onSaveClicked)">Save</v-btn>
                             </v-toolbar-items>
                         </v-toolbar>
                     </div>
@@ -36,34 +36,27 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                         <v-row>
                             <v-col>
                                 <v-form>
-                                    <validation-provider v-slot="{ errors, invalid }" name="switch"
-                                                         rules="required" slim>
-                                        <v-select v-model="subject.switchId"
-                                                  :items="switches" item-value="_id" item-text="title"
-                                                  :error="invalid" :error-count="invalid ? errors.length : 0"
-                                                  :error-messages="invalid ? errors : []" label="Switch"
+                                    <validation-provider v-slot="{ errors }" name="switch" rules="required" slim>
+                                        <v-select v-model="subject.switchId" v-bind="validatesWith(errors)"
+                                                  :items="switches" item-value="_id" item-text="title" label="Switch"
                                                   filled/>
                                     </validation-provider>
-                                    <validation-provider v-slot="{ errors, invalid }" name="input channel"
+                                    <validation-provider v-slot="{ errors }" name="input channel"
                                                          rules="required|min_value:1" slim>
-                                        <number-input v-model="subject.inputChannel"
-                                                      :error="invalid" :error-count="invalid ? errors.length : 0"
-                                                      :error-messages="invalid ? errors : []" label="Input"
-                                                      :min="1" filled/>
+                                        <number-input v-model="subject.inputChannel" v-bind="validatesWith(errors)"
+                                                      label="Input" :min="1" filled/>
                                     </validation-provider>
-                                    <validation-provider v-slot="{ errors, invalid }" :name="videoOutputName"
+                                    <validation-provider v-slot="{ errors }" :name="videoOutputName"
                                                          :rules="videoOutputRules" slim>
                                         <number-input v-show="showVideoOutput" v-model="subject.outputChannels.video"
-                                                      :error="invalid" :error-count="invalid ? errors.length : 0"
-                                                      :error-messages="invalid ? errors : []" :label="videoOutputLabel"
-                                                      :min="0" filled/>
+                                                      v-bind="validatesWith(errors)" :label="videoOutputLabel" :min="0"
+                                                      filled/>
                                     </validation-provider>
-                                    <validation-provider v-slot="{ errors, invalid }" name="audio output channel"
+                                    <validation-provider v-slot="{ errors }" name="audio output channel"
                                                          :rules="audioOutputRules" slim>
                                         <number-input v-show="showAudioOutput" v-model="subject.outputChannels.audio"
-                                                      :error="invalid" :error-count="invalid ? errors.length : 0"
-                                                      :error-messages="invalid ? errors : []" label="Audio output"
-                                                      :min="0" filled/>
+                                                      v-bind="validatesWith(errors)" label="Audio output" :min="0"
+                                                      filled/>
                                     </validation-provider>
                                 </v-form>
                             </v-col>
@@ -77,14 +70,21 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 <script lang="ts">
     import _                                                from "lodash";
-    import Vue, { VueConstructor }                          from "vue";
     import { ValidationObserver }                           from "vee-validate";
+    import mixins                                           from "vue-typed-mixins";
     import ties                                             from "../../../controllers/ties";
     import switches                                         from "../../../controllers/switches";
+    import DoesValidation                                   from "../../../foundation/concerns/does-valiadtion";
+    import withRefs                                         from "../../../foundation/concerns/with-refs";
+    import Driver, { DriverCapabilities, DriverDescriptor } from "../../../foundation/system/driver";
+    import Source                                           from "../../../models/source";
     import Switch                                           from "../../../models/switch";
     import Tie                                              from "../../../models/tie";
-    import Driver, { DriverCapabilities, DriverDescriptor } from "../../../foundation/system/driver";
-    import Source from "../../../models/source";
+
+    type Validator  = InstanceType<typeof ValidationObserver>;
+    type References = {
+        validator: Validator;
+    };
 
     const EMPTY_TIE: Tie = {
         _id:            "",
@@ -97,16 +97,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         },
     };
 
-    type Validator = InstanceType<typeof ValidationObserver>;
-
-    interface References {
-        $refs: {
-            validator: Validator;
-        };
-    }
-
-    const vue = Vue as VueConstructor<References & Vue>;
-    export default vue.extend({
+    export default mixins(DoesValidation, withRefs<References>()).extend({
         name:  "TieEditor",
         props: {
             transition: { type: String, default: "dialog-transition" },
@@ -198,6 +189,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             async readySubject(subject: Tie): Promise<void> {
                 await this.refresh();
                 this.subject = subject;
+                this.$refs.validator && this.$refs.validator.reset();
             },
         },
     });

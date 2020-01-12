@@ -20,7 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     <div>
         <slot name="activators" :edit="editSource" :create="newSource"/>
         <v-dialog v-model="visible" persistent fullscreen hide-overlay scrollable :transition="transition">
-            <validation-observer ref="validator" v-slot="{ valid }" slim>
+            <validation-observer ref="validator" v-slot="{ handleSubmit }" slim>
                 <v-card tile>
                     <div>
                         <v-toolbar>
@@ -28,7 +28,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                             <v-toolbar-title>{{ title }}</v-toolbar-title>
                             <div class="flex-grow-1"></div>
                             <v-toolbar-items>
-                                <v-btn text :disabled="!valid" @click="onSaveClicked">Save</v-btn>
+                                <v-btn text @click="handleSubmit(onSaveClicked)">Save</v-btn>
                             </v-toolbar-items>
                         </v-toolbar>
                     </div>
@@ -36,18 +36,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                         <v-row>
                             <v-col>
                                 <v-form>
-                                    <validation-provider v-slot="{ errors, invalid }" name="title"
-                                                         rules="required" slim>
-                                        <v-text-field v-model="subject.title" label="Name" :error="invalid"
-                                                      filled :error-count="invalid ? errors.length : 0"
-                                                      :error-messages="invalid ? errors[0] : undefined"/>
+                                    <validation-provider v-slot="{ errors }" name="title" rules="required"
+                                                         slim>
+                                        <v-text-field v-model="subject.title" label="Name"
+                                                      v-bind="validatesWith(errors)" filled/>
                                     </validation-provider>
-                                    <validation-provider v-slot="{ errors, invalid }" name="image"
-                                                         rules="required|mimes:image/*" slim>
-                                        <v-file-input v-model="subject.image" label="Image" :error="invalid"
-                                                      filled :error-count="invalid ? errors.length : 0"
-                                                      :error-messages="invalid ? errors[0] : undefined"
-                                                      prepend-icon="mdi-camera" @change="onChangeImage"/>
+                                    <validation-provider v-slot="{ errors }" name="image" rules="required|mimes:image/*"
+                                                         slim>
+                                        <v-file-input v-model="subject.image" label="Image"
+                                                      v-bind="validatesWith(errors)" prepend-icon="mdi-camera" filled
+                                                      @change="onChangeImage"/>
                                         <v-row>
                                             <v-col cols="2">
                                                 <v-card tile>
@@ -69,12 +67,19 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 <script lang="ts">
     import _                       from "lodash";
-    import Vue, { VueConstructor } from "vue";
     import { ValidationObserver }  from "vee-validate";
+    import mixins                  from "vue-typed-mixins";
     import hdmiIcon                from "@mdi/svg/svg/video-input-hdmi.svg";
     import sources                 from "../../../controllers/sources";
-    import Source                  from "../../../models/source";
+    import DoesValidation          from "../../../foundation/concerns/does-valiadtion";
+    import withRefs                from "../../../foundation/concerns/with-refs";
     import * as helpers            from "../../../foundation/helpers";
+    import Source                  from "../../../models/source";
+
+    type Validator  = InstanceType<typeof ValidationObserver>;
+    type References = {
+        validator: Validator;
+    };
 
     const EMPTY_SOURCE: Source = {
         _id:   "",
@@ -82,16 +87,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         image: new File([], "none"),
     };
 
-    type Validator = InstanceType<typeof ValidationObserver>;
-
-    interface References {
-        $refs: {
-            validator: Validator;
-        };
-    }
-
-    const vue = Vue as VueConstructor<Vue & References>;
-    export default vue.extend({
+    export default mixins(DoesValidation, withRefs<References>()).extend({
         name:  "SourceEditor",
         props: {
             transition: { type: String,  default: "dialog-transition" },
@@ -154,6 +150,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             async readySubject(subject: Source): Promise<void> {
                 this.subject = subject;
                 await this.updateImageUrl(subject.image);
+                this.$refs.validator && this.$refs.validator.reset();
             },
         },
     });
