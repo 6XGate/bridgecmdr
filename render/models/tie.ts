@@ -16,8 +16,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Model         from "../support/model";
-import { TieOutput } from "../support/system/tie";
+import Model         from "../foundation/model";
+import { TieOutput } from "../foundation/system/tie";
 
 export default interface Tie extends Model {
     _id:            string;

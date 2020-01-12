@@ -89,6 +89,7 @@
     "vue-loader": "^15.8.3",
     "vue-style-loader": "^4.1.2",
     "vue-template-compiler": "^2.6.11",
+    "vue-typed-mixins": "^0.2.0",
     "vuetify": "^2.1.15",
     "vuetify-loader": "^1.4.3",
     "webpack": "^4.41.4",

@@ -17,8 +17,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 import _            from "lodash";
-import Controller   from "../support/controller";
-import { Document } from "../support/store";
+import Controller   from "../foundation/controller";
+import { Document } from "../foundation/store";
 import Source       from "../models/source";
 import ties from "./ties";
 

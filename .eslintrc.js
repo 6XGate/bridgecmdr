@@ -259,32 +259,6 @@ module.exports = {
         }],
         "vue/script-indent": ["error", 4, {
             baseIndent: 1,
-            // "switchCase": 0,
-            // "ignores": [],
-        }],"vue/order-in-components": ["error", {
-            "order": [
-                "el",
-                "name",
-                "parent",
-                "functional",
-                ["delimiters", "comments"],
-                ["components", "directives", "filters"],
-                "extends",
-                "mixins",
-                "inheritAttrs",
-                "model",
-                ["props", "propsData"],
-                "fetch",
-                "asyncData",
-                "data",
-                "computed",
-                "watch",
-                "methods",
-                "LIFECYCLE_HOOKS",
-                "head",
-                ["template", "render"],
-                "renderError",
-            ]
         }],
     },
     "overrides": [
@@ -297,7 +271,7 @@ module.exports = {
     ],
     "settings": {
         "import/ignore": [
-            /^xdg-basedir$/u,
+            (/^xdg-basedir$/u),
         ],
     },
 };

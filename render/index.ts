@@ -18,7 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // app scaffolding
 import Vue         from "vue";
-import booting     from "./bootstrap";
+import booting     from "./boot/bootstrap";
 import Application from "./app/Application.vue";
 
 // We need to declare the new property for window.
@@ -31,5 +31,5 @@ declare global {
 // The main application instance.
 window.addEventListener("DOMContentLoaded", async () => {
     await booting;
-    window.theApp = new Vue(Application).$mount("#root");
+    window.theApp = new Application({ el: "#root" });
 });
