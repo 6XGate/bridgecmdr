@@ -16,19 +16,17 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Driver, { DriverCapabilities, DriverDescriptor }         from "../support/system/driver";
-import { openStream, SerialBits, SerialParity, SerialStopBits } from "../support/streams/command";
+import Driver, { DriverCapabilities, DriverDescriptor }         from "../driver";
+import { openStream, SerialBits, SerialParity, SerialStopBits } from "../../streams/command";
 
-const capabilities =
-    DriverCapabilities.HAS_MULTIPLE_OUTPUTS |
-    DriverCapabilities.CAN_DECOUPLE_AUDIO_OUTPUT;
-const about = {
-    guid:  "4C8F2838-C91D-431E-84DD-3666D14A6E2C",
-    title: "Extron SIS-compatible matrix switch",
+const capabilities = DriverCapabilities.NONE;
+const about        = {
+    guid:  "91D5BC95-A8E2-4F58-BCAC-A77BA1054D61",
+    title: "TeslaSmart-compatible matrix switch",
     capabilities,
 };
 
-export default class ExtronMatrixSwitch extends Driver {
+export default class TeslaSmartMatrixSwitch extends Driver {
     private readonly path: string;
 
     public static about(): DriverDescriptor {
@@ -36,7 +34,7 @@ export default class ExtronMatrixSwitch extends Driver {
     }
 
     public static load(path: string): Promise<Driver> {
-        return Promise.resolve(new ExtronMatrixSwitch(path));
+        return Promise.resolve(new TeslaSmartMatrixSwitch(path));
     }
 
     // eslint-disable-next-line class-methods-use-this
@@ -54,22 +52,17 @@ export default class ExtronMatrixSwitch extends Driver {
         this.path = path;
     }
 
-    public async setTie(inputChannel: number, videoOutputChannel: number, audioOutputChannel: number): Promise<void> {
-        console.log(`Extron SIS: ${inputChannel}, ${videoOutputChannel}, ${audioOutputChannel}`);
+    public async setTie(inputChannel: number): Promise<void> {
+        console.log(`Tesla: ${inputChannel}`);
 
-        const videoCommand = `${inputChannel}*${videoOutputChannel}%`;
-        const audioCommand = `${inputChannel}*${audioOutputChannel}$`;
-        const command      = `${videoCommand}\r\n${audioCommand}\r\n`;
+        const command = Buffer.from(Uint8Array.from([ 0xAA, 0xBB, 0x03, 0x01, inputChannel, 0xEE ]));
 
         const connection = await openStream(this.path, {
             baudReat: 9600,
             bits:     SerialBits.EIGHT,
             parity:   SerialParity.NONE,
             stopBits: SerialStopBits.ONE,
-            port:     23,
         });
-
-        connection.setEncoding("ascii");
 
         // TODO: Other situation handlers...
         connection.on("data", data => console.debug(`DEBUG: ${about.title}: return: ${data}`));

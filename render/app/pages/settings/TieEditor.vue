@@ -79,11 +79,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     import _                                                from "lodash";
     import Vue, { VueConstructor }                          from "vue";
     import { ValidationObserver }                           from "vee-validate";
-    import ties                                             from "../../../controller/ties";
-    import switches                                         from "../../../controller/switches";
+    import ties                                             from "../../../controllers/ties";
+    import switches                                         from "../../../controllers/switches";
     import Switch                                           from "../../../models/switch";
     import Tie                                              from "../../../models/tie";
-    import Driver, { DriverCapabilities, DriverDescriptor } from "../../../support/system/driver";
+    import Driver, { DriverCapabilities, DriverDescriptor } from "../../../foundation/system/driver";
     import Source from "../../../models/source";
 
     const EMPTY_TIE: Tie = {

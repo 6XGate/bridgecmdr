@@ -91,9 +91,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     import SerialPort              from "serialport";
     import Vue, { VueConstructor } from "vue";
     import { ValidationObserver }  from "vee-validate";
-    import switches                from "../../../controller/switches";
+    import switches                from "../../../controllers/switches";
     import Switch                  from "../../../models/switch";
-    import Driver                  from "../../../support/system/driver";
+    import Driver                  from "../../../foundation/system/driver";
 
     interface SerialDevice {
         label: string;

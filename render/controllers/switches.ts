@@ -16,18 +16,19 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-// The main driver module.
-import Driver from "../../support/system/driver";
+import Controller from "../foundation/controller";
+import Switch     from "../models/switch";
+import ties       from "./ties";
 
-// The available drivers.
-import ExtronMatrixSwitch         from "../../drivers/extron-matrix-switch";
-import SonySerialMonitor          from "../../drivers/sony-serial--monitor";
-import TeslaSmartMatrixSwitch     from "../../drivers/tesla-smart-matrix-switch";
+class SwitchController extends Controller<Switch> {
+    public constructor() {
+        super("switches");
+    }
 
-// Now we register our known drivers.
-Driver.register(ExtronMatrixSwitch);
-Driver.register(SonySerialMonitor);
-Driver.register(TeslaSmartMatrixSwitch);
+    public async remove(id: string): Promise<void> {
+        await this.store.remove(id);
+        await Promise.all((await ties.forSwitch(id)).map(tie => ties.remove(tie._id)));
+    }
+}
 
-// This module is resolved once it executes.
-export default Promise.resolve();
+export default new SwitchController();

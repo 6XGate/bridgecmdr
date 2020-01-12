@@ -21,12 +21,12 @@ import Driver   from "./driver";
 import Source   from "./source";
 import Switch   from "./switch";
 import Tie      from "./tie";
-import database from "../../bootstrap/booters/database";
-import sources  from "../../controller/sources";
-import switches from "../../controller/switches";
-import ties     from "../../controller/ties";
+import database from "../../boot/modules/database";
+import sources  from "../../controllers/sources";
+import switches from "../../controllers/switches";
+import ties     from "../../controllers/ties";
 
-async function loadConfiguration(): Promise<void> {
+async function loadRegistry(): Promise<void> {
     await database;
 
     // First ensure all existing switches are unloaded.
@@ -82,14 +82,14 @@ async function loadConfiguration(): Promise<void> {
     }
 }
 
-let loaded: Promise<void> = loadConfiguration();
+let loaded: Promise<void> = loadRegistry();
 
 export default {
     load(): Promise<void> {
         return loaded;
     },
     reload(): Promise<void> {
-        loaded = loadConfiguration();
+        loaded = loadRegistry();
 
         return loaded;
     },

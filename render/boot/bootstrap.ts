@@ -17,11 +17,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 export default Promise.all([
-    require("./booters/database"),
-    require("./booters/drivers"),
-    require("./booters/lodash"),
-    require("./booters/axios"),
-    require("./booters/vuetify"),
-    require("./booters/components"),
-    require("./booters/validation"),
+    require("./modules/database"),
+    require("./modules/drivers"),
+    require("./modules/lodash"),
+    require("./modules/axios"),
+    require("./modules/vuetify"),
+    require("./modules/components"),
+    require("./modules/validation"),
 ]);

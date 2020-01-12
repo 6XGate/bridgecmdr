@@ -85,13 +85,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     import _            from "lodash";
     import Vue          from "vue";
     import TieEditor    from "./TieEditor.vue";
-    import switches     from "../../../controller/switches";
-    import ties         from "../../../controller/ties";
+    import switches     from "../../../controllers/switches";
+    import ties         from "../../../controllers/ties";
     import Source       from "../../../models/source";
     import Switch       from "../../../models/switch";
     import Tie          from "../../../models/tie";
-    import * as helpers from "../../../support/helpers";
-    import Driver       from "../../../support/system/driver";
+    import * as helpers from "../../../foundation/helpers";
+    import Driver       from "../../../foundation/system/driver";
 
     const EMPTY_SOURCE: Source = {
         _id:   "",

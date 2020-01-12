@@ -72,9 +72,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     import Vue, { VueConstructor } from "vue";
     import { ValidationObserver }  from "vee-validate";
     import hdmiIcon                from "@mdi/svg/svg/video-input-hdmi.svg";
-    import sources                 from "../../../controller/sources";
+    import sources                 from "../../../controllers/sources";
     import Source                  from "../../../models/source";
-    import * as helpers            from "../../../support/helpers";
+    import * as helpers            from "../../../foundation/helpers";
 
     const EMPTY_SOURCE: Source = {
         _id:   "",

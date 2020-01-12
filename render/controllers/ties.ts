@@ -17,7 +17,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 import Tie        from "../models/tie";
-import Controller from "../support/controller";
+import Controller from "../foundation/controller";
 
 class TieController extends Controller<Tie> {
     public constructor() {
