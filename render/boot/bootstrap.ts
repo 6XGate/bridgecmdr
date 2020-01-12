@@ -1,6 +1,6 @@
 /*
 BridgeCmdr - A/V switch and monitor controller
-Copyright (C) 2019 Matthew Holder
+Copyright (C) 2019-2020 Matthew Holder
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
