@@ -1,6 +1,6 @@
 <!--
 BridgeCmdr - A/V switch and monitor controller
-Copyright (C) 2019 Matthew Holder
+Copyright (C) 2019-2020 Matthew Holder
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
     import Vue          from "vue";
     import SwitchEditor from "./SwitchEditor.vue";
-    import switches     from "../../../controller/switches";
+    import switches     from "../../../controllers/switches";
     import Switch       from "../../../models/switch";
 
     export default Vue.extend({

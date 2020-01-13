@@ -1,6 +1,6 @@
 /*
 BridgeCmdr - A/V switch and monitor controller
-Copyright (C) 2019 Matthew Holder
+Copyright (C) 2019-2020 Matthew Holder
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // app scaffolding
 import Vue         from "vue";
-import booting     from "./bootstrap";
+import booting     from "./boot/bootstrap";
 import Application from "./app/Application.vue";
 
 // We need to declare the new property for window.
@@ -31,5 +31,5 @@ declare global {
 // The main application instance.
 window.addEventListener("DOMContentLoaded", async () => {
     await booting;
-    window.theApp = new Vue(Application).$mount("#root");
+    window.theApp = new Application({ el: "#root" });
 });

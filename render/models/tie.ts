@@ -1,6 +1,6 @@
 /*
 BridgeCmdr - A/V switch and monitor controller
-Copyright (C) 2019 Matthew Holder
+Copyright (C) 2019-2020 Matthew Holder
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Model         from "../support/model";
-import { TieOutput } from "../support/system/tie";
+import Model         from "../foundation/model";
+import { TieOutput } from "../foundation/system/tie";
 
 export default interface Tie extends Model {
     _id:            string;

@@ -1,6 +1,6 @@
 <!--
 BridgeCmdr - A/V switch and monitor controller
-Copyright (C) 2019 Matthew Holder
+Copyright (C) 2019-2020 Matthew Holder
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     <div>
         <slot name="activators" :edit="editSwitch" :create="newSwitch"/>
         <v-dialog v-model="visible" persistent fullscreen hide-overlay scrollable :transition="transition">
-            <validation-observer ref="validator" v-slot="{ valid }" slim>
+            <validation-observer ref="validator" v-slot="{ handleSubmit }" slim>
                 <v-card tile>
                     <div>
                         <v-toolbar>
@@ -28,7 +28,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                             <v-toolbar-title>{{ title }}</v-toolbar-title>
                             <div class="flex-grow-1"></div>
                             <v-toolbar-items>
-                                <v-btn text :disabled="!valid" @click="onSaveClicked">Save</v-btn>
+                                <v-btn text @click="handleSubmit(onSaveClicked)">Save</v-btn>
                             </v-toolbar-items>
                         </v-toolbar>
                     </div>
@@ -36,40 +36,29 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                         <v-row>
                             <v-col>
                                 <v-form>
-                                    <validation-provider v-slot="{ errors, invalid }" name="title"
-                                                         rules="required" slim>
-                                        <v-text-field v-model="subject.title" label="Name" :error="invalid"
-                                                      filled :error-count="invalid ? errors.length : 0"
-                                                      :error-messages="invalid ? errors[0] : undefined"/>
+                                    <validation-provider v-slot="{ errors }" name="title" rules="required"
+                                                         slim>
+                                        <v-text-field v-model="subject.title" v-bind="validatesWith(errors)"
+                                                      label="Name" filled/>
                                     </validation-provider>
-                                    <validation-provider v-slot="{ errors, invalid }" name="driver"
-                                                         rules="required" slim>
-                                        <v-select v-model="subject.driverId" label="Driver" :error="invalid"
-                                                  :items="drivers" item-value="guid" item-text="title"
-                                                  filled :error-count="invalid ? errors.length : 0"
-                                                  :error-messages="invalid ? errors[0] : undefined"/>
+                                    <validation-provider v-slot="{ errors }" name="driver" rules="required" slim>
+                                        <v-select v-model="subject.driverId" v-bind="validatesWith(errors)"
+                                                  label="Driver" :items="drivers" item-value="guid" item-text="title"
+                                                  filled/>
                                     </validation-provider>
                                     <v-row>
                                         <v-col cols="3">
-                                            <v-select v-model="location" label="Type"
-                                                      :items="locations" item-value="value" item-text="label"
-                                                      filled/>
+                                            <v-select v-model="location" label="Type" :items="locations"
+                                                      item-value="value" item-text="label" filled/>
                                         </v-col>
                                         <v-col cols="9">
-                                            <validation-provider #default="{ errors, invalid }" :name="pathName"
-                                                                 rules="required" slim>
+                                            <validation-provider #default="{ errors }" :name="pathName"
+                                                                 :rules="pathRules" slim>
                                                 <v-text-field v-show="location !== DeviceLocation.PORT" v-model="path"
-                                                              :label="pathLabel" :error="invalid" filled
-                                                              :error-count="invalid ? errors.length : 0"
-                                                              :error-messages="invalid ? errors[0] : undefined"/>
-                                            </validation-provider>
-                                            <validation-provider #default="{ errors, invalid }" :name="pathName"
-                                                                 :rules="portRules" slim>
+                                                              v-bind="validatesWith(errors)" :label="pathLabel" filled/>
                                                 <v-select v-show="location === DeviceLocation.PORT" v-model="path"
-                                                          :label="pathLabel" :error="invalid" :items="ports"
-                                                          item-value="path" item-text="label" filled
-                                                          :error-count="invalid ? errors.length : 0"
-                                                          :error-messages="invalid ? errors[0] : undefined"/>
+                                                          v-bind="validatesWith(errors)" :label="pathLabel"
+                                                          :items="ports" item-value="path" item-text="label" filled/>
                                             </validation-provider>
                                         </v-col>
                                     </v-row>
@@ -87,18 +76,26 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 </template>
 
 <script lang="ts">
-    import _                       from "lodash";
-    import SerialPort              from "serialport";
-    import Vue, { VueConstructor } from "vue";
-    import { ValidationObserver }  from "vee-validate";
-    import switches                from "../../../controller/switches";
-    import Switch                  from "../../../models/switch";
-    import Driver                  from "../../../support/system/driver";
+    import _                      from "lodash";
+    import { ValidationObserver } from "vee-validate";
+    import mixins                 from "vue-typed-mixins";
+    import switches               from "../../../controllers/switches";
+    import DoesValidation         from "../../../foundation/concerns/does-valiadtion";
+    import withRefs               from "../../../foundation/concerns/with-refs";
+    import Driver                 from "../../../foundation/system/driver";
+    import Switch                 from "../../../models/switch";
+    import {
+        DeviceLocation,
+        getLocationFromPath, getSubPathFromPath,
+        makeSerialDeviceList,
+        rebuildPath,
+        SerialDevice,
+    } from "../../../support/switch-editing";
 
-    interface SerialDevice {
-        label: string;
-        path:  string;
-    }
+    type Validator  = InstanceType<typeof ValidationObserver>;
+    type References = {
+        validator: Validator;
+    };
 
     const EMPTY_SWITCH: Switch = {
         _id:      "",
@@ -107,108 +104,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         path:     "port:",
     };
 
-    type Validator = InstanceType<typeof ValidationObserver>;
-
-    interface References {
-        $refs: {
-            validator: Validator;
-        };
-    }
-
-    enum DeviceLocation {
-        PATH = 0,
-        PORT = 1,
-        IP   = 2,
-    }
-
-    function generateLabel(port: SerialPort.PortInfo): string {
-        if (!port.pnpId) {
-            return port.comName;
-        }
-
-        let labelParts = port.pnpId.split("-");
-        if (labelParts.length < 3) {
-            return port.comName;
-        }
-
-        for (;;) {
-            const part = _.last(labelParts) as string;
-            if ((/^port\d+$/u).test(part)) {
-                labelParts.pop();
-            } else if ((/^if\d+$/u).test(part)) {
-                labelParts.pop();
-            } else {
-                break;
-            }
-        }
-
-        labelParts = _.tail(labelParts);
-        if (labelParts.length === 0) {
-            return port.comName;
-        }
-
-        return labelParts.join("-").replace(/_/gu, " ");
-    }
-
-    async function makeSerialDeviceList(): Promise<SerialDevice[]> {
-        const ports   = await SerialPort.list();
-        const devices = [] as SerialDevice[];
-        for (const port of ports) {
-            const device = {} as SerialDevice;
-            if (port.pnpId && port.pnpId.length) {
-                // Use the `by-id` path from the PNP-ID.
-                device.label = generateLabel(port);
-                device.path  = `/dev/serial/by-id/${port.pnpId}`;
-            } else {
-                // Just use the port path for the label and path.
-                device.label = port.comName;
-                device.path  = port.comName;
-            }
-
-            devices.push(device);
-        }
-
-        return devices;
-    }
-
-    function rebuildPath(location: DeviceLocation, path: string): string {
-        if (location === DeviceLocation.IP) {
-            return `ip:${path}`;
-        }
-
-        if (location === DeviceLocation.PORT) {
-            return `port:${path}`;
-        }
-
-        return path;
-    }
-
-    function getLocationFromPath(path: string): DeviceLocation {
-        if (path.startsWith("ip:")) {
-            return DeviceLocation.IP;
-        }
-
-        if (path.startsWith("port:")) {
-            return DeviceLocation.PORT;
-        }
-
-        return DeviceLocation.PATH;
-    }
-
-    function getSubPathFromPath(path: string): string {
-        if (path.startsWith("ip:")) {
-            return path.substr(3);
-        }
-
-        if (path.startsWith("port:")) {
-            return path.substr(5);
-        }
-
-        return path;
-    }
-
-    const vue = Vue as VueConstructor<Vue & References>;
-    export default vue.extend({
+    export default mixins(DoesValidation, withRefs<References>()).extend({
         name:  "SwitchEditor",
         props: {
             transition: { type: String, default: "dialog-transition" },
@@ -248,11 +144,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                     throw Error("Impossible device location");
                 }
             },
-            portRules(): Record<string, unknown>|undefined {
+            pathRules(): Record<string, unknown> {
                 return this.location === DeviceLocation.PORT ? {
                     required: true,
                     oneOf:    this.validPorts,
-                } : undefined;
+                } : {
+                    required: true,
+                };
             },
             validPorts(): string[] {
                 return this.ports.map(port => port.path);
@@ -298,6 +196,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 this.subject  = subject;
                 this.location = getLocationFromPath(subject.path);
                 this.path     = getSubPathFromPath(subject.path);
+                this.$refs.validator && this.$refs.validator.reset();
             },
         },
     });

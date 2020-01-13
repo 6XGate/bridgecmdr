@@ -1,6 +1,6 @@
 /*
 BridgeCmdr - A/V switch and monitor controller
-Copyright (C) 2019 Matthew Holder
+Copyright (C) 2019-2020 Matthew Holder
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import unhandled from "electron-unhandled";
 unhandled();
 
 import { app, BrowserWindow } from "electron";
+import installExtension, { VUEJS_DEVTOOLS } from "electron-devtools-installer";
 
 let window: BrowserWindow|null = null;
 
@@ -65,10 +66,13 @@ process.on("SIGTERM", () => {
 
 app.on("ready", (): void => {
     if (process.env.NODE_ENV !== "production") {
-        require("./devtools");
+        installExtension(VUEJS_DEVTOOLS).
+            then(name => { console.log(`Installing ${name}`); }).
+            then(() => { createWindow(); }).
+            catch(error => { console.error(error); });
+    } else {
+        createWindow();
     }
-
-    createWindow();
 });
 
 app.on("window-all-closed", (): void => {

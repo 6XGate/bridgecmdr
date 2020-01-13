@@ -1,6 +1,6 @@
 /*
 BridgeCmdr - A/V switch and monitor controller
-Copyright (C) 2019 Matthew Holder
+Copyright (C) 2019-2020 Matthew Holder
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ const packerConfigPath = "..";
 require(path.join(packerConfigPath, "webpack.packer"));
 
 // Now export our functions.
-module.exports = env => Promise.all([
-    packer.main.generate(env, "electron-main"),
-    packer.render.generate(env, "electron-renderer"),
+module.exports = () => Promise.all([
+    packer.main.generate("electron-main"),
+    packer.render.generate("electron-renderer"),
 ]);

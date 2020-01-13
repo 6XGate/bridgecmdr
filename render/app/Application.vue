@@ -1,6 +1,6 @@
 <!--
 BridgeCmdr - A/V switch and monitor controller
-Copyright (C) 2019 Matthew Holder
+Copyright (C) 2019-2020 Matthew Holder
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -48,17 +48,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 </template>
 
 <script lang="ts">
-    import { promises as fs }      from "fs";
-    import path                    from "path";
-    import Vue, { VueConstructor } from "vue";
-    import Vuetify                 from "vuetify";
-    import colors                  from "vuetify/lib/util/colors";
-    import xdgBasedir              from "xdg-basedir";
-    import SettingsPage            from "./pages/SettingsPage.vue";
-    import * as helpers            from "../support/helpers";
-    import Source                  from "../support/system/source";
-    import Switch                  from "../support/system/switch";
-    import config                  from "../support/system/config";
+    import Vue                       from "vue";
+    import mixins                    from "vue-typed-mixins";
+    import SettingsPage              from "./pages/SettingsPage.vue";
+    import vuetify                   from "../config/vuetify";
+    import { Button, makeDashboard } from "../controllers/dashboard";
+    import withRefs                  from "../foundation/concerns/with-refs";
+    import * as helpers              from "../foundation/helpers";
+    import registry                  from "../foundation/system/registry";
+    import Switch                    from "../foundation/system/switch";
+    import doFirstRun                from "../support/first-run";
     import {
         AlertModal,
         AlertModalOptions,
@@ -66,107 +65,26 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         ConfirmModalOptions,
     } from "../components/modals";
 
-    const vuetify = new Vuetify({
-        icons: {
-            iconfont: "mdi",
-        },
-        theme: {
-            themes: {
-                light: {
-                    primary:       colors.indigo.base,
-                    secondary:     colors.indigo.lighten3,
-                    accent:        colors.teal.lighten5,
-                    primaryText:   "#FFFFFF",
-                    secondaryText: "#000000",
-                },
-                dark: {
-                    primary:       colors.indigo.base,
-                    secondary:     colors.indigo.lighten3,
-                    accent:        colors.teal.darken4,
-                    primaryText:   "#FFFFFF",
-                    secondaryText: "#000000",
-                },
-            },
-        },
-    });
+    type References = {
+        alert:   AlertModal;
+        confirm: ConfirmModal;
+    };
 
-    interface References {
-        $refs: {
-            alert:   AlertModal;
-            confirm: ConfirmModal;
-        };
-    }
-
-    interface ButtonStyles {
-        "white":     boolean;
-        "blue-grey": boolean;
-        "lighten-4": boolean;
-    }
-
-    class Button {
-        public readonly key: string;
-        public readonly image: string;
-        public readonly label: string;
-        public readonly activate: () => Promise<void>;
-        public classes: ButtonStyles = {
-            "white":     false,
-            "blue-grey": true,
-            "lighten-4": true,
-        };
-
-        public constructor(source: Source, imageUrl: string, activated: (button: Button) => void) {
-            this.key      = source.guid;
-            this.image    = imageUrl;
-            this.label    = source.title;
-            this.activate = async () => {
-                await source.select();
-                activated(this);
-                this.classes.white        = true;
-                this.classes["blue-grey"] = false;
-                this.classes["lighten-4"] = false;
-            };
-        }
-
-        public deactivate(): void {
-            this.classes.white        = false;
-            this.classes["blue-grey"] = true;
-            this.classes["lighten-4"] = true;
-        }
-    }
-
-    async function makeButtons(activated: (button: Button) => void): Promise<Button[]> {
-        await config.load();
-        const sources = Source.all();
-        const images  = await Promise.all(sources.map(source => helpers.toDataUrl(source.image)));
-        const buttons = [] as Button[];
-        for (let i = 0; i !== sources.length; ++i) {
-            const source = sources[i];
-            const image  = images[i];
-            if (source.ties.length > 0 || process.env.NODE_ENV !== "production") {
-                buttons.push(new Button(source, image, activated));
-            }
-        }
-
-        return buttons;
-    }
-
-    const vue = Vue as VueConstructor<Vue & References>;
-    export default vue.extend({
+    export default mixins(withRefs<References>()).extend({
         name:       "Application",
         components: {
             SettingsPage,
         },
         data: function () {
             return {
-                buttons:      [] as Button[],
-                activeButton: null as Button|null,
+                buttons: [] as Button[],
             };
         },
         methods: {
             async refresh() {
                 this.buttons = [];
-                await config.reload();
-                this.buttons = await makeButtons(button => this.onButtonActivated(button));
+                await registry.reload();
+                this.buttons = await makeDashboard();
             },
             async powerOff() {
                 try {
@@ -181,13 +99,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
                 window.close();
             },
-            onButtonActivated(button: Button) {
-                if (this.activeButton) {
-                    this.activeButton.deactivate();
-                }
-
-                this.activeButton = button;
-            },
         },
         mounted() {
             Vue.prototype.$modals = {
@@ -196,69 +107,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             };
 
             // On the first run, check for an auto-start file. Ask the user if they wish to make one.
-            this.$nextTick(async () => {
-                const configDir    = xdgBasedir.config;
-                const doneFirstRun = Number(window.localStorage.getItem("doneFirstRun") || 0);
-                if (doneFirstRun < 1) {
-                    // 1. Auto-start file creation.
-                    if (configDir) {
-                        const autoStartDir = path.resolve(configDir, "autostart");
-                        await fs.mkdir(autoStartDir, { recursive: true });
-
-                        const autoStartFile = "org.sleepingcats.BridgeCmdr.desktop";
-                        const autoStartPath = path.resolve(autoStartDir, autoStartFile);
-
-                        const autoStartExists = await fs.stat(autoStartPath).
-                            then(stat => stat.isFile()).catch(() => false);
-                        if (!autoStartExists) {
-                            const createAutoStart = await this.$modals.confirm({
-                                main:      "Do you want BridgeCmdr to start on boot?",
-                                secondary: "You can start BridgeCmdr when your system starts",
-                            });
-
-                            if (createAutoStart) {
-                                const needsExecProxy = (/electron$/u).test(process.execPath);
-                                const exec = needsExecProxy ?
-                                    path.resolve(window.__dirname, "../../bridgecmdr") :
-                                    "bridgecmdr";
-                                try {
-                                    const entry = await fs.open(autoStartPath, "w", 0o644);
-                                    await entry.write("[Desktop Entry]\n");
-                                    await entry.write("Name=BridgeCmdr\n");
-                                    await entry.write(`Exec=${exec}\n`);
-                                    await entry.write("NoDisplay=true\n");
-                                    await entry.write("Terminal=false\n");
-                                } catch (error) {
-                                    const ex = error as Error;
-                                    await this.$modals.alert({
-                                        main:      "Unable create auto-start entry",
-                                        secondary: ex.message,
-                                    });
-                                }
-                            }
-                        }
-                    }
-
-                    window.localStorage.setItem("doneFirstRun", String(1));
-                }
-            });
+            this.$nextTick(() => doFirstRun(this));
 
             // Load and create the buttons.
-            this.$nextTick(async () => {
-                this.buttons = await makeButtons(button => this.onButtonActivated(button));
-            });
+            this.$nextTick(async () => { this.buttons = await makeDashboard(); });
         },
         vuetify,
     });
 </script>
-
-<style lang="scss">
-    @import "~@mdi/font";
-    @import '~vuetify/src/styles/styles';
-
-    .fab-container {
-        position: fixed;
-        bottom: 0;
-        right: 0;
-    }
-</style>
