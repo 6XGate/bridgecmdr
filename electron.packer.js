@@ -29,6 +29,7 @@ packager.source(".").target("linux", "armhf").
         new RegExp("^/render", "u"),
         new RegExp("^/build", "u"),
         new RegExp("^/bridgecmdr$", "u"),
+        new RegExp("^/@types", "u"),
         new RegExp("^/[^/]+\\.txt$", "u"),
         new RegExp("^/[^/]+\\.md", "u"),
         new RegExp("^/[^/]+\\.dic", "u"),
