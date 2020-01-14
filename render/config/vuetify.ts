@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import Vuetify from "vuetify";
+import Vuetify from "vuetify/lib";
 import colors  from "vuetify/lib/util/colors";
 
 const vuetify = new Vuetify({
