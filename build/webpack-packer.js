@@ -145,6 +145,16 @@ class Packer {
                     },
                 },
             },
+            scss: {
+                loader:  "sass-loader",
+                options: {
+                    sourceMap:      true,
+                    implementation: require("sass"),
+                    sassOptions:    {
+                        fiber: require("fibers"),
+                    },
+                },
+            },
             file: {
                 loader:  "file-loader",
                 options: {
@@ -174,12 +184,21 @@ class Packer {
                 ],
             },
             sass: {
-                test: (/\.s[ac]ss$/u),
+                test: (/\.sass$/u),
                 use:  [
                     loaders.style,
                     loaders.css,
                     loaders.resolveUrl,
                     loaders.sass,
+                ],
+            },
+            scss: {
+                test: (/\.scss$/u),
+                use:  [
+                    loaders.style,
+                    loaders.css,
+                    loaders.resolveUrl,
+                    loaders.scss,
                 ],
             },
             vue: {
@@ -455,6 +474,7 @@ class Packer {
                     this[myRules].typeScript,
                     this[myRules].css,
                     this[myRules].sass,
+                    this[myRules].scss,
                     this[myRules].vue,
                     this[myRules].images,
                     this[myRules].fonts,
