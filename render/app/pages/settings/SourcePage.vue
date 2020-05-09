@@ -39,7 +39,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                                     <v-list-item-title class="headline">{{ subject.title }}</v-list-item-title>
                                     <v-list-item-subtitle>Source</v-list-item-subtitle>
                                 </v-list-item-content>
-                                <v-list-item-avatar size="64" tile><v-img :src="image"/></v-list-item-avatar>
+                                <v-list-item-avatar size="64" tile><v-img :src="image" contain/></v-list-item-avatar>
                             </v-list-item>
                             <!-- The ties -->
                             <v-list-item v-for="row of ties" :key="row._id" two-line @click="edit(row)">

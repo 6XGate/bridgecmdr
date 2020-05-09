@@ -25,7 +25,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                         <v-row justify="start" no-gutters>
                             <v-card v-for="button of buttons" :key="button.key" class="ma-1" :class="button.classes"
                                     tile @click="() => button.activate()">
-                                <v-img :src="button.image" width="128px" height="128px"/>
+                                <v-img :src="button.image" width="128px" height="128px" contain/>
                             </v-card>
                         </v-row>
                     </v-col>

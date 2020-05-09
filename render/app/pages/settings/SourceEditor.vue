@@ -49,8 +49,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                                         <v-row>
                                             <v-col cols="2">
                                                 <v-card tile>
-                                                    <v-img v-show="image" max-width="128px" max-height="128px"
-                                                           :class="imageClasses" :src="image"/>
+                                                    <v-img v-show="image" width="128px" height="128px"
+                                                           :class="imageClasses" :src="image" contain/>
                                                 </v-card>
                                             </v-col>
                                         </v-row>
