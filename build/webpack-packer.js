@@ -103,12 +103,20 @@ class Packer {
         /** @type {{[string]: RuleSetUseItem}} Common configuration */
         const loaders = {
             esLint: {
-                loader: "eslint-loader",
+                loader:  "eslint-loader",
+                options: {
+                    formatter: "unix",
+                },
             },
             typeScript: {
                 loader:  "ts-loader",
                 options: {
                     appendTsSuffixTo: [(/\.vue$/u)],
+                    errorFormatter:   (error, colors) => {
+                        const color = error.severity === "warning" ? colors.bold.yellow : colors.bold.red;
+
+                        return color(`${error.file}:${error.line}:${error.character}: ${error.content} [TS${error.code}]`);
+                    },
                 },
             },
             vue: {
