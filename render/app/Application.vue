@@ -81,7 +81,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             return {
                 productName: packageInfo.productName,
                 version:     packageInfo.version,
-                buttons: [] as Button[],
+                buttons:     [] as Button[],
             };
         },
         methods: {
