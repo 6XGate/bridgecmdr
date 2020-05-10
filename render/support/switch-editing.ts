@@ -32,12 +32,12 @@ export enum DeviceLocation {
 
 export function generateLabel(port: SerialPort.PortInfo): string {
     if (!port.pnpId) {
-        return port.comName;
+        return port.path;
     }
 
     let labelParts = port.pnpId.split("-");
     if (labelParts.length < 3) {
-        return port.comName;
+        return port.path;
     }
 
     for (;;) {
@@ -53,7 +53,7 @@ export function generateLabel(port: SerialPort.PortInfo): string {
 
     labelParts = _.tail(labelParts);
     if (labelParts.length === 0) {
-        return port.comName;
+        return port.path;
     }
 
     return labelParts.join("-").replace(/_/gu, " ");
@@ -70,8 +70,8 @@ export async function makeSerialDeviceList(): Promise<SerialDevice[]> {
             device.path  = `/dev/serial/by-id/${port.pnpId}`;
         } else {
             // Just use the port path for the label and path.
-            device.label = port.comName;
-            device.path  = port.comName;
+            device.label = port.path;
+            device.path  = port.path;
         }
 
         devices.push(device);

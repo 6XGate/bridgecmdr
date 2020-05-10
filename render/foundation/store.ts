@@ -16,9 +16,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import _       from "lodash";
+import _ from "lodash";
 import PouchDB from "pouchdb-browser";
-import uuid from "uuid/v4";
+import { v4 as uuid } from "uuid";
 
 type IndexFields  = Array<string>;
 type IndexList    = Array<IndexFields>;

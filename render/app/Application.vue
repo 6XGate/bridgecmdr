@@ -25,14 +25,15 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                         <v-row justify="start" no-gutters>
                             <v-card v-for="button of buttons" :key="button.key" class="ma-1" :class="button.classes"
                                     tile @click="() => button.activate()">
-                                <v-img :src="button.image" width="128px" height="128px"/>
+                                <v-img :src="button.image" width="128px" height="128px" contain/>
                             </v-card>
                         </v-row>
                     </v-col>
                 </v-row>
             </v-container>
         </v-content>
-        <v-layout row class="ma-3 text-right fab-container">
+        <v-layout row class="ma-3 fab-container d-flex flex-row justify-end align-center">
+            <span class="white--text font-weight-thin mx-2">{{ productName }} {{ version }}</span>
             <v-btn color="red" class="mx-2 secondaryText--text" fab @click="powerOff">
                 <v-icon>mdi-power</v-icon>
             </v-btn>
@@ -64,6 +65,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         ConfirmModal,
         ConfirmModalOptions,
     } from "../components/modals";
+    import packageInfo from "../../package.json";
 
     type References = {
         alert:   AlertModal;
@@ -77,7 +79,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         },
         data: function () {
             return {
-                buttons: [] as Button[],
+                productName: packageInfo.productName,
+                version:     packageInfo.version,
+                buttons:     [] as Button[],
             };
         },
         methods: {

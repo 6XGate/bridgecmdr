@@ -33,7 +33,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                             <v-list>
                                 <v-list-item v-for="row of sources" :key="row._id" @click="open(row)">
                                     <v-list-item-avatar>
-                                        <v-img :src="images[row._id]"/>
+                                        <v-img :src="images[row._id]" contain/>
                                     </v-list-item-avatar>
                                     <v-list-item-content v-text="row.title"/>
                                     <v-list-item-action>
