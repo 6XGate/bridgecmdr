@@ -52,7 +52,7 @@
     "copy-webpack-plugin": "^5.1.1",
     "cross-env": "^7.0.2",
     "css-loader": "^3.5.3",
-    "electron": "^8.2.5",
+    "electron": "^15.5.5",
     "electron-devtools-installer": "^3.0.0",
     "electron-installer-debian": "^3.0.0",
     "electron-packager": "^14.2.1",
