@@ -90,7 +90,7 @@
     "vue-style-loader": "^4.1.2",
     "vue-template-compiler": "^2.6.11",
     "vue-typed-mixins": "^0.2.0",
-    "vuetify": "^2.2.27",
+    "vuetify": "^2.6.10",
     "vuetify-loader": "^1.4.3",
     "webpack": "^4.43.0",
     "webpack-cli": "^3.3.11",
