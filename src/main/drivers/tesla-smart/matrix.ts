@@ -1,5 +1,5 @@
-import { defineDriver, kDeviceSupportsMultipleOutputs } from '@main/system/driver'
 import log from 'electron-log'
+import { defineDriver, kDeviceSupportsMultipleOutputs } from '@main/system/driver'
 
 const teslaSmartMatrixDriver = defineDriver({
   enable: false,

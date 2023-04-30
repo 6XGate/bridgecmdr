@@ -1,3 +1,4 @@
+import log from 'electron-log'
 import {
   createAddress,
   createCommand,
@@ -9,7 +10,6 @@ import {
 import { useCommandStream } from '@main/helpers/stream'
 import { defineDriver, kDeviceHasNoExtraCapabilities } from '@main/system/driver'
 import type { Command, CommandArg } from '@main/helpers/sonyRs485'
-import log from 'electron-log'
 
 const sonyRs485Driver = defineDriver({
   enable: true,

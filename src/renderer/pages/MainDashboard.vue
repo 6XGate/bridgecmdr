@@ -3,12 +3,12 @@ import { mdiPower, mdiVideoInputHdmi, mdiWrench } from '@mdi/js'
 import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useNextTick } from '@/helpers/vue'
+import { useDialogs } from '@/modals/dialogs'
 import { useDashboard } from '@/stores/dashboard'
 import useSettings from '@/stores/settings.js'
 import useBridgedApi from '@/system/bridged'
 import useFirstRun from '@/utilities/first'
 import type { I18nSchema } from '@/locales/locales'
-import log from 'electron-log'
 
 const settings = useSettings()
 const buttonSize = computed(() => `${settings.iconSize + 12}px`)
@@ -22,9 +22,14 @@ const powerTooltip = computed(() =>
     ? t('tooltip.doubleTapPowerOff')
     : t('tooltip.powerOff')))
 
-const powerOff = () => {
+const dialogs = useDialogs()
+const powerOff = async () => {
   if (import.meta.env.PROD) {
-    api.system.powerOff().catch(e => { log.error(e) })
+    try {
+      await api.system.powerOff()
+    } catch (e) {
+      await dialogs.error(e)
+    }
   }
 
   window.close()
@@ -32,8 +37,8 @@ const powerOff = () => {
 
 const powerButton = computed(() =>
   (settings.powerOffWhen === 'double'
-    ? { onDblclick: () => { powerOff() } }
-    : { onClick: () => { powerOff() } })
+    ? { onDblclick: async () => { await powerOff() } }
+    : { onClick: async () => { await powerOff() } })
 )
 
 const dashboard = useDashboard()

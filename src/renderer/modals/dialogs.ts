@@ -1,10 +1,10 @@
 import { createSharedComposable, useConfirmDialog } from '@vueuse/core'
+import log from 'electron-log'
 import { computed } from 'vue'
 import { useDisplay } from 'vuetify'
 import { z } from 'zod'
 import { useErrors } from '@/helpers/errors'
 import { useResponsiveModal } from '@/helpers/vuetify'
-import log from 'electron-log'
 
 export const AlertModalOptions = z.string().min(1).or(z.object({
   title: z.string().min(1).optional(),

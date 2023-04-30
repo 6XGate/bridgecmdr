@@ -1,5 +1,5 @@
-import execa from 'execa'
 import log from 'electron-log'
+import execa from 'execa'
 
 interface TypeMap {
   string: string

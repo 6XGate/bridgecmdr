@@ -1,3 +1,4 @@
+import log from 'electron-log'
 import { createI18n } from 'vue-i18n'
 import { en as vuetifyEn$ } from 'vuetify/locale'
 import { deepAssign } from '@/helpers/object'
@@ -7,7 +8,6 @@ import en from '@/locales/en/messages.json'
 import enNumbers from '@/locales/en/numbers'
 import type { DateTimeSchema, Locales, MessageSchema, NumberSchema } from '@/locales/locales'
 import type { MergeDeep } from 'type-fest'
-import log from 'electron-log'
 
 type CompleteSchema = MergeDeep<MessageSchema, { $vuetify: typeof vuetifyEn$ }>
 interface CompleteI18nSchema { message: CompleteSchema, datetime: DateTimeSchema, number: NumberSchema }

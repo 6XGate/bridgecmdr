@@ -1,3 +1,4 @@
+import log from 'electron-log'
 import { defineStore } from 'pinia'
 import { computed, readonly, ref } from 'vue'
 import { toFiles, useImages } from '@/helpers/attachment'
@@ -11,7 +12,6 @@ import type { DocumentId } from '@/data/database'
 import type { Driver } from '@/system/driver'
 import type { Source } from '@/system/source'
 import type { ReadonlyDeep } from 'type-fest'
-import log from 'electron-log'
 
 export interface Button {
   readonly guid: string

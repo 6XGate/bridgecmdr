@@ -1,6 +1,6 @@
+import log from 'electron-log'
 import { useCommandStream } from '@main/helpers/stream'
 import { defineDriver, kDeviceHasNoExtraCapabilities } from '@main/system/driver'
-import log from 'electron-log'
 
 const teslaSmartSdiDriver = defineDriver({
   enable: true,

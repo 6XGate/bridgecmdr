@@ -2,6 +2,7 @@ import { Buffer } from 'node:buffer'
 import { resolve as resolvePath } from 'node:path'
 import is from '@sindresorhus/is'
 import { app } from 'electron'
+import log from 'electron-log'
 import LevelDOWN from 'leveldown'
 import { memo } from 'radash'
 import useHandles from './handle'
@@ -20,7 +21,6 @@ import type {
   LevelDownIterator,
   LevelDownIteratorOptions
 } from 'leveldown'
-import log from 'electron-log'
 
 const kLevelHandle = Symbol('@leveldb') as HandleKey<LevelDown>
 const kIteratorHandle = Symbol('@levelIter') as HandleKey<LevelDownIterator>

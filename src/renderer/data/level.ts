@@ -1,6 +1,7 @@
 /* eslint-disable promise/always-return -- We are converting back to callbacks */
 /* eslint-disable promise/no-callback-in-promise -- We are converting back to callbacks */
 import is from '@sindresorhus/is'
+import log from 'electron-log'
 import LevelPouch from 'pouchdb-adapter-leveldb-core'
 import { memo } from 'radash'
 import useBridgedApi from '@/system/bridged'
@@ -25,7 +26,6 @@ import type {
   LevelDownPutOptions
 } from 'leveldown'
 import type { Merge } from 'type-fest'
-import log from 'electron-log'
 
 export const useLevelDb = memo(() => {
   const api = useBridgedApi()
