@@ -1,4 +1,3 @@
-
 # BridgeCmdr
 
 A/V switch and monitor controller
@@ -23,6 +22,8 @@ You should have received a copy of the GNU General Public License along with thi
 
 ## Installation
 
+> TODO: Update for AppImage or snap or whatever...
+
 To install BridgeCmdr on the Raspberry Pi, all you need do is download the
 [latest release](https://github.com/6XGate/bridgecmdr/releases) and install it with
 `sudo apt install ./bridgecmdr_<version>-<revision>_armhf.deb -y`
@@ -43,68 +44,100 @@ supported monitors and switches.
 
 ## Tools, Frameworks, Libraries, and Assets
 
-BridgeCmdr uses the following libraries and frameworks which are available under their respective license.
+BridgeCmdr uses the following libraries and frameworks are a major part of its makeup.
 
 | Framework/Library                                                        | License                                                                       |
 |--------------------------------------------------------------------------|-------------------------------------------------------------------------------|
 | [Electron](https://electronjs.org/)                                      | [MIT](https://github.com/electron/electron/blob/master/LICENSE)               |
 | [Vue.js](https://vuejs.org/)                                             | [MIT](https://github.com/vuejs/vue/blob/master/LICENSE)                       |
 | [Vuetify](https://vuetifyjs.com/)                                        | [MIT](https://github.com/vuetifyjs/vuetify/blob/master/LICENSE.md)            |
+| [Vue i18n](https://vue-i18n.intlify.dev/)                                | [MIT](https://github.com/intlify/vue-i18n-next/blob/master/LICENSE)           |
 | [PouchDB](https://pouchdb.com/)                                          | [Apache 2.0](https://github.com/pouchdb/pouchdb/blob/master/LICENSE)          |
+| [LevelDOWN](https://github.com/Level/leveldown)                          | [MIT](https://github.com/Level/leveldown/blob/master/LICENSE)                 |
 | [SerialPort](https://serialport.io/)                                     | [MIT](https://github.com/serialport/node-serialport/blob/master/LICENSE)      |
-| [VeeValidate](https://logaretm.github.io/vee-validate/)                  | [MIT](https://github.com/logaretm/vee-validate/blob/master/LICENSE)           |
-| [Lodash](https://lodash.com/)                                            | [MIT](https://github.com/lodash/lodash/blob/master/LICENSE)                   |
-| [Node UUID](https://github.com/kelektiv/node-uuid)                       | [MIT](https://github.com/kelektiv/node-uuid/blob/master/LICENSE.md)           |
-| [electron-unhandled](https://github.com/sindresorhus/electron-unhandled) | [MIT](https://github.com/sindresorhus/electron-unhandled/blob/master/license) |
-| [xdg-basedir](https://github.com/sindresorhus/xdg-basedir)               | [MIT](https://github.com/sindresorhus/xdg-basedir/blob/master/license)        |
-| [vue-typed-mixins](https://github.com/ktsn/vue-typed-mixins)             | [MIT](https://github.com/ktsn/vue-typed-mixins/blob/master/LICENSE)           |
+| [Vuelidate](https://vuelidate-next.netlify.app/)                         | [MIT](https://github.com/vuelidate/vuelidate/blob/next/LICENSE)               |
 
-Other dependencies not listed are part of one of the above packages and share the same license.
+For a complete list of dependencies and other utilized libraries, see the `package.json` file.
+Any other dependencies not listed above or in the package file are dependencies of those packages.
 
-BridgeCmdr also uses the [Material Design Icons](https://dev.materialdesignicons.com/) font and SVG graphics which are
-licensed under the [SIL Open Font License](https://github.com/Templarian/MaterialDesign/blob/master/LICENSE) v1.0.
-
-Finally, the following tools or libraries were used to build BridgeCmdr.
-
-- [cross-env](https://github.com/kentcdodds/cross-env).
-- [moment](https://momentjs.com/).
-- [read-package-json](https://github.com/npm/read-package-json).
-- [TypeScript](https://www.typescriptlang.org/).
-- [ESLint](https://eslint.org/), and the following third-party plug-ins;
-    - [ESLint Import Plug-in](https://github.com/benmosher/eslint-plugin-import),
-    - [ESLint Promise Plug-in](https://github.com/xjamundx/eslint-plugin-promise),
-    - [ESLint Node Plug-in](https://github.com/mysticatea/eslint-plugin-node),
-- [WebPack](https://webpack.js.org/), and the following third-party plug-ins;
-    - [TypeScript Loader](https://github.com/TypeStrong/ts-loader),
-    - [Resolve URL Loader](https://github.com/bholloway/resolve-url-loader),
-    - [Node Externals](https://github.com/liady/webpack-node-externals),
-    - [HTML WebPack Plug-in](https://github.com/jantimon/html-webpack-plugin),
-    - [Dart Sass](https://sass-lang.com/dart-sass), and the following third-party plug-ins;
-        - [Node Fibers](https://github.com/laverdet/node-fibers)
-- [Electron DevTools Installer](https://github.com/MarshallOfSound/electron-devtools-installer).
-- [Electron Installer (Debian)](https://github.com/electron-userland/electron-installer-debian).
-- [PHPStorm](https://www.jetbrains.com/phpstorm/), but no PHP code was harmed in the making of this software.
-- [VisualStudio Code](https://code.visualstudio.com/)
-
-Other tools or licenses not listed are part of one of the above packages.
+BridgeCmdr also uses the [Material Design Icons](https://pictogrammers.com/library/mdi/) SVG
+graphics which are licensed under the
+[Pictogrammers Free License](https://pictogrammers.com/docs/general/license/).
 
 ## Building
+
+The following tools or libraries are used to build BridgeCmdr.
+
+- [TypeScript](https://www.typescriptlang.org/).
+- [ESLint](https://eslint.org/), and the following third-party plug-ins;
+    - [ESLint TypeScript plug-in](https://typescript-eslint.io/),
+    - [ESLint Import plug-in](https://github.com/benmosher/eslint-plugin-import),
+    - [ESLint Promise plug-in](https://github.com/xjamundx/eslint-plugin-promise),
+    - [ESLint Node plug-in](https://github.com/eslint-community/eslint-plugin-n),
+    - [Vue.js plug-in](https://eslint.vuejs.org/),
+- [Electron Vite](https://evite.netlify.app/), and the following third-party plug-ins;
+    - [Vue plug-in](https://github.com/vitejs/vite-plugin-vue),
+    - [Vue i18n plug-in](https://github.com/intlify/bundle-tools/tree/main/packages/unplugin-vue-i18n),
+    - [Dart Sass](https://sass-lang.com/dart-sass),
+- [Electron Toolkit](https://github.com/alex8088/electron-toolkit).
+- [Electron Installer (Debian)](https://github.com/electron-userland/electron-installer-debian).
+- [VisualStudio Code](https://code.visualstudio.com/)
+
+For a complete list of tools, see the `package.json` file. Any other dependencies not listed above
+or in the package file are dependencies of those packages.
+
+### Recommended IDE Setup
+
+[VSCode](https://code.visualstudio.com/) with:
+  - [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur)
+  - [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin)
+  - [Dotenv + Vault](https://marketplace.visualstudio.com/items?itemName=dotenv.dotenv-vscode)
+  - [EditorConfig](https://marketplace.visualstudio.com/items?itemName=EditorConfig.EditorConfig)
+  - [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
+  - [i18n Ally](https://marketplace.visualstudio.com/items?itemName=Lokalise.i18n-ally)
+  - [Todo Tree](https://marketplace.visualstudio.com/items?itemName=Gruntfuggly.todo-tree)
+  - [YAML](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml)
+
+#### Type Support for `.vue` Imports in TS
+
+TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin) to make the TypeScript language service aware of `.vue` types.
+
+If the standalone TypeScript plugin doesn't feel fast enough to you, Volar has also implemented a [Take-Over Mode](https://github.com/johnsoncodehk/volar/discussions/471#discussioncomment-1361669) that is more performant. You can enable it by the following steps:
+
+1. Disable the built-in TypeScript Extension
+    1) Run `Extensions: Show Built-in Extensions` from VSCode's command palette
+    2) Find `TypeScript and JavaScript Language Features`, right click and select `Disable (Workspace)`
+2. Reload the VSCode window by running `Developer: Reload Window` from the command palette.
 
 ### Development
 
 If you want to help with the development of BridgeCmdr, downloading, building, then running the project on a GNU/Linux
 based operating system is required. The following steps will get you setup on a Debian-base operating system.
 
-1. Install the `build-essential` package; `sudo apt install build-essential -y`
+1. Install the `build-essential` package; `sudo apt install build-essential git -y`
 2. Acquire the source:
     - **Preferred**, Fork the [GitHub repository](https://github.com/6XGate/bridgecmdr), you may then issue pull
       requests back to the official source code. Also start personal branches from `develop`.
     - Download the [source](https://github.com/6XGate/bridgecmdr/archive/develop.zip) and extract it.
 3. Open a terminal clone and go to the folder into which source was cloned or extracted.
 4. Install the node packages; `npm ci`
-5. Build the user interface source; `npm run prod` or `npm run dev`
+5. Build and run the app;
+  - For hot-reload mode: `npm run dev`
+  - For product build preview: `npm run preview`
 
-You should now be able to run the program with `npm run start`.
+### Docker and ARM support
+
+If you want to run this in an ARM version of Linux, and don't have an ARM system or want to run on
+one. You can set up your system to support running ARM Docker container via QEMU's static user
+binary format translation. See
+[this article on Docker.com](https://www.docker.com/blog/getting-started-with-docker-for-arm-on-linux/)
+for more information. Some Linux distribution have packages or instruction for their own
+packaged version of QEMU and the binary translation support.
+
+The docker container can be built and activated in one command in this repository with
+`npm run docker:sh`. You may need to run `npm ci` to reinstall all packages with the
+proper ARM bindings. Using this container is really only useful when packaging the
+application with `npm run dist`.
 
 ### Packaging the Installer
 
@@ -126,9 +159,9 @@ Though not optimal, the only way to build a package on a 1GiB Raspberry Pi is to
 GNU/Linux based operating system to build the user interface and the Pi to build the installer package.
 
 1. On both systems, install the node packages; `npm ci`
-2. On the desktop system, build the user interface source; `npm run prod`
+2. On the desktop system, build the user interface source; `npm run build`
 3. Copy the `dist` folder from the desktop system to project folder on the Raspberry Pi system.
-4. Package the installer on the Raspberry Pi system; `npm run pack`
+4. Package the installer on the Raspberry Pi system; `npm run dist`
 
 #### Using Raspberry Pi with more RAM.
 
@@ -136,9 +169,11 @@ If you are running a Raspberry Pi 4 with 2GiB or 4GiB, all instructions can be d
 files and you will only use that single system. This is a simplest process.
 
 1. Install the node packages; `npm ci`
-2. Build the installer package; `npm run package`
+2. Build the installer package; `npm run dist`
 
 #### The Package
+
+> TODO: Update based on AppImage or snap or whatever...
 
 You should now have a Raspbian package ending in `.deb` in the `out` folder. This package can be installed with `apt` on
 the Raspberry Pi.

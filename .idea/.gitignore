@@ -1,18 +1,8 @@
-# User-specific stuff
+# Default ignored files
+/shelf/
 /workspace.xml
-/tasks.xml
-/usage.statistics.xml
-/dictionaries
-/shelf
-
-# Generated files
-/contentModel.xml
-
-# Sensitive or high-churn files
+# Editor-based HTTP Client requests
+/httpRequests/
+# Datasource local storage ignored files
 /dataSources/
-/dataSources.ids
 /dataSources.local.xml
-/sqlDataSources.xml
-/dynamic.xml
-/uiDesigner.xml
-/dbnavigator.xml

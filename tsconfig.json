@@ -1,25 +1,49 @@
 {
-  "compileOnSave": false,
+  "extends": "@vue/tsconfig/tsconfig.web.json",
+  "references": [{ "path": "./tsconfig.node.json" }],
+  "include": [
+    "src/renderer/env.d.ts",
+    "src/renderer/**/*",
+    "src/renderer/**/*.vue",
+    "src/preload/*.d.ts"
+  ],
+  // "exclude": ["node_modules"],
   "compilerOptions": {
-    "inlineSourceMap": true,
-    "module": "esnext",
-    "moduleResolution": "node",
-    "target": "esnext",
+    // Language and Environment
+    "lib": ["ESNext"],
 
+    // Modules
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["./src/shared/*"],
+      "@preload/*": ["./src/preload/*"],
+      "@main/*": ["./src/main/*"],
+      "@/*": ["./src/renderer/*"]
+    },
+
+    // JavaScript Support
     "allowJs": false,
-    "allowSyntheticDefaultImports": true,
     "checkJs": false,
-    "disableSizeLimit": true,
-    "emitBOM": false,
-    "esModuleInterop": false,
-    "noImplicitReturns": true,
+
+    // Emit
+    "importHelpers": true,
     "noEmitHelpers": true,
-    "noEmitOnError": true,
-    "noErrorTruncation": true,
+
+    // Interop Constraints
+    /* TODO: "verbatimModuleSyntax": true, */
+    "allowSyntheticDefaultImports": true,
+
+    // Type Checking/*  */
+    "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "resolveJsonModule": true,
-    "strict": true,
-    "types": ["vuetify"]
+    "exactOptionalPropertyTypes": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "allowUnusedLabels": true,
+    "allowUnreachableCode": true
   }
 }

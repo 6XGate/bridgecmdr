@@ -1,0 +1,28 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json
+appId: org.sleepingcats.BridgeCmdr
+productName: BridgeCmdr
+artifactName: ${name}-${version}-${arch}.${ext}
+directories:
+  buildResources: build
+files:
+  - '!**/.vscode/*'
+  - '!src/*'
+  - '!electron.vite.config.{js,ts,mjs,cjs}'
+  - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
+  - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
+  - '!{tsconfig.json,tsconfig.node.json}'
+  - '!{electron-builder.yml}'
+asarUnpack:
+  - node_modules/electron-log/**/*
+  - resources/**
+linux:
+  compression: store
+  target:
+    - AppImage
+  maintainer: Matthew Holder
+  category: Utility
+buildDependenciesFromSource: true
+npmRebuild: true
+publish:
+  provider: generic
+  url: https://6xgate.github.io/bridgecmdr/
