@@ -34,6 +34,19 @@ const useFirstRun = () => {
 
         return false
       }
+    },
+    // Version/step 2: Data migration warning.
+    async () => {
+      await dialogs.alert({
+        title: 'Old setting not migrated',
+        message: `Due to the architecture of version 1.x, your old data cannot be migrated to 2.x.
+                  Your data is still there and you can run version 1.x to write it down and put
+                  it in version 2.x if necessary. This will not be an issue moving forward.`,
+        button: 'Got it',
+        color: 'red'
+      })
+
+      return true
     }
   ]
 
