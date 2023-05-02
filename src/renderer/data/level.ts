@@ -1,7 +1,6 @@
 /* eslint-disable promise/always-return -- We are converting back to callbacks */
 /* eslint-disable promise/no-callback-in-promise -- We are converting back to callbacks */
 import is from '@sindresorhus/is'
-import log from 'electron-log'
 import LevelPouch from 'pouchdb-adapter-leveldb-core'
 import { memo } from 'radash'
 import useBridgedApi from '@/system/bridged'
@@ -106,7 +105,7 @@ export const useLevelDb = memo(() => {
       | [cb: ErrorCallback]
       | [options: LevelDownOpenOptions, cb: ErrorCallback]
 
-    const handleUnload = () => { close(e => { log.error(e) }) }
+    const handleUnload = () => { close(e => { console.error(e) }) }
 
     const open = (...args: OpenArgs) => {
       const oldStatus = status

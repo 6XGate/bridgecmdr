@@ -35,8 +35,8 @@ const sonyRs485Driver = defineDriver({
       })
 
       // TODO: Other situation handlers...
-      connection.on('data', data => { log.debug(`DEBUG: sonyRs485Driver: return: ${String(data)}`) })
-      connection.on('error', error => { log.error(`ERROR: sonyRs485Driver: ${error.message}`) })
+      connection.on('data', data => { log.debug(`sonyRs485Driver: return: ${String(data)}`) })
+      connection.on('error', error => { log.error(`sonyRs485Driver: ${error.message}`) })
 
       await connection.write(packet)
       await connection.close()

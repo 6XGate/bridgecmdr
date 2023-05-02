@@ -22,8 +22,8 @@ const extronSisDriver = defineDriver({
       })
 
       // TODO: Other situation handlers...
-      connection.on('data', data => { log.debug(`DEBUG: extronSisDriver: return: ${String(data)}`) })
-      connection.on('error', error => { log.error(`ERROR: extronSisDriver: ${error.message}`) })
+      connection.on('data', data => { log.debug(`extronSisDriver: return: ${String(data)}`) })
+      connection.on('error', error => { log.error(`extronSisDriver: ${error.message}`) })
 
       await connection.write(command)
       await connection.close()

@@ -1,4 +1,3 @@
-import log from 'electron-log'
 import { createPinia } from 'pinia'
 import { createApp } from 'vue'
 import BridgeCmdr from '@/BridgeCmdr.vue'
@@ -10,14 +9,6 @@ import vuetify from '@/plugins/vuetify'
 import '@/assets/main.scss'
 
 export const app = createApp(BridgeCmdr)
-
-app.config.errorHandler = (...[err, , info]) => {
-  log.error(info, err)
-}
-
-app.config.warnHandler = (...[err, , info]) => {
-  log.warn(info, err)
-}
 
 app.use(createPinia())
 app.use(vuetify)

@@ -22,8 +22,8 @@ const teslaSmartSdiDriver = defineDriver({
       })
 
       // TODO: Other situation handlers...
-      connection.on('data', data => { log.debug(`DEBUG: teslaSmartSdiDriver: return: ${String(data)}`) })
-      connection.on('error', error => { log.error(`ERROR: teslaSmartSdiDriver: ${error.message}`) })
+      connection.on('data', data => { log.debug(`teslaSmartSdiDriver: return: ${String(data)}`) })
+      connection.on('error', error => { log.error(`teslaSmartSdiDriver: ${error.message}`) })
 
       await connection.write(command)
       await connection.close()

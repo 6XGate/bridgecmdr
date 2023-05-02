@@ -7,7 +7,7 @@ import LevelDOWN from 'leveldown'
 import { memo } from 'radash'
 import useHandles from './handle'
 import type { HandleKey } from './handle'
-import type { Handle, LevelDownApi } from '@preload/api'
+import type { Handle, LevelProxyApi } from '@preload/api'
 import type { AbstractBatch } from 'abstract-leveldown'
 import type {
   Bytes,
@@ -210,7 +210,7 @@ const useLevelDown = memo(() => {
       end,
       seek
     }
-  } satisfies LevelDownApi
+  } satisfies LevelProxyApi
 })
 
 export default useLevelDown

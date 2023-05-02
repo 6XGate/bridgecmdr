@@ -1,4 +1,3 @@
-import log from 'electron-log'
 import { defineStore } from 'pinia'
 import { computed, readonly, ref } from 'vue'
 import { toFiles, useImages } from '@/helpers/attachment'
@@ -77,14 +76,14 @@ export const useDashboard = defineStore('dashboard', () => {
         const driver = loadedDrivers.get(tie.switchId)
 
         if (switcher == null) {
-          log.error(`${tie.switchId}: No such switch for source "${source.title}"`)
+          console.error(`${tie.switchId}: No such switch for source "${source.title}"`)
 
           return undefined
         }
 
         if (driver == null) {
-          log.error(
-              `${switcher.driverId}:  No such driver for switch "${switcher.title}" used by source "${source.title}"`
+          console.error(
+            `${switcher.driverId}:  No such driver for switch "${switcher.title}" used by source "${source.title}"`
           )
 
           return undefined

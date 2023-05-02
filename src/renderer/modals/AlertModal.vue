@@ -31,7 +31,7 @@ onReveal(config => {
         <VCardText>{{ message }}</VCardText>
       </template>
       <VCardActions class="justify-end">
-        <VBtn class="text-none" :text="color != null" :color="color" @click="confirm">{{ button }}</VBtn>
+        <VBtn class="text-none" :text="button" :color="color" @click="confirm"/>
       </VCardActions>
     </VCard>
   </VDialog>

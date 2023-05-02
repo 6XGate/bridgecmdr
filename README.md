@@ -22,11 +22,13 @@ You should have received a copy of the GNU General Public License along with thi
 
 ## Installation
 
-> TODO: Update for AppImage or snap or whatever...
-
 To install BridgeCmdr on the Raspberry Pi, all you need do is download the
-[latest release](https://github.com/6XGate/bridgecmdr/releases) and install it with
-`sudo apt install ./bridgecmdr_<version>-<revision>_armhf.deb -y`
+[latest release](https://github.com/6XGate/bridgecmdr/releases), grant
+the execution permission and run it. It may ask you to integrate the
+with the system to moving itself to common location and adding a
+desktop entry.
+
+It is best not to use BridgeCmdr with any tools such as `appimagelauncher`.
 
 ### System Requirements
 
@@ -173,7 +175,5 @@ files and you will only use that single system. This is a simplest process.
 
 #### The Package
 
-> TODO: Update based on AppImage or snap or whatever...
-
-You should now have a Raspbian package ending in `.deb` in the `out` folder. This package can be installed with `apt` on
-the Raspberry Pi.
+You should now have a package ending in `.AppImage` in the `dist` folder.
+This package can be run like any other AppImage file.

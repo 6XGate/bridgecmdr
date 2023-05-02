@@ -1,4 +1,6 @@
 import type { PortInfo } from '@serialport/bindings-interface'
+import type { AbstractBatch, AbstractGetOptions } from 'abstract-leveldown'
+import type { ProgressInfo, UpdateInfo } from 'electron-updater'
 import type {
   Bytes,
   LevelDownBatchOptions,
@@ -10,11 +12,28 @@ import type {
   LevelDownPutOptions
 } from 'leveldown'
 import type { Opaque } from 'type-fest'
-import type { z } from 'zod'
 
 //
 // Internal parts
 //
+
+/** Defines an event handler callback for a specific type of event. */
+type EventHandlerCallback<E extends Event> = (ev: E) => unknown
+/** Defines an event handler object for a specific type of event. */
+type EventHandlerObject<E extends Event> = { handleEvent: EventHandlerCallback<E> }
+/** Defines an event handler for a specific type of event. */
+type EventHandler<E extends Event> = EventHandlerCallback<E> | EventHandlerObject<E>
+
+/** Defines an event target for a specific type of event. */
+interface EventTargetEx<E extends Event> extends EventTarget {
+  addEventListener (type: E['type'], callback: EventHandler<E> | null): void
+  addEventListener (type: E['type'], callback: EventHandler<E> | null, useCapture: boolean): void
+  addEventListener (type: E['type'], callback: EventHandler<E> | null, options: EventListenerOptions): void
+  removeEventListener (type: E['type'], callback: EventHandler<E> | null): void
+  removeEventListener (type: E['type'], callback: EventHandler<E> | null, useCapture: boolean): void
+  removeEventListener (type: E['type'], callback: EventHandler<E> | null, options: EventListenerOptions): void
+  dispatchEvent (event: E): boolean
+}
 
 /** Internal IPC response structure */
 export interface IpcReturnedValue<T> {
@@ -40,6 +59,11 @@ export type ApiLocales = 'en'
 
 /** Opaque handles. */
 export type Handle = Opaque<number, 'Handle'>
+
+/** Event listener attachment options */
+export interface ListenerOptions {
+  once?: boolean | undefined
+}
 
 //
 // Login start API
@@ -137,19 +161,19 @@ export interface SystemApi {
 //
 
 /** Exposed LevelDown proxy API. */
-export interface LevelDownApi {
+export interface LevelProxyApi {
   readonly connect: (name: string) => Promise<Handle>
   readonly open: (h: Handle, options?: LevelDownOpenOptions) => Promise<void>
   readonly close: (h: Handle) => Promise<void>
   readonly get: (h: Handle, key: Bytes, options?: LevelDownGetOptions) => Promise<[Bytes]>
-  readonly getMany: (h: Handle, key: Bytes[], options: AbstractGetOptions) => Promise<[Bytes[]]>
+  readonly getMany: (h: Handle, key: Bytes[], options?: AbstractGetOptions) => Promise<[Bytes[]]>
   readonly put: (h: Handle, key: Bytes, value: Bytes, options?: LevelDownPutOptions) => Promise<void>
   readonly del: (h: Handle, key: Bytes, options?: LevelDownDelOptions) => Promise<void>
-  readonly batch: (h: Handle, array: Array<AbstractBatch<Bytes, Bytes>>, options?: LevelDownBatchOptions) => Promise<void>
+  readonly batch: (h: Handle, array: AbstractBatch[], options?: LevelDownBatchOptions) => Promise<void>
   readonly clear: (h: Handle, options?: LevelDownClearOptions) => Promise<void>
   readonly approximateSize: (h: Handle, start: Bytes, end: Bytes) => Promise<[number]>
   readonly compactRange: (h: Handle, start: Bytes, end: Bytes) => Promise<void>
-  readonly iterator(h: Handle, options?: LevelDownIteratorOptions): Promise<Handle>
+  readonly iterator:(h: Handle, options?: LevelDownIteratorOptions) => Promise<Handle>
   readonly iteration: {
     readonly next: (h: Handle) => Promise<[key: Bytes, value: Bytes]>
     readonly end: (h: Handle) => Promise<void>
@@ -167,7 +191,7 @@ export interface BridgedApi {
   readonly driver: DriverApi
   readonly ports: PortApi
   readonly system: SystemApi
-  readonly level: LevelDownApi
+  readonly level: LevelProxyApi
 }
 
 /** Basic application information. */
@@ -178,15 +202,28 @@ export interface AppInfo {
 
 /** Basic user information. */
 export interface UserInfo {
-  // TODO: User name
+  readonly name: string
   readonly locale: string
+}
+
+export interface AppUpdates {
+  checkForUpdates: () => Promise<UpdateInfo | undefined>
+  downloadUpdate: () => Promise<void>
+  cancelUpdate: () => Promise<void>
+  installUpdate: () => Promise<void>
+  // on('download')
+  onDownloadProgress: (fn: (progress: ProgressInfo) => void) => void
+  offDownloadProgress: (fn: (progress: ProgressInfo) => void) => void
 }
 
 // The exposed API global structure
 declare global {
   interface Window {
+    // APIs
     api: BridgedApi
     app: AppInfo
     user: UserInfo
+    // Events
+    appUpdates: AppUpdates
   }
 }

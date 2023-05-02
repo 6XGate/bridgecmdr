@@ -39,7 +39,7 @@ const useDBus = () => {
       ...args
     ]
 
-    log.debug('EXECA:', 'dbus-send', ...params)
+    log.debug('execa:dbus-send', ...params)
     const { stdout, stderr, exitCode } = await execa('dbus-send', params)
 
     if (exitCode !== 0) {

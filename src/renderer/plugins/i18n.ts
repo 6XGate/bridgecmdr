@@ -1,4 +1,3 @@
-import log from 'electron-log'
 import { createI18n } from 'vue-i18n'
 import { en as vuetifyEn$ } from 'vuetify/locale'
 import { deepAssign } from '@/helpers/object'
@@ -31,7 +30,7 @@ const i18n = createI18n<CompleteI18nSchema, Locales, false>({
       : `${locale}/key/${key}`
 
     if (!warned.has(checkKey)) {
-      log.warn(type != null
+      console.warn(type != null
         ? `Missing ${type} key "${key}" for "${locale}"`
         : `Missing key "${key}" for "${locale}"`)
     }

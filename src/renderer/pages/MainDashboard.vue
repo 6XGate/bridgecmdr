@@ -24,12 +24,10 @@ const powerTooltip = computed(() =>
 
 const dialogs = useDialogs()
 const powerOff = async () => {
-  if (import.meta.env.PROD) {
-    try {
-      await api.system.powerOff()
-    } catch (e) {
-      await dialogs.error(e)
-    }
+  try {
+    await api.system.powerOff()
+  } catch (e) {
+    await dialogs.error(e)
   }
 
   window.close()

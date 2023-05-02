@@ -33,6 +33,7 @@ lerna-debug.log*
 # Local environment data
 .env
 .env.*
+dev-app-update.yml
 
 # Build output
 dist/

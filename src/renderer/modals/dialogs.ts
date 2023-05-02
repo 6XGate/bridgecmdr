@@ -1,5 +1,4 @@
 import { createSharedComposable, useConfirmDialog } from '@vueuse/core'
-import log from 'electron-log'
 import { computed } from 'vue'
 import { useDisplay } from 'vuetify'
 import { z } from 'zod'
@@ -92,7 +91,7 @@ export const useDialogs = createSharedComposable(() => {
 
   const error = async (e: unknown, options?: ErrorModalOptions) => {
     const config = ErrorModalOptions.parse(options)
-    log.error(e)
+    console.error(e)
 
     await alert({
       title: config.title,
