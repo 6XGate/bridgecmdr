@@ -1,7 +1,11 @@
-import { unlink as deleteFile, mkdir, open as openFile, stat } from 'node:fs/promises'
+import { unlink as deleteFile, mkdir, stat, writeFile, readFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { resolve as resolvePath, join as joinPath } from 'node:path'
+import { app } from 'electron'
+import log from 'electron-log'
+import * as INI from 'ini'
 import xdgBasedir from 'xdg-basedir'
+import { DesktopEntryFile, readyEntry } from '@main/support/desktop'
 import type { StartupApi } from '@preload/api'
 
 export const useAutoStart = () => {
@@ -12,6 +16,7 @@ export const useAutoStart = () => {
   const autoStartDir = joinPath(configPath, 'autostart')
   const autoStartFile = 'org.sleepingcats.BridgeCmdr.desktop'
   const autoStartPath = joinPath(autoStartDir, autoStartFile)
+  const execPath = app.getPath('exe')
 
   const checkEnabled = async () =>
     await stat(autoStartPath)
@@ -19,24 +24,54 @@ export const useAutoStart = () => {
 
   const enable = async () => {
     await mkdir(autoStartDir, { recursive: true })
-    const needsExecProxy = process.execPath.endsWith('electron')
-    const exec = needsExecProxy
-      // FIXME: Shouldn't need the bridgecmdr name...
-      ? resolvePath(__dirname, '../../../bridgecmdr')
-      : 'bridgecmdr'
 
-    const entry = await openFile(autoStartPath, 'w', 0o644)
-    await entry.write('[Desktop Entry]\n')
-    await entry.write('Name=BridgeCmdr\n')
-    await entry.write(`Exec=${exec}\n`)
-    await entry.write('NoDisplay=true\n')
-    await entry.write('Terminal=false\n')
-    await entry.close()
+    const entry: DesktopEntryFile = {
+      'Desktop Entry': {
+        Type: 'Application',
+        Name: 'BridgeCmdr',
+        Exec: execPath,
+        NoDisplay: true,
+        Terminal: false
+      }
+    }
+
+    await writeFile(autoStartPath, INI.stringify(readyEntry(entry)),
+      { encoding: 'utf-8', mode: 0o644, flag: 'w' })
   }
 
   const disable = async () => {
     await deleteFile(autoStartPath)
   }
+
+  // Ensure that the file is valid and still points to the right location.
+  const checkUp = async () => {
+    const enabled = await checkEnabled()
+    if (!enabled) {
+      log.debug('No auto-start entry; auto-start disabled, so skipping entry check')
+
+      return
+    }
+
+    let reenable = false
+    try {
+      const file = DesktopEntryFile.parse(INI.parse(await readFile(autoStartPath,
+        { encoding: 'utf-8' })))
+      const entry = file['Desktop Entry']
+      if (entry.Type !== 'Application' || entry.Exec !== execPath) {
+        // Rewrite the entry to fix the type of path.
+        reenable = true
+      }
+    } catch (e) {
+      log.error(`Entry file parse error, rewriting: ${String(e)}`)
+      reenable = true
+    }
+
+    if (reenable) {
+      await enable()
+    }
+  }
+
+  checkUp().catch(e => { log.error(e) })
 
   return {
     checkEnabled,

@@ -33,8 +33,6 @@ useEventListener(appUpdater, 'progress', (ev: UpdateProgressEvent) => {
 const checkForUpdate = async () => {
   const info = await appUpdater.checkForUpdates()
   if (info == null) {
-    console.log('info.version null')
-
     return
   }
 

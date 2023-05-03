@@ -105,7 +105,9 @@ export const useLevelDb = memo(() => {
       | [cb: ErrorCallback]
       | [options: LevelDownOpenOptions, cb: ErrorCallback]
 
-    const handleUnload = () => { close(e => { console.error(e) }) }
+    const handleUnload = () => {
+      close(e => { e != null && console.error(e) })
+    }
 
     const open = (...args: OpenArgs) => {
       const oldStatus = status

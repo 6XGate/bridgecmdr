@@ -16,7 +16,7 @@ try {
   useAppInfo()
   useUserInfo()
   usePolyfills()
-} catch (error) {
-  console.error(error)
+} catch (e) {
+  console.error('Preload error', e)
   process.exit(1)
 }
