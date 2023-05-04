@@ -118,11 +118,11 @@ en:
     colorTheme: Color theme
     powerOffWhen: Power button will power off when
     powerOnSwitchesAtStart: Auto power on
-    closeApp: Close @:product
+    closeApp: Close BridgeCmdr
   description:
-    autoStart: Start @:product when the system starts
-    powerOnSwitchesAtStart: Power on switches & monitors when @:product starts
-    closeApp: Close @:product without powering down
+    autoStart: Start BridgeCmdr when the system starts
+    powerOnSwitchesAtStart: Power on switches & monitors when BridgeCmdr starts
+    closeApp: Close BridgeCmdr without powering down
   label:
     iconSize: Icon size
     powerOffWhen: Power off by

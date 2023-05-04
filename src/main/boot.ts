@@ -1,4 +1,4 @@
-import { join as joinPath } from 'node:path'
+import { join as joinPath, resolve as resolvePath } from 'node:path'
 import process from 'node:process'
 import { devTools, electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { app, shell, BrowserWindow, nativeTheme } from 'electron'
@@ -20,6 +20,10 @@ const waitTill = async (timeout: number) => {
 
 const useApplicationBoot = () => {
   const { shutDown } = useHandles()
+
+  // Let's change some paths
+  const configDir = app.getPath('userData')
+  app.setPath('sessionData', resolvePath(configDir, '.websession'))
 
   const createWindow = async () => {
     const willStartWithDark = nativeTheme.shouldUseDarkColors ||

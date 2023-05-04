@@ -67,9 +67,9 @@ onUnmounted(() => {
 <i18n lang="yaml">
 en:
   label:
-    about: About @:product
+    about: About BridgeCmdr
   description:
-    general: Basic settings for @:product
+    general: Basic settings for BridgeCmdr
     about: Version {0}
   count:
     sources: No sources | One source | {n} sources

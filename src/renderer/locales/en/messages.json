@@ -48,7 +48,7 @@
   },
   "validations": {
     "required": "A value is required",
-    "requiredIf": "@:validations.required",
+    "requiredIf": "A value is required",
     "alpha": "The value must be alphabetic",
     "alphaNum": "The value must be a mix of alphabetic or numeric",
     "numeric": "The value must be numeric",
