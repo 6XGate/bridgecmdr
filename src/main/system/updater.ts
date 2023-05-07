@@ -63,7 +63,7 @@ const useUpdater = memo(() => {
       try {
         if (import.meta.env.DEV) {
         // Force update check on for testing.
-          const installPath = resolvePath(app.getAppPath(), 'out', 'BridgeCmdr')
+          const installPath = resolvePath(app.getAppPath(), 'dist', 'BridgeCmdr')
           await writeFile(installPath, '')
           process.env['APPIMAGE'] = installPath
         }
