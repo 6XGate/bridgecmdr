@@ -1,10 +1,11 @@
 import { Buffer } from 'node:buffer'
 import { resolve as resolvePath } from 'node:path'
 import is from '@sindresorhus/is'
-import { app } from 'electron'
-import log from 'electron-log'
+import { app, ipcMain } from 'electron'
 import LevelDOWN from 'leveldown'
 import { memo } from 'radash'
+import useLogging from '@main/plugins/log'
+import { ipcProxy } from '@main/utilities'
 import useHandles from './handle'
 import type { HandleKey } from './handle'
 import type { Handle, LevelProxyApi } from '@preload/api'
@@ -22,36 +23,38 @@ import type {
   LevelDownIteratorOptions
 } from 'leveldown'
 
-const kLevelHandle = Symbol('@leveldb') as HandleKey<LevelDown>
-const kIteratorHandle = Symbol('@levelIter') as HandleKey<LevelDownIterator>
-
-type CallbackArg<Result> = Result extends unknown[] ? Result : []
-type ErrorCallback<Results> = (err: Error | undefined, ...args: CallbackArg<Results>) => void
-const makeAsync = async <Results = void> (fn: (resolver: ErrorCallback<Results>) => void) =>
-  await new Promise<Results>((resolve, reject) => {
-    fn((error, ...args: CallbackArg<Results>) => {
-      error != null
-        ? reject(error)
-        : resolve(args as never)
-    })
-  })
-
-const bufferize = (value: unknown) => {
-  if (typeof value === 'string' || value instanceof Buffer) {
-    return value
-  }
-
-  if (is.typedArray(value)) {
-    return Buffer.from(value.buffer)
-  }
-
-  throw new TypeError('Only string and buffers can be used as keys and values')
-}
-
 const useLevelDown = memo(() => {
-  const { createHandle, openHandle, freeHandle } = useHandles()
+  const log = useLogging()
 
-  const connect = async (location: string) => {
+  const { createHandle, openHandle, freeHandle } = useHandles()
+  const kLevelHandle = Symbol('@leveldb') as HandleKey<LevelDown>
+  const kIteratorHandle = Symbol('@levelIter') as HandleKey<LevelDownIterator>
+
+  type CallbackArg<Result> = Result extends unknown[] ? Result : []
+  type ErrorCallback<Results> = (err: Error | undefined, ...args: CallbackArg<Results>) => void
+  async function makeAsync<Results = void> (fn: (resolver: ErrorCallback<Results>) => void) {
+    return await new Promise<Results>((resolve, reject) => {
+      fn((error, ...args: CallbackArg<Results>) => {
+        error != null
+          ? reject(error)
+          : resolve(args as never)
+      })
+    })
+  }
+
+  function bufferize (value: unknown) {
+    if (typeof value === 'string' || value instanceof Buffer) {
+      return value
+    }
+
+    if (is.typedArray(value)) {
+      return Buffer.from(value.buffer)
+    }
+
+    throw new TypeError('Only string and buffers can be used as keys and values')
+  }
+
+  async function connect (location: string) {
     // Don't allow any path separating characters.
     if ((/[/\\.:]/u).test(location)) {
       throw new Error('Only a file name, without extension or relative path, may be specified')
@@ -77,7 +80,7 @@ const useLevelDown = memo(() => {
     }))
   }
 
-  const open = async (h: Handle, options?: LevelDownOpenOptions) => {
+  async function open (h: Handle, options?: LevelDownOpenOptions) {
     await makeAsync(cb => {
       const db = openHandle(kLevelHandle, h)
       options != null
@@ -86,27 +89,29 @@ const useLevelDown = memo(() => {
     })
   }
 
-  const close = async (h: Handle) => {
+  async function close (h: Handle) {
     await freeHandle(h)
   }
 
-  const get = async (h: Handle, key: Bytes, options?: LevelDownGetOptions) =>
-    await makeAsync<[Bytes]>(cb => {
+  async function get (h: Handle, key: Bytes, options?: LevelDownGetOptions) {
+    return await makeAsync<[Bytes]>(cb => {
       const db = openHandle(kLevelHandle, h)
       options != null
         ? db.get(bufferize(key), options, cb)
         : db.get(bufferize(key), cb)
     })
+  }
 
-  const getMany = async (h: Handle, keys: Bytes[], options?: LevelDownGetOptions) =>
-    await makeAsync<[Bytes[]]>(cb => {
+  async function getMany (h: Handle, keys: Bytes[], options?: LevelDownGetOptions) {
+    return await makeAsync<[Bytes[]]>(cb => {
       const db = openHandle(kLevelHandle, h)
       options != null
         ? db.getMany(keys.map(bufferize), options, cb)
         : db.getMany(keys.map(bufferize), cb)
     })
+  }
 
-  const put = async (h: Handle, key: Bytes, value: Bytes, options?: LevelDownPutOptions) => {
+  async function put (h: Handle, key: Bytes, value: Bytes, options?: LevelDownPutOptions) {
     await makeAsync(cb => {
       const db = openHandle(kLevelHandle, h)
       options != null
@@ -115,7 +120,7 @@ const useLevelDown = memo(() => {
     })
   }
 
-  const del = async (h: Handle, key: Bytes, options?: LevelDownDelOptions) => {
+  async function del (h: Handle, key: Bytes, options?: LevelDownDelOptions) {
     await makeAsync(cb => {
       const db = openHandle(kLevelHandle, h)
       options != null
@@ -124,7 +129,7 @@ const useLevelDown = memo(() => {
     })
   }
 
-  const batch = async (h: Handle, array: AbstractBatch[], options?: LevelDownBatchOptions) => {
+  async function batch (h: Handle, array: AbstractBatch[], options?: LevelDownBatchOptions) {
     await makeAsync(cb => {
       const db = openHandle(kLevelHandle, h)
       const ops = array.map(op => {
@@ -141,7 +146,7 @@ const useLevelDown = memo(() => {
     })
   }
 
-  const clear = async (h: Handle, options?: LevelDownClearOptions) => {
+  async function clear (h: Handle, options?: LevelDownClearOptions) {
     await makeAsync(cb => {
       const db = openHandle(kLevelHandle, h)
       options != null
@@ -150,33 +155,35 @@ const useLevelDown = memo(() => {
     })
   }
 
-  const approximateSize = async (h: Handle, start: Bytes, end: Bytes) =>
-    await makeAsync<[number]>(cb => {
+  async function approximateSize (h: Handle, start: Bytes, end: Bytes) {
+    return await makeAsync<[number]>(cb => {
       const db = openHandle(kLevelHandle, h)
       db.approximateSize(start, end, cb)
     })
+  }
 
-  const compactRange = async (h: Handle, start: Bytes, end: Bytes) => {
+  async function compactRange (h: Handle, start: Bytes, end: Bytes) {
     await makeAsync(cb => {
       const db = openHandle(kLevelHandle, h)
       db.compactRange(start, end, cb)
     })
   }
 
-  const iterator = async (h: Handle, options?: LevelDownIteratorOptions) => {
+  async function iterator (h: Handle, options?: LevelDownIteratorOptions) {
     const db = openHandle(kLevelHandle, h)
     const iter = db.iterator(options)
 
     return await Promise.resolve(createHandle(kIteratorHandle, iter, () => undefined))
   }
 
-  const next = async (h: Handle) =>
-    await makeAsync<[key: Bytes, value: Bytes]>(cb => {
+  async function iteratorNext (h: Handle) {
+    return await makeAsync<[key: Bytes, value: Bytes]>(cb => {
       const iter = openHandle(kIteratorHandle, h)
       iter.next(cb)
     })
+  }
 
-  const end = async (h: Handle) => {
+  async function iteratorEnd (h: Handle) {
     await makeAsync(cb => {
       const iter = openHandle(kIteratorHandle, h)
       iter.end(cb)
@@ -185,14 +192,14 @@ const useLevelDown = memo(() => {
     await freeHandle(h)
   }
 
-  const seek = async (h: Handle, key: Bytes) => {
+  async function iteratorSeek (h: Handle, key: Bytes) {
     const iter = openHandle(kIteratorHandle, h)
     iter.seek(key)
 
     await Promise.resolve()
   }
 
-  return {
+  const api = {
     connect,
     open,
     close,
@@ -206,11 +213,29 @@ const useLevelDown = memo(() => {
     compactRange,
     iterator,
     iteration: {
-      next,
-      end,
-      seek
+      next: iteratorNext,
+      end: iteratorEnd,
+      seek: iteratorSeek
     }
   } satisfies LevelProxyApi
+
+  ipcMain.handle('leveldb:connect', ipcProxy(api.connect))
+  ipcMain.handle('leveldb:open', ipcProxy(api.open))
+  ipcMain.handle('leveldb:close', ipcProxy(api.close))
+  ipcMain.handle('leveldb:get', ipcProxy(api.get))
+  ipcMain.handle('leveldb:getMany', ipcProxy(api.getMany))
+  ipcMain.handle('leveldb:put', ipcProxy(api.put))
+  ipcMain.handle('leveldb:del', ipcProxy(api.del))
+  ipcMain.handle('leveldb:batch', ipcProxy(api.batch))
+  ipcMain.handle('leveldb:clear', ipcProxy(api.clear))
+  ipcMain.handle('leveldb:approximateSize', ipcProxy(api.approximateSize))
+  ipcMain.handle('leveldb:compactRange', ipcProxy(api.compactRange))
+  ipcMain.handle('leveldb:iterator', ipcProxy(api.iterator))
+  ipcMain.handle('leveldb:iterator:next', ipcProxy(api.iteration.next))
+  ipcMain.handle('leveldb:iterator:end', ipcProxy(api.iteration.end))
+  ipcMain.handle('leveldb:iterator:seek', ipcProxy(api.iteration.seek))
+
+  return api
 })
 
 export default useLevelDown

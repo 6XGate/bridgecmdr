@@ -1,17 +1,12 @@
-import process from 'node:process'
 import unhandled from 'electron-unhandled'
 
-unhandled()
-
 const initialize = async () => {
-  const useLogging = await import('@main/plugins/log')
-    .then(m => m.default)
-  useLogging()
+  // Activate the unhandle handler...
+  unhandled()
 
-  const { doBoot } = await import('./boot')
-    .then(m => m.default)
-    .then(useBoot => useBoot())
-  await doBoot()
+  // Now boot the application.
+  const { startBridgeCmdr } = await import('./boot')
+  await startBridgeCmdr()
 }
 
 initialize()

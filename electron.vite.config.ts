@@ -42,13 +42,13 @@ export default defineConfig({
       vueJsx(),
       vuetify(),
       vueI18nPlugin({
-        // runtimeOnly: false,
-        // include: [
-        //   'src/renderer/locales/**/*.json',
-        //   'src/renderer/locales/**/*.json5',
-        //   'src/renderer/locales/**/*.yaml',
-        //   'src/renderer/locales/**/*.yml'
-        // ]
+        runtimeOnly: false,
+        include: [
+          'src/renderer/locales/**/*.json',
+          'src/renderer/locales/**/*.json5',
+          'src/renderer/locales/**/*.yaml',
+          'src/renderer/locales/**/*.yml'
+        ]
       })
     ],
     build: {

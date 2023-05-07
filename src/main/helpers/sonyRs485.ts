@@ -53,13 +53,13 @@ export class CommandBlockError extends SonyDriverError {
   }
 }
 
-export const calculateChecksum = (data: Buffer) => {
+export function calculateChecksum (data: Buffer) {
   let x = 0n
   for (const byte of data) {
     x = x + BigInt(byte)
   }
 
-  x = ~x & 0xFFn
+  x = ~x & 0xffn
   x = x - BigInt(data.byteLength - 1)
 
   return Number(x)
@@ -73,7 +73,7 @@ export const kCommandPacket = PacketType.parse(0x2)
 export type Package = z.infer<typeof Package>
 export const Package = z.instanceof(Buffer).brand('Packet')
 
-export const createPacket = (type: PacketType, data: Buffer) => {
+export function createPacket (type: PacketType, data: Buffer) {
   if (data.byteLength === 0) {
     throw new PacketError('Attempting to send empty packet')
   }
@@ -107,8 +107,9 @@ export const AddressNumber = z.number().int().min(0).max(0xF)
 export type Address = z.infer<typeof Address>
 export const Address = z.number().int().min(0).max(0xFF).brand('Address')
 
-export const createAddress = (kind: AddressKind, address: AddressNumber) =>
-  Address.parse(kind | AddressNumber.parse(address))
+export function createAddress (kind: AddressKind, address: AddressNumber) {
+  return Address.parse(kind | AddressNumber.parse(address))
+}
 
 export type Command = z.infer<typeof Command>
 export const Command = z.number().int().brand('Command')
@@ -121,7 +122,7 @@ export const kPressButton = Command.parse(0x3F44)
 export type CommandArg = z.infer<typeof CommandArg>
 export const CommandArg = z.number().int().min(0).max(0xFF)
 
-export const createCommand = (destination: Address, source: Address, command: Command, arg0?: CommandArg, arg1?: CommandArg) => {
+export function createCommand (destination: Address, source: Address, command: Command, arg0?: CommandArg, arg1?: CommandArg) {
   arg0 = CommandArg.optional().parse(arg0)
   arg1 = CommandArg.optional().parse(arg1)
 

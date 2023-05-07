@@ -1,5 +1,5 @@
-import log from 'electron-log'
-import { useCommandStream } from '@main/helpers/stream'
+import useCommandStream from '@main/helpers/stream'
+import useLogging from '@main/plugins/log'
 import { defineDriver, kDeviceHasNoExtraCapabilities } from '@main/system/driver'
 
 const teslaSmartSdiDriver = defineDriver({
@@ -14,8 +14,11 @@ const teslaSmartSdiDriver = defineDriver({
   },
   capabilities: kDeviceHasNoExtraCapabilities,
   setup: async uri => {
+    const log = useLogging()
+    const createCommandStream = useCommandStream()
+
     const sendCommand = async (command: Buffer) => {
-      const connection = await useCommandStream(uri, {
+      const connection = await createCommandStream(uri, {
         baudRate: 9600,
         timeout: 5000,
         keepAlive: true

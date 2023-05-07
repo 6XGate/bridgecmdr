@@ -153,7 +153,7 @@ export interface PortApi {
 /** Exposed session control APIs. */
 export interface SystemApi {
   /** Powers off the system. */
-  readonly powerOff: () => Promise<void>
+  readonly powerOff: (interactive?: boolean) => Promise<void>
 }
 
 //
@@ -206,12 +206,14 @@ export interface UserInfo {
   readonly locale: string
 }
 
-export interface AppUpdates {
+export interface AppUpdater {
   checkForUpdates: () => Promise<UpdateInfo | undefined>
   downloadUpdate: () => Promise<void>
   cancelUpdate: () => Promise<void>
   installUpdate: () => Promise<void>
-  // on('download')
+}
+
+export interface AppUpdates extends AppUpdater {
   onDownloadProgress: (fn: (progress: ProgressInfo) => void) => void
   offDownloadProgress: (fn: (progress: ProgressInfo) => void) => void
 }

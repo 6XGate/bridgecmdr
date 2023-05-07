@@ -1,11 +1,15 @@
 import { ipcMain } from 'electron'
-import useSerialPorts from '@main/system/ports'
+import { memo } from 'radash'
+import { SerialPort } from 'serialport'
 import { ipcProxy } from '@main/utilities'
+import type { PortApi } from '@preload/api'
 
-const useSerialPortsPlugin = () => {
-  const ports = useSerialPorts()
+const usePorts = memo(() => {
+  ipcMain.handle('ports:list', ipcProxy(SerialPort.list))
 
-  ipcMain.handle('ports:list', ipcProxy(ports.list))
-}
+  return {
+    list: SerialPort.list
+  } satisfies PortApi
+})
 
-export default useSerialPortsPlugin
+export default usePorts

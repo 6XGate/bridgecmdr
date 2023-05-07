@@ -1,4 +1,6 @@
+import { ipcMain } from 'electron'
 import { memo } from 'radash'
+import { ipcProxy } from '@main/utilities'
 import useHandles from './handle'
 import type { HandleKey } from './handle'
 import type { DriverApi, DriverData, Handle } from '@preload/api'
@@ -65,7 +67,7 @@ export interface DriverOptions extends DriverData {
 }
 
 /** Defines a driver. */
-export const defineDriver = (options: DriverOptions): DriverFactory | undefined => {
+export function defineDriver (options: DriverOptions): DriverFactory | undefined {
   const { setup, ...data } = options
   if (!data.enable) {
     return undefined
@@ -84,27 +86,30 @@ export const defineDriver = (options: DriverOptions): DriverFactory | undefined 
 // Driver API back-end
 //
 
-const kDriverHandle = Symbol.for('@driver') as HandleKey<Driver>
+interface DriverBackEnd extends DriverApi {
+  register: (factory: DriverFactory | undefined) => void
+}
 
-export const useDrivers = memo(() => {
+const useDrivers = memo(() => {
   const { createHandle, openHandle, freeHandle } = useHandles()
+  const kDriverHandle = Symbol.for('@driver') as HandleKey<Driver>
 
   /** The driver registry. */
   const registry = new Map<string, DriverFactory>()
 
   /** Registers a driver. */
-  const register = (factory: DriverFactory | undefined) => {
+  function register (factory: DriverFactory | undefined) {
     if (factory != null) {
       registry.set(factory.data.guid, factory)
     }
   }
 
-  const list = async () => await Promise.resolve(
-    Array.from(registry.values()).map(d => d.data)
-  )
+  async function list () {
+    return await Promise.resolve(Array.from(registry.values()).map(d => d.data))
+  }
 
   /** Loads a driver registered in the registry. */
-  const open = async (guid: string, path: string) => {
+  async function open (guid: string, path: string) {
     const factory = registry.get(guid)
     if (factory == null) {
       throw new Error(`No such driver registered as "${guid}"`)
@@ -114,28 +119,35 @@ export const useDrivers = memo(() => {
       async driver => { await driver.close?.() })
   }
 
-  const close = async (h: Handle) => {
+  async function close (h: Handle) {
     await freeHandle(h)
   }
 
-  const powerOn = async (h: Handle) => {
+  async function powerOn (h: Handle) {
     await openHandle(kDriverHandle, h).powerOn?.()
   }
 
-  const powerOff = async (h: Handle) => {
+  async function powerOff (h: Handle) {
     await openHandle(kDriverHandle, h).powerOff?.()
   }
 
-  const activate = async (h: Handle, inputChannel: number, videoOutputChannel: number, audioOutputChannel: number) => {
+  async function activate (h: Handle, inputChannel: number, videoOutputChannel: number, audioOutputChannel: number) {
     await openHandle(kDriverHandle, h).activate(inputChannel, videoOutputChannel, audioOutputChannel)
   }
 
+  ipcMain.handle('driver:list', ipcProxy(list))
+  ipcMain.handle('driver:open', ipcProxy(open))
+  ipcMain.handle('driver:close', ipcProxy(close))
+  ipcMain.handle('driver:powerOn', ipcProxy(powerOn))
+  ipcMain.handle('driver:powerOff', ipcProxy(powerOff))
+  ipcMain.handle('driver:activate', ipcProxy(activate))
+
   return {
-    capabilities: Object.freeze({
+    capabilities: {
       kDeviceHasNoExtraCapabilities,
       kDeviceSupportsMultipleOutputs,
       kDeviceCanDecoupleAudioOutput
-    }),
+    },
     register,
     list,
     open,
@@ -143,5 +155,7 @@ export const useDrivers = memo(() => {
     powerOn,
     powerOff,
     activate
-  } satisfies DriverApi & Record<string, unknown>
+  } satisfies DriverBackEnd
 })
+
+export default useDrivers

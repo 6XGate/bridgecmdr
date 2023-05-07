@@ -1,5 +1,6 @@
-import log from 'electron-log'
 import execa from 'execa'
+import { memo } from 'radash'
+import useLogging from '@main/plugins/log'
 
 interface TypeMap {
   string: string
@@ -26,14 +27,36 @@ interface KeyMap {
   objpath: string
 }
 
-const useDBus = () => {
+const useDbus = memo(() => {
+  const log = useLogging()
+
+  /**
+   * Targets bus.
+   */
   type DBusTarget = '--system' | '--session'
 
-  const dbusSend = async (target: DBusTarget, bus: string, path: string, ifname: string, member: string, ...args: string[]) => {
+  /**
+   * Sends a DBus command via dbus-send(1)
+   * @param target Target bus.
+   * @param dest Connection name.
+   * @param path Object path.
+   * @param ifname Interface name.
+   * @param member Member name.
+   * @param args Method arguments.
+   * @returns Result message.
+   */
+  async function dbusSend (
+    target: DBusTarget,
+    dest: string,
+    path: string,
+    ifname: string,
+    member: string,
+    ...args: string[]
+  ) {
     const params = [
       target,
       '--print-reply',
-      `--dest=${bus}`,
+      `--dest=${dest}`,
       path,
       `${ifname}.${member}`,
       ...args
@@ -49,23 +72,28 @@ const useDBus = () => {
     return stdout.toString()
   }
 
+  /** Gets the schema named type to its argument type. */
   type ArgFromType<T>
     = T extends keyof TypeMap ? TypeMap[T]
       : T extends `array:${infer V extends keyof TypeMap}` ? Array<TypeMap[V]>
         : T extends `dict:${infer K extends keyof KeyMap}:${infer V extends keyof TypeMap}` ? Record<KeyMap[K], TypeMap[V]>
           : T extends 'variant' ? unknown : never
 
+  /** Converts a binding schema to a parameter tuple. */
   type ArgsFromSchame<Schema>
     = Schema extends [infer Single] ? [ArgFromType<Single>]
       : Schema extends [infer Head, ...infer Rest] ? [ArgFromType<Head>, ...ArgsFromSchame<Rest>]
         : Schema extends [infer Head, infer Last] ? [ArgFromType<Head>, ArgFromType<Last>]
           : never
 
+  /** Support schema types. */
   type SchemaType = keyof TypeMap | 'variant' | `array:${keyof TypeMap}` | `dict:${keyof KeyMap}:${keyof TypeMap}`
 
+  /** Dictionary detector. */
   const kDictType = /^dict:([a-z0-9]+):([a-z0-9]+)$/u
 
-  const encodeDict = (key: keyof KeyMap, value: keyof TypeMap, dict: Record<string | number, unknown>) => {
+  /** Encodes a diction. */
+  function encodeDict (key: keyof KeyMap, value: keyof TypeMap, dict: Record<string | number, unknown>) {
     const encodeKey = key === 'string'
       ? (k: string | number) => `"${k}"`
       : (k: string | number) => String(k)
@@ -73,12 +101,12 @@ const useDBus = () => {
       ? (v: unknown) => `"${v as string}"`
       : (v: unknown) => String(v)
 
-    return `dict:${key}:${value}:${Object.entries(dict).map(([k, v]) =>
-      `${encodeKey(k)},${encodeValue(v)}`).join(',')}`
+    return `dict:${key}:${value}:${Object.entries(dict).map(([k, v]) => `${encodeKey(k)},${encodeValue(v)}`).join(',')}`
   }
 
+  /** Defines the variant numeric type ranges. */
   const Limits = {
-    // Signed
+  // Signed
     INT8_MIN: BigInt.asIntN(8, 0x80n),
     INT8_MAX: BigInt.asIntN(8, 0x7Fn),
     INT16_MIN: BigInt.asIntN(16, 0x8000n),
@@ -94,7 +122,8 @@ const useDBus = () => {
     UINT64_MAX: 0xFFFFFFFFFFFFFFFFn
   }
 
-  const encodeVariantNumber = (value: number) => {
+  /** Encodes a number into a variant. */
+  function encodeVariantNumber (value: number) {
     if (value >= 0) {
       // Positive side
       if (value <= Limits.INT8_MAX) {
@@ -134,7 +163,8 @@ const useDBus = () => {
     throw new TypeError('Numbe is out of range')
   }
 
-  const encodeVariantBigInt = (value: bigint) => {
+  /** Encodes a bigint into a variant. */
+  function encodeVariantBigInt (value: bigint) {
     if (value >= 0) {
       // Positive side
       if (value <= Limits.INT8_MAX) {
@@ -176,7 +206,8 @@ const useDBus = () => {
     throw new TypeError('Numbe is out of range')
   }
 
-  const encodeVariant = (index: number, arg: unknown) => {
+  /** Encodes a value into a variant. */
+  function encodeVariant (index: number, arg: unknown) {
     switch (typeof arg) {
       case 'object':
         throw new TypeError(`dbus-send does not support sending containers in a variant at argument position ${index}`)
@@ -197,16 +228,15 @@ const useDBus = () => {
     }
   }
 
-  const encodeParams = (schema: SchemaType[], args: unknown[]) =>
-    schema.map((type, index) => {
+  /** Encodes the parameters based on a binding schema. */
+  function encodeParams (schema: SchemaType[], args: unknown[]) {
+    return schema.map((type, index) => {
       // NOTE: All logic here depends on TypeScript type
       // checking to ensure all strings and data are
       // correct, only the nullish check is done.
-
       // NOTE: No checks are done on the size of numeric
       // values, so care must be taken not to overflow
       // them. This may be added later.
-
       const arg = args[index]
       if (arg == null) {
         throw new ReferenceError(`Argument in position ${index} was expected to be ${type}`)
@@ -236,20 +266,37 @@ const useDBus = () => {
 
       return `${type}:${String(arg)}`
     })
+  }
 
-  const dbusBind = <Type extends SchemaType, Schema extends [Type, ...Type[]]> (
-    target: DBusTarget, bus: string, path: string, ifname: string, member: string, schema: Schema
-  ): (...args: ArgsFromSchame<Schema>) => Promise<string> =>
-      async (...args) => {
-        const params = encodeParams(schema, args)
+  /**
+   * Creates a DBus bound function.
+   * @param target Target bus.
+   * @param dest Connection name.
+   * @param path Object path.
+   * @param ifname Interface name.
+   * @param member Member name.
+   * @param schema Argument schema.
+   * @returns A bound function that uses dbus-send(1)
+   */
+  function dbusBind<Type extends SchemaType, Schema extends [Type, ...Type[]]> (
+    target: DBusTarget,
+    dest: string,
+    path: string,
+    ifname: string,
+    member: string,
+    schema: Schema
+  ): (...args: ArgsFromSchame<Schema>) => Promise<string> {
+    return async (...args) => {
+      const params = encodeParams(schema, args)
 
-        return await dbusSend(target, bus, path, ifname, member, ...params)
-      }
+      return await dbusSend(target, dest, path, ifname, member, ...params)
+    }
+  }
 
   return {
     dbusSend,
     dbusBind
   }
-}
+})
 
-export default useDBus
+export default useDbus

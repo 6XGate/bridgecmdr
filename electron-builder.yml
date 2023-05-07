@@ -3,12 +3,19 @@ appId: org.sleepingcats.BridgeCmdr
 productName: BridgeCmdr
 artifactName: ${name}-${version}-${arch}.${ext}
 directories:
-  buildResources: build
+  buildResources: resources
 files:
   - '!**/.vscode/*'
+  - '!**/.idea/*'
+  - '!docker/*'
+  - '!.husky/*'
   - '!src/*'
+  - '!.git/*'
+  - '!{.ncurc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
   - '!electron.vite.config.{js,ts,mjs,cjs}'
-  - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
+  - '!{.eslintignore,.eslintrc.cjs}'
+  - '!{.prettierignore,.prettierrc.json}'
+  - '!{.dockerignore,Dockerfile}'
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
   - '!{tsconfig.json,tsconfig.node.json}'
   - '!{electron-builder.yml}'
@@ -25,4 +32,5 @@ buildDependenciesFromSource: true
 npmRebuild: true
 publish:
   provider: generic
-  url: https://6xgate.github.io/bridgecmdr/
+  url: http://localplex.home.sleepingcats.org:9001/bridgecmdr/
+

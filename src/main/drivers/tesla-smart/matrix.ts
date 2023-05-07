@@ -1,4 +1,4 @@
-import log from 'electron-log'
+import useLogging from '@main/plugins/log'
 import { defineDriver, kDeviceSupportsMultipleOutputs } from '@main/system/driver'
 
 const teslaSmartMatrixDriver = defineDriver({
@@ -13,6 +13,9 @@ const teslaSmartMatrixDriver = defineDriver({
   },
   capabilities: kDeviceSupportsMultipleOutputs,
   setup: async _uri => {
+    const log = useLogging()
+    // const createCommandStream = useCommandStream()
+
     const activate = async (inputChannel: number) => {
       log.log(`Tesla smart matrix: ${inputChannel}`)
       await Promise.resolve()

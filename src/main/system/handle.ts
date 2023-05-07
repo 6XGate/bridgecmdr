@@ -1,31 +1,45 @@
 import { memo } from 'radash'
 import type { Handle } from '@preload/api'
 
-/** The maximum number of handles sans 256. */
-const kMaxHandles = 131072
-
-export const kNullHandle = 0 as Handle
-
 // @ts-expect-error T is required to type the resource.
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export interface HandleKey<T> extends Symbol { }
 
-type Close<T> = (resource: T) => unknown | Promise<unknown>
+/** Close routine for a handle. */
+export type Close<T> = (resource: T) => unknown | Promise<unknown>
 
-interface Descriptor<T> {
+/** Handle transparent structure. */
+export interface Descriptor<T> {
   key: HandleKey<T>
   resource: T
   close: Close<T>
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prevent need to cast
-type AnyDescriptor = Descriptor<any>
+// TODO Would be nice to watch for page reloads and closes to free handles in use by that page.
+// TODO: Register a Handle API for the main process
+// interface HandleApi {
+//   // Closes a singular handle.
+//   close: (h: Handle) => Promise<void>
+//   // Closes all handle for a given web content.
+//   unload: (sender: WebContent) => Promise<void>
+// }
+//
+// May want to add a reference counting or weakset system for this.
 
 /**
  * Allows the use of an opaque handles for referencing
  * resources by the renderer process.
  */
 const useHandles = memo(() => {
+  /** The maximum number of handles sans 256. */
+  const kMaxHandles = 131072
+
+  /** The NIL/NULL handle. */
+  const kNullHandle = 0 as Handle
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Prevent need to cast
+  type AnyDescriptor = Descriptor<any>
+
   // The first 256 will be reserved, and used as a
   // sanity check for validity.
   const handleMap = new Array<number | AnyDescriptor>(kMaxHandles)
@@ -46,9 +60,9 @@ const useHandles = memo(() => {
    * @param key The key to confirm the type of the handle.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const isValidHandle = <T = any> (handle: Handle, key?: HandleKey<T>) => {
-    // Get the handle descriptor
-    // and check its validity.
+  function isValidHandle<T = any> (handle: Handle, key?: HandleKey<T>) {
+  // Get the handle descriptor
+  // and check its validity.
     const descriptor = handleMap[handle]
     if (descriptor == null || typeof descriptor !== 'object') {
       return false
@@ -60,31 +74,21 @@ const useHandles = memo(() => {
   }
 
   /**
-   * Gets the descriptor of a handle, optionally confirming its type.
-   */
-  interface GetDescriptor {
-    /**
-     * Gets the descriptor of a handle.
-     * @param handle The handle from which to get a descriptor.
-     */
-    (handle: Handle): AnyDescriptor
-    /**
-     * Gets the descriptor of a handle and confirms its type.
-     * @param handle The handle from which to get a descriptor.
-     * @param key The key to confirm the handle type.
-     */
-    <T> (handle: Handle, key: HandleKey<T>): Descriptor<T>
-  }
-
-  /**
-   * Gets the descriptor of a handle, optionally confirming its type.
+   * Gets the descriptor of a handle.
    * @param handle The handle from which to get a descriptor.
-   * @param key An optional key to confirm the handle type.
    */
+  function getDescriptor (handle: Handle): AnyDescriptor
+  /**
+   * Gets the descriptor of a handle and confirms its type.
+   * @param handle The handle from which to get a descriptor.
+   * @param key The key to confirm the handle type.
+   */
+  function getDescriptor<T> (handle: Handle, key: HandleKey<T>): Descriptor<T>
+  /** Implementation */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const getDescriptor: GetDescriptor = <T = any> (handle: Handle, key?: HandleKey<T>) => {
-    // Get the handle descriptor
-    // and check its validity.
+  function getDescriptor<T = any> (handle: Handle, key?: HandleKey<T>) {
+  // Get the handle descriptor
+  // and check its validity.
     const descriptor = handleMap[handle]
     if (descriptor == null || typeof descriptor !== 'object') {
       throw new ReferenceError('Invalid handle')
@@ -107,9 +111,9 @@ const useHandles = memo(() => {
    * @param resource A resource that will be attached to the handle.
    * @param close A callback to clean up the resource attached to the handle when it closes.
    */
-  const createHandle = <T> (key: HandleKey<T>, resource: T, close?: Close<T>) => {
-    // Get the handle value and ensure
-    // there is no handle exhaustion.
+  function createHandle<T> (key: HandleKey<T>, resource: T, close?: Close<T>) {
+  // Get the handle value and ensure
+  // there is no handle exhaustion.
     const handle = nextFree
     if (handle === kMaxHandles) {
       throw new Error('Out of handles')
@@ -136,9 +140,9 @@ const useHandles = memo(() => {
    * @param key The handle key that tags the handle type.
    * @param handle The handle to open.
    */
-  const openHandle = <T> (key: HandleKey<T>, handle: Handle) => {
-    // Get the handle descriptor
-    // and check the resource.
+  function openHandle<T> (key: HandleKey<T>, handle: Handle) {
+  // Get the handle descriptor
+  // and check the resource.
     const descriptor = getDescriptor(handle, key)
     if (descriptor.resource == null) {
       throw new ReferenceError('Invalid handle')
@@ -151,9 +155,9 @@ const useHandles = memo(() => {
    * Closes a handle and cleans up its resource.
    * @param handle The handle to close.
    */
-  const freeHandle = async (handle: Handle) => {
-    // Get the handle descriptor
-    // and check the resource.
+  async function freeHandle (handle: Handle) {
+  // Get the handle descriptor
+  // and check the resource.
     const descriptor = getDescriptor(handle)
     if (descriptor.resource == null) {
       throw new ReferenceError('Invalid handle')
@@ -176,7 +180,7 @@ const useHandles = memo(() => {
   /**
    * Closes all handles on shutdown.
    */
-  const shutDown = async () => {
+  async function shutDown () {
     await Promise.all(
       handleMap.map(async handle => {
         if (typeof handle === 'object') {
@@ -199,5 +203,3 @@ const useHandles = memo(() => {
 })
 
 export default useHandles
-
-// TODO Would be nice to watch for page reloads and closes to free handles in use by that page.

@@ -1,21 +1,16 @@
-import { ipcMain } from 'electron'
-import { useDrivers } from '@main/system/driver'
-import { getDefault, ipcProxy } from '@main/utilities'
+import extronSisDriver from '@main/drivers/extron/sis'
+import sonyRs485Driver from '@main/drivers/sony/rs485'
+import teslaSmartMatrixDriver from '@main/drivers/tesla-smart/matrix'
+import teslaSmartSdiDriver from '@main/drivers/tesla-smart/sdi'
+import useDrivers from '@main/system/driver'
 
-const useDriverPlugin = async () => {
-  const drivers = useDrivers()
+const registerDrivers = () => {
+  const { register } = useDrivers()
 
-  ipcMain.handle('driver:list', ipcProxy(drivers.list))
-  ipcMain.handle('driver:open', ipcProxy(drivers.open))
-  ipcMain.handle('driver:close', ipcProxy(drivers.close))
-  ipcMain.handle('driver:powerOn', ipcProxy(drivers.powerOn))
-  ipcMain.handle('driver:powerOff', ipcProxy(drivers.powerOff))
-  ipcMain.handle('driver:activate', ipcProxy(drivers.activate))
-
-  drivers.register(getDefault(await import('@main/drivers/extron/sis')))
-  drivers.register(getDefault(await import('@main/drivers/sony/rs485')))
-  drivers.register(getDefault(await import('@main/drivers/tesla-smart/matrix')))
-  drivers.register(getDefault(await import('@main/drivers/tesla-smart/sdi')))
+  register(extronSisDriver)
+  register(sonyRs485Driver)
+  register(teslaSmartMatrixDriver)
+  register(teslaSmartSdiDriver)
 }
 
-export default useDriverPlugin
+export default registerDrivers

@@ -1,14 +1,17 @@
 import { unlink as deleteFile, mkdir, stat, writeFile, readFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { resolve as resolvePath, join as joinPath } from 'node:path'
-import { app } from 'electron'
-import log from 'electron-log'
+import { app, ipcMain } from 'electron'
 import * as INI from 'ini'
+import { memo } from 'radash'
 import xdgBasedir from 'xdg-basedir'
+import useLogging from '@main/plugins/log'
 import { DesktopEntryFile, readyEntry } from '@main/support/desktop'
+import { ipcProxy } from '@main/utilities'
 import type { StartupApi } from '@preload/api'
 
-export const useAutoStart = () => {
+const useStartup = memo(async () => {
+  const log = useLogging()
   const configPath = xdgBasedir.config != null
     ? resolvePath(xdgBasedir.config)
     : resolvePath(homedir(), '.config')
@@ -16,20 +19,23 @@ export const useAutoStart = () => {
   const autoStartDir = joinPath(configPath, 'autostart')
   const autoStartFile = 'org.sleepingcats.BridgeCmdr.desktop'
   const autoStartPath = joinPath(autoStartDir, autoStartFile)
-  const execPath = app.getPath('exe')
+  const exePath = process.env['APPIMAGE'] ?? app.getPath('exe')
 
-  const checkEnabled = async () =>
-    await stat(autoStartPath)
+  /** Checks if the auto-start entry is enabled. */
+  async function checkEnabled () {
+    return await stat(autoStartPath)
       .then(s => s.isFile()).catch(() => false)
+  }
 
-  const enable = async () => {
+  /** Enables the auto-start entry. */
+  async function enable () {
     await mkdir(autoStartDir, { recursive: true })
 
     const entry: DesktopEntryFile = {
       'Desktop Entry': {
         Type: 'Application',
         Name: 'BridgeCmdr',
-        Exec: execPath,
+        Exec: exePath,
         NoDisplay: true,
         Terminal: false
       }
@@ -39,12 +45,14 @@ export const useAutoStart = () => {
       { encoding: 'utf-8', mode: 0o644, flag: 'w' })
   }
 
-  const disable = async () => {
+  /** Disables the auto-start entry. */
+  async function disable () {
     await deleteFile(autoStartPath)
   }
 
-  // Ensure that the file is valid and still points to the right location.
-  const checkUp = async () => {
+  //
+  /** Ensure that the file is valid and still points to the right location. */
+  async function checkUp () {
     const enabled = await checkEnabled()
     if (!enabled) {
       log.debug('No auto-start entry; auto-start disabled, so skipping entry check')
@@ -57,8 +65,8 @@ export const useAutoStart = () => {
       const file = DesktopEntryFile.parse(INI.parse(await readFile(autoStartPath,
         { encoding: 'utf-8' })))
       const entry = file['Desktop Entry']
-      if (entry.Type !== 'Application' || entry.Exec !== execPath) {
-        // Rewrite the entry to fix the type of path.
+      if (entry.Type !== 'Application' || entry.Exec !== exePath) {
+      // Rewrite the entry to fix the type of path.
         reenable = true
       }
     } catch (e) {
@@ -71,11 +79,17 @@ export const useAutoStart = () => {
     }
   }
 
-  checkUp().catch(e => { log.error(e) })
+  await checkUp()
+
+  ipcMain.handle('startup:checkEnabled', ipcProxy(checkEnabled))
+  ipcMain.handle('startup:enable', ipcProxy(enable))
+  ipcMain.handle('startup:disable', ipcProxy(disable))
 
   return {
     checkEnabled,
     enable,
     disable
   } satisfies StartupApi
-}
+})
+
+export default useStartup
