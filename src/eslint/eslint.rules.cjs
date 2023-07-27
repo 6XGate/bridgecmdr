@@ -362,6 +362,7 @@ const useTypeScriptOnlyRules = () => ({
   //
 
   'no-undef': 'off',
+  'no-redeclare': 'off',
 
   //
   // Supported rules

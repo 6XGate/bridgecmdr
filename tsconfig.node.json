@@ -44,7 +44,7 @@
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
-    "allowUnusedLabels": true,
+    "allowUnusedLabels": false,
     "allowUnreachableCode": false
   }
 }

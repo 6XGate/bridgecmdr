@@ -28,7 +28,7 @@ module.exports = defineConfig({
       }
     },
     {
-      files: ['*.ts', '*.tsx'],
+      files: ['*.ts', '*.tsx', '*.vue'],
       extends: './src/eslint/configs/typescript.cjs'
     },
     {
