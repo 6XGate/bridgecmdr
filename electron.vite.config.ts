@@ -3,7 +3,7 @@ import vueI18nPlugin from '@intlify/unplugin-vue-i18n/vite'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
-// import vueDevTools from 'vite-plugin-vue-devtools'
+import vueDevTools from 'vite-plugin-vue-devtools'
 import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 import tsconfigPaths from 'vite-tsconfig-paths'
 import main from './vite.config'
@@ -36,7 +36,7 @@ export default defineConfig({
       vue({ template: { transformAssetUrls } }),
       vueJsx(),
       vuetify(),
-      // vueDevTools(),
+      vueDevTools(),
       vueI18nPlugin({
         runtimeOnly: false,
         include: [

@@ -14,4 +14,4 @@ app.use(vuetify)
 app.use(router)
 app.use(createPersistentStores())
 
-app.mount('#app')
+app.mount('#root')
