@@ -1,10 +1,14 @@
 import { computed, nextTick } from 'vue'
-import type { Database } from '@/data/database'
-import type { DataSet } from '@/data/set'
-import type { Tracker } from '@/utilities/tracking'
+import type { Database } from './database'
+import type { DataSet } from './set'
+import type { Tracker } from '../utilities/tracking'
 import type { z } from 'zod'
 
-export const useDataStore = <Schema extends z.AnyZodObject> (db: Database<Schema>, set: DataSet<Schema>, tracker: Tracker) => {
+export const useDataStore = <Schema extends z.AnyZodObject>(
+  db: Database<Schema>,
+  set: DataSet<Schema>,
+  tracker: Tracker
+) => {
   const all = tracker.track(async () => {
     // Clear the list before load.
     set.initialize([])

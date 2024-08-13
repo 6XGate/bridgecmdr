@@ -1,16 +1,22 @@
 import { ipcMain } from 'electron'
 import { memo } from 'radash'
-import useDbus from '@main/helpers/dbus'
-import { ipcProxy } from '@main/utilities'
-import type { SystemApi } from '@preload/api'
+import useDbus from '../helpers/dbus.js'
+import { ipcProxy } from '../utilities.js'
+import type { SystemApi } from '../../preload/api.js'
 
 const useSystem = memo(() => {
   const { dbusBind } = useDbus()
 
-  const powerOffByDbus = dbusBind('--system', 'org.freedesktop.login1', '/org/freedesktop/login1',
-    'org.freedesktop.login1.Manager', 'PowerOff', ['boolean'])
+  const powerOffByDbus = dbusBind(
+    '--system',
+    'org.freedesktop.login1',
+    '/org/freedesktop/login1',
+    'org.freedesktop.login1.Manager',
+    'PowerOff',
+    ['boolean']
+  )
 
-  async function powerOff (interactive = false) {
+  async function powerOff(interactive = false) {
     await powerOffByDbus(interactive)
   }
 

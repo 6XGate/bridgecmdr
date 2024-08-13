@@ -1,14 +1,13 @@
-<script setup lang='ts'>
+<script setup lang="ts">
 import { mdiAlertCircleOutline, mdiArrowLeft, mdiGamepadVariant, mdiHelpCircleOutline, mdiVideoSwitch } from '@mdi/js'
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import Page from '@/components/Page.vue'
-import useAppInfo from '@/system/appInfo'
-import { useSources } from '@/system/source'
-import { useSwitches } from '@/system/switch'
-import { trackBusy } from '@/utilities/tracking'
-import type { I18nSchema } from '@/locales/locales'
+import useAppInfo from '../system/appInfo'
+import { useSources } from '../system/source'
+import { useSwitches } from '../system/switch'
+import { trackBusy } from '../utilities/tracking'
+import type { I18nSchema } from '../locales/locales'
 
 //
 // Utilities
@@ -32,11 +31,13 @@ const switches = useSwitches()
 const sourceCount = ref(0)
 const switchCount = ref(0)
 
-onMounted(track(async () => {
-  await Promise.all([sources.all(), switches.all()])
-  sourceCount.value = sources.items.length
-  switchCount.value = switches.items.length
-}))
+onMounted(
+  track(async () => {
+    await Promise.all([sources.all(), switches.all()])
+    sourceCount.value = sources.items.length
+    switchCount.value = switches.items.length
+  })
+)
 
 onUnmounted(() => {
   sources.clear()
@@ -47,19 +48,32 @@ onUnmounted(() => {
 <template>
   <Page v-slot="{ toolbar, scrolled }">
     <VToolbar v-bind="toolbar" :title="t('label.settings')" flat>
-      <template #prepend><VBtn :icon="mdiArrowLeft" @click="router.back"/></template>
+      <template #prepend><VBtn :icon="mdiArrowLeft" @click="router.back" /></template>
     </VToolbar>
     <VList v-scroll.self="scrolled" bg-color="transparent" :disabled="isBusy">
-      <VListItem :title="t('label.general')" lines="two" :prepend-icon="mdiAlertCircleOutline"
-                 :subtitle="t('description.general')" :to="{ name: 'settings-general' }"/>
-      <VListItem :title="t('label.sources')" lines="two" :prepend-icon="mdiGamepadVariant"
-                 :subtitle="t('count.sources', { n: n(sourceCount, 'integer') }, sourceCount)"
-                 :to="{ name: 'sources' }"/>
-      <VListItem :title="t('label.switches')" lines="two" :prepend-icon="mdiVideoSwitch"
-                 :subtitle="t('count.switches', { n: n(switchCount, 'integer') }, switchCount)"
-                 :to="{ name: 'switches' }"/>
-      <VListItem :title="t('label.about')" lines="two" :prepend-icon="mdiHelpCircleOutline"
-                 :subtitle="t('description.about', [appInfo.version])"/>
+      <VListItem
+        :title="t('label.general')"
+        lines="two"
+        :prepend-icon="mdiAlertCircleOutline"
+        :subtitle="t('description.general')"
+        :to="{ name: 'settings-general' }" />
+      <VListItem
+        :title="t('label.sources')"
+        lines="two"
+        :prepend-icon="mdiGamepadVariant"
+        :subtitle="t('count.sources', { n: n(sourceCount, 'integer') }, sourceCount)"
+        :to="{ name: 'sources' }" />
+      <VListItem
+        :title="t('label.switches')"
+        lines="two"
+        :prepend-icon="mdiVideoSwitch"
+        :subtitle="t('count.switches', { n: n(switchCount, 'integer') }, switchCount)"
+        :to="{ name: 'switches' }" />
+      <VListItem
+        :title="t('label.about')"
+        lines="two"
+        :prepend-icon="mdiHelpCircleOutline"
+        :subtitle="t('description.about', [appInfo.version])" />
     </VList>
   </Page>
 </template>

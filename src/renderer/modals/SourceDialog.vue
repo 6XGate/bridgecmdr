@@ -4,18 +4,18 @@ import videoInputHdmiIcon from '@mdi/svg/svg/video-input-hdmi.svg'
 import { useObjectUrl, useVModel } from '@vueuse/core'
 import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useErrors } from '@/helpers/errors'
-import { isNotNullish } from '@/helpers/filters'
-import { useRules, useValidation } from '@/helpers/validation'
-import { useDialogs, useSourceDialog } from '@/modals/dialogs'
-import { useSources } from '@/system/source'
-import type { I18nSchema } from '@/locales/locales'
-import type { Source, NewSource } from '@/system/source'
+import { useRules, useValidation } from '../helpers/validation'
+import { useSources } from '../system/source'
+import { useDialogs, useSourceDialog } from './dialogs'
+import type { I18nSchema } from '../locales/locales'
+import type { NewSource, Source } from '../system/source'
+import { isNotNullish } from '@/basics'
+import { toError } from '@/error-handling'
 
-const props = defineProps({
+const props = defineProps<{
   // eslint-disable-next-line vue/no-unused-properties -- useVModel
-  visible: Boolean
-})
+  visible?: boolean
+}>()
 
 const emit = defineEmits<{
   (on: 'update:visible', value: boolean): void
@@ -25,7 +25,6 @@ const emit = defineEmits<{
 
 const dialogs = useDialogs()
 const { t } = useI18n<I18nSchema>()
-const { toError } = useErrors()
 
 const sources = useSources()
 const source = ref<NewSource>(sources.blank())
@@ -33,7 +32,9 @@ const source = ref<NewSource>(sources.blank())
 const files = ref<File[]>([])
 const file = computed(() => files.value[0])
 const image = useObjectUrl(file)
-watch(file, value => { v$.image.$model = value?.name ?? null })
+watch(file, value => {
+  v$.image.$model = value?.name ?? null
+})
 
 // v-model
 const isVisible = useVModel(props, 'visible', emit)
@@ -88,7 +89,7 @@ const { cardProps, isFullscreen } = useSourceDialog()
   <VCard :loading="sources.isBusy" v-bind="cardProps">
     <VToolbar v-if="isFullscreen" :title="t('title')" color="transparent">
       <template #prepend>
-        <VBtn :icon="mdiClose" @click="cancelIfConfirmed"/>
+        <VBtn :icon="mdiClose" @click="cancelIfConfirmed" />
       </template>
       <template #append>
         <VBtn class="text-none" color="primary" @click="submit">{{ t('action.save') }}</VBtn>
@@ -99,23 +100,35 @@ const { cardProps, isFullscreen } = useSourceDialog()
     </template>
     <VCardText>
       <VForm :disabled="sources.isBusy">
-        <VTextField v-model="v$.title.$model" :label="t('label.name')"
-                    :placeholder="t('placeholder.required')"
-                    v-bind="getStatus(v$.title)"/>
-        <VFileInput v-model="files" :label="t('label.image')" accept="image/*" prepend-icon=""
-                    :placeholder="t('placeholder.required')" :prepend-inner-icon="mdiCamera"
-                    v-bind="getStatus(v$.title)"/>
+        <VTextField
+          v-model="v$.title.$model"
+          :label="t('label.name')"
+          :placeholder="t('placeholder.required')"
+          v-bind="getStatus(v$.title)" />
+        <VFileInput
+          v-model="files"
+          :label="t('label.image')"
+          accept="image/*"
+          prepend-icon=""
+          :placeholder="t('placeholder.required')"
+          :prepend-inner-icon="mdiCamera"
+          v-bind="getStatus(v$.title)" />
         <div class="d-flex justify-center">
           <VCard variant="outlined" max-width="128px" rounded="lg">
-            <VIcon v-if="image == null" size="128px" :icon="mdiVideoInputHdmi"/>
-            <VImg v-else width="128px" max-height="128px" aspect-ratio="1/1"
-                  :src="image" :lazy-src="videoInputHdmiIcon"/>
+            <VIcon v-if="image == null" size="128px" :icon="mdiVideoInputHdmi" />
+            <VImg
+              v-else
+              width="128px"
+              max-height="128px"
+              aspect-ratio="1/1"
+              :src="image"
+              :lazy-src="videoInputHdmiIcon" />
           </VCard>
         </div>
       </VForm>
     </VCardText>
     <VCardActions v-if="!isFullscreen">
-      <VSpacer/>
+      <VSpacer />
       <VBtn class="text-none" @click="cancel">{{ t('action.discard') }}</VBtn>
       <VBtn class="text-none" color="primary" @click="submit">{{ t('action.save') }}</VBtn>
     </VCardActions>

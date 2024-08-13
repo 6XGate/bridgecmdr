@@ -4,8 +4,8 @@ import * as builtInRules from '@vuelidate/validators'
 import { unref, computed, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { z } from 'zod'
-import type { TupleLike } from './type'
-import type { I18nSchema } from '@/locales/locales'
+import type { I18nSchema } from '../locales/locales'
+import type { Fixed } from '@/basics'
 import type {
   ValidationRuleWithoutParams,
   BaseValidation,
@@ -28,119 +28,124 @@ interface ValidationCacheEntry {
 
 type RuleCollection<T> = ValidationRuleCollection<T> | undefined
 
-export const useValidation =
-  <
-    SArgs extends unknown[],
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Matching Vuelidate.
-    SRoot extends { [key in keyof VArgs]: any },
-    VArgs extends ValidationArgs = ValidationArgs
-  > (
-    validationsArgs: Ref<VArgs> | VArgs,
-    state: SRoot | Ref<SRoot> | ToRefs<SRoot>,
-    submit: (...args: SArgs) => unknown,
-    globalConfig?: GlobalConfig
-  ) => {
-    const config = { ...(globalConfig ?? { }) } satisfies GlobalConfig
-    const v$ = unref(useVuelidate(validationsArgs, state, config))
+export const useValidation = <
+  SArgs extends unknown[],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Matching Vuelidate.
+  SRoot extends { [key in keyof VArgs]: any },
+  VArgs extends ValidationArgs = ValidationArgs
+>(
+  validationsArgs: Ref<VArgs> | VArgs,
+  state: SRoot | Ref<SRoot> | ToRefs<SRoot>,
+  submit: (...args: SArgs) => unknown,
+  globalConfig?: GlobalConfig
+) => {
+  const config = { ...(globalConfig ?? {}) } satisfies GlobalConfig
+  const v$ = unref(useVuelidate(validationsArgs, state, config))
 
-    const cache = reactive(new Map<string, ValidationCacheEntry>())
-    const ready = ref(false)
+  const cache = reactive(new Map<string, ValidationCacheEntry>())
+  const ready = ref(false)
 
-    const reset = () => {
-      v$.$reset()
-      ready.value = false
-      cache.clear()
+  const reset = () => {
+    v$.$reset()
+    ready.value = false
+    cache.clear()
+  }
+
+  const touch = () => {
+    v$.$touch()
+    ready.value = true
+    cache.clear()
+  }
+
+  const checkNestedDirty = (validation: BaseValidation) => {
+    if (validation.$dirty) {
+      return true
     }
 
-    const touch = () => {
-      v$.$touch()
-      ready.value = true
-      cache.clear()
-    }
-
-    const checkNestedDirty = (validation: BaseValidation) => {
-      if (validation.$dirty) {
+    for (const [key, value] of Object.entries(validation)) {
+      if (
+        !key.startsWith('$') &&
+        typeof value === 'object' &&
+        value != null &&
+        '$dirty' in value &&
+        checkNestedDirty(value as BaseValidation)
+      ) {
         return true
       }
-
-      for (const [key, value] of Object.entries(validation)) {
-        if (!key.startsWith('$') &&
-          typeof value === 'object' &&
-          value != null &&
-          '$dirty' in value &&
-          checkNestedDirty(value as BaseValidation)) {
-          return true
-        }
-      }
-
-      return false
     }
 
-    const dirty = computed(() => checkNestedDirty(v$))
+    return false
+  }
 
-    const getEntry = <T, VRules extends RuleCollection<T>> (validator: BaseValidation<T, VRules>) => {
-      let entry = cache.get(validator.$path)
-      if (entry != null) {
-        return entry
-      }
+  const dirty = computed(() => checkNestedDirty(v$))
 
-      entry = validator.$error && ready.value
-        ? ({
+  const getEntry = <T, VRules extends RuleCollection<T>>(validator: BaseValidation<T, VRules>) => {
+    let entry = cache.get(validator.$path)
+    if (entry != null) {
+      return entry
+    }
+
+    entry =
+      validator.$error && ready.value
+        ? {
             status: {
               errorMessages: validator.$errors.map(error => unref(error.$message)),
               color: 'error'
             },
             class: 'error--text'
-          })
-        : ({
+          }
+        : {
             status: undefined,
             class: undefined
-          })
+          }
 
-      cache.set(validator.$path, entry)
+    cache.set(validator.$path, entry)
 
-      return entry
-    }
-
-    const getMessages = <T, VRules extends RuleCollection<T>> (validator: BaseValidation<T, VRules>) =>
-      getEntry(validator).status?.errorMessages
-
-    const getClass = <T, VRules extends RuleCollection<T>> (validator: BaseValidation<T, VRules>) =>
-      getEntry(validator).class
-
-    const getColor = <T, VRules extends RuleCollection<T>> (validator: BaseValidation<T, VRules>) =>
-      getEntry(validator).status?.color
-
-    const getStatus = <T, VRules extends RuleCollection<T>> (validator: BaseValidation<T, VRules>) =>
-      getEntry(validator).status
-
-    const handleCall = async (fn: () => unknown) => {
-      touch()
-
-      const good = await v$.$validate()
-      if (!good) {
-        return
-      }
-
-      await fn()
-    }
-
-    const guardCall = <Args extends unknown[]> (fn: (...args: Args) => unknown) =>
-      async (...args: Args) => { await handleCall(() => fn(...args)) }
-
-    return {
-      dirty,
-      getMessages,
-      getClass,
-      getColor,
-      getStatus,
-      handleCall,
-      guardCall,
-      submit: guardCall(submit),
-      reset,
-      v$
-    }
+    return entry
   }
+
+  const getMessages = <T, VRules extends RuleCollection<T>>(validator: BaseValidation<T, VRules>) =>
+    getEntry(validator).status?.errorMessages
+
+  const getClass = <T, VRules extends RuleCollection<T>>(validator: BaseValidation<T, VRules>) =>
+    getEntry(validator).class
+
+  const getColor = <T, VRules extends RuleCollection<T>>(validator: BaseValidation<T, VRules>) =>
+    getEntry(validator).status?.color
+
+  const getStatus = <T, VRules extends RuleCollection<T>>(validator: BaseValidation<T, VRules>) =>
+    getEntry(validator).status
+
+  const handleCall = async (fn: () => unknown) => {
+    touch()
+
+    const good = await v$.$validate()
+    if (!good) {
+      return
+    }
+
+    await fn()
+  }
+
+  const guardCall =
+    <Args extends unknown[]>(fn: (...args: Args) => unknown) =>
+    async (...args: Args) => {
+      await handleCall(() => fn(...args))
+    }
+
+  return {
+    dirty,
+    getMessages,
+    getClass,
+    getColor,
+    getStatus,
+    handleCall,
+    guardCall,
+    submit: guardCall(submit),
+    reset,
+    v$
+  }
+}
 
 export const useRules = () => {
   //
@@ -181,15 +186,16 @@ export const useRules = () => {
 
   const uuid = withI18nMessage(
     helpers.regex(/^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/u),
-    { messagePath: () => 'validations.uuid' }) as ValidationRuleWithoutParams
+    { messagePath: () => 'validations.uuid' }
+  ) as ValidationRuleWithoutParams
 
   return {
     // Built-in rules
     required,
-    requiredIf: (...args: Parameters<typeof builtInRules.requiredIf>) =>
-      ({ requiredIf: requiredIf(...args) }),
-    requiredUnless: (...args: Parameters<typeof builtInRules.requiredUnless>) =>
-      ({ requiredUnless: requiredUnless(...args) }),
+    requiredIf: (...args: Parameters<typeof builtInRules.requiredIf>) => ({ requiredIf: requiredIf(...args) }),
+    requiredUnless: (...args: Parameters<typeof builtInRules.requiredUnless>) => ({
+      requiredUnless: requiredUnless(...args)
+    }),
     alpha,
     alphaNum,
     numeric,
@@ -198,22 +204,24 @@ export const useRules = () => {
     email,
     ipAddress,
     url,
-    minLength: (...args: Parameters<typeof builtInRules.minLength>) =>
-      ({ minLength: withI18nMessage(minLength(...args), { withArguments: true }) }),
-    maxLength: (...args: Parameters<typeof builtInRules.maxLength>) =>
-      ({ maxLength: withI18nMessage(maxLength(...args), { withArguments: true }) }),
-    minValue: (...args: Parameters<typeof builtInRules.minValue>) =>
-      ({ minValue: withI18nMessage(minValue(...args), { withArguments: true }) }),
-    maxValue: (...args: Parameters<typeof builtInRules.maxValue>) =>
-      ({ maxValue: withI18nMessage(maxValue(...args), { withArguments: true }) }),
-    between: (...args: Parameters<typeof builtInRules.between>) =>
-      ({ between: withI18nMessage(between(...args), { withArguments: true }) }),
-    or: (...args: Parameters<typeof builtInRules.or>) =>
-      ({ or: or(...args) }),
-    and: (...args: Parameters<typeof builtInRules.and>) =>
-      ({ and: and(...args) }),
-    not: (...args: Parameters<typeof builtInRules.not>) =>
-      ({ not: not(...args) }),
+    minLength: (...args: Parameters<typeof builtInRules.minLength>) => ({
+      minLength: withI18nMessage(minLength(...args), { withArguments: true })
+    }),
+    maxLength: (...args: Parameters<typeof builtInRules.maxLength>) => ({
+      maxLength: withI18nMessage(maxLength(...args), { withArguments: true })
+    }),
+    minValue: (...args: Parameters<typeof builtInRules.minValue>) => ({
+      minValue: withI18nMessage(minValue(...args), { withArguments: true })
+    }),
+    maxValue: (...args: Parameters<typeof builtInRules.maxValue>) => ({
+      maxValue: withI18nMessage(maxValue(...args), { withArguments: true })
+    }),
+    between: (...args: Parameters<typeof builtInRules.between>) => ({
+      between: withI18nMessage(between(...args), { withArguments: true })
+    }),
+    or: (...args: Parameters<typeof builtInRules.or>) => ({ or: or(...args) }),
+    and: (...args: Parameters<typeof builtInRules.and>) => ({ and: and(...args) }),
+    not: (...args: Parameters<typeof builtInRules.not>) => ({ not: not(...args) }),
     // Our rules
     uuid
   }
@@ -236,8 +244,7 @@ export const useRules = () => {
   to capturing converted for better readibility.
 */
 
-const kHostNamePattern =
-  /^[\p{N}\p{L}]([\p{N}\p{L}-]*[\p{N}\p{L}])?(\.[\p{N}\p{L}]([\p{N}\p{L}-]*[\p{N}\p{L}])?)*$/u
+const kHostNamePattern = /^[\p{N}\p{L}]([\p{N}\p{L}-]*[\p{N}\p{L}])?(\.[\p{N}\p{L}]([\p{N}\p{L}-]*[\p{N}\p{L}])?)*$/u
 export const isHostName = (value: string) => kHostNamePattern.test(value)
 const zodHostname = z.string().regex(kHostNamePattern)
 export { zodHostname as hostname }
@@ -253,7 +260,8 @@ export { zodHostname as hostname }
 
 const kIpV4Pattern =
   /^((25[0-5])|(2[0-4][0-9])|(1[0-9]{2})|([1-9][0-9])|[0-9])(\.((25[0-5])|(2[0-4][0-9])|(1[0-9]{2})|([1-9][0-9])|[0-9])){3}$/u
-export const isIpV4Address = (value: string): value is `${number}.${number}.${number}.${number}` => kIpV4Pattern.test(value)
+export const isIpV4Address = (value: string): value is `${number}.${number}.${number}.${number}` =>
+  kIpV4Pattern.test(value)
 const zodIpV4Address = z.string().regex(kIpV4Pattern)
 export { zodIpV4Address as ipV4Address }
 
@@ -318,10 +326,10 @@ const parsePossibleIpString = (value: string) => {
     // We add a zero to the second array to simply compact form logic.
     // This is because the extra zero can stand for the at least one
     // missing pair in the compact form.
-    return [parts.slice(0, sep), ['0', ...parts.slice(sep + 1)]] satisfies TupleLike
+    return [parts.slice(0, sep), ['0', ...parts.slice(sep + 1)]] satisfies Fixed
   }
 
-  return [parts] satisfies TupleLike
+  return [parts] satisfies Fixed
 }
 
 const isValidFullIpV6 = (value: string[]) => {
@@ -329,14 +337,11 @@ const isValidFullIpV6 = (value: string[]) => {
 
   // IPv4 translation.
   if (kIpV4Pattern.test(last ?? '')) {
-    return value.length === 6 &&
-      value.every(p => kIpPair.test(p))
+    return value.length === 6 && value.every(p => kIpPair.test(p))
   }
 
   // IPv6, only 7 since we pop'ped the last.
-  return value.length === 7 &&
-    value.every(p => kIpPair.test(p)) &&
-    kIpPair.test(last ?? '')
+  return value.length === 7 && value.every(p => kIpPair.test(p)) && kIpPair.test(last ?? '')
 }
 
 const isValidCompactIpV6 = ([left, right]: [string[], string[]]) => {
@@ -345,18 +350,18 @@ const isValidCompactIpV6 = ([left, right]: [string[], string[]]) => {
 
   // IPv4 translation, won't test on an empty right.
   if (kIpV4Pattern.test(last ?? '')) {
-    return (left.length + right.length) <= 6 &&
-      left.every(p => kIpPair.test(p)) &&
-      right.every(p => kIpPair.test(p))
+    return left.length + right.length <= 6 && left.every(p => kIpPair.test(p)) && right.every(p => kIpPair.test(p))
   }
 
   // IPv6, only 7 since we pop'ed the last.
   // Empty arrays won't have anything to
   // test and are valid as zero leading.
-  return (left.length + right.length) <= 7 &&
+  return (
+    left.length + right.length <= 7 &&
     left.every(p => kIpPair.test(p)) &&
     right.every(p => kIpPair.test(p)) &&
     kIpPair.test(last ?? '')
+  )
 }
 
 export const isIpV6Address = (value: string) => {
@@ -376,10 +381,7 @@ export const isIpV6Address = (value: string) => {
 const zodIpV6Address = z.string().refine(isIpV6Address)
 export { zodIpV6Address as ipV6Address }
 
-export const isHost = (value: string) =>
-  isHostName(value) ||
-  isIpV4Address(value) ||
-  isIpV6Address(value)
+export const isHost = (value: string) => isHostName(value) || isIpV4Address(value) || isIpV6Address(value)
 
 const zodHost = z.string().refine(isHost)
 export { zodHost as host }
@@ -401,7 +403,7 @@ export const zodParseHostWithOptionalPort = (value: string) => {
   const host = zodHost.safeParse(match[1])
   const port = z.coerce.number().positive().int().optional().safeParse(match[2])
 
-  return [host, port] satisfies TupleLike
+  return [host, port] satisfies Fixed
 }
 
 export const parseHostWithOptionalPort = (value: string) => {
@@ -416,17 +418,16 @@ export const parseHostWithOptionalPort = (value: string) => {
   }
 
   if (!port.success || port.data == null) {
-    return [host.data] satisfies TupleLike
+    return [host.data] satisfies Fixed
   }
 
-  return [host.data, port.data] satisfies TupleLike
+  return [host.data, port.data] satisfies Fixed
 }
 
 export const isHostWithOptionalPort = (value: string) => {
   const result = zodParseHostWithOptionalPort(value)
 
-  // eslint-disable-next-line @typescript-eslint/prefer-optional-chain -- Not optimal.
-  return result != null && result[0].success && result[1].success
+  return result?.[0].success === true && result[1].success
 }
 
 const zodHostWithOptionalPort = z.string().transform((value, ctx) => {

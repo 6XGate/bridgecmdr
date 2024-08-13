@@ -1,8 +1,9 @@
-import useLogging from '@main/plugins/log'
-import { defineDriver, kDeviceSupportsMultipleOutputs } from '@main/system/driver'
+import Logger from 'electron-log'
+import { createCommandStream } from '../../helpers/stream.js'
+import { defineDriver, kDeviceSupportsMultipleOutputs } from '../../system/driver.js'
 
 const teslaSmartMatrixDriver = defineDriver({
-  enable: false,
+  enable: true,
   guid: '671824ED-0BC4-43A6-85CC-4877890A7722',
   localized: {
     en: {
@@ -12,22 +13,45 @@ const teslaSmartMatrixDriver = defineDriver({
     }
   },
   capabilities: kDeviceSupportsMultipleOutputs,
-  setup: async _uri => {
-    const log = useLogging()
-    // const createCommandStream = useCommandStream()
+  setup: async uri => {
+    const sendCommand = async (command: Buffer) => {
+      const connection = await createCommandStream(uri, {
+        baudRate: 9600,
+        timeout: 5000,
+        keepAlive: true
+      })
 
-    const activate = async (inputChannel: number) => {
-      log.log(`Tesla smart matrix: ${inputChannel}`)
+      // TODO: Other situation handlers...
+      connection.on('data', data => {
+        Logger.debug(`teslaSmartMatrixDriver: return: ${String(data)}`)
+      })
+      connection.on('error', error => {
+        Logger.error(`teslaSmartMatrixDriver: ${error.message}`)
+      })
+
+      await connection.write(command)
+      await connection.close()
+    }
+
+    const toChannel = (n: number) => String(n).padStart(2, '0')
+
+    const activate = async (inputChannel: number, outputChannel: number) => {
+      Logger.log(`teslaSmartMatrixDriver.activate(${inputChannel}, ${outputChannel})`)
+      const command = `MT00SW${toChannel(inputChannel)}${toChannel(outputChannel)}NT`
+      await sendCommand(Buffer.from(command, 'ascii'))
+
       await Promise.resolve()
     }
 
     const powerOn = async () => {
-      log.log('Tesla smart matrix: Power On')
+      Logger.log('teslaSmartMatrixDriver.powerOn')
+      Logger.debug('teslaSmartMatrixDriver.powerOn is a no-op')
       await Promise.resolve()
     }
 
     const powerOff = async () => {
-      log.log('Tesla smart matrix: Power On')
+      Logger.log('teslaSmartMatrixDriver.powerOff')
+      Logger.debug('teslaSmartMatrixDriver.powerOff is a no-op')
       await Promise.resolve()
     }
 
@@ -37,7 +61,6 @@ const teslaSmartMatrixDriver = defineDriver({
       powerOff
     })
   }
-
 })
 
 export default teslaSmartMatrixDriver

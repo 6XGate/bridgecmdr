@@ -1,5 +1,5 @@
-import type { BridgedApi } from '@preload/api'
+import type { BridgedApi } from '../../preload/api'
 
-const useBridgedApi = (): BridgedApi => window.api
+const useBridgedApi = (): BridgedApi => globalThis.api
 
 export default useBridgedApi

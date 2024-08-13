@@ -35,6 +35,10 @@ lerna-debug.log*
 .env.*
 dev-app-update.yml
 
+# Test output
+coverage/
+logs/
+
 # Build output
 dist/
 out/

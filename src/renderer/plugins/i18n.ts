@@ -1,15 +1,19 @@
 import { createI18n } from 'vue-i18n'
 import { en as vuetifyEn$ } from 'vuetify/locale'
-import { deepAssign } from '@/helpers/object'
-import enDateTimes from '@/locales/en/datetimes'
-import enFunction from '@/locales/en/functions'
-import en from '@/locales/en/messages.json'
-import enNumbers from '@/locales/en/numbers'
-import type { DateTimeSchema, Locales, MessageSchema, NumberSchema } from '@/locales/locales'
+import enDateTimes from '../locales/en/datetimes'
+import enFunction from '../locales/en/functions'
+import en from '../locales/en/messages.json'
+import enNumbers from '../locales/en/numbers'
+import type { DateTimeSchema, Locales, MessageSchema, NumberSchema } from '../locales/locales'
 import type { MergeDeep } from 'type-fest'
+import { deepAssign } from '@/object'
 
 type CompleteSchema = MergeDeep<MessageSchema, { $vuetify: typeof vuetifyEn$ }>
-interface CompleteI18nSchema { message: CompleteSchema, datetime: DateTimeSchema, number: NumberSchema }
+interface CompleteI18nSchema {
+  message: CompleteSchema
+  datetime: DateTimeSchema
+  number: NumberSchema
+}
 
 // Missing translation warning tracker.
 const warned = new Set<string>()
@@ -25,14 +29,12 @@ const i18n = createI18n<CompleteI18nSchema, Locales, false>({
   fallbackWarn: false,
   missingWarn: false,
   missing: (...[locale, key, , type]) => {
-    const checkKey = type != null
-      ? `${locale}/${type}/${key}`
-      : `${locale}/key/${key}`
+    const checkKey = type != null ? `${locale}/${type}/${key}` : `${locale}/key/${key}`
 
     if (!warned.has(checkKey)) {
-      console.warn(type != null
-        ? `Missing ${type} key "${key}" for "${locale}"`
-        : `Missing key "${key}" for "${locale}"`)
+      console.warn(
+        type != null ? `Missing ${type} key "${key}" for "${locale}"` : `Missing key "${key}" for "${locale}"`
+      )
     }
 
     warned.add(checkKey)

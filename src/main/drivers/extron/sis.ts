@@ -1,6 +1,6 @@
-import useCommandStream from '@main/helpers/stream'
-import useLogging from '@main/plugins/log'
-import { defineDriver, kDeviceCanDecoupleAudioOutput, kDeviceSupportsMultipleOutputs } from '@main/system/driver'
+import Logger from 'electron-log'
+import { createCommandStream } from '../../helpers/stream.js'
+import { defineDriver, kDeviceCanDecoupleAudioOutput, kDeviceSupportsMultipleOutputs } from '../../system/driver.js'
 
 const extronSisDriver = defineDriver({
   enable: true,
@@ -14,9 +14,6 @@ const extronSisDriver = defineDriver({
   },
   capabilities: kDeviceSupportsMultipleOutputs | kDeviceCanDecoupleAudioOutput,
   setup: async uri => {
-    const log = useLogging()
-    const createCommandStream = useCommandStream()
-
     const sendCommand = async (command: string) => {
       const connection = await createCommandStream(uri, {
         baudRate: 9600,
@@ -25,29 +22,33 @@ const extronSisDriver = defineDriver({
       })
 
       // TODO: Other situation handlers...
-      connection.on('data', data => { log.debug(`extronSisDriver: return: ${String(data)}`) })
-      connection.on('error', error => { log.error(`extronSisDriver: ${error.message}`) })
+      connection.on('data', data => {
+        Logger.debug(`extronSisDriver: return: ${String(data)}`)
+      })
+      connection.on('error', error => {
+        Logger.error(`extronSisDriver: ${error.message}`)
+      })
 
       await connection.write(command)
       await connection.close()
     }
 
     const activate = async (inputChannel: number, videoOutputChannel: number, audioOutputChannel: number) => {
-      log.log(`extronSisDriver.activate(${inputChannel}, ${videoOutputChannel}, ${audioOutputChannel})`)
+      Logger.log(`extronSisDriver.activate(${inputChannel}, ${videoOutputChannel}, ${audioOutputChannel})`)
       const videoCommand = `${inputChannel}*${videoOutputChannel}%`
       const audioCommand = `${inputChannel}*${audioOutputChannel}$`
       await sendCommand(`${videoCommand}\r\n${audioCommand}\r\n`)
     }
 
     const powerOn = async () => {
-      log.log('extronSisDriver.powerOn')
-      log.debug('extronSisDriver.powerOn is a no-op')
+      Logger.log('extronSisDriver.powerOn')
+      Logger.debug('extronSisDriver.powerOn is a no-op')
       await Promise.resolve()
     }
 
     const powerOff = async () => {
-      log.log('extronSisDriver.powerOff')
-      log.debug('extronSisDriver.powerOff is a no-op')
+      Logger.log('extronSisDriver.powerOff')
+      Logger.debug('extronSisDriver.powerOff is a no-op')
       await Promise.resolve()
     }
 

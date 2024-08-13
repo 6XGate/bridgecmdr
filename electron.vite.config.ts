@@ -3,19 +3,13 @@ import vueI18nPlugin from '@intlify/unplugin-vue-i18n/vite'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
+// import vueDevTools from 'vite-plugin-vue-devtools'
 import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 import tsconfigPaths from 'vite-tsconfig-paths'
+import main from './vite.config'
 
 export default defineConfig({
-  main: {
-    plugins: [
-      externalizeDepsPlugin(),
-      tsconfigPaths({
-        projects: [fileURLToPath(new URL('./tsconfig.node.json', import.meta.url))],
-        loose: true
-      })
-    ]
-  },
+  main,
   preload: {
     plugins: [
       externalizeDepsPlugin(),
@@ -25,22 +19,24 @@ export default defineConfig({
       })
     ],
     resolve: {
-      alias: {
-        buffer: fileURLToPath(new URL('./node_modules/buffer', import.meta.url)),
-        stream: fileURLToPath(new URL('./node_modules/stream-browserify', import.meta.url)),
-        util: fileURLToPath(new URL('./node_modules/util', import.meta.url))
-      }
+      alias: [
+        { find: /^(.*)\.js$/u, replacement: '$1' },
+        { find: 'buffer', replacement: fileURLToPath(new URL('./node_modules/buffer', import.meta.url)) },
+        { find: 'stream', replacement: fileURLToPath(new URL('./node_modules/stream-browserify', import.meta.url)) },
+        { find: 'util', replacement: fileURLToPath(new URL('./node_modules/util', import.meta.url)) }
+      ]
     }
   },
   renderer: {
     plugins: [
       tsconfigPaths({
-        projects: [fileURLToPath(new URL('./tsconfig.json', import.meta.url))],
+        projects: [fileURLToPath(new URL('./tsconfig.web.json', import.meta.url))],
         loose: true
       }),
       vue({ template: { transformAssetUrls } }),
       vueJsx(),
       vuetify(),
+      // vueDevTools(),
       vueI18nPlugin({
         runtimeOnly: false,
         include: [
@@ -49,21 +45,24 @@ export default defineConfig({
           'src/renderer/locales/**/*.yaml',
           'src/renderer/locales/**/*.yml'
         ]
-      })
+      }) as never
     ],
-    build: {
-      rollupOptions: {
-        output: {
-          hoistTransitiveImports: false
-        }
-      }
+    esbuild: {
+      target: ['chrome126']
     },
+    // build: {
+    //   rollupOptions: {
+    //     output: {
+    //       hoistTransitiveImports: false
+    //     }
+    //   }
+    // },
     resolve: {
-      alias: {
-        buffer: fileURLToPath(new URL('./node_modules/buffer', import.meta.url)),
-        stream: fileURLToPath(new URL('./node_modules/stream-browserify', import.meta.url)),
-        util: fileURLToPath(new URL('./node_modules/util', import.meta.url))
-      }
+      alias: [
+        { find: 'buffer', replacement: fileURLToPath(new URL('./node_modules/buffer', import.meta.url)) },
+        { find: 'stream', replacement: fileURLToPath(new URL('./node_modules/stream-browserify', import.meta.url)) },
+        { find: 'util', replacement: fileURLToPath(new URL('./node_modules/util', import.meta.url)) }
+      ]
     }
   }
 })

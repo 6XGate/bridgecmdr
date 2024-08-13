@@ -1,16 +1,16 @@
 import { defineStore } from 'pinia'
 import { computed, readonly, ref } from 'vue'
-import { toFiles, useImages } from '@/helpers/attachment'
-import { isNotNullish } from '@/helpers/filters'
-import { useDrivers } from '@/system/driver'
-import { useSources } from '@/system/source'
-import { useSwitches } from '@/system/switch'
-import { useTies } from '@/system/tie'
-import { trackBusy } from '@/utilities/tracking'
-import type { DocumentId } from '@/data/database'
-import type { Driver } from '@/system/driver'
-import type { Source } from '@/system/source'
+import { toFiles, useImages } from '../helpers/attachment'
+import { useDrivers } from '../system/driver'
+import { useSources } from '../system/source'
+import { useSwitches } from '../system/switch'
+import { useTies } from '../system/tie'
+import { trackBusy } from '../utilities/tracking'
+import type { DocumentId } from '../data/database'
+import type { Driver } from '../system/driver'
+import type { Source } from '../system/source'
 import type { ReadonlyDeep } from 'type-fest'
+import { isNotNullish } from '@/basics'
 
 export interface Button {
   readonly guid: string
@@ -49,16 +49,18 @@ export const useDashboard = defineStore('dashboard', () => {
       }
     }
 
-    await Promise.all(closing.map(async driver => { await driver.close() }))
+    await Promise.all(
+      closing.map(async driver => {
+        await driver.close()
+      })
+    )
 
     // Load any drivers that are new or are being replaced.
-    const loading: Array<Promise<[DocumentId, Driver]>> = []
+    const loading: Promise<[DocumentId, Driver]>[] = []
     for (const switcher of switches.items) {
       const driver = loadedDrivers.get(switcher._id)
       if (driver == null || driver.uri !== switcher.path) {
-        loading.push(
-          drivers.load(switcher.driverId, switcher.path).then(loaded => [switcher._id, loaded])
-        )
+        loading.push(drivers.load(switcher.driverId, switcher.path).then(loaded => [switcher._id, loaded]))
       }
     }
 
@@ -70,7 +72,8 @@ export const useDashboard = defineStore('dashboard', () => {
   }
 
   const defineButton = (source: ReadonlyDeep<Source>, index: number): Button => {
-    const commands = ties.items.filter(tie => tie.sourceId === source._id)
+    const commands = ties.items
+      .filter(tie => tie.sourceId === source._id)
       .map(tie => {
         const switcher = switches.items.find(item => tie.switchId === item._id)
         const driver = loadedDrivers.get(tie.switchId)
@@ -125,9 +128,11 @@ export const useDashboard = defineStore('dashboard', () => {
   }
 
   const defineDashboard = async () => {
-    loadImages(sources.items.map(source =>
-      toFiles(source._attachments)
-        .find(f => source.image != null && f.name === source.image)))
+    loadImages(
+      sources.items.map(source =>
+        toFiles(source._attachments).find(f => source.image != null && f.name === source.image)
+      )
+    )
     items.value = await Promise.all(sources.items.map(defineButton).map(prepareButton))
   }
 

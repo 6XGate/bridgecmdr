@@ -1,9 +1,6 @@
 {
-  "i18n-ally.localesPaths": ["src/renderer/locales"],
-  "i18n-ally.keystyle": "nested",
-  "i18n-ally.enabledFrameworks": ["vue", "vue-sfc"],
-  "i18n-ally.extract.keyMaxLength": 1024,
-  "i18n-ally.extract.parsers.html": {
-    "attributes": ["title", "alt", "placeholder", "label", "aria-label", "subtitle", "text"]
-  }
+    "i18n-ally.localesPaths": [
+        "src/renderer/locales"
+    ],
+    "vitest.disableWorkspaceWarning": true
 }

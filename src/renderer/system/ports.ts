@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is'
 import { createSharedComposable } from '@vueuse/shared'
 import { ref, computed, readonly, reactive } from 'vue'
-import { trackBusy } from '@/utilities/tracking'
+import { trackBusy } from '../utilities/tracking'
 import useBridgedApi from './bridged'
 
 export interface PortData {
@@ -55,9 +55,9 @@ const usePorts = createSharedComposable(() => {
           }
         }
 
-        if ((/^port\d+$/u).test(part)) {
+        if (/^port\d+$/u.test(part)) {
           labelParts.pop()
-        } else if ((/^if\d+$/u).test(part)) {
+        } else if (/^if\d+$/u.test(part)) {
           labelParts.pop()
         } else {
           break

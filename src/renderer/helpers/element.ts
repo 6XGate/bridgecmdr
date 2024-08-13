@@ -3,8 +3,16 @@ import { toValue } from '@vueuse/shared'
 import { watch, computed, ref } from 'vue'
 import type { MaybeComputedElementRef } from '@vueuse/core'
 
-interface ScrollingBoundsEntry { left: number, top: number, width: number, height: number }
-interface ScrollingBounds { client: ScrollingBoundsEntry, scrolling: ScrollingBoundsEntry }
+interface ScrollingBoundsEntry {
+  left: number
+  top: number
+  width: number
+  height: number
+}
+interface ScrollingBounds {
+  client: ScrollingBoundsEntry
+  scrolling: ScrollingBoundsEntry
+}
 
 export const useElementScrollingBounds = (el: MaybeComputedElementRef) => {
   const scrolling = ref<ScrollingBounds>({

@@ -3,24 +3,24 @@ import { mdiClose } from '@mdi/js'
 import { useVModel } from '@vueuse/core'
 import { computed, ref, reactive, onBeforeMount } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useLocation } from '@/helpers/location'
-import { deepClone } from '@/helpers/object'
-import { useRules, useValidation } from '@/helpers/validation'
-import { useDialogs, useSwitchDialog } from '@/modals/dialogs'
-import { useDrivers } from '@/system/driver'
-import usePorts from '@/system/ports'
-import type { I18nSchema } from '@/locales/locales'
-import type { NewSwitch } from '@/system/switch'
-import type { PropType, DeepReadonly } from 'vue'
+import { useLocation } from '../helpers/location'
+import { useRules, useValidation } from '../helpers/validation'
+import { useDrivers } from '../system/driver'
+import usePorts from '../system/ports'
+import { useDialogs, useSwitchDialog } from './dialogs'
+import type { I18nSchema } from '../locales/locales'
+import type { NewSwitch } from '../system/switch'
+import type { DeepReadonly } from 'vue'
+import { deepClone } from '@/object'
 
-const props = defineProps({
+const props = defineProps<{
   // Dialog
   // eslint-disable-next-line vue/no-unused-properties -- useVModel
-  visible: Boolean,
+  visible?: boolean
   // Form
-  editing: Boolean,
-  switch: { type: Object as PropType<DeepReadonly<NewSwitch>>, required: true }
-})
+  editing: boolean
+  switch: DeepReadonly<NewSwitch>
+}>()
 
 const emit = defineEmits<{
   (on: 'update:visible', value: boolean): void
@@ -40,8 +40,14 @@ onBeforeMount(drivers.all)
 const ports = usePorts()
 onBeforeMount(ports.all)
 
+// eslint-disable-next-line vue/no-setup-props-reactivity-loss -- Prop reactivity not desired.
 const target = ref<NewSwitch>(deepClone(props.switch))
-const location = computed({ get: () => v$.path.$model, set: v => { v$.path.$model = v } })
+const location = computed({
+  get: () => v$.path.$model,
+  set: v => {
+    v$.path.$model = v
+  }
+})
 const { locationPath, pathTypes, pathType, path } = useLocation(location, () => ports.items)
 
 const confirm = () => {
@@ -57,9 +63,7 @@ const cancelIfConfirmed = async () => {
   }
 
   const yes = await dialogs.confirm({
-    message: props.editing
-      ? t('message.discardChanges')
-      : t('message.discardNew'),
+    message: props.editing ? t('message.discardChanges') : t('message.discardNew'),
     color: 'primary',
     confirmButton: t('action.discard'),
     cancelButton: t('common.cancel')
@@ -92,7 +96,7 @@ const isBusy = computed(() => drivers.isBusy || ports.isBusy)
   <VCard v-bind="cardProps" :loading="isBusy">
     <VToolbar v-if="isFullscreen" :title="title" color="transparent">
       <template #prepend>
-        <VBtn :icon="mdiClose" @click="cancelIfConfirmed"/>
+        <VBtn :icon="mdiClose" @click="cancelIfConfirmed" />
       </template>
       <template #append>
         <VBtn class="text-none" color="primary" @click="submit">{{ t('action.save') }}</VBtn>
@@ -100,32 +104,48 @@ const isBusy = computed(() => drivers.isBusy || ports.isBusy)
     </VToolbar>
     <template v-else>
       <VCardTitle>{{ title }}</VCardTitle>
-      <VDivider v-if="showDividers"/>
+      <VDivider v-if="showDividers" />
     </template>
     <VCardText ref="body">
       <VForm>
-        <VTextField v-model="v$.title.$model" :label="t('label.name')"
-                    :placeholder="t('placeholder.required')" variant="outlined"
-                    v-bind="getStatus(v$.title)"/>
-        <VSelect v-model="v$.driverId.$model" :label="t('label.driver')" :items="drivers.items"
-                 item-title="title" item-value="guid" variant="outlined" :loading="drivers.isBusy"
-                 :placeholder="t('placeholder.required')"
-                 v-bind="getStatus(v$.driverId)"/>
+        <VTextField
+          v-model="v$.title.$model"
+          :label="t('label.name')"
+          :placeholder="t('placeholder.required')"
+          variant="outlined"
+          v-bind="getStatus(v$.title)" />
+        <VSelect
+          v-model="v$.driverId.$model"
+          :label="t('label.driver')"
+          :items="drivers.items"
+          item-title="title"
+          item-value="guid"
+          variant="outlined"
+          :loading="drivers.isBusy"
+          :placeholder="t('placeholder.required')"
+          v-bind="getStatus(v$.driverId)" />
         <div class="colg d-flex flex-wrap justify-start">
-          <VSelect v-model="pathType" class="flex-grow-0 w-175px" :items="pathTypes" variant="outlined"
-                   item-props/>
-          <VTextField v-if="pathType !== 'port'" v-model="path" variant="outlined"
-                      :placeholder="t('placeholder.required')"
-                      v-bind="getStatus(v$.path)"/>
-          <VSelect v-else v-model="path" :items="ports.items" variant="outlined"
-                   :loading="ports.isBusy" :placeholder="t('placeholder.required')"
-                   v-bind="getStatus(v$.path)"/>
+          <VSelect v-model="pathType" class="flex-grow-0 w-175px" :items="pathTypes" variant="outlined" item-props />
+          <VTextField
+            v-if="pathType !== 'port'"
+            v-model="path"
+            variant="outlined"
+            :placeholder="t('placeholder.required')"
+            v-bind="getStatus(v$.path)" />
+          <VSelect
+            v-else
+            v-model="path"
+            :items="ports.items"
+            variant="outlined"
+            :loading="ports.isBusy"
+            :placeholder="t('placeholder.required')"
+            v-bind="getStatus(v$.path)" />
         </div>
       </VForm>
     </VCardText>
-    <VDivider v-if="showDividers"/>
+    <VDivider v-if="showDividers" />
     <VCardActions v-if="!isFullscreen">
-      <VSpacer/>
+      <VSpacer />
       <VBtn class="text-none" @click="cancel">{{ t('action.discard') }}</VBtn>
       <VBtn class="text-none" color="primary" :disabled="isBusy" @click="submit">
         {{ t('action.save') }}

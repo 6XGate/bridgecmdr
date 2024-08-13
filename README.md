@@ -53,7 +53,6 @@ BridgeCmdr uses the following libraries and frameworks are a major part of its m
 | [Electron](https://electronjs.org/)                                      | [MIT](https://github.com/electron/electron/blob/master/LICENSE)               |
 | [Vue.js](https://vuejs.org/)                                             | [MIT](https://github.com/vuejs/vue/blob/master/LICENSE)                       |
 | [Vuetify](https://vuetifyjs.com/)                                        | [MIT](https://github.com/vuetifyjs/vuetify/blob/master/LICENSE.md)            |
-| [Vue i18n](https://vue-i18n.intlify.dev/)                                | [MIT](https://github.com/intlify/vue-i18n-next/blob/master/LICENSE)           |
 | [PouchDB](https://pouchdb.com/)                                          | [Apache 2.0](https://github.com/pouchdb/pouchdb/blob/master/LICENSE)          |
 | [LevelDOWN](https://github.com/Level/leveldown)                          | [MIT](https://github.com/Level/leveldown/blob/master/LICENSE)                 |
 | [SerialPort](https://serialport.io/)                                     | [MIT](https://github.com/serialport/node-serialport/blob/master/LICENSE)      |
@@ -79,7 +78,6 @@ The following tools or libraries are used to build BridgeCmdr.
     - [Vue.js plug-in](https://eslint.vuejs.org/),
 - [Electron Vite](https://evite.netlify.app/), and the following third-party plug-ins;
     - [Vue plug-in](https://github.com/vitejs/vite-plugin-vue),
-    - [Vue i18n plug-in](https://github.com/intlify/bundle-tools/tree/main/packages/unplugin-vue-i18n),
     - [Dart Sass](https://sass-lang.com/dart-sass),
 - [Electron Toolkit](https://github.com/alex8088/electron-toolkit).
 - [Electron Installer (Debian)](https://github.com/electron-userland/electron-installer-debian).
@@ -96,7 +94,6 @@ or in the package file are dependencies of those packages.
   - [Dotenv + Vault](https://marketplace.visualstudio.com/items?itemName=dotenv.dotenv-vscode)
   - [EditorConfig](https://marketplace.visualstudio.com/items?itemName=EditorConfig.EditorConfig)
   - [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
-  - [i18n Ally](https://marketplace.visualstudio.com/items?itemName=Lokalise.i18n-ally)
   - [Todo Tree](https://marketplace.visualstudio.com/items?itemName=Gruntfuggly.todo-tree)
   - [YAML](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml)
 

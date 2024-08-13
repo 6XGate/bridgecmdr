@@ -1,9 +1,9 @@
 import { useLocalStorage } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
-import { asyncForEach } from '@/helpers/utilities'
-import { useDialogs } from '@/modals/dialogs'
-import useBridgedApi from '@/system/bridged'
-import type { I18nSchema } from '@/locales/locales'
+import { asyncForEach } from '../helpers/utilities'
+import { useDialogs } from '../modals/dialogs'
+import useBridgedApi from '../system/bridged'
+import type { I18nSchema } from '../locales/locales'
 
 const useFirstRun = () => {
   const { t } = useI18n<I18nSchema>()

@@ -1,50 +1,8 @@
 {
-  "extends": "@vue/tsconfig/tsconfig.web.json",
-  "references": [{ "path": "./tsconfig.node.json" }],
-  "include": [
-    "src/renderer/env.d.ts",
-    "src/renderer/**/*",
-    "src/renderer/**/*.vue",
-    "src/preload/*.d.ts"
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.node.json" },
+    { "path": "./tsconfig.web.json" },
+    { "path": "./tsconfig.test.json" },
   ],
-  // "exclude": ["node_modules"],
-  "compilerOptions": {
-    // Language and Environment
-    "lib": ["ESNext"],
-
-    // Modules
-    "baseUrl": ".",
-    "paths": {
-      "@shared/*": ["./src/shared/*"],
-      "@preload/*": ["./src/preload/*"],
-      "@main/*": ["./src/main/*"],
-      "@/*": ["./src/renderer/*"]
-    },
-
-    // JavaScript Support
-    "allowJs": false,
-    "checkJs": false,
-
-    // Emit
-    "importHelpers": true,
-    "noEmitHelpers": true,
-
-    // Interop Constraints
-    /* TODO: "verbatimModuleSyntax": true, */
-    "allowSyntheticDefaultImports": true,
-
-    // Type Checking/*  */
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "exactOptionalPropertyTypes": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": true,
-    "noImplicitOverride": true,
-    // Temporarily disabled due to issue with Vue slots.
-    // "noPropertyAccessFromIndexSignature": true,
-    "allowUnusedLabels": false,
-    "allowUnreachableCode": false
-  }
 }

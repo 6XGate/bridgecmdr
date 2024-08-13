@@ -1,9 +1,9 @@
 import { computed, readonly, ref } from 'vue'
-import type { DocumentId, DocumentOf } from '@/data/database'
+import type { DocumentId, DocumentOf } from './database'
 import type { Ref } from 'vue'
 import type { z } from 'zod'
 
-export const useDataSet = <Schema extends z.AnyZodObject> (_: Schema) => {
+export const useDataSet = <Schema extends z.AnyZodObject>(_: Schema) => {
   type Document = DocumentOf<Schema>
 
   const items: Ref<Document[]> = ref([])

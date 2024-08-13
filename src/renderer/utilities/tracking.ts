@@ -1,18 +1,11 @@
 import { toValue } from '@vueuse/core'
 import { computed, ref, shallowRef } from 'vue'
-import { useErrors } from '@/helpers/errors'
 import type { MaybeRefOrGetter } from '@vueuse/core'
+import { toError } from '@/error-handling'
 
-type Trackable<T> =
-  | (() => PromiseLike<T>)
-  | (() => Promise<T>)
-  | (() => T)
-  | PromiseLike<T>
-  | Promise<T>
+type Trackable<T> = (() => PromiseLike<T>) | (() => Promise<T>) | (() => T) | PromiseLike<T> | Promise<T>
 
-export const trackBusy = (...chain: Array<MaybeRefOrGetter<boolean>>) => {
-  const { toError } = useErrors()
-
+export const trackBusy = (...chain: MaybeRefOrGetter<boolean>[]) => {
   /** The busy weight. */
   const weight = ref(0)
 
@@ -20,7 +13,7 @@ export const trackBusy = (...chain: Array<MaybeRefOrGetter<boolean>>) => {
   const error = shallowRef<Error>()
 
   /** Tracks an asynchronous operation or promise, return its result. */
-  const wait = async <R> (trackable: Trackable<R>) => {
+  const wait = async <R>(trackable: Trackable<R>) => {
     try {
       ++weight.value
       const result = await (typeof trackable === 'function' ? trackable() : trackable)
@@ -37,8 +30,10 @@ export const trackBusy = (...chain: Array<MaybeRefOrGetter<boolean>>) => {
   }
 
   /** Wraps an asynchronous operation. */
-  const track = <R, Args extends unknown[]> (cb: (...args: Args) => PromiseLike<R>) =>
-    async (...args: Args) => await wait(() => cb(...args))
+  const track =
+    <R, Args extends unknown[]>(cb: (...args: Args) => PromiseLike<R>) =>
+    async (...args: Args) =>
+      await wait(() => cb(...args))
 
   return {
     isBusy: computed(() => chain.some(r => toValue(r)) || weight.value > 0),

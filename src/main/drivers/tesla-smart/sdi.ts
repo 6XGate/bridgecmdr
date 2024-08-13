@@ -1,10 +1,10 @@
-import useCommandStream from '@main/helpers/stream'
-import useLogging from '@main/plugins/log'
-import { defineDriver, kDeviceHasNoExtraCapabilities } from '@main/system/driver'
+import Logger from 'electron-log'
+import { createCommandStream } from '../../helpers/stream.js'
+import { defineDriver, kDeviceHasNoExtraCapabilities } from '../../system/driver.js'
 
 const teslaSmartSdiDriver = defineDriver({
   enable: true,
-  guid: '91D5BC95-A8E2-4F58-BCAC-A77BA1054D61',
+  guid: 'DDB13CBC-ABFC-405E-9EA6-4A999F9A16BD',
   localized: {
     en: {
       title: 'Tesla smart SDI-compatible switch',
@@ -14,9 +14,6 @@ const teslaSmartSdiDriver = defineDriver({
   },
   capabilities: kDeviceHasNoExtraCapabilities,
   setup: async uri => {
-    const log = useLogging()
-    const createCommandStream = useCommandStream()
-
     const sendCommand = async (command: Buffer) => {
       const connection = await createCommandStream(uri, {
         baudRate: 9600,
@@ -25,25 +22,31 @@ const teslaSmartSdiDriver = defineDriver({
       })
 
       // TODO: Other situation handlers...
-      connection.on('data', data => { log.debug(`teslaSmartSdiDriver: return: ${String(data)}`) })
-      connection.on('error', error => { log.error(`teslaSmartSdiDriver: ${error.message}`) })
+      connection.on('data', data => {
+        Logger.debug(`teslaSmartSdiDriver: return: ${String(data)}`)
+      })
+      connection.on('error', error => {
+        Logger.error(`teslaSmartSdiDriver: ${error.message}`)
+      })
 
       await connection.write(command)
       await connection.close()
     }
 
     const activate = async (inputChannel: number) => {
-      log.log(`teslaSmartSdiDriver.activate(${inputChannel})`)
-      await sendCommand(Buffer.from(Uint8Array.from([0xAA, 0xBB, 0x03, 0x01, inputChannel, 0xEE])))
+      Logger.log(`teslaSmartSdiDriver.activate(${inputChannel})`)
+      await sendCommand(Buffer.of(0xaa, 0xcc, 0x01, inputChannel))
     }
 
     const powerOn = async () => {
-      log.log('teslaSmartSdiDriver.powerOn')
+      Logger.log('teslaSmartSdiDriver.powerOn')
+      Logger.debug('teslaSmartSdiDriver.powerOn is a no-op')
       await Promise.resolve()
     }
 
     const powerOff = async () => {
-      log.log('teslaSmartSdiDriver.powerOff')
+      Logger.log('teslaSmartSdiDriver.powerOff')
+      Logger.debug('teslaSmartSdiDriver.powerOff is a no-op')
       await Promise.resolve()
     }
 

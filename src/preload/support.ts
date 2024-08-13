@@ -1,22 +1,21 @@
 import { ipcRenderer } from 'electron'
-import type { IpsResponse, ListenerOptions } from '@preload/api'
+import type { IpcResponse, ListenerOptions } from './api.js'
 import type { IpcRendererEvent } from 'electron'
 
 const useIpc = () => {
-  const useInvoke = <Id extends string, Args extends unknown[], Result> (id: Id) =>
+  const useInvoke =
+    <Id extends string, Args extends unknown[], Result>(id: Id) =>
     async (...args: Args) => {
-      const response = await ipcRenderer.invoke(id, ...args) as IpsResponse<Result>
-      if (response.error == null) {
-        return response.value
-      }
-
-      throw response.error
+      const response = (await ipcRenderer.invoke(id, ...args)) as IpcResponse<Result>
+      if (response.error != null) throw response.error
+      return response.value
     }
 
-  // eslint-disable-next-line @typescript-eslint/ban-types -- Supports any type
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type -- Supports any function type
   const listeners = new WeakMap<Function, Function>()
 
-  const useAddListener = <Id extends string, Args extends unknown[]> (id: Id) =>
+  const useAddListener =
+    <Id extends string, Args extends unknown[]>(id: Id) =>
     (fn: (...args: Args) => unknown, options?: ListenerOptions) => {
       const listener = listeners.get(fn)
       if (listener != null) {
@@ -30,12 +29,12 @@ const useIpc = () => {
 
       listeners.set(fn, wrapper)
 
-      options?.once === true
-        ? ipcRenderer.once(id, wrapper as never)
-        : ipcRenderer.on(id, wrapper as never)
+      if (options?.once === true) ipcRenderer.once(id, wrapper as never)
+      else ipcRenderer.on(id, wrapper as never)
     }
 
-  const useRemoveListener = <Id extends string, Args extends unknown[]> (id: Id) =>
+  const useRemoveListener =
+    <Id extends string, Args extends unknown[]>(id: Id) =>
     (fn: (...args: Args) => unknown) => {
       const listener = listeners.get(fn)
       if (listener == null) {

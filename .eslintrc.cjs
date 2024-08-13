@@ -1,39 +1,53 @@
-require('@rushstack/eslint-patch/modern-module-resolution')
-
 /* eslint-env node */
-const { defineConfig } = require('./src/eslint/eslint.rules.cjs')
+'use strict'
+const { defineConfig } = require('@sixxgate/lint')
 
-module.exports = defineConfig({
-  root: true,
-  reportUnusedDisableDirectives: true,
-  parserOptions: {
-    ecmaVersion: 'latest'
-  },
-  overrides: [
-    {
-      files: ['*.cjs'],
-      extends: './src/eslint/configs/javascript.cjs'
+module.exports = defineConfig(({ useVue, useNode, useTypeScript }) => {
+  useVue({ version: '3.4', style: 'sass' })
+  useNode()
+  useTypeScript()
+
+  return {
+    root: true,
+    env: { es2023: true },
+    reportUnusedDisableDirectives: true,
+    rules: {
+      // 'n/file-extension-in-import': ['error', 'always']
     },
-    {
-      files: ['*.js', '*.mjs', '*.jsx'],
-      extends: './src/eslint/configs/ecmascript.cjs'
-    },
-    {
-      files: ['*.ts', '*.tsx', '*.vue'],
-      parserOptions: {
-        project: [
-          './tsconfig.json',
-          './tsconfig.node.json'
-        ]
+    overrides: [
+      {
+        files: ['*.cjs'],
+        rules: {
+          '@typescript-eslint/no-require-imports': 'off'
+        },
+        parserOptions: {
+          project: './tsconfig.config.json'
+        }
+      },
+      {
+        files: ['src/core/**/*.ts', 'src/main/**/*.ts', 'src/main/**/*.js', 'src/preload/**/*.ts'],
+        parserOptions: {
+          project: './tsconfig.node.json'
+        }
+      },
+      {
+        files: ['src/renderer/**/*.ts', 'src/renderer/**/*.js', 'src/renderer/**/*.vue'],
+        parserOptions: {
+          project: './tsconfig.web.json'
+        }
+      },
+      {
+        files: ['electron.vite.config.ts', 'vite.config.ts'],
+        parserOptions: {
+          project: './tsconfig.config.json'
+        }
+      },
+      {
+        files: ['src/tests/**/*.ts'],
+        parserOptions: {
+          project: './tsconfig.test.json'
+        }
       }
-    },
-    {
-      files: ['*.ts', '*.tsx', '*.vue'],
-      extends: './src/eslint/configs/typescript.cjs'
-    },
-    {
-      files: ['*.vue'],
-      extends: './src/eslint/configs/vue.cjs'
-    }
-  ]
+    ]
+  }
 })

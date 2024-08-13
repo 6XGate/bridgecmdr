@@ -31,10 +31,10 @@ const emit = (data: AsyncStorageEventInitDict) => {
     composed: false
   })
 
-  window.dispatchEvent(event)
+  globalThis.dispatchEvent(event)
 }
 
-export const defineAsyncStorage = <T extends StorageLikeAsync> (setup: () => T) => {
+export const defineAsyncStorage = <T extends StorageLikeAsync>(setup: () => T) => {
   const storageArea = setup()
 
   return () => ({
@@ -53,15 +53,15 @@ export const defineAsyncStorage = <T extends StorageLikeAsync> (setup: () => T) 
 }
 
 export const createUserStorage = defineAsyncStorage(() => {
-  const { level } = useLevelDb()
+  const { connect } = useLevelDb()
 
-  const dbPromise = level('_userStorage')
+  const dbPromise = connect('_userStorage')
 
   const getItem = async (key: string) => {
     const db = await dbPromise
 
     try {
-      return await db.get(key, { asBuffer: false }) as string
+      return (await db.get(key, { asBuffer: false })) as string
     } catch {
       return null
     }
@@ -93,29 +93,48 @@ export const createUserStorage = defineAsyncStorage(() => {
   }
 })
 
-export function useUserStorage (key: string, initialValue: MaybeRefOrGetter<boolean>, options?: UseStorageAsyncOptions<boolean>): RemovableRef<boolean>
-export function useUserStorage (key: string, initialValue: MaybeRefOrGetter<number>, options?: UseStorageAsyncOptions<number>): RemovableRef<number>
-export function useUserStorage (key: string, initialValue: MaybeRefOrGetter<string>, options?: UseStorageAsyncOptions<string>): RemovableRef<string>
-export function useUserStorage <T> (key: string, initialValue: MaybeRefOrGetter<T>, options?: UseStorageAsyncOptions<T>): RemovableRef<T>
-// eslint-disable-next-line @typescript-eslint/unified-signatures -- Not with that default unknown
-export function useUserStorage<T = unknown> (key: string, initialValue: MaybeRefOrGetter<null>, options?: UseStorageAsyncOptions<T>): RemovableRef<T>
+export function useUserStorage(
+  key: string,
+  initialValue: MaybeRefOrGetter<boolean>,
+  options?: UseStorageAsyncOptions<boolean>
+): RemovableRef<boolean>
+export function useUserStorage(
+  key: string,
+  initialValue: MaybeRefOrGetter<number>,
+  options?: UseStorageAsyncOptions<number>
+): RemovableRef<number>
+export function useUserStorage(
+  key: string,
+  initialValue: MaybeRefOrGetter<string>,
+  options?: UseStorageAsyncOptions<string>
+): RemovableRef<string>
+export function useUserStorage<T>(
+  key: string,
+  initialValue: MaybeRefOrGetter<T>,
+  options?: UseStorageAsyncOptions<T>
+): RemovableRef<T>
 
-export function useUserStorage<T extends (string | number | boolean | object | null)> (
+export function useUserStorage<T = unknown>(
+  key: string,
+  initialValue: MaybeRefOrGetter<null>,
+  options?: UseStorageAsyncOptions<T>
+): RemovableRef<T>
+
+export function useUserStorage<T extends string | number | boolean | object | null>(
   key: string,
   initialValue: MaybeRefOrGetter<T>,
   options: UseStorageAsyncOptions<T> = {}
 ): RemovableRef<unknown> {
-  return useStorageAsync(key, initialValue, window.userStorage, options)
+  return useStorageAsync(key, initialValue, globalThis.userStorage, options)
 }
 
 declare global {
-  interface Window {
-    userStorage: ReturnType<typeof createUserStorage>
-  }
+  // eslint-disable-next-line no-var -- Required to augment globalThis
+  var userStorage: ReturnType<typeof createUserStorage>
 }
 
 export const createPersistentStores = () => ({
   install: () => {
-    window.userStorage = createUserStorage()
+    globalThis.userStorage = createUserStorage()
   }
 })

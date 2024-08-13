@@ -1,16 +1,15 @@
+import { app } from 'electron'
 import unhandled from 'electron-unhandled'
 
-const initialize = async () => {
-  // Activate the unhandle handler...
-  unhandled()
+// Activate the unhandle handler...
+unhandled()
 
+async function main() {
   // Now boot the application.
-  const { startBridgeCmdr } = await import('./boot')
-  await startBridgeCmdr()
+  await import('./main.js')
 }
 
-initialize()
-  .catch(e => {
-    console.error(e)
-    process.exit(1)
-  })
+main().catch((cause: unknown) => {
+  console.error(cause)
+  app.exit(1)
+})

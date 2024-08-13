@@ -14,6 +14,9 @@ import { z } from 'zod'
  * - Byte 3 to N-1: Packet data (D)
  * - Byte 3+N:      Packet checksum; ~(sum(D)) - (N - 1)
  *
+ * Packet Type
+ * - 2: Command package
+ *
  * Command-block Format
  * - Byte 1:    Destination address
  * - Byte 2:    Source address
@@ -30,30 +33,30 @@ import { z } from 'zod'
  */
 
 export class SonyDriverError extends Error {
-  constructor (message?: string) {
+  constructor(message?: string) {
     super(`[Sony Driver]: ${message ?? 'Unknown error'}`)
   }
 }
 
 export class PacketError extends SonyDriverError {
-  constructor (message?: string) {
+  constructor(message?: string) {
     super(message ?? 'Unknown package error')
   }
 }
 
 export class ChecksumError extends PacketError {
-  constructor (message?: string) {
+  constructor(message?: string) {
     super(message ?? 'Unknown checksum error')
   }
 }
 
 export class CommandBlockError extends SonyDriverError {
-  constructor (message?: string) {
+  constructor(message?: string) {
     super(message ?? 'Unknown command block error')
   }
 }
 
-export function calculateChecksum (data: Buffer) {
+export function calculateChecksum(data: Buffer) {
   let x = 0n
   for (const byte of data) {
     x = x + BigInt(byte)
@@ -73,41 +76,45 @@ export const kCommandPacket = PacketType.parse(0x2)
 export type Package = z.infer<typeof Package>
 export const Package = z.instanceof(Buffer).brand('Packet')
 
-export function createPacket (type: PacketType, data: Buffer) {
+export function createPacket(type: PacketType, data: Buffer) {
   if (data.byteLength === 0) {
     throw new PacketError('Attempting to send empty packet')
   }
 
-  if (data.byteLength > 0xFF) {
+  if (data.byteLength > 0xff) {
     throw new PacketError(`Packet is too large at ${data.byteLength}B`)
   }
 
   const checksum = calculateChecksum(data)
   const buffer = Buffer.alloc(3 + data.byteLength)
-  let pos = 3
+  let pos = 0
 
-  buffer.writeUint8(type, pos); pos += 1
-  buffer.writeUint8(data.byteLength, pos); pos += 1
-  data.copy(buffer, pos); pos += data.byteLength
+  buffer.writeUint8(type, pos)
+  pos += 1
+  buffer.writeUint8(data.byteLength, pos)
+  pos += 1
+  data.copy(buffer, pos)
+  pos += data.byteLength
   buffer.writeUint8(checksum, pos)
+  pos += 1
 
-  return Package.parse(buffer)
+  return Package.parse(buffer.subarray(0, pos))
 }
 
 export type AddressKind = z.infer<typeof AddressKind>
 export const AddressKind = z.number().int().brand('AddressKind')
 
-export const kAddressAllMonitors = AddressKind.parse(0xC0)
+export const kAddressAllMonitors = AddressKind.parse(0xc0)
 export const kAddressGroup = AddressKind.parse(0x80)
 export const kAddressMonitor = AddressKind.parse(0x00)
 
 export type AddressNumber = z.infer<typeof AddressNumber>
-export const AddressNumber = z.number().int().min(0).max(0xF)
+export const AddressNumber = z.number().int().min(0).max(0xf)
 
 export type Address = z.infer<typeof Address>
-export const Address = z.number().int().min(0).max(0xFF).brand('Address')
+export const Address = z.number().int().min(0).max(0xff).brand('Address')
 
-export function createAddress (kind: AddressKind, address: AddressNumber) {
+export function createAddress(kind: AddressKind, address: AddressNumber) {
   return Address.parse(kind | AddressNumber.parse(address))
 }
 
@@ -115,33 +122,44 @@ export type Command = z.infer<typeof Command>
 export const Command = z.number().int().brand('Command')
 
 export const kSetChannel = Command.parse(0x2100)
-export const kPowerOn = Command.parse(0x293E)
-export const kPowerOff = Command.parse(0x2A3E)
-export const kPressButton = Command.parse(0x3F44)
+export const kPowerOn = Command.parse(0x293e)
+export const kPowerOff = Command.parse(0x2a3e)
+export const kPressButton = Command.parse(0x3f44)
 
 export type CommandArg = z.infer<typeof CommandArg>
-export const CommandArg = z.number().int().min(0).max(0xFF)
+export const CommandArg = z.number().int().min(0).max(0xff)
 
-export function createCommand (destination: Address, source: Address, command: Command, arg0?: CommandArg, arg1?: CommandArg) {
+export function createCommand(
+  destination: Address,
+  source: Address,
+  command: Command,
+  arg0?: CommandArg,
+  arg1?: CommandArg
+) {
   arg0 = CommandArg.optional().parse(arg0)
   arg1 = CommandArg.optional().parse(arg1)
 
   const buffer = Buffer.alloc(6, 0)
   let pos = 0
 
-  buffer.writeUInt8(destination, pos); pos += 1
-  buffer.writeUInt8(source, pos); pos += 1
-  buffer.writeUInt16BE(command, pos); pos += 2
-  if (arg0 == null) {
+  buffer.writeUInt8(destination, pos)
+  pos += 1
+  buffer.writeUInt8(source, pos)
+  pos += 1
+  buffer.writeUInt16BE(command, pos)
+  pos += 2
+  if (arg0 == null || arg0 === 0) {
     return createPacket(kCommandPacket, buffer.subarray(0, pos))
   }
 
-  buffer.writeUInt8(arg0, pos); pos += 1
-  if (arg1 == null) {
+  buffer.writeUInt8(arg0, pos)
+  pos += 1
+  if (arg1 == null || arg1 === 0) {
     return createPacket(kCommandPacket, buffer.subarray(0, pos))
   }
 
-  buffer.writeUInt8(arg1, pos); pos += 1
+  buffer.writeUInt8(arg1, pos)
+  pos += 1
 
   return createPacket(kCommandPacket, buffer.subarray(0, pos))
 }

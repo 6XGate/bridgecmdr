@@ -1,50 +1,11 @@
 {
-  "extends": "@vue/tsconfig/tsconfig.node.json",
+  "extends": ["@tsconfig/node20", "./tsconfig.base.json"],
   "include": [
-    "electron.vite.config.*",
-    "src/preload/**/*",
-    "src/main/env.d.ts",
-    "src/main/**/*"
+    "src/core/**/*",
+    "src/main/**/*",
+    "src/preload/**/*"
   ],
-  // "exclude": ["node_modules"],
   "compilerOptions": {
-    // Projects
-    "composite": true,
-
-    // Modules
-    "baseUrl": ".",
-    "paths": {
-      "@shared/*": ["./src/shared/*"],
-      "@preload/*": ["./src/preload/*"],
-      "@main/*": ["./src/main/*"],
-      "@/*": ["./src/renderer/*"]
-    },
-    "types": ["node", "electron-vite/node"],
-
-    // JavaScript Support
-    "allowJs": false,
-    "checkJs": false,
-
-    // Emit
-    "outDir": "./inter",
-    "importHelpers": true,
-    "noEmitHelpers": true,
-
-    // Interop Constraints
-    /* TODO: "verbatimModuleSyntax": true, */
-    "allowSyntheticDefaultImports": true,
-
-    // Type Checking
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "exactOptionalPropertyTypes": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": true,
-    "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true,
-    "allowUnusedLabels": false,
-    "allowUnreachableCode": false
+    "types": ["electron-vite/node"]
   }
 }

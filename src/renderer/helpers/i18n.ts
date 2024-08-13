@@ -19,12 +19,12 @@ export type DefineMessageSchema<Schema extends DefaultLocaleMessageSchema = Defa
  * Defines an i18n date/time format schema that is only typed as the generic set of options,
  * while leaving the general schema structure intact.
  */
-export type DefineDateTimeFormatSchema<Schema extends IntlDateTimeFormat> =
-  { [K in keyof Schema]: DateTimeFormatOptions }
+export type DefineDateTimeFormatSchema<Schema extends IntlDateTimeFormat> = {
+  [K in keyof Schema]: DateTimeFormatOptions
+}
 
 /**
  * Defines an i18n date/time format schema that is only typed as the generic set of options,
  * while leaving the general schema structure intact.
  */
-export type DefineNumberFormatSchema<Schema extends IntlNumberFormat> =
-  { [K in keyof Schema]: NumberFormatOptions }
+export type DefineNumberFormatSchema<Schema extends IntlNumberFormat> = { [K in keyof Schema]: NumberFormatOptions }

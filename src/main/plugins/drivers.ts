@@ -1,16 +1,16 @@
-import extronSisDriver from '@main/drivers/extron/sis'
-import sonyRs485Driver from '@main/drivers/sony/rs485'
-import teslaSmartMatrixDriver from '@main/drivers/tesla-smart/matrix'
-import teslaSmartSdiDriver from '@main/drivers/tesla-smart/sdi'
-import useDrivers from '@main/system/driver'
+import extronSisDriver from '../drivers/extron/sis.js'
+import sonyRs485Driver from '../drivers/sony/rs485.js'
+import teslaSmartKvmDriver from '../drivers/tesla-smart/kvm.js'
+import teslaSmartMatrixDriver from '../drivers/tesla-smart/matrix.js'
+import teslaSmartSdiDriver from '../drivers/tesla-smart/sdi.js'
+import useDrivers from '../system/driver.js'
 
-const registerDrivers = () => {
+export default function registerDrivers() {
   const { register } = useDrivers()
 
   register(extronSisDriver)
   register(sonyRs485Driver)
   register(teslaSmartMatrixDriver)
+  register(teslaSmartKvmDriver)
   register(teslaSmartSdiDriver)
 }
-
-export default registerDrivers

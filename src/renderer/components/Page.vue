@@ -1,10 +1,11 @@
-<!-- eslint-disable vue/multi-word-component-names -- Tool basic -->
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 
-const props = defineProps({
-  elevate: Boolean
-})
+interface Props {
+  elevate?: boolean
+}
+
+const props = defineProps<Props>()
 
 const flatToolbar = computed(() => ({
   color: 'transparent',
@@ -23,9 +24,7 @@ const toolbar = ref({
 
 const handleContentScroll = (e: Event) => {
   if (e.target instanceof HTMLElement) {
-    toolbar.value = e.target.scrollTop === 0
-      ? flatToolbar.value
-      : elevatedToolbar.value
+    toolbar.value = e.target.scrollTop === 0 ? flatToolbar.value : elevatedToolbar.value
   }
 }
 </script>

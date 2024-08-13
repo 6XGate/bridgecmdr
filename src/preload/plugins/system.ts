@@ -1,5 +1,5 @@
-import useIpc from '@preload/support'
-import type { SystemApi } from '@preload/api'
+import useIpc from '../support.js'
+import type { SystemApi } from '../api.js'
 
 const useSystemApi = () => {
   const ipc = useIpc()

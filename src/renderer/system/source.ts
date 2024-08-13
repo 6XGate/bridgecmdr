@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia'
 import { z } from 'zod'
-import { defineDatabase } from '@/data/database'
-import { useDataSet } from '@/data/set'
-import { useDataStore } from '@/data/store'
-import { forceUndefined } from '@/helpers/utilities'
-import { useTies, useTiesDatabase } from '@/system/tie'
-import { trackBusy } from '@/utilities/tracking'
-import type { DocumentOf } from '@/data/database'
+import { defineDatabase } from '../data/database'
+import { useDataSet } from '../data/set'
+import { useDataStore } from '../data/store'
+import { forceUndefined } from '../helpers/utilities'
+import { trackBusy } from '../utilities/tracking'
+import { useTies, useTiesDatabase } from './tie'
+import type { DocumentOf } from '../data/database'
 
 export type NewSource = z.input<typeof Source>
 export type Source = DocumentOf<typeof Source>
@@ -39,7 +39,11 @@ export const useSources = defineStore('sources', () => {
       .query(async backend => await backend.find({ selector: { sourceId: id } }))
       .then(r => r.docs)
 
-    await Promise.all(related.map(async tie => { await ties.remove(tie._id) }))
+    await Promise.all(
+      related.map(async tie => {
+        await ties.remove(tie._id)
+      })
+    )
   })
 
   return {

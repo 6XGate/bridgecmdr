@@ -1,9 +1,12 @@
+/* eslint-disable n/no-process-exit -- No real way to do this otherwise */
+
 // import process from 'node:process'
-import useBridgedApi from '@preload/plugins/bridge'
-import useAppInfo from '@preload/plugins/info/app'
-import useUserInfo from '@preload/plugins/info/user'
-import usePolyfills from '@preload/plugins/polyfill'
-import useAppUpdates from '@preload/plugins/updates'
+
+import useBridgedApi from './plugins/bridge.js'
+import useAppInfo from './plugins/info/app.js'
+import useUserInfo from './plugins/info/user.js'
+import usePolyfills from './plugins/polyfill.js'
+import useAppUpdates from './plugins/updates.js'
 
 if (!process.contextIsolated) {
   console.error('Context isolation is not enabled')

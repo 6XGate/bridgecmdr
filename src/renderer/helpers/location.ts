@@ -2,11 +2,11 @@ import { helpers } from '@vuelidate/validators'
 import { toValue } from '@vueuse/shared'
 import { computed, readonly } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { isHostWithOptionalPort } from '@/helpers/validation'
-import type { TupleLike } from '@/helpers/type'
-import type { I18nSchema } from '@/locales/locales'
-import type { PortData } from '@/system/ports'
-import type { NewSwitch } from '@/system/switch'
+import { isHostWithOptionalPort } from './validation'
+import type { I18nSchema } from '../locales/locales'
+import type { PortData } from '../system/ports'
+import type { NewSwitch } from '../system/switch'
+import type { Fixed } from '@/basics'
 import type { MessageProps } from '@vuelidate/validators'
 import type { MaybeRefOrGetter } from '@vueuse/shared'
 import type { Ref } from 'vue'
@@ -31,14 +31,19 @@ export const useLocationUtils = (validSwitches: MaybeRefOrGetter<readonly PortDa
   const locMsg = ({ $model }: MessageProps) => {
     const path = String($model)
     switch (true) {
-      case path.startsWith('port:'): return t('validations.location.port')
-      case path.startsWith('ip:'): return t('validations.location.ip')
-      default: return t('validations.location.path')
+      case path.startsWith('port:'):
+        return t('validations.location.port')
+      case path.startsWith('ip:'):
+        return t('validations.location.ip')
+      default:
+        return t('validations.location.path')
     }
   }
 
-  const locationPath = helpers.withMessage(locMsg,
-    (value: unknown) => !(helpers.req(value) as boolean) || isPath(String(value)))
+  const locationPath = helpers.withMessage(
+    locMsg,
+    (value: unknown) => !(helpers.req(value) as boolean) || isPath(String(value))
+  )
 
   const splitPath = (value: string | undefined) => {
     if (value == null) {
@@ -47,11 +52,11 @@ export const useLocationUtils = (validSwitches: MaybeRefOrGetter<readonly PortDa
 
     switch (true) {
       case value.startsWith('port:'):
-        return ['port' as const, value.substring(5)] satisfies TupleLike
+        return ['port' as const, value.substring(5)] satisfies Fixed
       case value.startsWith('ip:'):
-        return ['ip' as const, value.substring(3)] satisfies TupleLike
+        return ['ip' as const, value.substring(3)] satisfies Fixed
       default:
-        return ['path' as const, value] satisfies TupleLike
+        return ['path' as const, value] satisfies Fixed
     }
   }
 
@@ -79,38 +84,44 @@ export const useLocation = (location: Ref<string>, validSwitches: MaybeRefOrGett
   const pathType = computed({
     get: () => {
       switch (true) {
-        case location.value.startsWith('port:'): return 'port'
-        case location.value.startsWith('ip:'): return 'ip'
-        default: return 'path'
+        case location.value.startsWith('port:'):
+          return 'port'
+        case location.value.startsWith('ip:'):
+          return 'ip'
+        default:
+          return 'path'
       }
     },
     set: value => {
-      location.value = value !== 'path'
-        ? location.value = `${value}:${path.value}`
-        : location.value = path.value
+      location.value = value !== 'path' ? (location.value = `${value}:${path.value}`) : (location.value = path.value)
     }
   })
 
   const pathLabel = computed(() => {
     switch (true) {
-      case pathType.value === 'port': return t('label.port')
-      case pathType.value === 'ip': return t('label.remote')
-      default: return t('label.path')
+      case pathType.value === 'port':
+        return t('label.port')
+      case pathType.value === 'ip':
+        return t('label.remote')
+      default:
+        return t('label.path')
     }
   })
 
   const path = computed({
     get: () => {
       switch (pathType.value) {
-        case 'port': return location.value.substring(5)
-        case 'ip': return location.value.substring(3)
-        default: return location.value
+        case 'port':
+          return location.value.substring(5)
+        case 'ip':
+          return location.value.substring(3)
+        default:
+          return location.value
       }
     },
     set: value => {
-      location.value = pathType.value !== 'path'
-        ? location.value = `${pathType.value}:${value}`
-        : location.value = value
+      location.value =
+        pathType.value !== 'path' ? (location.value = `${pathType.value}:${value}`) : (location.value = value)
     }
   })
 
@@ -124,10 +135,15 @@ export const useLocation = (location: Ref<string>, validSwitches: MaybeRefOrGett
   }
 }
 
-export const useSwitchLocation = (switcher: MaybeRefOrGetter<NewSwitch>, validSwitches: MaybeRefOrGetter<readonly PortData[]>) => {
+export const useSwitchLocation = (
+  switcher: MaybeRefOrGetter<NewSwitch>,
+  validSwitches: MaybeRefOrGetter<readonly PortData[]>
+) => {
   const location = computed({
     get: () => toValue(switcher).path,
-    set: v => { toValue(switcher).path = v }
+    set: v => {
+      toValue(switcher).path = v
+    }
   })
 
   return {

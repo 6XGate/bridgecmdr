@@ -1,22 +1,26 @@
-<script setup lang='ts'>
+<script setup lang="ts">
 import { useEventListener, useTitle } from '@vueuse/core'
 import { watch, ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useTheme } from 'vuetify'
-import AlertModal from '@/modals/AlertModal.vue'
-import ConfirmModal from '@/modals/ConfirmModal.vue'
-import { useDialogs } from '@/modals/dialogs'
-import useSettings from '@/stores/settings'
-import useAppUpdates from '@/system/appUpdates'
-import type { I18nSchema } from '@/locales/locales'
-import type { UpdateProgressEvent } from '@/system/appUpdates'
+import AlertModal from './modals/AlertModal.vue'
+import ConfirmModal from './modals/ConfirmModal.vue'
+import { useDialogs } from './modals/dialogs'
+import useSettings from './stores/settings'
+import useAppUpdates from './system/appUpdates'
+import type { I18nSchema } from './locales/locales'
+import type { UpdateProgressEvent } from './system/appUpdates'
 import type { ProgressInfo } from 'electron-updater'
 
 const settings = useSettings()
 const theme = useTheme()
-watch(() => settings.activeColorScheme, () => {
-  theme.global.name.value = settings.activeColorScheme
-}, { immediate: true })
+watch(
+  () => settings.activeColorScheme,
+  () => {
+    theme.global.name.value = settings.activeColorScheme
+  },
+  { immediate: true }
+)
 
 const dialogs = useDialogs()
 const { t, n } = useI18n<I18nSchema>()
@@ -50,7 +54,7 @@ const checkForUpdate = async () => {
       await dialogs.alert(t('message.updateReady'))
 
       await appUpdater.installUpdate()
-      window.close()
+      globalThis.close()
     } finally {
       progress.value = undefined
     }
@@ -82,35 +86,39 @@ const roundByteSize = (amount: number, type: 'size' | 'speed' = 'size') => {
   }
 }
 
-onMounted(async () => { await checkForUpdate() })
+onMounted(async () => {
+  await checkForUpdate()
+})
 </script>
 
 <template>
   <VApp id="bridgecmdr">
     <RouterView v-slot="{ Component: Route, route }">
       <VScrollXTransition leave-absolute>
-        <Component :is="Route" :key="route.name"/>
+        <Component :is="Route" :key="route.name" />
       </VScrollXTransition>
     </RouterView>
   </VApp>
   <!-- Update progress dialog -->
-  <VDialog v-if="progress != null" :model-value="progress != null" max-width="640">
+  <VDialog v-if="progress != null" :model-value="progress != null" :max-width="640">
     <VCard title="Downloading update...">
       <VCardText>
-        {{ t('message.progress', {
-          amount: roundByteSize(progress.transferred),
-          total: roundByteSize(progress.total),
-          speed: roundByteSize(progress.bytesPerSecond)
-        }) }}
+        {{
+          t('message.progress', {
+            amount: roundByteSize(progress.transferred),
+            total: roundByteSize(progress.total),
+            speed: roundByteSize(progress.bytesPerSecond, 'speed')
+          })
+        }}
       </VCardText>
       <VCardText>
-        <VProgressLinear :model-value="progress.percent"/>
+        <VProgressLinear :model-value="progress.percent" />
       </VCardText>
     </VCard>
   </VDialog>
   <!-- Common dialogs -->
-  <AlertModal/>
-  <ConfirmModal/>
+  <AlertModal />
+  <ConfirmModal />
 </template>
 
 <i18n lang="yaml">

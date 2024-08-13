@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia'
 import { nextTick } from 'vue'
 import { z } from 'zod'
-import { defineDatabase, DocumentId } from '@/data/database'
-import { useDataSet } from '@/data/set'
-import { useDataStore } from '@/data/store'
-import { forceUndefined } from '@/helpers/utilities'
-import { trackBusy } from '@/utilities/tracking'
-import type { DocumentOf } from '@/data/database'
+import { defineDatabase, DocumentId } from '../data/database'
+import { useDataSet } from '../data/set'
+import { useDataStore } from '../data/store'
+import { forceUndefined } from '../helpers/utilities'
+import { trackBusy } from '../utilities/tracking'
+import type { DocumentOf } from '../data/database'
 
 export type NewTie = z.input<typeof Tie>
 export type Tie = DocumentOf<typeof Tie>
@@ -46,10 +46,9 @@ export const useTies = defineStore('ties', () => {
     set.initialize([])
 
     await nextTick()
-    set.initialize(await db.query(async backend =>
-      await backend
-        .find({ selector: { switchId: id } })
-        .then(r => r.docs)))
+    set.initialize(
+      await db.query(async backend => await backend.find({ selector: { switchId: id } }).then(r => r.docs))
+    )
   })
 
   const forSource = tracker.track(async (id: DocumentId) => {
@@ -57,10 +56,9 @@ export const useTies = defineStore('ties', () => {
     set.initialize([])
 
     await nextTick()
-    set.initialize(await db.query(async backend =>
-      await backend
-        .find({ selector: { sourceId: id } })
-        .then(r => r.docs)))
+    set.initialize(
+      await db.query(async backend => await backend.find({ selector: { sourceId: id } }).then(r => r.docs))
+    )
   })
 
   return {

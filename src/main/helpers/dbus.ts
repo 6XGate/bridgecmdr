@@ -1,6 +1,6 @@
-import execa from 'execa'
+import Logger from 'electron-log'
+import { execa } from 'execa'
 import { memo } from 'radash'
-import useLogging from '@main/plugins/log'
 
 interface TypeMap {
   string: string
@@ -28,8 +28,6 @@ interface KeyMap {
 }
 
 const useDbus = memo(() => {
-  const log = useLogging()
-
   /**
    * Targets bus.
    */
@@ -45,7 +43,7 @@ const useDbus = memo(() => {
    * @param args Method arguments.
    * @returns Result message.
    */
-  async function dbusSend (
+  async function dbusSend(
     target: DBusTarget,
     dest: string,
     path: string,
@@ -53,16 +51,9 @@ const useDbus = memo(() => {
     member: string,
     ...args: string[]
   ) {
-    const params = [
-      target,
-      '--print-reply',
-      `--dest=${dest}`,
-      path,
-      `${ifname}.${member}`,
-      ...args
-    ]
+    const params = [target, '--print-reply', `--dest=${dest}`, path, `${ifname}.${member}`, ...args]
 
-    log.debug('execa:dbus-send', ...params)
+    Logger.debug('execa:dbus-send', ...params)
     const { stdout, stderr, exitCode } = await execa('dbus-send', params)
 
     if (exitCode !== 0) {
@@ -73,18 +64,24 @@ const useDbus = memo(() => {
   }
 
   /** Gets the schema named type to its argument type. */
-  type ArgFromType<T>
-    = T extends keyof TypeMap ? TypeMap[T]
-      : T extends `array:${infer V extends keyof TypeMap}` ? Array<TypeMap[V]>
-        : T extends `dict:${infer K extends keyof KeyMap}:${infer V extends keyof TypeMap}` ? Record<KeyMap[K], TypeMap[V]>
-          : T extends 'variant' ? unknown : never
+  type ArgFromType<T> = T extends keyof TypeMap
+    ? TypeMap[T]
+    : T extends `array:${infer V extends keyof TypeMap}`
+      ? TypeMap[V][]
+      : T extends `dict:${infer K extends keyof KeyMap}:${infer V extends keyof TypeMap}`
+        ? Record<KeyMap[K], TypeMap[V]>
+        : T extends 'variant'
+          ? unknown
+          : never
 
   /** Converts a binding schema to a parameter tuple. */
-  type ArgsFromSchame<Schema>
-    = Schema extends [infer Single] ? [ArgFromType<Single>]
-      : Schema extends [infer Head, ...infer Rest] ? [ArgFromType<Head>, ...ArgsFromSchame<Rest>]
-        : Schema extends [infer Head, infer Last] ? [ArgFromType<Head>, ArgFromType<Last>]
-          : never
+  type ArgsFromSchame<Schema> = Schema extends [infer Single]
+    ? [ArgFromType<Single>]
+    : Schema extends [infer Head, ...infer Rest]
+      ? [ArgFromType<Head>, ...ArgsFromSchame<Rest>]
+      : Schema extends [infer Head, infer Last]
+        ? [ArgFromType<Head>, ArgFromType<Last>]
+        : never
 
   /** Support schema types. */
   type SchemaType = keyof TypeMap | 'variant' | `array:${keyof TypeMap}` | `dict:${keyof KeyMap}:${keyof TypeMap}`
@@ -93,37 +90,35 @@ const useDbus = memo(() => {
   const kDictType = /^dict:([a-z0-9]+):([a-z0-9]+)$/u
 
   /** Encodes a diction. */
-  function encodeDict (key: keyof KeyMap, value: keyof TypeMap, dict: Record<string | number, unknown>) {
-    const encodeKey = key === 'string'
-      ? (k: string | number) => `"${k}"`
-      : (k: string | number) => String(k)
-    const encodeValue = value === 'string'
-      ? (v: unknown) => `"${v as string}"`
-      : (v: unknown) => String(v)
+  function encodeDict(key: keyof KeyMap, value: keyof TypeMap, dict: Record<string | number, unknown>) {
+    const encodeKey = key === 'string' ? (k: string | number) => `"${k}"` : (k: string | number) => String(k)
+    const encodeValue = value === 'string' ? (v: unknown) => `"${v as string}"` : (v: unknown) => String(v)
 
-    return `dict:${key}:${value}:${Object.entries(dict).map(([k, v]) => `${encodeKey(k)},${encodeValue(v)}`).join(',')}`
+    return `dict:${key}:${value}:${Object.entries(dict)
+      .map(([k, v]) => `${encodeKey(k)},${encodeValue(v)}`)
+      .join(',')}`
   }
 
   /** Defines the variant numeric type ranges. */
   const Limits = {
-  // Signed
+    // Signed
     INT8_MIN: BigInt.asIntN(8, 0x80n),
-    INT8_MAX: BigInt.asIntN(8, 0x7Fn),
+    INT8_MAX: BigInt.asIntN(8, 0x7fn),
     INT16_MIN: BigInt.asIntN(16, 0x8000n),
-    INT16_MAX: BigInt.asIntN(16, 0x7FFFn),
+    INT16_MAX: BigInt.asIntN(16, 0x7fffn),
     INT32_MIN: BigInt.asIntN(32, 0x80000000n),
-    INT32_MAX: BigInt.asIntN(32, 0x7FFFFFFFn),
+    INT32_MAX: BigInt.asIntN(32, 0x7fffffffn),
     INT64_MIN: BigInt.asIntN(64, 0x8000000000000000n),
-    INT64_MAX: BigInt.asIntN(64, 0x7FFFFFFFFFFFFFFFn),
+    INT64_MAX: BigInt.asIntN(64, 0x7fffffffffffffffn),
     // Unsigned
-    UINT8_MAX: 0xFFn,
-    UINT16_MAX: 0xFFFFn,
-    UINT32_MAX: 0xFFFFFFFFn,
-    UINT64_MAX: 0xFFFFFFFFFFFFFFFFn
+    UINT8_MAX: 0xffn,
+    UINT16_MAX: 0xffffn,
+    UINT32_MAX: 0xffffffffn,
+    UINT64_MAX: 0xffffffffffffffffn
   }
 
   /** Encodes a number into a variant. */
-  function encodeVariantNumber (value: number) {
+  function encodeVariantNumber(value: number) {
     if (value >= 0) {
       // Positive side
       if (value <= Limits.INT8_MAX) {
@@ -164,7 +159,7 @@ const useDbus = memo(() => {
   }
 
   /** Encodes a bigint into a variant. */
-  function encodeVariantBigInt (value: bigint) {
+  function encodeVariantBigInt(value: bigint) {
     if (value >= 0) {
       // Positive side
       if (value <= Limits.INT8_MAX) {
@@ -207,7 +202,7 @@ const useDbus = memo(() => {
   }
 
   /** Encodes a value into a variant. */
-  function encodeVariant (index: number, arg: unknown) {
+  function encodeVariant(index: number, arg: unknown) {
     switch (typeof arg) {
       case 'object':
         throw new TypeError(`dbus-send does not support sending containers in a variant at argument position ${index}`)
@@ -224,12 +219,14 @@ const useDbus = memo(() => {
       case 'function':
         throw new TypeError(`dbus-send does not support sending a function in a variant at argument position ${index}`)
       default:
-        throw new TypeError(`dbus-send does not support sending ${typeof arg} in a variant at argument position ${index}`)
+        throw new TypeError(
+          `dbus-send does not support sending ${typeof arg} in a variant at argument position ${index}`
+        )
     }
   }
 
   /** Encodes the parameters based on a binding schema. */
-  function encodeParams (schema: SchemaType[], args: unknown[]) {
+  function encodeParams(schema: SchemaType[], args: unknown[]) {
     return schema.map((type, index) => {
       // NOTE: All logic here depends on TypeScript type
       // checking to ensure all strings and data are
@@ -256,8 +253,7 @@ const useDbus = memo(() => {
 
       const match = kDictType.exec(type)
       if (match != null) {
-        return encodeDict(match[1] as keyof KeyMap, match[2] as keyof TypeMap,
-          arg as Record<string | number, unknown>)
+        return encodeDict(match[1] as keyof KeyMap, match[2] as keyof TypeMap, arg as Record<string | number, unknown>)
       }
 
       if (type === 'string') {
@@ -278,7 +274,7 @@ const useDbus = memo(() => {
    * @param schema Argument schema.
    * @returns A bound function that uses dbus-send(1)
    */
-  function dbusBind<Type extends SchemaType, Schema extends [Type, ...Type[]]> (
+  function dbusBind<Type extends SchemaType, Schema extends [Type, ...Type[]]>(
     target: DBusTarget,
     dest: string,
     path: string,

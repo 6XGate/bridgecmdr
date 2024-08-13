@@ -1,5 +1,5 @@
-import useIpc from '@preload/support'
-import type { PortApi } from '@preload/api'
+import useIpc from '../support.js'
+import type { PortApi } from '../api.js'
 
 const usePortsApi = () => {
   const ipc = useIpc()

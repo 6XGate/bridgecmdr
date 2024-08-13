@@ -1,28 +1,33 @@
-import useIpc from '@preload/support'
-import type { LevelProxyApi } from '@preload/api'
+import { ipcRenderer } from 'electron'
+import useIpc from '../support.js'
+import type { Handle, LevelApi, Messanger } from '../api.js'
+import type { IpcRendererEvent } from 'electron'
 
-const useLevelProxyApi = () => {
+export default function useLevelApi() {
   const ipc = useIpc()
 
-  return {
-    connect: ipc.useInvoke('leveldb:connect'),
-    open: ipc.useInvoke('leveldb:open'),
-    close: ipc.useInvoke('leveldb:close'),
-    get: ipc.useInvoke('leveldb:get'),
-    getMany: ipc.useInvoke('leveldb:getMany'),
-    put: ipc.useInvoke('leveldb:put'),
-    del: ipc.useInvoke('leveldb:del'),
-    batch: ipc.useInvoke('leveldb:batch'),
-    clear: ipc.useInvoke('leveldb:clear'),
-    approximateSize: ipc.useInvoke('leveldb:approximateSize'),
-    compactRange: ipc.useInvoke('leveldb:compactRange'),
-    iterator: ipc.useInvoke('leveldb:iterator'),
-    iteration: {
-      next: ipc.useInvoke('leveldb:iterator:next'),
-      end: ipc.useInvoke('leveldb:iterator:end'),
-      seek: ipc.useInvoke('leveldb:iterator:seek')
-    }
-  } satisfies LevelProxyApi
-}
+  type GetChannel = (h: Handle) => Promise<`level:${string}`>
+  const getChannel: GetChannel = ipc.useInvoke('database:channel')
 
-export default useLevelProxyApi
+  const activate = async (handle: Handle, receiver: Messanger): Promise<Messanger> => {
+    const channel = await getChannel(handle)
+
+    const received = (_: IpcRendererEvent, message: unknown) => {
+      receiver(message)
+    }
+
+    ipcRenderer.on(channel, received)
+    ipcRenderer.once(`${channel}:close`, () => {
+      ipcRenderer.off(channel, received)
+    })
+
+    return (message: unknown) => {
+      ipcRenderer.send(channel, message)
+    }
+  }
+
+  return {
+    open: ipc.useInvoke('database:open'),
+    activate
+  } satisfies LevelApi
+}

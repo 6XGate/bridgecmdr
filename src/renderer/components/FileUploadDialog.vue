@@ -5,28 +5,54 @@ import is from '@sindresorhus/is'
 import { useObjectUrl, useVModel } from '@vueuse/core'
 import { ref, computed, watch, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useElementScrollingBounds } from '@/helpers/element'
-import { useButton } from '@/helpers/utilities'
-import type { I18nSchema } from '@/locales/locales'
-import type { ComponentPublicInstance, PropType } from 'vue'
+import { useElementScrollingBounds } from '../helpers/element'
+import { useButton } from '../helpers/utilities'
+import type { I18nSchema } from '../locales/locales'
+import type { ComponentPublicInstance } from 'vue'
+import { toArray } from '@/basics'
 
-const props = defineProps({
+interface Props {
   // State
   // eslint-disable-next-line vue/no-unused-properties -- useVModel
-  visible: Boolean,
+  visible?: boolean
   // Size and location
   // File
-  accept: String,
-  icon: String,
-  unsetIcon: { type: String, default: mdiFile },
-  lazySource: { type: String, default: fileIcon },
+  accept?: string | undefined
+  icon?: string | undefined
+  unsetIcon?: string | undefined
+  lazySource?: string | undefined
   // Popup data
-  title: String,
-  showConfirm: [String, Boolean],
-  showCancel: [String, Boolean],
-  modelValue: File as PropType<File | undefined>, // Need undefined due to exactOptionalPropertyTypes
-  mandatory: Boolean
+  title?: string | undefined
+  showConfirm?: boolean | string | undefined
+  showCancel?: boolean | string | undefined
+  modelValue?: File | undefined
+  mandatory?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  unsetIcon: mdiFile,
+  lazySource: fileIcon,
+  showConfirm: false,
+  showCancel: false
 })
+
+// const props = defineProps({
+//   // State
+//   // eslint-disable-next-line vue/no-unused-properties -- useVModel
+//   visible: Boolean,
+//   // Size and location
+//   // File
+//   accept: String,
+//   icon: String,
+//   unsetIcon: { type: String, default: mdiFile },
+//   lazySource: { type: String, default: fileIcon },
+//   // Popup data
+//   title: String,
+//   showConfirm: [String, Boolean],
+//   showCancel: [String, Boolean],
+//   modelValue: File as PropType<File | undefined>, // Need undefined due to exactOptionalPropertyTypes
+//   mandatory: Boolean
+// })
 
 const emit = defineEmits<{
   (on: 'update:model-value' | 'confirm', value: File | undefined): void
@@ -35,18 +61,31 @@ const emit = defineEmits<{
 
 const { t } = useI18n<I18nSchema>()
 
-const confirmButton = useButton(() => props.showConfirm, () => t('common.confirm'))
-const cancelButton = useButton(() => props.showCancel, () => t('common.cancel'))
+const confirmButton = useButton(
+  () => props.showConfirm,
+  () => t('common.confirm')
+)
+const cancelButton = useButton(
+  () => props.showCancel,
+  () => t('common.cancel')
+)
 
 const isVisible = useVModel(props, 'visible', emit)
 
+// eslint-disable-next-line vue/no-setup-props-reactivity-loss -- Watched and updated
 const innerValue = ref(props.modelValue != null ? [props.modelValue] : [])
-watch(() => props.modelValue, value => { innerValue.value = value != null ? [value] : [] })
+watch(
+  () => props.modelValue,
+  value => {
+    innerValue.value = value != null ? [value] : []
+  }
+)
 
 const current = computed(() => innerValue.value[0])
 const image = useObjectUrl(current)
 
-const onNewFile = async (files: File[]) => {
+const onNewFile = async (files: File | File[]) => {
+  files = toArray(files)
   // Confirm the dialog if the confirm button is not present.
   if (confirmButton.value == null && is.nonEmptyArray(files)) {
     await nextTick()
@@ -75,25 +114,33 @@ const showDividers = computed(() => scrolling.value.client.height !== scrolling.
   <VCard>
     <VCardText ref="body">
       <div v-if="is.nonEmptyString(title)">{{ title }}</div>
-      <VFileInput v-model="innerValue" :accept="accept" prepend-icon=""
-                  :prepend-inner-icon="icon" variant="outlined"
-                  density="compact" @update:model-value="onNewFile"/>
+      <VFileInput
+        v-model="innerValue"
+        :accept="accept"
+        prepend-icon=""
+        :prepend-inner-icon="icon"
+        variant="outlined"
+        density="compact"
+        @update:model-value="onNewFile" />
       <div class="d-flex justify-center">
         <VCard variant="outlined" max-width="128px" rounded="lg">
-          <VIcon v-if="image == null" size="128px" :icon="unsetIcon"/>
-          <VImg v-else width="128px" max-height="128px" aspect-ratio="1/1"
-                :src="image" :lazy-src="lazySource"/>
+          <VIcon v-if="image == null" size="128px" :icon="unsetIcon" />
+          <VImg v-else width="128px" max-height="128px" aspect-ratio="1/1" :src="image" :lazy-src="lazySource" />
         </VCard>
       </div>
     </VCardText>
-    <VDivider v-if="showDividers"/>
+    <VDivider v-if="showDividers" />
     <VCardActions>
-      <VSpacer/>
+      <VSpacer />
       <VBtn v-if="cancelButton != null" class="text-none" @click="cancelChange">
         {{ cancelButton }}
       </VBtn>
-      <VBtn v-if="confirmButton != null" :disabled="disableConfirm" class="text-none"
-            color="primary" @click="updateValue">
+      <VBtn
+        v-if="confirmButton != null"
+        :disabled="disableConfirm"
+        class="text-none"
+        color="primary"
+        @click="updateValue">
         {{ confirmButton }}
       </VBtn>
     </VCardActions>

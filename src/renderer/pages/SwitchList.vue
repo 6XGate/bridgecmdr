@@ -3,18 +3,18 @@ import { mdiArrowLeft, mdiDelete, mdiPlus, mdiVideoSwitch } from '@mdi/js'
 import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import Page from '@/components/Page.vue'
-import { isNotNullish } from '@/helpers/filters'
-import SwitchDialog from '@/modals/SwitchDialog.vue'
-import { useDialogs, useSwitchDialog } from '@/modals/dialogs'
-import { useDrivers } from '@/system/driver'
-import { useSwitches } from '@/system/switch'
-import { trackBusy } from '@/utilities/tracking'
-import type { DocumentId } from '@/data/database'
-import type { I18nSchema } from '@/locales/locales'
-import type { DriverInformation } from '@/system/driver'
-import type { NewSwitch, Switch } from '@/system/switch'
+import Page from '../components/Page.vue'
+import SwitchDialog from '../modals/SwitchDialog.vue'
+import { useDialogs, useSwitchDialog } from '../modals/dialogs'
+import { useDrivers } from '../system/driver'
+import { useSwitches } from '../system/switch'
+import { trackBusy } from '../utilities/tracking'
+import type { DocumentId } from '../data/database'
+import type { I18nSchema } from '../locales/locales'
+import type { DriverInformation } from '../system/driver'
+import type { NewSwitch, Switch } from '../system/switch'
 import type { DeepReadonly } from 'vue'
+import { isNotNullish } from '@/basics'
 
 const router = useRouter()
 
@@ -35,9 +35,7 @@ const items = computed(() =>
     .map(item => {
       const driver = drivers.items.find(d => d.guid === item.driverId)
 
-      return driver != null
-        ? { switch: item, driver } satisfies Item
-        : undefined
+      return driver != null ? ({ switch: item, driver } satisfies Item) : undefined
     })
     .filter(isNotNullish)
 )
@@ -93,26 +91,32 @@ const { dialogProps: editorProps } = useSwitchDialog()
 <template>
   <Page v-slot="{ toolbar, scrolled }">
     <VToolbar v-bind="toolbar" :title="t('label.switches')">
-      <template #prepend><VBtn :icon="mdiArrowLeft" @click="router.back"/></template>
+      <template #prepend><VBtn :icon="mdiArrowLeft" @click="router.back" /></template>
     </VToolbar>
     <VList v-scroll.self="scrolled" :disabled="isBusy" bg-color="transparent">
       <template v-for="(item, index) of items" :key="item.switch._id">
-        <VDivider v-if="index > 0" class="mx-4"/>
+        <VDivider v-if="index > 0" class="mx-4" />
         <VDialog v-bind="editorProps">
           <template #default="{ isActive }">
-            <SwitchDialog v-model:visible="isActive.value" :switch="item.switch"
-                          editing @confirm="v => updateSwitch(item.switch, v)"/>
+            <SwitchDialog
+              v-model:visible="isActive.value"
+              :switch="item.switch"
+              editing
+              @confirm="v => updateSwitch(item.switch, v)" />
           </template>
           <template #activator="{ props: dailog }">
             <VListItem v-bind="dailog" :title="item.switch.title" :subtitle="item.driver.title">
               <template #prepend>
-                <VAvatar :icon="mdiVideoSwitch"/>
+                <VAvatar :icon="mdiVideoSwitch" />
               </template>
               <template #append>
                 <VTooltip :text="t('action.delete')">
                   <template #activator="{ props: tooltip }">
-                    <VBtn v-bind="tooltip" :icon="mdiDelete" variant="text"
-                          @click.prevent.stop="deleteSwitch(item.switch._id)"/>
+                    <VBtn
+                      v-bind="tooltip"
+                      :icon="mdiDelete"
+                      variant="text"
+                      @click.prevent.stop="deleteSwitch(item.switch._id)" />
                   </template>
                 </VTooltip>
               </template>
@@ -126,11 +130,14 @@ const { dialogProps: editorProps } = useSwitchDialog()
         <template #activator="{ props }">
           <VDialog v-bind="editorProps">
             <template #default="{ isActive }">
-              <SwitchDialog v-model:visible="isActive.value" :switch="switches.blank()"
-                            :editing="false" @confirm="addSwitch"/>
+              <SwitchDialog
+                v-model:visible="isActive.value"
+                :switch="switches.blank()"
+                :editing="false"
+                @confirm="addSwitch" />
             </template>
             <template #activator="{ props: dialog }">
-              <VBtn v-bind="{ ...props, ...dialog }" class="ml-6" :icon="mdiPlus" color="primary"/>
+              <VBtn v-bind="{ ...props, ...dialog }" class="ml-6" :icon="mdiPlus" color="primary" />
             </template>
           </VDialog>
         </template>

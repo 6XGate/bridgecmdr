@@ -1,12 +1,14 @@
+import { ipcMain } from 'electron'
 import { memo } from 'radash'
-import type { Handle } from '@preload/api'
+import { ipcHandle } from '../utilities.js'
+import type { Handle } from '../../preload/api.js'
+import type { SymbolKey } from '@/keys.js'
+import type { IpcMainInvokeEvent, WebContents } from 'electron'
 
-// @ts-expect-error T is required to type the resource.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export interface HandleKey<T> extends Symbol { }
+export type HandleKey<T> = SymbolKey<'handle', T>
 
 /** Close routine for a handle. */
-export type Close<T> = (resource: T) => unknown | Promise<unknown>
+export type Close<T> = (resource: T) => Promise<unknown>
 
 /** Handle transparent structure. */
 export interface Descriptor<T> {
@@ -15,7 +17,11 @@ export interface Descriptor<T> {
   close: Close<T>
 }
 
-// TODO Would be nice to watch for page reloads and closes to free handles in use by that page.
+async function dummyClose() {
+  await Promise.resolve()
+}
+
+// TODO: Would be nice to watch for page reloads and closes to free handles in use by that page.
 // TODO: Register a Handle API for the main process
 // interface HandleApi {
 //   // Closes a singular handle.
@@ -60,35 +66,33 @@ const useHandles = memo(() => {
    * @param key The key to confirm the type of the handle.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function isValidHandle<T = any> (handle: Handle, key?: HandleKey<T>) {
-  // Get the handle descriptor
-  // and check its validity.
+  function isValidHandle<T = any>(handle: Handle, key?: HandleKey<T>) {
+    // Get the handle descriptor
+    // and check its validity.
     const descriptor = handleMap[handle]
     if (descriptor == null || typeof descriptor !== 'object') {
       return false
     }
 
-    return key != null
-      ? key === descriptor.key
-      : true
+    return key != null ? key === descriptor.key : true
   }
 
   /**
    * Gets the descriptor of a handle.
    * @param handle The handle from which to get a descriptor.
    */
-  function getDescriptor (handle: Handle): AnyDescriptor
+  function getDescriptor(handle: Handle): AnyDescriptor
   /**
    * Gets the descriptor of a handle and confirms its type.
    * @param handle The handle from which to get a descriptor.
    * @param key The key to confirm the handle type.
    */
-  function getDescriptor<T> (handle: Handle, key: HandleKey<T>): Descriptor<T>
+  function getDescriptor<T>(handle: Handle, key: HandleKey<T>): Descriptor<T>
   /** Implementation */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function getDescriptor<T = any> (handle: Handle, key?: HandleKey<T>) {
-  // Get the handle descriptor
-  // and check its validity.
+  function getDescriptor<T = any>(handle: Handle, key?: HandleKey<T>) {
+    // Get the handle descriptor
+    // and check its validity.
     const descriptor = handleMap[handle]
     if (descriptor == null || typeof descriptor !== 'object') {
       throw new ReferenceError('Invalid handle')
@@ -105,15 +109,28 @@ const useHandles = memo(() => {
     return descriptor
   }
 
+  const handleTrackers = new WeakMap<WebContents, Set<Handle>>()
+
+  function getHandleTracker(sender: WebContents) {
+    let handleTracker = handleTrackers.get(sender)
+    if (handleTracker != null) return handleTracker
+    handleTracker = new Set<Handle>()
+    handleTrackers.set(sender, handleTracker)
+    return handleTracker
+  }
+
   /**
    * Creates a new handle, with the given type key, resource, and clean up routine.
-   * @param key A key used to identify and validate the type of the handle.
-   * @param resource A resource that will be attached to the handle.
-   * @param close A callback to clean up the resource attached to the handle when it closes.
+   * @param event - The event from which the handle is being opened.
+   * @param key - A key used to identify and validate the type of the handle.
+   * @param resource - A resource that will be attached to the handle.
+   * @param close - A callback to clean up the resource attached to the handle when it closes.
    */
-  function createHandle<T> (key: HandleKey<T>, resource: T, close?: Close<T>) {
-  // Get the handle value and ensure
-  // there is no handle exhaustion.
+  function createHandle<T>(event: IpcMainInvokeEvent, key: HandleKey<T>, resource: T, close?: Close<T>) {
+    const { sender } = event
+
+    // Get the handle value and ensure
+    // there is no handle exhaustion.
     const handle = nextFree
     if (handle === kMaxHandles) {
       throw new Error('Out of handles')
@@ -130,19 +147,30 @@ const useHandles = memo(() => {
     // descriptor in the map so the
     // handle can be closed.
     nextFree = opaque
-    handleMap[handle] = { key, resource, close: close ?? (() => undefined) }
+    handleMap[handle] = { key, resource, close: close ?? dummyClose }
+
+    // Add the handle to the tracker tree.
+    getHandleTracker(sender).add(handle as Handle)
 
     return handle as Handle
   }
 
   /**
    * Opens a handle to access its attached resource.
-   * @param key The handle key that tags the handle type.
-   * @param handle The handle to open.
+   * @param key - The handle key that tags the handle type.
+   * @param handle - The handle to open.
    */
-  function openHandle<T> (key: HandleKey<T>, handle: Handle) {
-  // Get the handle descriptor
-  // and check the resource.
+  function openHandle<T>(event: IpcMainInvokeEvent, key: HandleKey<T>, handle: Handle) {
+    const { sender } = event
+
+    // Check that the handle belongs to this sender and frame.
+    const handles = getHandleTracker(sender)
+    if (!handles.has(handle)) {
+      throw new ReferenceError('Invalid handle')
+    }
+
+    // Get the handle descriptor
+    // and check the resource.
     const descriptor = getDescriptor(handle, key)
     if (descriptor.resource == null) {
       throw new ReferenceError('Invalid handle')
@@ -151,13 +179,9 @@ const useHandles = memo(() => {
     return descriptor.resource // as T
   }
 
-  /**
-   * Closes a handle and cleans up its resource.
-   * @param handle The handle to close.
-   */
-  async function freeHandle (handle: Handle) {
-  // Get the handle descriptor
-  // and check the resource.
+  async function closeHandle(handle: Handle) {
+    // Get the handle descriptor
+    // and check the resource.
     const descriptor = getDescriptor(handle)
     if (descriptor.resource == null) {
       throw new ReferenceError('Invalid handle')
@@ -178,9 +202,46 @@ const useHandles = memo(() => {
   }
 
   /**
-   * Closes all handles on shutdown.
+   * Closes a handle and cleans up its resource.
+   * @param event - The event from which the handle is being closed.
+   * @param handle - The handle to close.
    */
-  async function shutDown () {
+  async function freeHandle(event: IpcMainInvokeEvent, handle: Handle) {
+    const { sender } = event
+
+    // Check that the handle belongs to this sender and frame.
+    const handles = getHandleTracker(sender)
+    if (!handles.has(handle)) {
+      throw new ReferenceError('Invalid handle')
+    }
+
+    // Close the handle.
+    await closeHandle(handle)
+
+    // Remove the handle from the tracker tree.
+    getHandleTracker(sender).delete(handle)
+  }
+
+  /**
+   * Closes all handles in a frame.
+   */
+  async function freeAllHandle(event: IpcMainInvokeEvent) {
+    const { sender } = event
+
+    const handles = getHandleTracker(sender)
+    await Promise.all(
+      [...handles].map(async handle => {
+        await closeHandle(handle)
+      })
+    )
+  }
+
+  /**
+   * Closes all handles on shutdown.
+   *
+   * There is no need to handle the free-list or ownership.
+   */
+  async function shutDown() {
     await Promise.all(
       handleMap.map(async handle => {
         if (typeof handle === 'object') {
@@ -192,12 +253,16 @@ const useHandles = memo(() => {
     )
   }
 
+  ipcMain.handle('handle:free', ipcHandle(freeHandle))
+  ipcMain.handle('handle:clean', ipcHandle(freeAllHandle))
+
   return {
     kNullHandle,
     isValidHandle,
     createHandle,
     openHandle,
     freeHandle,
+    freeAllHandle,
     shutDown
   }
 })

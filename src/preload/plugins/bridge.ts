@@ -1,18 +1,23 @@
 import { contextBridge } from 'electron'
-import useDriverApi from '@preload/plugins/driver'
-import useLevelProxyApi from '@preload/plugins/level'
-import usePortsApi from '@preload/plugins/ports'
-import useStartupApi from '@preload/plugins/startup'
-import useSystemApi from '@preload/plugins/system'
-import type { BridgedApi } from '@preload/api'
+import useIpc from '../support.js'
+import useDriverApi from './driver.js'
+import useLevelApi from './level.js'
+import usePortsApi from './ports.js'
+import useStartupApi from './startup.js'
+import useSystemApi from './system.js'
+import type { BridgedApi } from '../api.js'
 
 const useBridgedApi = () => {
+  const ipc = useIpc()
+
   const api = {
     startup: useStartupApi(),
     driver: useDriverApi(),
     ports: usePortsApi(),
     system: useSystemApi(),
-    level: useLevelProxyApi()
+    level: useLevelApi(),
+    freeHandle: ipc.useInvoke('handle:free'),
+    freeAllHandles: ipc.useInvoke('handle:clean')
   } satisfies BridgedApi
 
   contextBridge.exposeInMainWorld('api', api)

@@ -1,5 +1,5 @@
 import { tryOnScopeDispose } from '@vueuse/core'
-import useTypedEventTarget from '@/support/events'
+import useTypedEventTarget from '../support/events'
 import type { ProgressInfo } from 'electron-updater'
 
 export class UpdateProgressEvent extends Event implements ProgressInfo {
@@ -9,7 +9,7 @@ export class UpdateProgressEvent extends Event implements ProgressInfo {
   declare readonly transferred: number
   declare readonly percent: number
   declare readonly bytesPerSecond: number
-  constructor (options: EventInit & ProgressInfo) {
+  constructor(options: EventInit & ProgressInfo) {
     super('progress', options)
     Object.assign(this, options)
   }
@@ -25,19 +25,19 @@ const useAppUpdates = () => {
 
   const appUpdater = {
     ...target,
-    checkForUpdates: window.appUpdates.checkForUpdates,
-    downloadUpdate: window.appUpdates.downloadUpdate,
-    cancelUpdate: window.appUpdates.cancelUpdate,
-    installUpdate: window.appUpdates.installUpdate
+    checkForUpdates: globalThis.appUpdates.checkForUpdates,
+    downloadUpdate: globalThis.appUpdates.downloadUpdate,
+    cancelUpdate: globalThis.appUpdates.cancelUpdate,
+    installUpdate: globalThis.appUpdates.installUpdate
   }
 
   const progressProxy = (info: ProgressInfo) => {
     appUpdater.dispatchEvent(new UpdateProgressEvent(info))
   }
 
-  window.appUpdates.onDownloadProgress(progressProxy)
+  globalThis.appUpdates.onDownloadProgress(progressProxy)
   tryOnScopeDispose(() => {
-    window.appUpdates.offDownloadProgress(progressProxy)
+    globalThis.appUpdates.offDownloadProgress(progressProxy)
   })
 
   return appUpdater

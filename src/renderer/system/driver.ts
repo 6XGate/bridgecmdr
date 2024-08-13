@@ -1,7 +1,7 @@
 import { createSharedComposable } from '@vueuse/core'
 import { readonly, computed, reactive } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { trackBusy } from '@/utilities/tracking'
+import i18n from '../plugins/i18n'
+import { trackBusy } from '../utilities/tracking'
 import useBridgedApi from './bridged'
 
 const api = useBridgedApi()
@@ -47,37 +47,43 @@ export interface Driver {
   readonly uri: string
 }
 
-// Can't get ReturnType<typeof useI18n<{ useScope: 'global' }>> to work by itself.
-const resolveI18n = () => useI18n({ useScope: 'global' })
-
 /** Core parts of the drive system, so we don't hold any component's effect scope in memory. */
 const useDriverCore = createSharedComposable(() => {
   const registry = reactive(new Map<string, DriverInformation>())
 
   /** Loads the drivers, using the first i18n we can get. */
-  const loadList = async (i18n: ReturnType<typeof resolveI18n>) => {
+  const loadList = async () => {
     if (registry.size > 0) {
       // Already loaded...
       return
     }
 
-    (await api.driver.list()).forEach(({ guid, localized, capabilities }) => {
+    ;(await api.driver.list()).forEach(({ guid, localized, capabilities }) => {
       /** The localized driver information made i18n compatible. */
       Object.entries(localized).forEach(([locale, description]) => {
-        i18n.mergeLocaleMessage(locale, {
+        i18n.global.mergeLocaleMessage(locale as never, {
           $driver: {
             [guid]: { ...description }
           }
         })
       })
 
-      registry.set(guid, readonly({
+      registry.set(
         guid,
-        get title () { return i18n.t(`$driver.${guid}.title`) },
-        get company () { return i18n.t(`$driver.${guid}.company`) },
-        get provider () { return i18n.t(`$driver.${guid}.provider`) },
-        capabilities
-      }))
+        readonly({
+          guid,
+          get title() {
+            return i18n.global.t(`$driver.${guid}.title`)
+          },
+          get company() {
+            return i18n.global.t(`$driver.${guid}.company`)
+          },
+          get provider() {
+            return i18n.global.t(`$driver.${guid}.provider`)
+          },
+          capabilities
+        })
+      )
     })
   }
 
@@ -86,8 +92,8 @@ const useDriverCore = createSharedComposable(() => {
 
 /** Use drivers. */
 export const useDrivers = () => {
-  const i18n = useI18n({ useScope: 'global' })
   const { registry, loadList } = useDriverCore()
+  const { freeHandle } = api
 
   /** Busy tracking. */
   const tracker = trackBusy()
@@ -96,10 +102,13 @@ export const useDrivers = () => {
   const items = computed(() => Array.from(registry.values()))
 
   /** Loads information about all the drivers. */
-  const all = tracker.track(async () => { await loadList(i18n) })
+  const all = tracker.track(async () => {
+    await loadList()
+  })
 
   /** Loads a driver registered in the registry. */
   const load = async (guid: string, path: string): Promise<Driver> => {
+    await loadList()
     if (!registry.has(guid)) {
       throw new Error(`No such driver registered as "${guid}"`)
     }
@@ -116,11 +125,11 @@ export const useDrivers = () => {
 
     const powerOff = async () => {
       await api.driver.powerOff(h)
-      await api.driver.close(h)
+      await freeHandle(h)
     }
 
     const close = async () => {
-      await api.driver.close(h)
+      await freeHandle(h)
     }
 
     return readonly({

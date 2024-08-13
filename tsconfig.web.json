@@ -1,0 +1,16 @@
+{
+  "extends": ["@vue/tsconfig/tsconfig.dom.json", "./tsconfig.base.json"],
+  "include": [
+    "src/core/**/*",
+    "src/preload/*.d.ts",
+    "src/renderer/**/*",
+    "src/renderer/**/*.vue",
+    "src/vite-env.d.ts",
+  ],
+  "compilerOptions": {
+    "lib": [
+      "ES2023",
+      "DOM",
+    ]
+  }
+}

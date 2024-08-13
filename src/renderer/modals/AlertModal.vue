@@ -1,8 +1,8 @@
-<script setup lang='ts'>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useAlertModal } from '@/modals/dialogs'
-import type { I18nSchema } from '@/locales/locales'
+import { useAlertModal } from './dialogs'
+import type { I18nSchema } from '../locales/locales'
 
 const { isRevealed, onReveal, confirm } = useAlertModal()
 const { t } = useI18n<I18nSchema>()
@@ -31,7 +31,7 @@ onReveal(config => {
         <VCardText>{{ message }}</VCardText>
       </template>
       <VCardActions class="justify-end">
-        <VBtn class="text-none" :text="button" :color="color" @click="confirm"/>
+        <VBtn class="text-none" :text="button" :color="color" @click="confirm" />
       </VCardActions>
     </VCard>
   </VDialog>

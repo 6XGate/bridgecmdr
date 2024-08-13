@@ -6,10 +6,10 @@ import type { MaybeRefOrGetter } from '@vueuse/shared'
 import type { ComponentPublicInstance } from 'vue'
 
 const Block = ['top', 'bottom'] as const
-type Block = typeof Block[number]
+type Block = (typeof Block)[number]
 
 const Inline = ['start', 'end', 'left', 'right'] as const
-type Inline = typeof Inline[number]
+type Inline = (typeof Inline)[number]
 
 export type Anchor =
   | Block
@@ -19,15 +19,12 @@ export type Anchor =
   | `${Block} ${Inline | 'center'}`
   | `${Inline} ${Block | 'center'}`
 
-export type Origin =
-  | 'auto'
-  | Anchor
-  | 'overlap'
+export type Origin = 'auto' | Anchor | 'overlap'
 
 export type SelectItemKey =
   | boolean // Ignored
   | string // Lookup by key, can use dot notation for nested objects
-  | Array<string | number> // Nested lookup by key, each array item is a key in the next level
+  | (string | number)[] // Nested lookup by key, each array item is a key in the next level
   | ((item: Record<string, unknown>, fallback?: unknown) => unknown)
 
 export type ResponsiveModalOptions = z.input<typeof ResponsiveModalOptions>
@@ -58,17 +55,17 @@ const CardProps = ResponsiveModalOptions.pick({
 
 export const useResponsiveModal = (
   breakpoint: MaybeRefOrGetter<boolean>,
-  options: MaybeRefOrGetter<ResponsiveModalOptions> = { }
+  options: MaybeRefOrGetter<ResponsiveModalOptions> = {}
 ) => {
   const dialogProps = computed(() =>
-    (toValue(breakpoint)
-      ? ({ fullscreen: true, scrim: false, scrollable: true })
-      : ({ ...DialogProps.parse(toValue(options)), scrollable: true })))
+    toValue(breakpoint)
+      ? { fullscreen: true, scrim: false, scrollable: true }
+      : { ...DialogProps.parse(toValue(options)), scrollable: true }
+  )
 
   const cardProps = computed(() =>
-    (toValue(breakpoint)
-      ? ({ rounded: false })
-      : ({ ...CardProps.parse(toValue(options)) })))
+    toValue(breakpoint) ? { rounded: false } : { ...CardProps.parse(toValue(options)) }
+  )
 
   const isFullscreen = computed(() => toValue(breakpoint))
 

@@ -1,5 +1,5 @@
-import useIpc from '@preload/support'
-import type { DriverApi } from '@preload/api'
+import useIpc from '../support.js'
+import type { DriverApi } from '../api.js'
 
 const useDriverApi = () => {
   const ipc = useIpc()
@@ -12,7 +12,6 @@ const useDriverApi = () => {
     }),
     list: ipc.useInvoke('driver:list'),
     open: ipc.useInvoke('driver:open'),
-    close: ipc.useInvoke('driver:close'),
     activate: ipc.useInvoke('driver:activate'),
     powerOn: ipc.useInvoke('driver:powerOn'),
     powerOff: ipc.useInvoke('driver:powerOff')

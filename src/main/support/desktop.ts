@@ -87,10 +87,12 @@ export const DesktopEntry = z.union([ApplicationEntry, LinkEntry, DirectoryEntry
 /** Parsed Desktop entry file. */
 export type DesktopEntryFile = z.infer<typeof DesktopEntryFile>
 /** Basic Zod schema for Desktop Entry files. Does not validate all information only basic types. */
-export const DesktopEntryFile = z.object({
-  'Desktop Entry': DesktopEntry
-  // TODO: Actions
-}).catchall(Entry.Section)
+export const DesktopEntryFile = z
+  .object({
+    'Desktop Entry': DesktopEntry
+    // TODO: Actions
+  })
+  .catchall(Entry.Section)
 
 /** Makes sure the desktop structure is ready for INI serialization, joining arrays. */
 export const readyEntry = (file: DesktopEntryFile) => {
