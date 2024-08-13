@@ -1,5 +1,6 @@
+import { resolve as resolvePath } from 'node:path'
 import { Duplex, PassThrough, pipeline, Writable } from 'node:stream'
-import { ipcMain } from 'electron'
+import { app, ipcMain } from 'electron'
 import Logger from 'electron-log'
 import level from 'level'
 // @ts-expect-error -- No types
@@ -24,9 +25,16 @@ export default function useLevelServer() {
         throw new SyntaxError("Database names cannot end in ':close'")
       }
 
+      // Don't allow any path separating characters.
+      if (/[/\\.:]/u.test(name)) {
+        throw new Error('Only a file name, without extension or relative path, may be specified')
+      }
+
+      const path = resolvePath(app.getPath('userData'), name)
+
       const sender = event.sender
 
-      const db = level(name)
+      const db = level(path)
       // eslint-disable-next-line -- No types, mo errors.
       const host = multileveldown.server(db)
       /** @type {Channel} */
