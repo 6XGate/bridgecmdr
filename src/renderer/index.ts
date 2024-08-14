@@ -1,5 +1,6 @@
 import { Buffer } from 'buffer'
 import log from 'electron-log'
+import 'setimmediate'
 
 //
 // Earliest to enable logger.
@@ -18,6 +19,10 @@ if (import.meta.env.PROD) {
 
 globalThis.global = globalThis
 globalThis.Buffer = Buffer
+Object.defineProperties((globalThis.process = {} as never), {
+  env: { value: globalThis.api.env },
+  nextTick: { value: setImmediate }
+})
 
 //
 // Dynamic load the main module.

@@ -2,6 +2,7 @@ import { createPinia } from 'pinia'
 import { createApp } from 'vue'
 import BridgeCmdr from './BridgeCmdr.vue'
 import { createPersistentStores } from './data/storage'
+import i18n from './plugins/i18n'
 import router from './plugins/router'
 import vuetify from './plugins/vuetify'
 
@@ -12,6 +13,7 @@ export const app = createApp(BridgeCmdr)
 app.use(createPinia())
 app.use(vuetify)
 app.use(router)
+app.use(i18n)
 app.use(createPersistentStores())
 
 app.mount('#root')

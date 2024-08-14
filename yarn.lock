@@ -1589,6 +1589,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/duplexify@npm:^3.6.4":
+  version: 3.6.4
+  resolution: "@types/duplexify@npm:3.6.4"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 10c0/1d7550dcc5fcd79344479b4f688754f397742b126a2fd4c1e84e0d0238ff59b3a55d8fec0a4a98b4f43931140e7ac5f2c7ff4e9acb3dbd3a069b4a363b2de296
+  languageName: node
+  linkType: hard
+
 "@types/encoding-down@npm:*":
   version: 5.0.5
   resolution: "@types/encoding-down@npm:5.0.5"
@@ -1765,6 +1774,13 @@ __metadata:
   dependencies:
     "@types/node": "npm:*"
   checksum: 10c0/a58ba341cb9e7d74f71810a88862da7b2a6fa42e2a1fc0ce40498f6ea1d44382f0640117057da779f74c47039f7166bf48fad02dc876f94e005c7afa50f5e129
+  languageName: node
+  linkType: hard
+
+"@types/setimmediate@npm:^1.0.4":
+  version: 1.0.4
+  resolution: "@types/setimmediate@npm:1.0.4"
+  checksum: 10c0/7eb791c92a261cbcdc529eb399b0536b7439d69703f39f5e3dc610f67050495a953dc02a70b5f73efc9423c4267ea4a9a806fec11edb99d37ca72fcd516e7296
   languageName: node
   linkType: hard
 
@@ -3046,6 +3062,7 @@ __metadata:
     "@tsconfig/node20": "npm:^20.1.4"
     "@tsconfig/strictest": "npm:^2.0.5"
     "@types/abstract-leveldown": "npm:^7.2.5"
+    "@types/duplexify": "npm:^3.6.4"
     "@types/eslint": "npm:^8.56.11"
     "@types/ini": "npm:^4.1.1"
     "@types/level": "npm:^6.0.3"
@@ -3053,6 +3070,7 @@ __metadata:
     "@types/node": "npm:^20.14.15"
     "@types/pouchdb-core": "npm:^7.0.15"
     "@types/pouchdb-find": "npm:^7.3.3"
+    "@types/setimmediate": "npm:^1.0.4"
     "@types/uuid": "npm:^10.0.0"
     "@typescript-eslint/eslint-plugin": "npm:^8.0.1"
     "@typescript-eslint/parser": "npm:^8.0.1"
@@ -3072,6 +3090,7 @@ __metadata:
     assert: "npm:^2.1.0"
     auto-bind: "npm:^5.0.1"
     buffer: "npm:^6.0.3"
+    duplexify: "npm:^4.1.3"
     electron: "npm:^31.3.1"
     electron-builder: "npm:^24.13.3"
     electron-log: "npm:^5.1.7"
@@ -3093,6 +3112,7 @@ __metadata:
     ini: "npm:^4.1.3"
     jsdom: "npm:^24.1.1"
     level: "npm:^7.0.1"
+    levelup: "npm:^5.1.1"
     multileveldown: "npm:^5.0.1"
     npm-check-updates: "npm:^17.0.6"
     npm-run-all2: "npm:^6.2.2"
@@ -3104,6 +3124,7 @@ __metadata:
     radash: "npm:^12.1.0"
     sass: "npm:^1.77.8"
     serialport: "npm:^12.0.0"
+    setimmediate: "npm:^1.0.5"
     sharp: "npm:^0.33.4"
     stream-browserify: "npm:^3.0.0"
     tslib: "npm:^2.6.3"
@@ -4010,7 +4031,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"duplexify@npm:^4.1.1":
+"duplexify@npm:^4.1.1, duplexify@npm:^4.1.3":
   version: 4.1.3
   resolution: "duplexify@npm:4.1.3"
   dependencies:
@@ -8622,6 +8643,13 @@ __metadata:
     functions-have-names: "npm:^1.2.3"
     has-property-descriptors: "npm:^1.0.2"
   checksum: 10c0/fce59f90696c450a8523e754abb305e2b8c73586452619c2bad5f7bf38c7b6b4651895c9db895679c5bef9554339cf3ef1c329b66ece3eda7255785fbe299316
+  languageName: node
+  linkType: hard
+
+"setimmediate@npm:^1.0.5":
+  version: 1.0.5
+  resolution: "setimmediate@npm:1.0.5"
+  checksum: 10c0/5bae81bfdbfbd0ce992893286d49c9693c82b1bcc00dcaaf3a09c8f428fdeacf4190c013598b81875dfac2b08a572422db7df779a99332d0fce186d15a3e4d49
   languageName: node
   linkType: hard
 

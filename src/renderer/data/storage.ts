@@ -53,9 +53,9 @@ export const defineAsyncStorage = <T extends StorageLikeAsync>(setup: () => T) =
 }
 
 export const createUserStorage = defineAsyncStorage(() => {
-  const { connect } = useLevelDb()
+  const { levelup } = useLevelDb()
 
-  const dbPromise = connect('_userStorage')
+  const dbPromise = levelup('_userStorage')
 
   const getItem = async (key: string) => {
     const db = await dbPromise

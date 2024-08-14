@@ -1,17 +1,6 @@
-import type { AbstractBatch, AbstractGetOptions } from 'abstract-leveldown'
 import type { IpcRendererEvent } from 'electron'
 import type { ProgressInfo, UpdateInfo } from 'electron-updater'
-import type {
-  LevelDownBatchOptions,
-  LevelDownClearOptions,
-  LevelDownDelOptions,
-  LevelDownGetOptions,
-  LevelDownIteratorOptions,
-  LevelDownOpenOptions,
-  LevelDownPutOptions
-} from 'leveldown'
-import type { SerialPort } from 'serialport'
-import type { IterableElement, Tagged } from 'type-fest'
+import type { ReadonlyDeep, Tagged } from 'type-fest'
 
 //
 // Internal parts
@@ -144,7 +133,6 @@ export interface DriverApi {
 // Serial port API
 //
 
-// type PortInfo = IterableElement<Awaited<ReturnType<typeof SerialPort.list>>>
 // HACK: Workaround legacy TypeDefinition from serialport PortInfo.
 interface PortInfo {
   path: string
@@ -179,27 +167,6 @@ export interface SystemApi {
 export type LevelKey = string | Buffer
 export type LevelValue = string | Buffer
 
-// /** Exposed LevelDown proxy API. */
-// export interface LevelProxyApi {
-//   readonly connect: (name: string) => Promise<Handle>
-//   readonly open: (h: Handle, options?: LevelDownOpenOptions) => Promise<void>
-//   readonly close: (h: Handle) => Promise<void>
-//   readonly get: (h: Handle, key: LevelKey, options?: LevelDownGetOptions) => Promise<[Bytes]>
-//   readonly getMany: (h: Handle, keys: LevelKey[], options?: AbstractGetOptions) => Promise<[Bytes[]]>
-//   readonly put: (h: Handle, key: LevelKey, value: Bytes, options?: LevelDownPutOptions) => Promise<void>
-//   readonly del: (h: Handle, key: LevelKey, options?: LevelDownDelOptions) => Promise<void>
-//   readonly batch: (h: Handle, array: AbstractBatch[], options?: LevelDownBatchOptions) => Promise<void>
-//   readonly clear: (h: Handle, options?: LevelDownClearOptions) => Promise<void>
-//   readonly approximateSize: (h: Handle, start: Bytes, end: Bytes) => Promise<[number]>
-//   readonly compactRange: (h: Handle, start: Bytes, end: Bytes) => Promise<void>
-//   readonly iterator: (h: Handle, options?: LevelDownIteratorOptions) => Promise<Handle>
-//   readonly iteration: {
-//     readonly next: (h: Handle) => Promise<[key: Bytes, value: Bytes]>
-//     readonly end: (h: Handle) => Promise<void>
-//     readonly seek: (h: Handle, key: Bytes) => Promise<void>
-//   }
-// }
-
 export type Messanger = (message: unknown) => void
 
 /** Level RPC API. */
@@ -219,6 +186,7 @@ export interface BridgedApi {
   readonly ports: PortApi
   readonly system: SystemApi
   readonly level: LevelApi
+  readonly env: ReadonlyDeep<Record<string, string | undefined>>
   /** Closes a handle, freeing its resources. */
   readonly freeHandle: (h: Handle) => Promise<void>
   /** Closes all handles for a page. */

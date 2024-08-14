@@ -21,7 +21,10 @@ export async function electronModule(original: () => Promise<typeof import('elec
     ipcMain,
     ipcRenderer,
     webContents,
-    contextBridge
+    contextBridge,
+    app: {
+      getPath: (_name: string) => 'logs'
+    }
   }
 }
 

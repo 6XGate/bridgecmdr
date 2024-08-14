@@ -18,14 +18,14 @@ afterEach(async () => {
 test('basics', async () => {
   const { useLevelDb } = await import('../renderer/data/level.js')
 
-  const { connect } = useLevelDb()
-  const connectSpy = vi.fn(connect)
+  const { levelup } = useLevelDb()
+  const connectSpy = vi.fn(levelup)
 
-  const db = await connectSpy('logs/test')
+  const db = await connectSpy('test')
   expect(connectSpy).toHaveResolved()
 
   await expect(db.put('test', 'test')).resolves.toBeUndefined()
-  await expect(db.get('test')).resolves.toEqual('test')
+  await expect(db.get('test')).resolves.toEqual(Buffer.from('test'))
   await expect(db.close()).resolves.toBeUndefined()
 })
 
@@ -35,5 +35,8 @@ describe('forbidden names', () => {
     const { connect } = useLevelDb()
 
     await expect(connect('test:close')).rejects.toThrowError("Database names cannot end in ':close'")
+    await expect(connect('test/close')).rejects.toThrowError(
+      'Only a file name, without extension or relative path, may be specified'
+    )
   })
 })

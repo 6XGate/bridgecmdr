@@ -1,7 +1,10 @@
-import type levelup from 'levelup'
+import type { AbstractLevelDOWN } from 'abstract-leveldown'
+import type { LevelUp } from 'levelup'
 
 export const useLevelDb: () => {
-  connect: (name: string) => Promise<levelup.LevelUp>
+  connectSync: (name: string) => AbstractLevelDOWN
+  connect: (name: string) => Promise<AbstractLevelDOWN>
+  levelup: (name: string) => Promise<LevelUp>
 }
 
 export const useLevelAdapter: () => PouchDB.Plugin<PouchDB.Static>

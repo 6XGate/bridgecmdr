@@ -16,6 +16,7 @@ const useBridgedApi = () => {
     ports: usePortsApi(),
     system: useSystemApi(),
     level: useLevelApi(),
+    env: { ...process.env },
     freeHandle: ipc.useInvoke('handle:free'),
     freeAllHandles: ipc.useInvoke('handle:clean')
   } satisfies BridgedApi
