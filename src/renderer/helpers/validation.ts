@@ -89,7 +89,7 @@ export const useValidation = <
       validator.$error && ready.value
         ? {
             status: {
-              errorMessages: validator.$errors.map(error => unref(error.$message)),
+              errorMessages: validator.$errors.map((error) => unref(error.$message)),
               color: 'error'
             },
             class: 'error--text'
@@ -337,11 +337,11 @@ const isValidFullIpV6 = (value: string[]) => {
 
   // IPv4 translation.
   if (kIpV4Pattern.test(last ?? '')) {
-    return value.length === 6 && value.every(p => kIpPair.test(p))
+    return value.length === 6 && value.every((p) => kIpPair.test(p))
   }
 
   // IPv6, only 7 since we pop'ped the last.
-  return value.length === 7 && value.every(p => kIpPair.test(p)) && kIpPair.test(last ?? '')
+  return value.length === 7 && value.every((p) => kIpPair.test(p)) && kIpPair.test(last ?? '')
 }
 
 const isValidCompactIpV6 = ([left, right]: [string[], string[]]) => {
@@ -350,7 +350,7 @@ const isValidCompactIpV6 = ([left, right]: [string[], string[]]) => {
 
   // IPv4 translation, won't test on an empty right.
   if (kIpV4Pattern.test(last ?? '')) {
-    return left.length + right.length <= 6 && left.every(p => kIpPair.test(p)) && right.every(p => kIpPair.test(p))
+    return left.length + right.length <= 6 && left.every((p) => kIpPair.test(p)) && right.every((p) => kIpPair.test(p))
   }
 
   // IPv6, only 7 since we pop'ed the last.
@@ -358,8 +358,8 @@ const isValidCompactIpV6 = ([left, right]: [string[], string[]]) => {
   // test and are valid as zero leading.
   return (
     left.length + right.length <= 7 &&
-    left.every(p => kIpPair.test(p)) &&
-    right.every(p => kIpPair.test(p)) &&
+    left.every((p) => kIpPair.test(p)) &&
+    right.every((p) => kIpPair.test(p)) &&
     kIpPair.test(last ?? '')
   )
 }

@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-const mock = await vi.hoisted(async () => await import('./support/mock.js'))
+const mock = await vi.hoisted(async () => await import('./support/mock'))
 
 describe('bad setup', () => {
   beforeEach(() => {
@@ -19,7 +19,7 @@ describe('bad setup', () => {
     const logger = mock.console()
 
     vi.spyOn(process, 'contextIsolated', 'get').mockImplementation(() => false)
-    await expect(import('../preload/index.js')).rejects.toThrowError('process.exit unexpectedly called with "1"')
+    await expect(import('../preload/index')).rejects.toThrowError('process.exit unexpectedly called with "1"')
     expect(logger.error).toBeCalledWith('Context isolation is not enabled')
   })
 
@@ -31,7 +31,7 @@ describe('bad setup', () => {
   })
 
   test('app info', async () => {
-    const { default: useAppInfo } = await import('../preload/plugins/info/app.js')
+    const { default: useAppInfo } = await import('../preload/plugins/info/app')
 
     expect(() => useAppInfo()).toThrowError('Missing appInfo.name')
     vi.stubEnv('app_name_', 'BridgeCmdr')
@@ -39,7 +39,7 @@ describe('bad setup', () => {
   })
 
   test('user info', async () => {
-    const { default: useUserInfo } = await import('../preload/plugins/info/user.js')
+    const { default: useUserInfo } = await import('../preload/plugins/info/user')
 
     vi.stubEnv('USER', '') // HACK: Only way to clear a variables.
     expect(() => useUserInfo()).toThrowError('Missing user info')
@@ -60,7 +60,7 @@ describe('correct setup', () => {
   })
 
   test('ready', async () => {
-    await import('../preload/index.js')
+    await import('../preload/index')
 
     expect(globalThis.app).toStrictEqual({
       name: 'BridgeCmdr',

@@ -6,15 +6,15 @@ import { app, ipcMain } from 'electron'
 import Logger from 'electron-log'
 import { autoUpdater } from 'electron-updater'
 import { memo } from 'radash'
-import { ipcHandle, ipcProxy } from '../utilities.js'
-import type { AppUpdater } from '../../preload/api.js'
+import { ipcHandle, ipcProxy } from '../utilities'
+import type { AppUpdater } from '../../preload/api'
 import type { WebContents } from 'electron'
 import type { UpdateCheckResult, ProgressInfo, CancellationToken } from 'electron-updater'
 import type { Simplify } from 'type-fest'
 import type TypedEmitter from 'typed-emitter'
 import type { EventMap } from 'typed-emitter'
 
-type TypedEventEmitter<T extends EventMap> = TypedEmitter.default<T>
+type TypedEventEmitter<T extends EventMap> = TypedEmitter<T>
 
 type ProgressHandler = (progress: ProgressInfo) => void
 
@@ -131,10 +131,10 @@ const useUpdater = memo(() => {
   const updater = autoBind(new AppAutoUpdater())
 
   const downloadWaiters = new WeakMap<WebContents, ProgressHandler>()
-  const remoteDownloadUpdate = ipcHandle(async ev => {
+  const remoteDownloadUpdate = ipcHandle(async (ev) => {
     let handler = downloadWaiters.get(ev.sender)
     if (handler == null) {
-      handler = progress => {
+      handler = (progress) => {
         ev.sender.send('update:download:progress', progress)
       }
       downloadWaiters.set(ev.sender, handler)

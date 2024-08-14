@@ -1,5 +1,5 @@
-import useIpc from '../support.js'
-import type { PortApi } from '../api.js'
+import useIpc from '../support'
+import type { PortApi } from '../api'
 
 const usePortsApi = () => {
   const ipc = useIpc()

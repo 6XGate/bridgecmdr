@@ -1,6 +1,6 @@
 import Logger from 'electron-log'
-import { createCommandStream } from '../../helpers/stream.js'
-import { defineDriver, kDeviceCanDecoupleAudioOutput, kDeviceSupportsMultipleOutputs } from '../../system/driver.js'
+import { createCommandStream } from '../../helpers/stream'
+import { defineDriver, kDeviceCanDecoupleAudioOutput, kDeviceSupportsMultipleOutputs } from '../../system/driver'
 
 const extronSisDriver = defineDriver({
   enable: true,
@@ -13,7 +13,7 @@ const extronSisDriver = defineDriver({
     }
   },
   capabilities: kDeviceSupportsMultipleOutputs | kDeviceCanDecoupleAudioOutput,
-  setup: async uri => {
+  setup: async (uri) => {
     const sendCommand = async (command: string) => {
       const connection = await createCommandStream(uri, {
         baudRate: 9600,
@@ -22,10 +22,10 @@ const extronSisDriver = defineDriver({
       })
 
       // TODO: Other situation handlers...
-      connection.on('data', data => {
+      connection.on('data', (data) => {
         Logger.debug(`extronSisDriver: return: ${String(data)}`)
       })
-      connection.on('error', error => {
+      connection.on('error', (error) => {
         Logger.error(`extronSisDriver: ${error.message}`)
       })
 

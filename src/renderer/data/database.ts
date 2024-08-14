@@ -26,7 +26,7 @@ export type DocumentId = z.output<typeof DocumentId>
 export const DocumentId = z
   .string()
   .uuid()
-  .transform(value => value.toUpperCase())
+  .transform((value) => value.toUpperCase())
 
 export type Database<Schema extends z.AnyZodObject> = ReturnType<ReturnType<typeof defineDatabase<Schema>>>
 export type DocumentOf<Schema extends z.AnyZodObject> = IterableElement<Awaited<ReturnType<Database<Schema>['all']>>>
@@ -113,7 +113,7 @@ export const defineDatabase = <Schema extends z.AnyZodObject>(
         endkey: 'Z'
       })
 
-      return response.rows.map(row => row.doc).filter(isNotNullish)
+      return response.rows.map((row) => row.doc).filter(isNotNullish)
     }
 
     /**

@@ -23,19 +23,19 @@ const settings = useSettings()
 
 const router = useRouter()
 
-const iconSizes = settings.iconSizes.map(size => ({
+const iconSizes = settings.iconSizes.map((size) => ({
   title: t('item.iconSize', { size }),
   value: size,
   props: { line: 'one' }
 }))
 
-const colorSchemeOptions = settings.colorSchemes.map(option => ({
+const colorSchemeOptions = settings.colorSchemes.map((option) => ({
   title: t(`theme.${option}`),
   value: option,
   props: { line: 'one' }
 }))
 
-const powerOffWhenOptions = settings.powerOffWhenOptions.map(option => ({
+const powerOffWhenOptions = settings.powerOffWhenOptions.map((option) => ({
   title: t(`powerOff.${option}`),
   value: option,
   props: { line: 'one' }

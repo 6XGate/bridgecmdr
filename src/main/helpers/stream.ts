@@ -5,7 +5,7 @@ import { z } from 'zod'
 import type { Socket, NetConnectOpts, IpcNetConnectOpts, TcpNetConnectOpts } from 'node:net'
 import type { Duplex } from 'node:stream'
 import type { Simplify } from 'type-fest'
-import { toError } from '@/error-handling.js'
+import { toError } from '@/error-handling'
 
 export type IpcStreamOptions = Omit<IpcNetConnectOpts, 'path'>
 
@@ -70,7 +70,7 @@ async function createSocketStream(options: NetConnectOpts) {
 
   async function close() {
     await new Promise<void>((resolve, reject) => {
-      socket.once('error', e => {
+      socket.once('error', (e) => {
         reject(e)
       })
       socket.end(() => {
@@ -108,7 +108,7 @@ async function createNetStream(target: string, options: NetStreamOptions) {
 
 async function createPortStream(path: string, options: PortStreamOptions) {
   const port = await new Promise<SerialPort>((resolve, reject) => {
-    const stream = new SerialPort({ path, ...options }, e => {
+    const stream = new SerialPort({ path, ...options }, (e) => {
       if (e != null) reject(e)
       else resolve(stream)
     })
@@ -116,7 +116,7 @@ async function createPortStream(path: string, options: PortStreamOptions) {
 
   async function close() {
     await new Promise<void>((resolve, reject) => {
-      port.close(e => {
+      port.close((e) => {
         if (e != null) reject(e)
         else resolve()
       })

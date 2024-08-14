@@ -47,7 +47,7 @@ export const useTies = defineStore('ties', () => {
 
     await nextTick()
     set.initialize(
-      await db.query(async backend => await backend.find({ selector: { switchId: id } }).then(r => r.docs))
+      await db.query(async (backend) => await backend.find({ selector: { switchId: id } }).then((r) => r.docs))
     )
   })
 
@@ -57,7 +57,7 @@ export const useTies = defineStore('ties', () => {
 
     await nextTick()
     set.initialize(
-      await db.query(async backend => await backend.find({ selector: { sourceId: id } }).then(r => r.docs))
+      await db.query(async (backend) => await backend.find({ selector: { sourceId: id } }).then((r) => r.docs))
     )
   })
 

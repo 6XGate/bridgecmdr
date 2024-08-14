@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is'
 import { contextBridge } from 'electron'
-import type { UserInfo } from '../../api.js'
+import type { UserInfo } from '../../api'
 
 const useUserInfo = () => {
   if (!is.nonEmptyString(process.env['USER'])) throw new ReferenceError('Missing user info')

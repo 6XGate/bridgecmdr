@@ -83,7 +83,7 @@ const cancelLabel = computed(() => props.cancelButton ?? t('common.cancel'))
 const isVisible = useVModel(props, 'visible')
 
 // HACK: Always use cancelChanges since updateValue will dismiss the dialog after updating the original.
-watch(isVisible, value => {
+watch(isVisible, (value) => {
   if (!value) cancelChange()
 })
 
@@ -92,7 +92,7 @@ const innerValue = ref(props.modelValue)
 const originalValue = ref(innerValue.value)
 watch(
   () => props.modelValue,
-  value => {
+  (value) => {
     innerValue.value = value
     originalValue.value = innerValue.value
   }

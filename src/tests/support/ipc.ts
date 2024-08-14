@@ -1,7 +1,7 @@
 import NodeEventEmitter from 'node:events'
-import { notImplemented } from './reactor.js'
-import type { IpcReactor } from './reactor.js'
-import type { MaybePromise } from '@/basics.js'
+import { notImplemented } from './reactor'
+import type { IpcReactor } from './reactor'
+import type { MaybePromise } from '@/basics'
 import type { IpcMain, IpcMainEvent, IpcMainInvokeEvent, IpcRenderer, IpcRendererEvent } from 'electron'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

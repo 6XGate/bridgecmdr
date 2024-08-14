@@ -5,15 +5,15 @@ import Logger from 'electron-log'
 import level from 'level'
 // @ts-expect-error -- No types
 import multileveldown from 'multileveldown'
-import { ipcHandle } from '../utilities.js'
-import useHandles from './handle.js'
+import { ipcHandle } from '../utilities'
+import useHandles from './handle'
 
 /** @typedef {`level:${string}`} Channel */
 
 export default function useLevelServer() {
-  /** @type {import('./handle.js').HandleKey<{ channel: Channel; stream: import('node:stream').Duplex }>} */
-  // @ts-expect-error -- Casting
-  const kLevelDatabaseHandle = Symbol.for('@level')
+  const kLevelDatabaseHandle =
+    /** @type {import('./handle').HandleKey<{ channel: Channel; stream: import('node:stream').Duplex }>} */
+    (Symbol.for('@level'))
   const { createHandle, openHandle } = useHandles()
 
   const open = ipcHandle(
@@ -46,7 +46,7 @@ export default function useLevelServer() {
             /**
              * @param {unknown} e
              */
-            e => {
+            (e) => {
               /* v8 ignore next 1 --Rarely reached over IPC. */
               Logger.error(e)
             }
@@ -88,7 +88,7 @@ export default function useLevelServer() {
 
   const getChannel = ipcHandle(
     /**
-     * @param {import('../../preload/api.js').Handle} handle
+     * @param {import('../../preload/api').Handle} handle
      * @returns
      */
     async (event, handle) => {

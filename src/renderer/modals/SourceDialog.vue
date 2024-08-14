@@ -32,7 +32,7 @@ const source = ref<NewSource>(sources.blank())
 const files = ref<File[]>([])
 const file = computed(() => files.value[0])
 const image = useObjectUrl(file)
-watch(file, value => {
+watch(file, (value) => {
   v$.image.$model = value?.name ?? null
 })
 

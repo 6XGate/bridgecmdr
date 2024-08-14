@@ -62,7 +62,7 @@ const image = useObjectUrl(file)
 const loadSource = async () => {
   source.value = { ...(await sources.get(props.id)) }
   file.value = toFiles(source.value._attachments).find(
-    f => source.value?.image != null && f.name === source.value.image
+    (f) => source.value?.image != null && f.name === source.value.image
   )
 }
 
@@ -79,7 +79,7 @@ const save = async () => {
     source.value.image = file.value.name
     source.value = { ...(await wait(sources.update(source.value, ...[file.value].filter(isNotNullish)))) }
     file.value = toFiles(source.value._attachments).find(
-      f => source.value?.image != null && f.name === source.value.image
+      (f) => source.value?.image != null && f.name === source.value.image
     )
   } catch (e) {
     await loadSource()
@@ -105,9 +105,9 @@ const drivers = useDrivers()
 const ties = useTies()
 const entries = computed(() =>
   ties.items
-    .map(tie => {
-      const switcher = switches.items.find(s => s._id === tie.switchId)
-      const driver = switcher != null ? drivers.items.find(d => d.guid === switcher.driverId) : undefined
+    .map((tie) => {
+      const switcher = switches.items.find((s) => s._id === tie.switchId)
+      const driver = switcher != null ? drivers.items.find((d) => d.guid === switcher.driverId) : undefined
 
       return switcher != null && driver != null ? ({ switch: switcher, driver, tie } satisfies TieEntry) : undefined
     })
@@ -226,7 +226,7 @@ const { dialogProps: editorProps } = useTieDialog()
                 v-model:visible="isActive.value"
                 :tie="entry.tie"
                 editing
-                @confirm="v => updateTie(entry.tie, v)" />
+                @confirm="(v) => updateTie(entry.tie, v)" />
             </template>
             <template #activator="{ props: dialog }">
               <VListItem v-bind="dialog" lines="three" :title="entry.switch.title" :subtitle="entry.driver.title">

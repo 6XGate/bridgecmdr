@@ -1,6 +1,4 @@
 {
-    "i18n-ally.localesPaths": [
-        "src/renderer/locales"
-    ],
-    "vitest.disableWorkspaceWarning": true
+  "i18n-ally.localesPaths": ["src/renderer/locales"],
+  "vitest.disableWorkspaceWarning": true
 }

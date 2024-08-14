@@ -36,7 +36,7 @@ export const trackBusy = (...chain: MaybeRefOrGetter<boolean>[]) => {
       await wait(() => cb(...args))
 
   return {
-    isBusy: computed(() => chain.some(r => toValue(r)) || weight.value > 0),
+    isBusy: computed(() => chain.some((r) => toValue(r)) || weight.value > 0),
     error: computed(() => error.value),
     wait,
     track

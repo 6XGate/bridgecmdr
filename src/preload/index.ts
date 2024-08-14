@@ -2,10 +2,10 @@
 
 // import process from 'node:process'
 
-import useBridgedApi from './plugins/bridge.js'
-import useAppInfo from './plugins/info/app.js'
-import useUserInfo from './plugins/info/user.js'
-import useAppUpdates from './plugins/updates.js'
+import useBridgedApi from './plugins/bridge'
+import useAppInfo from './plugins/info/app'
+import useUserInfo from './plugins/info/user'
+import useAppUpdates from './plugins/updates'
 
 if (!process.contextIsolated) {
   console.error('Context isolation is not enabled')

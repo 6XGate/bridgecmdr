@@ -1,6 +1,6 @@
 import Logger from 'electron-log'
-import { createCommandStream } from '../../helpers/stream.js'
-import { defineDriver, kDeviceSupportsMultipleOutputs } from '../../system/driver.js'
+import { createCommandStream } from '../../helpers/stream'
+import { defineDriver, kDeviceSupportsMultipleOutputs } from '../../system/driver'
 
 const teslaSmartMatrixDriver = defineDriver({
   enable: true,
@@ -13,7 +13,7 @@ const teslaSmartMatrixDriver = defineDriver({
     }
   },
   capabilities: kDeviceSupportsMultipleOutputs,
-  setup: async uri => {
+  setup: async (uri) => {
     const sendCommand = async (command: Buffer) => {
       const connection = await createCommandStream(uri, {
         baudRate: 9600,
@@ -22,10 +22,10 @@ const teslaSmartMatrixDriver = defineDriver({
       })
 
       // TODO: Other situation handlers...
-      connection.on('data', data => {
+      connection.on('data', (data) => {
         Logger.debug(`teslaSmartMatrixDriver: return: ${String(data)}`)
       })
-      connection.on('error', error => {
+      connection.on('error', (error) => {
         Logger.error(`teslaSmartMatrixDriver: ${error.message}`)
       })
 

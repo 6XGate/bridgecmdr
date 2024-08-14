@@ -16,7 +16,7 @@ export const AlertModalOptions = z
       color: z.string().min(1).optional()
     })
   )
-  .transform(value => (typeof value === 'string' ? { message: value } : value))
+  .transform((value) => (typeof value === 'string' ? { message: value } : value))
 
 export type AlertModalOptions = z.input<typeof AlertModalOptions>
 export type AlertModalConfiguration = z.output<typeof AlertModalOptions>
@@ -48,7 +48,7 @@ const ConfirmModalOptions = z
       color: z.string().min(1).default('primary')
     })
   )
-  .transform(value => (typeof value === 'string' ? { message: value, color: 'primary' } : value))
+  .transform((value) => (typeof value === 'string' ? { message: value, color: 'primary' } : value))
 
 export type ConfirmModalOptions = z.input<typeof ConfirmModalOptions>
 export type ConfirmModalConfiguration = z.output<typeof ConfirmModalOptions>
@@ -82,7 +82,7 @@ const ErrorModalOptions = z
     })
   )
   .optional()
-  .transform(value => (typeof value === 'string' ? { title: value, color: 'error' } : (value ?? { color: 'error' })))
+  .transform((value) => (typeof value === 'string' ? { title: value, color: 'error' } : (value ?? { color: 'error' })))
 
 export type ErrorModalOptions = z.input<typeof ErrorModalOptions>
 export type ErrorModalConfiguration = z.output<typeof ErrorModalOptions>

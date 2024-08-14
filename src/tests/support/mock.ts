@@ -2,10 +2,10 @@
 
 import { vi } from 'vitest'
 
-const { MockWebContents } = await import('./contents.js')
-const { MockContextBridge } = await import('./context.js')
-const { MockIpcMain, MockIpcRenderer } = await import('./ipc.js')
-const { IpcReactor } = await import('./reactor.js')
+const { MockWebContents } = await import('./contents')
+const { MockContextBridge } = await import('./context')
+const { MockIpcMain, MockIpcRenderer } = await import('./ipc')
+const { IpcReactor } = await import('./reactor')
 
 export async function electronModule(original: () => Promise<typeof import('electron')>) {
   const electron = await original()
@@ -105,8 +105,8 @@ export async function bridgeCmdrBasics() {
   await globalEventTarget()
   bridgeCmdrEnv()
 
-  await import('../../preload/index.js')
+  await import('../../preload/index')
 
-  const { default: useHandles } = await import('../../main/system/handle.js')
+  const { default: useHandles } = await import('../../main/system/handle')
   useHandles()
 }

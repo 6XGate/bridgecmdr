@@ -8,9 +8,10 @@
     "noEmit": true,
     "importHelpers": true,
     "noEmitHelpers": true,
+    "allowSyntheticDefaultImports": true,
     "allowJs": true,
     "paths": {
       "@/*": ["./src/core/*"]
-    },
+    }
   }
 }

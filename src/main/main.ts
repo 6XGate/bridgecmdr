@@ -4,15 +4,15 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { app, shell, BrowserWindow, nativeTheme } from 'electron'
 import Logger from 'electron-log'
 import appIcon from '../../resources/icon.png?asset&asarUnpack'
-import registerDrivers from './plugins/drivers.js'
-import usePorts from './plugins/ports.js'
-import useCrypto from './plugins/webcrypto.js'
-import useDrivers from './system/driver.js'
-import useHandles from './system/handle.js'
-import useLevelServer from './system/level.js'
-import useStartup from './system/startup.js'
-import useSystem from './system/system.js'
-import useUpdater from './system/updater.js'
+import registerDrivers from './plugins/drivers'
+import usePorts from './plugins/ports'
+import useCrypto from './plugins/webcrypto'
+import useDrivers from './system/driver'
+import useHandles from './system/handle'
+import useLevelServer from './system/level'
+import useStartup from './system/startup'
+import useSystem from './system/system'
+import useUpdater from './system/updater'
 
 // In this file you can include the rest of your app"s specific main process
 // code. You can also put them in separate files and require them here.
@@ -23,7 +23,7 @@ Logger.transports.file.level = 'debug'
 Logger.errorHandler.startCatching()
 
 async function waitTill(timeout: number) {
-  await new Promise<void>(resolve => {
+  await new Promise<void>((resolve) => {
     setTimeout(resolve, timeout)
   })
 }
@@ -51,7 +51,7 @@ async function createWindow() {
     main.webContents.openDevTools({ mode: 'undocked' })
   }
 
-  main.webContents.setWindowOpenHandler(details => {
+  main.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url).catch((e: unknown) => {
       Logger.error(e)
     })

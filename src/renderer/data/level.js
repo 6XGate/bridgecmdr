@@ -21,7 +21,7 @@ import { toError } from '@/error-handling'
 /** @template K @template V @typedef {import('abstract-leveldown').AbstractBatch<K,V>} AbstractBatch<K,V> */
 /** @template K @typedef {import('abstract-leveldown').AbstractIteratorOptions<K>} AbstractIteratorOptions<K> */
 /** @template K @template V @typedef {import('abstract-leveldown').AbstractIterator<K,V>} AbstractIterator<K,V> */
-/** @typedef {import('../../preload/api.js').Handle} Handle */
+/** @typedef {import('../../preload/api').Handle} Handle */
 
 /**
  * @template K - Key
@@ -65,7 +65,7 @@ class IpcLevelDown extends AbstractLevelDOWN {
       }
     })
 
-    const sender = await level.activate(h, message => {
+    const sender = await level.activate(h, (message) => {
       readable.write(message)
     })
 
@@ -97,7 +97,7 @@ class IpcLevelDown extends AbstractLevelDOWN {
        * @param {(error: Error) => void} reject
        */
       (resolve, reject) => {
-        db.open(options, error => {
+        db.open(options, (error) => {
           if (error == null) resolve(db)
           else reject(error)
         })
@@ -113,7 +113,7 @@ class IpcLevelDown extends AbstractLevelDOWN {
     if (this.#db == null) {
       cb(new Error('Not ready'))
     } else {
-      this.#db.close(error => {
+      this.#db.close((error) => {
         if (error == null) cb(undefined)
         else cb(error)
       })
@@ -133,7 +133,7 @@ class IpcLevelDown extends AbstractLevelDOWN {
     }
 
     this.#handle
-      .then(async h => {
+      .then(async (h) => {
         this.#db = await this._doOpen(h, options)
         window.addEventListener('beforeunload', () => {
           this.#db?.close(() => {
@@ -147,7 +147,7 @@ class IpcLevelDown extends AbstractLevelDOWN {
       })
       .catch(
         /** @param {unknown} cause */
-        cause => {
+        (cause) => {
           // eslint-disable-next-line promise/no-callback-in-promise -- Required by design
           cb(toError(cause))
         }
@@ -258,12 +258,12 @@ export const useLevelDb = memo(() => {
   /**
    * @param {string} name
    */
-  const connectSync = name => new IpcLevelDown(name)
+  const connectSync = (name) => new IpcLevelDown(name)
 
   /**
    * @param {string} name
    */
-  const connect = async name => {
+  const connect = async (name) => {
     const h = await level.open(name)
 
     const readable = new PassThrough({
@@ -273,13 +273,13 @@ export const useLevelDb = memo(() => {
            * @param {unknown} e
            */
           /* v8 ignore next 3 --Rarely reached over IPC. */
-          e => {
+          (e) => {
             console.error(e)
           }
         )
       }
     })
-    const sender = await level.activate(h, message => {
+    const sender = await level.activate(h, (message) => {
       readable.write(message)
     })
 
@@ -294,12 +294,7 @@ export const useLevelDb = memo(() => {
 
     /** @type {AbstractLevelDOWN & { createRpcStream: () => Duplex }} */
     // eslint-disable-next-line -- Eveything is messed up when no typings.
-    const db = leveldown({ /*
-      onflush: () => {
-        db.emit('flush')
-      }
-    */
-    })
+    const db = leveldown({})
 
     const client = db.createRpcStream()
     stream.on('close', () => {
@@ -319,39 +314,28 @@ export const useLevelDb = memo(() => {
    * @template V
    * @param {string} name
    */
-  const levelup_ = async name =>
-    await connect(name).then(async db => {
-      return await new Promise(
-        /**
-         * @param {(db: LevelUp<AbstractLevelDOWN<K, V>, AbstractIterator<K,V>>) => void} resolve
-         * @param {(error: Error) => void} reject
-         */
-        (resolve, reject) => {
+  const levelup_ = async (name) =>
+    await connect(name).then(
+      async (db) =>
+        await new Promise(
           /**
-           * @param {Error|undefined} error
+           * @param {(db: LevelUp<AbstractLevelDOWN<K, V>, AbstractIterator<K,V>>) => void} resolve
+           * @param {(error: Error) => void} reject
            */
-          const cb = error => {
-            if (error == null) resolve(up)
-            else reject(error)
-          }
+          (resolve, reject) => {
+            /**
+             * @param {Error|undefined} error
+             */
+            const cb = (error) => {
+              if (error == null) resolve(up)
+              else reject(error)
+            }
 
-          /** @type {LevelUp<AbstractLevelDOWN<K, V>, AbstractIterator<K,V>>} */
-          const up = levelup(db, cb)
-        }
-      )
-    })
-  // await new Promise(
-  //   /**
-  //    * @param {(db: AbstractLevelDOWN<K, V>) => void} resolve
-  //    * @param {(error: Error) => void} reject
-  //    */
-  //   (resolve, reject) => {
-  //     const db = levelup(await connect(name), {}, error => {
-  //       if (error != null) reject(error)
-  //       else resolve(db)
-  //     })
-  //   }
-  // )
+            /** @type {LevelUp<AbstractLevelDOWN<K, V>, AbstractIterator<K,V>>} */
+            const up = levelup(db, cb)
+          }
+        )
+    )
 
   return {
     connectSync,
@@ -383,7 +367,7 @@ export const useLevelAdapter = memo(() => {
   MainDown.use_prefix = true
 
   /** @type {PouchDB.Plugin<PouchDB.Static>} */
-  const plugin = pouch => {
+  const plugin = (pouch) => {
     // @ts-expect-error -- Not defined in the types.
     // eslint-disable-next-line -- Eveything is messed up when no typings.
     pouch.adapter('maindb', MainDown, true)

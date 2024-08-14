@@ -106,15 +106,15 @@ const cancelLabel = computed(() => props.cancelButton ?? t('common.cancel'))
 const isVisible = ref(props.visible)
 watch(
   () => props.visible,
-  value => {
+  (value) => {
     isVisible.value = value
   }
 )
 // HACK: Always use cancelChanges since updateValue will dismiss the dialog after updating the original.
-watch(isVisible, value => {
+watch(isVisible, (value) => {
   if (!value) cancelChange()
 })
-watch(isVisible, value => {
+watch(isVisible, (value) => {
   if (value !== props.visible) emit('update:visible', value)
 })
 
@@ -123,7 +123,7 @@ const innerValue = ref(props.multiple ? toArray(props.modelValue) : props.modelV
 const originalValue = ref(innerValue.value)
 watch(
   () => props.modelValue,
-  value => {
+  (value) => {
     innerValue.value = props.multiple ? toArray(value) : value
     originalValue.value = innerValue.value
   }
@@ -196,7 +196,7 @@ const getFromItem =
     }
 
     if (typeof selector === 'string') {
-      return item => get(item, selector)
+      return (item) => get(item, selector)
     }
 
     if (Array.isArray(selector)) {
@@ -204,14 +204,14 @@ const getFromItem =
         .map((key, index) => (typeof key === 'string' ? `${index === 0 ? '' : '.'}${key}` : `[${key}]`))
         .join('')
 
-      return item => get(item, path)
+      return (item) => get(item, path)
     }
 
     if (typeof selector === 'function') {
-      return item => selector(item as Record<string, unknown>) as T
+      return (item) => selector(item as Record<string, unknown>) as T
     }
 
-    return item => get(item, def)
+    return (item) => get(item, def)
   }
 
 const getItemTitle = computed(getFromItem<string>(() => props.itemTitle, 'title'))

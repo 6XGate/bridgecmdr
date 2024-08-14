@@ -76,7 +76,7 @@ const isVisible = useVModel(props, 'visible', emit)
 const innerValue = ref(props.modelValue != null ? [props.modelValue] : [])
 watch(
   () => props.modelValue,
-  value => {
+  (value) => {
     innerValue.value = value != null ? [value] : []
   }
 )

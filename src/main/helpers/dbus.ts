@@ -244,11 +244,11 @@ const useDbus = memo(() => {
       }
 
       if (type === 'array:string') {
-        return `array:string:${(arg as string[]).map(v => `"${v}"`).join(',')}`
+        return `array:string:${(arg as string[]).map((v) => `"${v}"`).join(',')}`
       }
 
       if (type.startsWith('array:')) {
-        return `${type}:${(arg as string[]).map(v => `"${String(v)}"`).join(',')}`
+        return `${type}:${(arg as string[]).map((v) => `"${String(v)}"`).join(',')}`
       }
 
       const match = kDictType.exec(type)

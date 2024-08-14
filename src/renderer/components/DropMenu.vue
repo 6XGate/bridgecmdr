@@ -88,7 +88,7 @@ const innerValue = useVModel(props, 'modelValue', emit)
 // })
 
 const visible = ref(false)
-watch(visible, value => {
+watch(visible, (value) => {
   emit('update:visible', value)
 })
 
@@ -136,7 +136,7 @@ const getFromItem =
     }
 
     if (typeof selector === 'string') {
-      return item => get(item, selector)
+      return (item) => get(item, selector)
     }
 
     if (Array.isArray(selector)) {
@@ -144,14 +144,14 @@ const getFromItem =
         .map((key, index) => (typeof key === 'string' ? `${index === 0 ? '' : '.'}${key}` : `[${key}]`))
         .join('')
 
-      return item => get(item, path)
+      return (item) => get(item, path)
     }
 
     if (typeof selector === 'function') {
-      return item => selector(item as Record<string, unknown>) as T
+      return (item) => selector(item as Record<string, unknown>) as T
     }
 
-    return item => get(item, def)
+    return (item) => get(item, def)
   }
 
 const getItemTitle = computed(getFromItem<string>(() => props.itemTitle, 'title'))

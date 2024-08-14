@@ -6,9 +6,9 @@ import Logger from 'electron-log'
 import * as INI from 'ini'
 import { memo } from 'radash'
 import { xdgConfig } from 'xdg-basedir'
-import { DesktopEntryFile, readyEntry } from '../support/desktop.js'
-import { ipcProxy } from '../utilities.js'
-import type { StartupApi } from '../../preload/api.js'
+import { DesktopEntryFile, readyEntry } from '../support/desktop'
+import { ipcProxy } from '../utilities'
+import type { StartupApi } from '../../preload/api'
 
 const useStartup = memo(async () => {
   const configPath = xdgConfig != null ? resolvePath(xdgConfig) : resolvePath(homedir(), '.config')
@@ -21,7 +21,7 @@ const useStartup = memo(async () => {
   /** Checks if the auto-start entry is enabled. */
   async function checkEnabled() {
     return await stat(autoStartPath)
-      .then(s => s.isFile())
+      .then((s) => s.isFile())
       .catch(() => false)
   }
 

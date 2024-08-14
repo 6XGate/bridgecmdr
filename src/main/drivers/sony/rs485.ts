@@ -6,10 +6,10 @@ import {
   kPowerOff,
   kPowerOn,
   kSetChannel
-} from '../../helpers/sonyRs485.js'
-import { createCommandStream } from '../../helpers/stream.js'
-import { defineDriver, kDeviceHasNoExtraCapabilities } from '../../system/driver.js'
-import type { Command, CommandArg } from '../../helpers/sonyRs485.js'
+} from '../../helpers/sonyRs485'
+import { createCommandStream } from '../../helpers/stream'
+import { defineDriver, kDeviceHasNoExtraCapabilities } from '../../system/driver'
+import type { Command, CommandArg } from '../../helpers/sonyRs485'
 
 const sonyRs485Driver = defineDriver({
   enable: true,
@@ -22,7 +22,7 @@ const sonyRs485Driver = defineDriver({
     }
   },
   capabilities: kDeviceHasNoExtraCapabilities,
-  setup: async uri => {
+  setup: async (uri) => {
     const sendCommand = async (command: Command, arg0?: CommandArg, arg1?: CommandArg) => {
       const source = createAddress(kAddressAllMonitors, 0)
       const destination = createAddress(kAddressAllMonitors, 0)
@@ -35,10 +35,10 @@ const sonyRs485Driver = defineDriver({
       })
 
       // TODO: Other situation handlers...
-      connection.on('data', data => {
+      connection.on('data', (data) => {
         Logger.debug(`sonyRs485Driver: return: ${String(data)}`)
       })
-      connection.on('error', error => {
+      connection.on('error', (error) => {
         Logger.error(`sonyRs485Driver: ${error.message}`)
       })
 

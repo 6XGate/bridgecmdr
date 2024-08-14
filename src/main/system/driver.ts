@@ -1,9 +1,9 @@
 import { ipcMain } from 'electron'
 import { memo } from 'radash'
-import { ipcHandle, ipcProxy } from '../utilities.js'
-import useHandles from './handle.js'
-import type { HandleKey } from './handle.js'
-import type { DriverData, Handle } from '../../preload/api.js'
+import { ipcHandle, ipcProxy } from '../utilities'
+import useHandles from './handle'
+import type { HandleKey } from './handle'
+import type { DriverData, Handle } from '../../preload/api'
 
 //
 // Device capabilities
@@ -107,7 +107,7 @@ const useDrivers = memo(() => {
 
   /** Lists available drivers. */
   async function list() {
-    return await Promise.resolve(Array.from(registry.values()).map(d => d.data))
+    return await Promise.resolve(Array.from(registry.values()).map((d) => d.data))
   }
 
   /** Loads a driver registered in the registry. */
@@ -117,7 +117,7 @@ const useDrivers = memo(() => {
       throw new Error(`No such driver registered as "${guid}"`)
     }
 
-    return createHandle(event, kDriverHandle, await factory.load(path), async driver => {
+    return createHandle(event, kDriverHandle, await factory.load(path), async (driver) => {
       await driver.close?.()
     })
   })

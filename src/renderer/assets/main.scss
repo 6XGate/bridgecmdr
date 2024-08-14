@@ -1,7 +1,7 @@
-@use "sass:string";
-@use "sass:map";
-@use "vuetify/settings" as settings;
-@use "vuetify/tools" as tools;
+@use 'sass:string';
+@use 'sass:map';
+@use 'vuetify/settings' as settings;
+@use 'vuetify/tools' as tools;
 
 $widths: 0 5 10 20 25 30 40 50 60 70 75 80 90 100;
 $widthspx: 50 75 100 125 150 175 200 250 300 400 500 600 700 800 900;
@@ -9,29 +9,61 @@ $widthspx: 50 75 100 125 150 175 200 250 300 400 500 600 700 800 900;
 @each $breakpoint in map.keys(settings.$grid-breakpoints) {
   @include tools.media-breakpoint-up($breakpoint) {
     @each $width in $widths {
-      .minw-#{$breakpoint}-#{$width} { min-width: string.unquote("#{$width}%") !important; }
-      .maxw-#{$breakpoint}-#{$width} { max-width: string.unquote("#{$width}%") !important; }
-      .w-#{$breakpoint}-#{$width} { max-width: string.unquote("#{$width}%") !important; }
+      .minw-#{$breakpoint}-#{$width} {
+        min-width: string.unquote('#{$width}%') !important;
+      }
+      .maxw-#{$breakpoint}-#{$width} {
+        max-width: string.unquote('#{$width}%') !important;
+      }
+      .w-#{$breakpoint}-#{$width} {
+        max-width: string.unquote('#{$width}%') !important;
+      }
     }
     @each $width in $widthspx {
-      .minw-#{$breakpoint}-#{$width}px { min-width: string.unquote("#{$width}px") !important; }
-      .maxw-#{$breakpoint}-#{$width}px { max-width: string.unquote("#{$width}px") !important; }
-      .w-#{$breakpoint}-#{$width}px { width: string.unquote("#{$width}px") !important }
+      .minw-#{$breakpoint}-#{$width}px {
+        min-width: string.unquote('#{$width}px') !important;
+      }
+      .maxw-#{$breakpoint}-#{$width}px {
+        max-width: string.unquote('#{$width}px') !important;
+      }
+      .w-#{$breakpoint}-#{$width}px {
+        width: string.unquote('#{$width}px') !important;
+      }
     }
-    .colg-#{$breakpoint} { column-gap: map.get(settings.$grid-gutters, $breakpoint); }
-    .rowg-#{$breakpoint} { row-gap: map.get(settings.$grid-gutters, $breakpoint); }
-}
+    .colg-#{$breakpoint} {
+      column-gap: map.get(settings.$grid-gutters, $breakpoint);
+    }
+    .rowg-#{$breakpoint} {
+      row-gap: map.get(settings.$grid-gutters, $breakpoint);
+    }
+  }
 }
 
 @each $width in $widths {
-  .minw-#{$width} { min-width: string.unquote("#{$width}%") !important; }
-  .maxw-#{$width} { max-width: string.unquote("#{$width}%") !important; }
-  .w-#{$width} { width: string.unquote("#{$width}%") !important }
+  .minw-#{$width} {
+    min-width: string.unquote('#{$width}%') !important;
+  }
+  .maxw-#{$width} {
+    max-width: string.unquote('#{$width}%') !important;
+  }
+  .w-#{$width} {
+    width: string.unquote('#{$width}%') !important;
+  }
 }
 @each $width in $widthspx {
-  .minw-#{$width}px { min-width: string.unquote("#{$width}px") !important; }
-  .maxw-#{$width}px { max-width: string.unquote("#{$width}px") !important; }
-  .w-#{$width}px { width: string.unquote("#{$width}px") !important }
+  .minw-#{$width}px {
+    min-width: string.unquote('#{$width}px') !important;
+  }
+  .maxw-#{$width}px {
+    max-width: string.unquote('#{$width}px') !important;
+  }
+  .w-#{$width}px {
+    width: string.unquote('#{$width}px') !important;
+  }
 }
-.colg { column-gap: settings.$grid-gutter; }
-.rowg { row-gap: settings.$grid-gutter; }
+.colg {
+  column-gap: settings.$grid-gutter;
+}
+.rowg {
+  row-gap: settings.$grid-gutter;
+}

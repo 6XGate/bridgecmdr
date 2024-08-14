@@ -1,6 +1,6 @@
 import Logger from 'electron-log'
-import { createCommandStream } from '../../helpers/stream.js'
-import { defineDriver, kDeviceHasNoExtraCapabilities } from '../../system/driver.js'
+import { createCommandStream } from '../../helpers/stream'
+import { defineDriver, kDeviceHasNoExtraCapabilities } from '../../system/driver'
 
 const teslaSmartSdiDriver = defineDriver({
   enable: true,
@@ -13,7 +13,7 @@ const teslaSmartSdiDriver = defineDriver({
     }
   },
   capabilities: kDeviceHasNoExtraCapabilities,
-  setup: async uri => {
+  setup: async (uri) => {
     const sendCommand = async (command: Buffer) => {
       const connection = await createCommandStream(uri, {
         baudRate: 9600,
@@ -22,10 +22,10 @@ const teslaSmartSdiDriver = defineDriver({
       })
 
       // TODO: Other situation handlers...
-      connection.on('data', data => {
+      connection.on('data', (data) => {
         Logger.debug(`teslaSmartSdiDriver: return: ${String(data)}`)
       })
-      connection.on('error', error => {
+      connection.on('error', (error) => {
         Logger.error(`teslaSmartSdiDriver: ${error.message}`)
       })
 

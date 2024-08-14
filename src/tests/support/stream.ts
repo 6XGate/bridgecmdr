@@ -1,7 +1,7 @@
 import { EventEmitter } from 'node:events'
 import { expect, vi } from 'vitest'
-import type { CommandStream } from '../../main/helpers/stream.js'
-import { raiseError } from '@/error-handling.js'
+import type { CommandStream } from '../../main/helpers/stream'
+import { raiseError } from '@/error-handling'
 
 /* eslint-disable @typescript-eslint/consistent-type-imports -- Required for module mocks. */
 
@@ -122,7 +122,7 @@ export interface MockStreamContext {
 }
 
 export function commandStreamModule(context: MockStreamContext) {
-  return async (original: () => Promise<typeof import('../../main/helpers/stream.js')>) => {
+  return async (original: () => Promise<typeof import('../../main/helpers/stream')>) => {
     const module = await original()
 
     const createCommandStream = vi

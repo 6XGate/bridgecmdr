@@ -1,12 +1,12 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest'
 
-const mock = await vi.hoisted(async () => await import('./support/mock.js'))
+const mock = await vi.hoisted(async () => await import('./support/mock'))
 
 beforeEach(async () => {
   vi.mock(import('electron'), mock.electronModule)
   vi.mock(import('electron-log'))
   await mock.bridgeCmdrBasics()
-  const { default: useLevelServer } = await import('../main/system/level.js')
+  const { default: useLevelServer } = await import('../main/system/level')
   useLevelServer()
 })
 
@@ -16,7 +16,7 @@ afterEach(async () => {
 })
 
 test('basics', async () => {
-  const { useLevelDb } = await import('../renderer/data/level.js')
+  const { useLevelDb } = await import('../renderer/data/level')
 
   const { levelup } = useLevelDb()
   const connectSpy = vi.fn(levelup)
@@ -31,7 +31,7 @@ test('basics', async () => {
 
 describe('forbidden names', () => {
   test('ending in ":close"', async () => {
-    const { useLevelDb } = await import('../renderer/data/level.js')
+    const { useLevelDb } = await import('../renderer/data/level')
     const { connect } = useLevelDb()
 
     await expect(connect('test:close')).rejects.toThrowError("Database names cannot end in ':close'")

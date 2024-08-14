@@ -20,7 +20,7 @@ export const toFiles = (attachments?: Attachments) => {
   }
 
   return Object.entries(attachments)
-    .map(entry => toFile(...entry))
+    .map((entry) => toFile(...entry))
     .filter(isNotNullish)
 }
 
@@ -28,7 +28,7 @@ export const useImages = () => {
   const images = ref<(string | undefined)[]>([])
 
   const unloadImages = () => {
-    images.value.forEach(image => {
+    images.value.forEach((image) => {
       if (image != null) {
         URL.revokeObjectURL(image)
       }
@@ -37,7 +37,7 @@ export const useImages = () => {
 
   const loadImages = (files: (File | undefined)[]) => {
     unloadImages()
-    images.value = files.map(file => (file != null ? URL.createObjectURL(file) : undefined))
+    images.value = files.map((file) => (file != null ? URL.createObjectURL(file) : undefined))
   }
 
   tryOnScopeDispose(unloadImages)
@@ -59,7 +59,7 @@ export const useObjectUrls = (sources: MaybeRef<(Blob | MediaSource | undefined)
 
   watch(
     () => unref(sources),
-    files => {
+    (files) => {
       release()
       for (const file of files) {
         urls.value.push(file != null ? URL.createObjectURL(file) : undefined)

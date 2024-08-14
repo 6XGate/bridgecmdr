@@ -4,7 +4,7 @@ import { z } from 'zod'
 const useEntry = () => {
   const Boolean = z.coerce.boolean()
   const String = z.string()
-  const StringList = z.string().transform(v => v.split(';'))
+  const StringList = z.string().transform((v) => v.split(';'))
   const Type = z.enum(['Application', 'Link', 'Directory'])
   const Version = z.string().regex(/^\d+\.\d+/u)
   const Url = z.string().url()
@@ -99,7 +99,7 @@ export const readyEntry = (file: DesktopEntryFile) => {
   for (const section of Object.values(file)) {
     for (const [key, value] of Object.entries(section)) {
       if (Array.isArray(value)) {
-        section[key] = value.map(v => String(v)).join(';')
+        section[key] = value.map((v) => String(v)).join(';')
       }
     }
   }

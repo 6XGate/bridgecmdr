@@ -1,6 +1,6 @@
 import { contextBridge } from 'electron'
-import useIpc from '../support.js'
-import type { AppUpdates } from '../api.js'
+import useIpc from '../support'
+import type { AppUpdates } from '../api'
 
 const useAppUpdates = (): AppUpdates => {
   const ipc = useIpc()

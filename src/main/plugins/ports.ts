@@ -1,8 +1,8 @@
 import { ipcMain } from 'electron'
 import { memo } from 'radash'
 import { SerialPort } from 'serialport'
-import { ipcProxy } from '../utilities.js'
-import type { PortApi } from '../../preload/api.js'
+import { ipcProxy } from '../utilities'
+import type { PortApi } from '../../preload/api'
 
 const usePorts = memo(() => {
   ipcMain.handle('ports:list', ipcProxy(SerialPort.list))

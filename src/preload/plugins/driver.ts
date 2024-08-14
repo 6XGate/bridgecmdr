@@ -1,5 +1,5 @@
-import useIpc from '../support.js'
-import type { DriverApi } from '../api.js'
+import useIpc from '../support'
+import type { DriverApi } from '../api'
 
 const useDriverApi = () => {
   const ipc = useIpc()

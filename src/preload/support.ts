@@ -1,5 +1,5 @@
 import { ipcRenderer } from 'electron'
-import type { IpcResponse, ListenerOptions } from './api.js'
+import type { IpcResponse, ListenerOptions } from './api'
 import type { IpcRendererEvent } from 'electron'
 
 const useIpc = () => {

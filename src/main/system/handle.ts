@@ -1,8 +1,8 @@
 import { ipcMain } from 'electron'
 import { memo } from 'radash'
-import { ipcHandle } from '../utilities.js'
-import type { Handle } from '../../preload/api.js'
-import type { SymbolKey } from '@/keys.js'
+import { ipcHandle } from '../utilities'
+import type { Handle } from '../../preload/api'
+import type { SymbolKey } from '@/keys'
 import type { IpcMainInvokeEvent, WebContents } from 'electron'
 
 export type HandleKey<T> = SymbolKey<'handle', T>
@@ -230,7 +230,7 @@ const useHandles = memo(() => {
 
     const handles = getHandleTracker(sender)
     await Promise.all(
-      [...handles].map(async handle => {
+      [...handles].map(async (handle) => {
         await closeHandle(handle)
       })
     )
@@ -243,7 +243,7 @@ const useHandles = memo(() => {
    */
   async function shutDown() {
     await Promise.all(
-      handleMap.map(async handle => {
+      handleMap.map(async (handle) => {
         if (typeof handle === 'object') {
           await handle.close(handle.resource)
         } else {

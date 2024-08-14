@@ -1,19 +1,19 @@
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
-import type { MockStreamContext } from '../../support/stream.js'
+import type { MockStreamContext } from '../../support/stream'
 
-const mock = await vi.hoisted(async () => await import('../../support/mock.js'))
-const port = await vi.hoisted(async () => await import('../../support/serial.js'))
-const stream = await vi.hoisted(async () => await import('../../support/stream.js'))
+const mock = await vi.hoisted(async () => await import('../../support/mock'))
+const port = await vi.hoisted(async () => await import('../../support/serial'))
+const stream = await vi.hoisted(async () => await import('../../support/stream'))
 
-beforeEach<MockStreamContext>(async context => {
+beforeEach<MockStreamContext>(async (context) => {
   vi.mock(import('electron'), mock.electronModule)
   vi.mock(import('electron-log'))
   vi.mock(import('serialport'), port.serialPortModule)
-  vi.doMock(import('../../../main/helpers/stream.js'), stream.commandStreamModule(context))
+  vi.doMock(import('../../../main/helpers/stream'), stream.commandStreamModule(context))
   await mock.bridgeCmdrBasics()
   await port.createMockPorts()
-  const { default: useDrivers } = await import('../../../main/system/driver.js')
-  const { default: registerDrivers } = await import('../../../main/plugins/drivers.js')
+  const { default: useDrivers } = await import('../../../main/system/driver')
+  const { default: registerDrivers } = await import('../../../main/plugins/drivers')
   useDrivers()
   registerDrivers()
 })
@@ -27,7 +27,7 @@ afterEach(async () => {
 const kDriverGuid = '8626D6D3-C211-4D21-B5CC-F5E3B50D9FF0'
 
 test('available', async () => {
-  const { kDeviceHasNoExtraCapabilities } = await import('../../../main/system/driver.js')
+  const { kDeviceHasNoExtraCapabilities } = await import('../../../main/system/driver')
 
   // Raw list.
   await expect(globalThis.api.driver.list()).resolves.toContainEqual({
@@ -44,7 +44,7 @@ test('available', async () => {
   })
 
   // Localized list.
-  const { useDrivers } = await import('../../../renderer/system/driver.js')
+  const { useDrivers } = await import('../../../renderer/system/driver')
   const drivers = useDrivers()
   await expect(drivers.all()).resolves.toBeUndefined()
   expect(drivers.items).toContainEqual({
@@ -57,18 +57,18 @@ test('available', async () => {
 })
 
 test('connect', async () => {
-  const { useDrivers } = await import('../../../renderer/system/driver.js')
+  const { useDrivers } = await import('../../../renderer/system/driver')
   const { load } = useDrivers()
 
   await expect(load(kDriverGuid, 'port:/dev/ttyS0')).resolves.not.toBeNull()
 })
 
-test<MockStreamContext>('power on', async context => {
+test<MockStreamContext>('power on', async (context) => {
   mock.console()
 
   context.stream = new stream.MockCommandStream()
 
-  const { useDrivers } = await import('../../../renderer/system/driver.js')
+  const { useDrivers } = await import('../../../renderer/system/driver')
   const { load } = useDrivers()
 
   const command = Buffer.of(0x02, 4, 0xc0, 0xc0, 0x29, 0x3e, 0x15)
@@ -87,12 +87,12 @@ test<MockStreamContext>('power on', async context => {
   context.stream.sequence.expectDone()
 })
 
-test<MockStreamContext>('power off', async context => {
+test<MockStreamContext>('power off', async (context) => {
   mock.console()
 
   context.stream = new stream.MockCommandStream()
 
-  const { useDrivers } = await import('../../../renderer/system/driver.js')
+  const { useDrivers } = await import('../../../renderer/system/driver')
   const { load } = useDrivers()
 
   const commnad = Buffer.of(0x02, 4, 0xc0, 0xc0, 0x2a, 0x3e, 0x14)
@@ -111,12 +111,12 @@ test<MockStreamContext>('power off', async context => {
   context.stream.sequence.expectDone()
 })
 
-test<MockStreamContext>('activate tie', async context => {
+test<MockStreamContext>('activate tie', async (context) => {
   mock.console()
 
   context.stream = new stream.MockCommandStream()
 
-  const { useDrivers } = await import('../../../renderer/system/driver.js')
+  const { useDrivers } = await import('../../../renderer/system/driver')
   const { load } = useDrivers()
 
   const input = 1

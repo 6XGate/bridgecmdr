@@ -1,11 +1,11 @@
 import { contextBridge } from 'electron'
-import useIpc from '../support.js'
-import useDriverApi from './driver.js'
-import useLevelApi from './level.js'
-import usePortsApi from './ports.js'
-import useStartupApi from './startup.js'
-import useSystemApi from './system.js'
-import type { BridgedApi } from '../api.js'
+import useIpc from '../support'
+import useDriverApi from './driver'
+import useLevelApi from './level'
+import usePortsApi from './ports'
+import useStartupApi from './startup'
+import useSystemApi from './system'
+import type { BridgedApi } from '../api'
 
 const useBridgedApi = () => {
   const ipc = useIpc()

@@ -1,10 +1,8 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-// import { stubBasicBridgeCmdrMain } from './support/mock'
-// import { stubSerialPort } from './support/serial'
-import type { PortInfo } from '../preload/api.js'
+import type { PortInfo } from '../preload/api'
 
-const mock = await vi.hoisted(async () => await import('./support/mock.js'))
-const port = await vi.hoisted(async () => await import('./support/serial.js'))
+const mock = await vi.hoisted(async () => await import('./support/mock'))
+const port = await vi.hoisted(async () => await import('./support/serial'))
 
 interface PortContext {
   ports: PortInfo[]
@@ -49,7 +47,7 @@ test('list raw port', async () => {
 })
 
 test('list ports', async () => {
-  const { default: usePorts } = await import('../renderer/system/ports.js')
+  const { default: usePorts } = await import('../renderer/system/ports')
 
   const ports = usePorts()
   await expect(ports.all()).resolves.toBeUndefined()
@@ -70,11 +68,9 @@ test('list ports', async () => {
 })
 
 describe('parsing port info', () => {
-  beforeEach<PortContext>(context => {
+  beforeEach<PortContext>((context) => {
     context.ports = []
-    vi.spyOn(globalThis.api.ports, 'list').mockImplementation(async () => {
-      return await Promise.resolve(context.ports)
-    })
+    vi.spyOn(globalThis.api.ports, 'list').mockImplementation(async () => await Promise.resolve(context.ports))
   })
 
   afterEach<PortContext>(() => {
@@ -82,13 +78,13 @@ describe('parsing port info', () => {
   })
 
   test<PortContext>('no ports', async () => {
-    const { default: usePorts } = await import('../renderer/system/ports.js')
+    const { default: usePorts } = await import('../renderer/system/ports')
     const ports = usePorts()
     await ports.all()
     expect(ports.items).toStrictEqual([])
   })
 
-  test<PortContext>('USB PnP ID ports', async context => {
+  test<PortContext>('USB PnP ID ports', async (context) => {
     context.ports = [
       {
         manufacturer: 'FTDI',
@@ -101,7 +97,7 @@ describe('parsing port info', () => {
       }
     ]
 
-    const { default: usePorts } = await import('../renderer/system/ports.js')
+    const { default: usePorts } = await import('../renderer/system/ports')
     const ports = usePorts()
     await ports.all()
     expect(ports.items).toStrictEqual([
@@ -112,7 +108,7 @@ describe('parsing port info', () => {
     ])
   })
 
-  test<PortContext>('Unknown PnP ID ports', async context => {
+  test<PortContext>('Unknown PnP ID ports', async (context) => {
     context.ports = [
       {
         manufacturer: 'FTDI',
@@ -152,7 +148,7 @@ describe('parsing port info', () => {
       }
     ]
 
-    const { default: usePorts } = await import('../renderer/system/ports.js')
+    const { default: usePorts } = await import('../renderer/system/ports')
     const ports = usePorts()
     await ports.all()
     expect(ports.items).toStrictEqual([

@@ -1,6 +1,6 @@
 import { ipcRenderer } from 'electron'
-import useIpc from '../support.js'
-import type { Handle, LevelApi, Messanger } from '../api.js'
+import useIpc from '../support'
+import type { Handle, LevelApi, Messanger } from '../api'
 import type { IpcRendererEvent } from 'electron'
 
 export default function useLevelApi() {

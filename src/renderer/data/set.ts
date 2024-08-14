@@ -12,7 +12,7 @@ export const useDataSet = <Schema extends z.AnyZodObject>(_: Schema) => {
 
   const initialize = (docs: Document[]) => {
     items.value = [...docs]
-    docs.forEach(doc => {
+    docs.forEach((doc) => {
       if (doc._id === current.value?._id) {
         current.value = doc
       }
@@ -24,7 +24,7 @@ export const useDataSet = <Schema extends z.AnyZodObject>(_: Schema) => {
   }
 
   const replaceItem = (doc: Document) => {
-    const idx = items.value.findIndex(item => item._id === doc._id)
+    const idx = items.value.findIndex((item) => item._id === doc._id)
     if (idx !== -1) {
       items.value.splice(idx, 1, doc)
     } else {
@@ -37,7 +37,7 @@ export const useDataSet = <Schema extends z.AnyZodObject>(_: Schema) => {
   }
 
   const deleteItem = (id: DocumentId) => {
-    const idx = items.value.findIndex(item => item._id === id)
+    const idx = items.value.findIndex((item) => item._id === id)
     if (idx !== -1) {
       items.value.splice(idx, 1)
     }

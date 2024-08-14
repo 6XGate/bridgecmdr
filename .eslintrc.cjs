@@ -11,9 +11,6 @@ module.exports = defineConfig(({ useVue, useNode, useTypeScript }) => {
     root: true,
     env: { es2023: true },
     reportUnusedDisableDirectives: true,
-    rules: {
-      // 'n/file-extension-in-import': ['error', 'always']
-    },
     overrides: [
       {
         files: ['*.cjs'],

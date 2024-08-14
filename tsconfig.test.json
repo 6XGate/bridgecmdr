@@ -1,15 +1,10 @@
 {
   "extends": ["@tsconfig/node20", "./tsconfig.base.json"],
-  "include": [
-    "src/tests/**/*",
-  ],
+  "include": ["src/tests/**/*"],
   "compilerOptions": {
     "types": ["electron-vite/node"],
-    // "module": "ESNext",
-    // "moduleResolution": "Bundler",
-    "lib": [
-      "ES2023",
-      "DOM",
-    ]
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2023", "DOM"]
   }
 }

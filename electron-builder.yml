@@ -33,4 +33,3 @@ npmRebuild: true
 publish:
   provider: generic
   url: http://localplex.home.sleepingcats.org:9001/bridgecmdr/
-

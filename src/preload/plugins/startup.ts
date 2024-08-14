@@ -1,5 +1,5 @@
-import useIpc from '../support.js'
-import type { StartupApi } from '../api.js'
+import useIpc from '../support'
+import type { StartupApi } from '../api'
 
 const useStartupApi = () => {
   const ipc = useIpc()

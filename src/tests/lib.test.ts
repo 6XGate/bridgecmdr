@@ -6,7 +6,7 @@ import { describe, expect, test } from 'vitest'
 
 describe('reactor', () => {
   test('notImplemented', async () => {
-    const { notImplemented } = await import('./support/reactor.js')
+    const { notImplemented } = await import('./support/reactor')
     const unneeded = notImplemented<() => unknown>()
     expect(() => unneeded()).toThrowError(Error)
   })

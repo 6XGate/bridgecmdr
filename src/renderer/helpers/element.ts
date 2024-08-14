@@ -20,7 +20,7 @@ export const useElementScrollingBounds = (el: MaybeComputedElementRef) => {
     scrolling: { left: 0, top: 0, width: 0, height: 0 }
   })
 
-  useResizeObserver(el, entries => {
+  useResizeObserver(el, (entries) => {
     for (const entry of entries) {
       const { target } = entry
       const { scrollLeft, scrollTop, scrollWidth, scrollHeight } = target
@@ -47,7 +47,7 @@ export const useElementScrollingBounds = (el: MaybeComputedElementRef) => {
   })
 
   const scroll = useScroll($el)
-  watch([scroll.x, scroll.y], value => {
+  watch([scroll.x, scroll.y], (value) => {
     scrolling.value.client.left = value[0]
     scrolling.value.client.top = value[1]
   })

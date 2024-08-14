@@ -1,11 +1,9 @@
 {
   "extends": ["@tsconfig/node20", "./tsconfig.base.json"],
-  "include": [
-    "src/core/**/*",
-    "src/main/**/*",
-    "src/preload/**/*"
-  ],
+  "include": ["src/core/**/*", "src/main/**/*", "src/preload/**/*"],
   "compilerOptions": {
-    "types": ["electron-vite/node"]
+    "types": ["electron-vite/node"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler"
   }
 }

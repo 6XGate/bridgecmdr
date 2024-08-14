@@ -32,8 +32,8 @@ const switches = useSwitches()
 const drivers = useDrivers()
 const items = computed(() =>
   switches.items
-    .map(item => {
-      const driver = drivers.items.find(d => d.guid === item.driverId)
+    .map((item) => {
+      const driver = drivers.items.find((d) => d.guid === item.driverId)
 
       return driver != null ? ({ switch: item, driver } satisfies Item) : undefined
     })
@@ -102,7 +102,7 @@ const { dialogProps: editorProps } = useSwitchDialog()
               v-model:visible="isActive.value"
               :switch="item.switch"
               editing
-              @confirm="v => updateSwitch(item.switch, v)" />
+              @confirm="(v) => updateSwitch(item.switch, v)" />
           </template>
           <template #activator="{ props: dailog }">
             <VListItem v-bind="dailog" :title="item.switch.title" :subtitle="item.driver.title">

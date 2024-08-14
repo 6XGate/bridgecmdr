@@ -13,7 +13,7 @@ const confirmButton = ref(t('common.yes'))
 const cancelButton = ref(t('common.no'))
 const color = ref('primary')
 
-onReveal(config => {
+onReveal((config) => {
   title.value = config.title
   message.value = config.message
   confirmButton.value = config.confirmButton ?? t('common.yes')

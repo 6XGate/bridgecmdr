@@ -40,7 +40,7 @@ export const useDashboard = defineStore('dashboard', () => {
     // Remove drivers for switches removed
     const closing: Driver[] = []
     for (const guid of loadedDrivers.keys()) {
-      if (switches.items.find(switcher => switcher._id === guid) == null) {
+      if (switches.items.find((switcher) => switcher._id === guid) == null) {
         const driver = loadedDrivers.get(guid)
         if (driver != null) {
           loadedDrivers.delete(guid)
@@ -50,7 +50,7 @@ export const useDashboard = defineStore('dashboard', () => {
     }
 
     await Promise.all(
-      closing.map(async driver => {
+      closing.map(async (driver) => {
         await driver.close()
       })
     )
@@ -60,7 +60,7 @@ export const useDashboard = defineStore('dashboard', () => {
     for (const switcher of switches.items) {
       const driver = loadedDrivers.get(switcher._id)
       if (driver == null || driver.uri !== switcher.path) {
-        loading.push(drivers.load(switcher.driverId, switcher.path).then(loaded => [switcher._id, loaded]))
+        loading.push(drivers.load(switcher.driverId, switcher.path).then((loaded) => [switcher._id, loaded]))
       }
     }
 
@@ -73,9 +73,9 @@ export const useDashboard = defineStore('dashboard', () => {
 
   const defineButton = (source: ReadonlyDeep<Source>, index: number): Button => {
     const commands = ties.items
-      .filter(tie => tie.sourceId === source._id)
-      .map(tie => {
-        const switcher = switches.items.find(item => tie.switchId === item._id)
+      .filter((tie) => tie.sourceId === source._id)
+      .map((tie) => {
+        const switcher = switches.items.find((item) => tie.switchId === item._id)
         const driver = loadedDrivers.get(tie.switchId)
 
         if (switcher == null) {
@@ -129,8 +129,8 @@ export const useDashboard = defineStore('dashboard', () => {
 
   const defineDashboard = async () => {
     loadImages(
-      sources.items.map(source =>
-        toFiles(source._attachments).find(f => source.image != null && f.name === source.image)
+      sources.items.map((source) =>
+        toFiles(source._attachments).find((f) => source.image != null && f.name === source.image)
       )
     )
     items.value = await Promise.all(sources.items.map(defineButton).map(prepareButton))

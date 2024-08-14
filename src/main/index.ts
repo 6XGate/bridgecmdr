@@ -6,7 +6,7 @@ unhandled()
 
 async function main() {
   // Now boot the application.
-  await import('./main.js')
+  await import('./main')
 }
 
 main().catch((cause: unknown) => {

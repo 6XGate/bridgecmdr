@@ -19,7 +19,7 @@ const usePorts = createSharedComposable(() => {
   const all = tracker.track(async () => {
     const ports = await api.ports.list()
 
-    items.value = ports.map(port => {
+    items.value = ports.map((port) => {
       // If there is no PnP ID, then just use the path.
       if (!is.nonEmptyString(port.pnpId)) {
         return {

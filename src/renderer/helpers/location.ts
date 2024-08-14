@@ -20,7 +20,7 @@ export const useLocationUtils = (validSwitches: MaybeRefOrGetter<readonly PortDa
   const isPath = (value: string) => {
     switch (true) {
       case value.startsWith('port:'):
-        return toValue(validSwitches).find(port => port.value === value.substring(5)) != null
+        return toValue(validSwitches).find((port) => port.value === value.substring(5)) != null
       case value.startsWith('ip:'):
         return isHostWithOptionalPort(value.substring(3))
       default:
@@ -92,7 +92,7 @@ export const useLocation = (location: Ref<string>, validSwitches: MaybeRefOrGett
           return 'path'
       }
     },
-    set: value => {
+    set: (value) => {
       location.value = value !== 'path' ? (location.value = `${value}:${path.value}`) : (location.value = path.value)
     }
   })
@@ -119,7 +119,7 @@ export const useLocation = (location: Ref<string>, validSwitches: MaybeRefOrGett
           return location.value
       }
     },
-    set: value => {
+    set: (value) => {
       location.value =
         pathType.value !== 'path' ? (location.value = `${pathType.value}:${value}`) : (location.value = value)
     }
@@ -141,7 +141,7 @@ export const useSwitchLocation = (
 ) => {
   const location = computed({
     get: () => toValue(switcher).path,
-    set: v => {
+    set: (v) => {
       toValue(switcher).path = v
     }
   })

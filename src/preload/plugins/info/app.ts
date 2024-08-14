@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is'
 import { contextBridge } from 'electron'
-import type { AppInfo } from '../../api.js'
+import type { AppInfo } from '../../api'
 
 const useAppInfo = () => {
   if (!is.nonEmptyString(process.env['app_name_'])) throw new ReferenceError('Missing appInfo.name')

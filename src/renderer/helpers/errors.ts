@@ -8,7 +8,7 @@ export const useErrors = () => {
 
   const toPath = (path: (number | string)[]) =>
     path
-      .map(segment => (typeof segment === 'number' ? `[${segment}]` : segment))
+      .map((segment) => (typeof segment === 'number' ? `[${segment}]` : segment))
       .reduce((p, c) => (c.startsWith('[') ? `${p}${c}` : `${p}.${c}`))
 
   const toMessage = (e: unknown) => {
@@ -17,7 +17,7 @@ export const useErrors = () => {
     }
 
     if (e instanceof z.ZodError) {
-      const flattened = e.flatten(issue =>
+      const flattened = e.flatten((issue) =>
         issue.path.length > 0 ? `${toPath(issue.path)}: ${issue.message}` : issue.message
       )
 
@@ -25,8 +25,8 @@ export const useErrors = () => {
         flattened.formErrors[0] ??
         // Map all fields to their first error, and find the first that has an error.
         Object.values(flattened.fieldErrors)
-          .map(errors => errors?.[0])
-          .find(error => error != null) ??
+          .map((errors) => errors?.[0])
+          .find((error) => error != null) ??
         t('error.zod')
       )
     }

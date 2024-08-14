@@ -11,14 +11,14 @@ interface JsonObject {
   [property: string]: JsonValue
 }
 type JsonValue = null | boolean | number | string | JsonValue[] | JsonObject
-const JsonValue = z.string().transform(data => JSON.parse(data) as JsonValue)
+const JsonValue = z.string().transform((data) => JSON.parse(data) as JsonValue)
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Need to match anything, as Zod does.
 type JsonType = z.ZodType<any, any, JsonValue> | z.ZodCatch<z.ZodType<any, any, JsonValue>>
 
 const kIconSizes = [48, 64, 96, 128, 192, 256] as const
 export type IconSize = z.infer<typeof IconSize>
-export const IconSize = z.custom<(typeof kIconSizes)[number]>(value => kIconSizes.includes(value as never))
+export const IconSize = z.custom<(typeof kIconSizes)[number]>((value) => kIconSizes.includes(value as never))
 
 export type PowerOffTaps = z.infer<typeof PowerOffTaps>
 export const PowerOffTaps = z.enum(['single', 'double'])
@@ -33,8 +33,8 @@ const useSchema = <Schema extends JsonType>(schema: Schema, deep = false) =>
     writeDefaults: true,
     serializer: {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return -- TS is unable to infer properly.
-      read: raw => JsonValue.pipe(schema).parse(raw),
-      write: value => JSON.stringify(value)
+      read: (raw) => JsonValue.pipe(schema).parse(raw),
+      write: (value) => JSON.stringify(value)
     }
   }) satisfies UseStorageOptions<z.output<Schema>>
 

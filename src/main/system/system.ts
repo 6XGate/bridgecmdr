@@ -1,8 +1,8 @@
 import { ipcMain } from 'electron'
 import { memo } from 'radash'
-import useDbus from '../helpers/dbus.js'
-import { ipcProxy } from '../utilities.js'
-import type { SystemApi } from '../../preload/api.js'
+import useDbus from '../helpers/dbus'
+import { ipcProxy } from '../utilities'
+import type { SystemApi } from '../../preload/api'
 
 const useSystem = memo(() => {
   const { dbusBind } = useDbus()

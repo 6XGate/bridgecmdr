@@ -28,7 +28,9 @@ const dialogs = useDialogs()
 
 const sources = useSources()
 const files = computed(() =>
-  sources.items.map(source => toFiles(source._attachments).find(f => source.image != null && f.name === source.image))
+  sources.items.map((source) =>
+    toFiles(source._attachments).find((f) => source.image != null && f.name === source.image)
+  )
 )
 const images = useObjectUrls(files)
 

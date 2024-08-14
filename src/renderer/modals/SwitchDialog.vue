@@ -44,7 +44,7 @@ onBeforeMount(ports.all)
 const target = ref<NewSwitch>(deepClone(props.switch))
 const location = computed({
   get: () => v$.path.$model,
-  set: v => {
+  set: (v) => {
     v$.path.$model = v
   }
 })

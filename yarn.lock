@@ -1483,9 +1483,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sixxgate/lint@npm:^3.1.4":
-  version: 3.1.4
-  resolution: "@sixxgate/lint@npm:3.1.4"
+"@sixxgate/lint@npm:^3.2.1":
+  version: 3.2.1
+  resolution: "@sixxgate/lint@npm:3.2.1"
   dependencies:
     "@eslint/eslintrc": "npm:^2.1.4"
     "@eslint/js": "npm:^8.57.0"
@@ -1500,11 +1500,12 @@ __metadata:
     radash: "npm:^12.1.0"
     read-pkg: "npm:^5.2.0"
     tslib: "npm:^2.6.3"
-    type-fest: "npm:^4.23.0"
+    type-fest: "npm:^4.24.0"
     zod: "npm:^3.23.8"
   peerDependencies:
     eslint: ^8.52.0
-  checksum: 10c0/4d2ed7213de51f32115eb16d111edd5576069d623e58a27962c49f5a25df88f7133f8fc4e8cb319c46e09a6c23aa95e0c5dfbf7d7ba590eeeac3dd9612907d26
+    prettier: ^3.3.3
+  checksum: 10c0/dd0636cbd710e40c8c51f7419677756330667d07d418636de15f6347241ae1b9aed4303fa52be0f8e926bf64afdd3cfa4c91ea908b78cc26db93e9de2edb3f73
   languageName: node
   linkType: hard
 
@@ -3058,7 +3059,7 @@ __metadata:
     "@mdi/js": "npm:^7.4.47"
     "@mdi/svg": "npm:^7.4.47"
     "@sindresorhus/is": "npm:^7.0.0"
-    "@sixxgate/lint": "npm:^3.1.4"
+    "@sixxgate/lint": "npm:^3.2.1"
     "@tsconfig/node20": "npm:^20.1.4"
     "@tsconfig/strictest": "npm:^2.0.5"
     "@types/abstract-leveldown": "npm:^7.2.5"
@@ -9487,7 +9488,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"type-fest@npm:^4.23.0, type-fest@npm:^4.24.0":
+"type-fest@npm:^4.24.0":
   version: 4.24.0
   resolution: "type-fest@npm:4.24.0"
   checksum: 10c0/9770471a397733b17b5a9ce48ee5a4d6c042c84a4858ff4e15abd126f351c61b5fea8b7b5e55bfa34840098a920b915d5ff878db1b3c007a2512a6a9c7f21579

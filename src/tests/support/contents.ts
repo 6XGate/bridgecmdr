@@ -1,6 +1,6 @@
 import EventEmitter from 'node:events'
-import { notImplemented } from './reactor.js'
-import type { IpcReactor } from './reactor.js'
+import { notImplemented } from './reactor'
+import type { IpcReactor } from './reactor'
 import type { IpcMain, WebContents } from 'electron'
 
 export class MockWebContents extends EventEmitter implements WebContents {

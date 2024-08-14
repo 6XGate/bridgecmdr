@@ -1,4 +1,4 @@
-import { notImplemented } from './reactor.js'
+import { notImplemented } from './reactor'
 import type { ContextBridge } from 'electron'
 
 export class MockContextBridge implements ContextBridge {

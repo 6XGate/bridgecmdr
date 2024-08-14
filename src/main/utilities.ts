@@ -1,4 +1,4 @@
-import type { IpcResponse } from '../preload/api.js'
+import type { IpcResponse } from '../preload/api'
 import type { IpcMainInvokeEvent } from 'electron'
 
 export const ipcProxy =

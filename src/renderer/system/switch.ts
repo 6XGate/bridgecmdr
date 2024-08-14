@@ -38,11 +38,11 @@ export const useSwitches = defineStore('switches', () => {
     set.deleteItem(id)
 
     const related = await tiesDb
-      .query(async backend => await backend.find({ selector: { switchId: id } }))
-      .then(r => r.docs)
+      .query(async (backend) => await backend.find({ selector: { switchId: id } }))
+      .then((r) => r.docs)
 
     await Promise.all(
-      related.map(async tie => {
+      related.map(async (tie) => {
         await ties.remove(tie._id)
       })
     )

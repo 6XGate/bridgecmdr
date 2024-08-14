@@ -62,22 +62,22 @@ watch(() => target.value.outputChannels.video, syncChannels)
 
 const audioOutputChannel = computed({
   get: () => v$.outputChannels.audio.$model as number,
-  set: value => {
+  set: (value) => {
     v$.outputChannels.audio.$model = value
   }
 })
 
 const videoOutputChannel = computed({
   get: () => v$.outputChannels.video.$model as number,
-  set: value => {
+  set: (value) => {
     v$.outputChannels.video.$model = value
   }
 })
 
-const switcher = computed(() => switches.items.find(s => s._id === target.value.switchId))
+const switcher = computed(() => switches.items.find((s) => s._id === target.value.switchId))
 
 const driver = computed(() =>
-  switcher.value != null ? drivers.items.find(d => d.guid === switcher.value?.driverId) : undefined
+  switcher.value != null ? drivers.items.find((d) => d.guid === switcher.value?.driverId) : undefined
 )
 
 const hasOutputChannel = computed(() => Boolean((driver.value?.capabilities ?? 0) & kDeviceSupportsMultipleOutputs))
