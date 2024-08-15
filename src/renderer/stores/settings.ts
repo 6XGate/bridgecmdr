@@ -3,7 +3,6 @@ import { defineStore } from 'pinia'
 import { readonly, computed } from 'vue'
 import { z } from 'zod'
 import { useUserStorage } from '../data/storage'
-import useBridgedApi from '../system/bridged'
 import type { UseStorageOptions } from '@vueuse/core'
 
 // eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style -- Will cause circular type reference.
@@ -39,8 +38,6 @@ const useSchema = <Schema extends JsonType>(schema: Schema, deep = false) =>
   }) satisfies UseStorageOptions<z.output<Schema>>
 
 const useSettings = defineStore('settings', () => {
-  const api = useBridgedApi()
-
   const iconSize = useUserStorage<IconSize>('iconSize', 128, useSchema(IconSize))
   const iconSizes = readonly(kIconSizes)
 
@@ -73,9 +70,9 @@ const useSettings = defineStore('settings', () => {
     powerOnSwitchesAtStart,
     powerOffWhen,
     powerOffWhenOptions,
-    checkAutoStart: api.startup.checkEnabled,
-    enableAutoStart: api.startup.enable,
-    disableAutoStart: api.startup.disable
+    checkAutoStart: services.startup.checkEnabled,
+    enableAutoStart: services.startup.enable,
+    disableAutoStart: services.startup.disable
   }
 })
 

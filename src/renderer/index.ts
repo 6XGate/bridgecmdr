@@ -20,7 +20,7 @@ if (import.meta.env.PROD) {
 globalThis.global = globalThis
 globalThis.Buffer = Buffer
 Object.defineProperties((globalThis.process = {} as never), {
-  env: { value: globalThis.api.env },
+  env: { value: globalThis.services.env },
   nextTick: { value: setImmediate }
 })
 

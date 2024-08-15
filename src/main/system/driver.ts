@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron'
 import { memo } from 'radash'
-import { ipcHandle, ipcProxy } from '../utilities'
+import { ipcHandle, ipcProxy, logError } from '../utilities'
 import useHandles from './handle'
 import type { HandleKey } from './handle'
 import type { DriverData, Handle } from '../../preload/api'
@@ -114,7 +114,7 @@ const useDrivers = memo(() => {
   const open = ipcHandle(async (event, guid: string, path: string) => {
     const factory = registry.get(guid)
     if (factory == null) {
-      throw new Error(`No such driver registered as "${guid}"`)
+      throw logError(new Error(`No such driver registered as "${guid}"`))
     }
 
     return createHandle(event, kDriverHandle, await factory.load(path), async (driver) => {

@@ -13,7 +13,14 @@ if (!process.contextIsolated) {
 }
 
 try {
-  useBridgedApi()
+  // Register services and setup to free all handles when the window closes.
+  const services = useBridgedApi()
+  globalThis.addEventListener('beforeunload', () => {
+    services.freeAllHandles().catch((e: unknown) => {
+      console.error(e)
+    })
+  })
+
   useAppUpdates()
   useAppInfo()
   useUserInfo()

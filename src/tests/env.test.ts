@@ -49,8 +49,9 @@ describe('bad setup', () => {
 })
 
 describe('correct setup', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.mock(import('electron'), mock.electronModule)
+    await mock.globalEventTarget()
     mock.electronProcess()
     mock.bridgeCmdrEnv()
   })

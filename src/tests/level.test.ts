@@ -11,7 +11,7 @@ beforeEach(async () => {
 })
 
 afterEach(async () => {
-  await globalThis.api.freeAllHandles()
+  await globalThis.services.freeAllHandles()
   vi.resetModules()
 })
 

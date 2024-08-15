@@ -36,24 +36,6 @@ const props = withDefaults(defineProps<Props>(), {
   showCancel: false
 })
 
-// const props = defineProps({
-//   // State
-//   // eslint-disable-next-line vue/no-unused-properties -- useVModel
-//   visible: Boolean,
-//   // Size and location
-//   // File
-//   accept: String,
-//   icon: String,
-//   unsetIcon: { type: String, default: mdiFile },
-//   lazySource: { type: String, default: fileIcon },
-//   // Popup data
-//   title: String,
-//   showConfirm: [String, Boolean],
-//   showCancel: [String, Boolean],
-//   modelValue: File as PropType<File | undefined>, // Need undefined due to exactOptionalPropertyTypes
-//   mandatory: Boolean
-// })
-
 const emit = defineEmits<{
   (on: 'update:model-value' | 'confirm', value: File | undefined): void
   (on: 'update:visible', value: boolean): void

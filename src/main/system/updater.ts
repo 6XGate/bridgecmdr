@@ -6,7 +6,7 @@ import { app, ipcMain } from 'electron'
 import Logger from 'electron-log'
 import { autoUpdater } from 'electron-updater'
 import { memo } from 'radash'
-import { ipcHandle, ipcProxy } from '../utilities'
+import { ipcHandle, ipcProxy, logError } from '../utilities'
 import type { AppUpdater } from '../../preload/api'
 import type { WebContents } from 'electron'
 import type { UpdateCheckResult, ProgressInfo, CancellationToken } from 'electron-updater'
@@ -41,7 +41,7 @@ const useUpdater = memo(() => {
 
     async #getUpdateInfo() {
       if (this.#checkPromise == null) {
-        throw new ReferenceError('Cannot get update information, no check in progress')
+        throw logError(new ReferenceError('Cannot get update information, no check in progress'))
       }
 
       const result = await this.#checkPromise
@@ -58,7 +58,7 @@ const useUpdater = memo(() => {
 
     async #checkForUpdates() {
       if (this.#donwloadPromise != null) {
-        throw new ReferenceError('Update download already in progress')
+        throw logError(new ReferenceError('Update download already in progress'))
       }
 
       try {
@@ -87,7 +87,7 @@ const useUpdater = memo(() => {
 
     async #downloadUpdate() {
       if (this.#cancelToken == null) {
-        throw new ReferenceError('No update available for download, check first')
+        throw logError(new ReferenceError('No update available for download, check first'))
       }
 
       const handleProgress = (progress: ProgressInfo) => {

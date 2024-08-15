@@ -40,36 +40,6 @@ interface Props {
 
 const props = defineProps<Props>()
 
-// const props = defineProps({
-//   // Activator attachment
-//   activator: [String, Object] as PropType<string | Element | ComponentPublicInstance>,
-//   activatorProps: Object,
-//   attach: [String, Boolean, Element] as PropType<string | boolean | Element>,
-//   // State
-//   visible: Boolean,
-//   persistent: Boolean,
-//   disabled: Boolean,
-//   // Size and location
-//   absolute: Boolean,
-//   fullscreen: Boolean,
-//   location: String as PropType<Anchor>,
-//   origin: String as PropType<Origin>,
-//   height: [String, Number],
-//   width: [String, Number],
-//   minHeight: [String, Number],
-//   minWidth: [String, Number],
-//   maxHeight: [String, Number],
-//   maxWidth: [String, Number],
-//   zIndex: [String, Number],
-//   // Popup data
-//   title: String,
-//   confirmButton: String,
-//   cancelButton: String,
-//   withCancel: Boolean,
-//   modelValue: String,
-//   mandatory: Boolean
-// })
-
 const emit = defineEmits<{
   (on: 'update:modelValue', value: string | undefined): void
   (on: 'update:visible', value: boolean): void

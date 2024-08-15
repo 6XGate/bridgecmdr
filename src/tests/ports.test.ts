@@ -17,13 +17,13 @@ beforeEach(async () => {
 })
 
 afterEach(async () => {
-  await globalThis.api.freeAllHandles()
+  await globalThis.services.freeAllHandles()
   await port.resetMockPorts()
   vi.resetModules()
 })
 
 test('list raw port', async () => {
-  const ports = await globalThis.api.ports.list()
+  const ports = await globalThis.services.ports.list()
   expect(ports).toMatchObject([
     {
       path: '/dev/ttyS0',
@@ -70,7 +70,7 @@ test('list ports', async () => {
 describe('parsing port info', () => {
   beforeEach<PortContext>((context) => {
     context.ports = []
-    vi.spyOn(globalThis.api.ports, 'list').mockImplementation(async () => await Promise.resolve(context.ports))
+    vi.spyOn(globalThis.services.ports, 'list').mockImplementation(async () => await Promise.resolve(context.ports))
   })
 
   afterEach<PortContext>(() => {

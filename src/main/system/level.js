@@ -1,14 +1,14 @@
 import { resolve as resolvePath } from 'node:path'
 import { Duplex, PassThrough, pipeline, Writable } from 'node:stream'
 import { app, ipcMain } from 'electron'
-import Logger from 'electron-log'
 import level from 'level'
 // @ts-expect-error -- No types
 import multileveldown from 'multileveldown'
-import { ipcHandle } from '../utilities'
+import { ipcHandle, logError } from '../utilities'
 import useHandles from './handle'
 
 /** @typedef {`level:${string}`} Channel */
+/** @typedef {import('level').LevelDB} LevelDB */
 
 export default function useLevelServer() {
   const kLevelDatabaseHandle =
@@ -16,43 +16,49 @@ export default function useLevelServer() {
     (Symbol.for('@level'))
   const { createHandle, openHandle } = useHandles()
 
+  /**
+   * @param {string} path
+   */
+  const openDatabase = async (path) =>
+    await new Promise(
+      /**
+       *
+       * @param {(db: LevelDB) => void} resolve
+       * @param {(error: Error | undefined) => void} reject
+       */
+      (resolve, reject) => {
+        const db = level(path, {}, (error) => {
+          if (error == null) resolve(db)
+          else reject(error)
+        })
+      }
+    )
+
   const open = ipcHandle(
     /**
      * @param {string} name
      */
     async (event, name) => {
       if (name.endsWith(':close')) {
-        throw new SyntaxError("Database names cannot end in ':close'")
+        throw logError(new SyntaxError("Database names cannot end in ':close'"))
       }
 
       // Don't allow any path separating characters.
       if (/[/\\.:]/u.test(name)) {
-        throw new Error('Only a file name, without extension or relative path, may be specified')
+        throw logError(new Error('Only a file name, without extension or relative path, may be specified'))
       }
 
       const path = resolvePath(app.getPath('userData'), name)
 
       const sender = event.sender
 
-      const db = level(path)
+      const db = await openDatabase(path)
       // eslint-disable-next-line -- No types, mo errors.
       const host = multileveldown.server(db)
       /** @type {Channel} */
       const channel = `level:${name}`
 
-      const readable = new PassThrough({
-        destroy: () => {
-          db.close().catch(
-            /**
-             * @param {unknown} e
-             */
-            (e) => {
-              /* v8 ignore next 1 --Rarely reached over IPC. */
-              Logger.error(e)
-            }
-          )
-        }
-      })
+      const readable = new PassThrough()
       const writable = new Writable({
         write: (chunk, _, next) => {
           sender.send(channel, chunk)
@@ -75,11 +81,12 @@ export default function useLevelServer() {
       })
 
       const handle = createHandle(event, kLevelDatabaseHandle, { channel, stream }, async () => {
-        ipcMain.off(channel, receiver)
-        event.sender.send(`${channel}:close`, channel)
+        await db.close()
+
         // eslint-disable-next-line -- No types, mo errors.
         host.destroy()
-        await db.close()
+        ipcMain.off(channel, receiver)
+        if (!event.sender.isDestroyed()) event.sender.send(`${channel}:close`)
       })
 
       return await Promise.resolve(handle)

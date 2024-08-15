@@ -1,3 +1,4 @@
+import Logger from 'electron-log'
 import type { IpcResponse } from '../preload/api'
 import type { IpcMainInvokeEvent } from 'electron'
 
@@ -20,3 +21,8 @@ export const ipcHandle =
       return { error: e instanceof Error ? e : new Error(String(e)) }
     }
   }
+
+export function logError<E extends Error>(e: E) {
+  Logger.error(e)
+  return e
+}

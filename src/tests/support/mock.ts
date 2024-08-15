@@ -28,27 +28,28 @@ export async function electronModule(original: () => Promise<typeof import('elec
   }
 }
 
-export async function elctronLogModule(original: () => Promise<typeof import('electron-log')>) {
-  const Logger = await original()
-
-  const initialize = vi.spyOn(Logger, 'initialize').mockReturnValue()
-
-  const error = vi.spyOn(Logger, 'error').mockReturnValue()
-  const warn = vi.spyOn(Logger, 'warn').mockReturnValue()
-  const info = vi.spyOn(Logger, 'info').mockReturnValue()
-  const log = vi.spyOn(Logger, 'log').mockReturnValue()
-  const debug = vi.spyOn(Logger, 'debug').mockReturnValue()
-
-  return {
-    ...Logger,
-    initialize,
-    error,
-    warn,
-    info,
-    log,
-    debug
-  }
-}
+// FIXME: Not needed right now, but won't always mock well.
+// export async function elctronLogModule(original: () => Promise<typeof import('electron-log')>) {
+//   const Logger = await original()
+//
+//   const initialize = vi.spyOn(Logger, 'initialize').mockReturnValue()
+//
+//   const error = vi.spyOn(Logger, 'error').mockReturnValue()
+//   const warn = vi.spyOn(Logger, 'warn').mockReturnValue()
+//   const info = vi.spyOn(Logger, 'info').mockReturnValue()
+//   const log = vi.spyOn(Logger, 'log').mockReturnValue()
+//   const debug = vi.spyOn(Logger, 'debug').mockReturnValue()
+//
+//   return {
+//     ...Logger,
+//     initialize,
+//     error,
+//     warn,
+//     info,
+//     log,
+//     debug
+//   }
+// }
 
 export function electronProcess() {
   vi.stubGlobal('process', {

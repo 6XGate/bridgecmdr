@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron'
 import { memo } from 'radash'
-import { ipcHandle } from '../utilities'
+import { ipcHandle, logError } from '../utilities'
 import type { Handle } from '../../preload/api'
 import type { SymbolKey } from '@/keys'
 import type { IpcMainInvokeEvent, WebContents } from 'electron'
@@ -95,7 +95,7 @@ const useHandles = memo(() => {
     // and check its validity.
     const descriptor = handleMap[handle]
     if (descriptor == null || typeof descriptor !== 'object') {
-      throw new ReferenceError('Invalid handle')
+      throw logError(new ReferenceError('Invalid handle'))
     }
 
     if (key == null) {
@@ -103,7 +103,7 @@ const useHandles = memo(() => {
     }
 
     if (descriptor.key !== key) {
-      throw new TypeError('Wrong handle')
+      throw logError(new TypeError('Wrong handle'))
     }
 
     return descriptor
@@ -133,14 +133,14 @@ const useHandles = memo(() => {
     // there is no handle exhaustion.
     const handle = nextFree
     if (handle === kMaxHandles) {
-      throw new Error('Out of handles')
+      throw logError(new Error('Out of handles'))
     }
 
     // Ensure the handle is not already in use,
     // indicating a possible map corruption.
     const opaque = handleMap[handle]
     if (typeof opaque !== 'number') {
-      throw new Error('Handle map corrupt: tNF!=N')
+      throw logError(new Error(`'Handle map corrupt: tNF!=N' ${handle}`))
     }
 
     // Record the next free and put the
@@ -166,39 +166,17 @@ const useHandles = memo(() => {
     // Check that the handle belongs to this sender and frame.
     const handles = getHandleTracker(sender)
     if (!handles.has(handle)) {
-      throw new ReferenceError('Invalid handle')
+      throw logError(new ReferenceError('Invalid handle'))
     }
 
     // Get the handle descriptor
     // and check the resource.
     const descriptor = getDescriptor(handle, key)
     if (descriptor.resource == null) {
-      throw new ReferenceError('Invalid handle')
+      throw logError(new ReferenceError('Invalid handle'))
     }
 
     return descriptor.resource // as T
-  }
-
-  async function closeHandle(handle: Handle) {
-    // Get the handle descriptor
-    // and check the resource.
-    const descriptor = getDescriptor(handle)
-    if (descriptor.resource == null) {
-      throw new ReferenceError('Invalid handle')
-    }
-
-    // Attempt to close the resource.
-    // If it fails to close, it
-    // must throw an error or
-    // be silent.
-    await descriptor.close(descriptor.resource)
-
-    // Now, point the next free to the
-    // handle just closed, and update
-    // the next free to point to
-    // said handle.
-    handleMap[handle] = nextFree
-    nextFree = handle
   }
 
   /**
@@ -212,14 +190,38 @@ const useHandles = memo(() => {
     // Check that the handle belongs to this sender and frame.
     const handles = getHandleTracker(sender)
     if (!handles.has(handle)) {
-      throw new ReferenceError('Invalid handle')
+      throw logError(new ReferenceError('Invalid handle'))
     }
 
-    // Close the handle.
-    await closeHandle(handle)
-
     // Remove the handle from the tracker tree.
-    getHandleTracker(sender).delete(handle)
+    // do this ealier so if any other task
+    // tries to close this handle, it
+    // cannot see it.
+    handles.delete(handle)
+
+    // Get the handle descriptor
+    // and check the resource.
+    const descriptor = getDescriptor(handle)
+    if (descriptor.resource == null) {
+      throw logError(new ReferenceError('Invalid handle'))
+    }
+
+    // Now, point the next free to the
+    // handle just closed, and update
+    // the next free to point to
+    // said handle.
+    handleMap[handle] = nextFree
+    nextFree = handle
+
+    // Ensure that any asynchronous call out are at the end,
+    // to ensure all changes to the handle map or tracker
+    // don't interleave. Attempt to close the resource.
+    // If it fails to close, it must throw an
+    // error or be silent.
+    await descriptor.close(descriptor.resource)
+
+    // // Close the handle.
+    // await closeHandle(handle)
   }
 
   /**
@@ -229,11 +231,17 @@ const useHandles = memo(() => {
     const { sender } = event
 
     const handles = getHandleTracker(sender)
-    await Promise.all(
-      [...handles].map(async (handle) => {
-        await closeHandle(handle)
-      })
-    )
+    while (handles.size > 0) {
+      // Right now, must use a new iterator to always pull the first item.
+      // This is to attempt to make this as synchronous as possible
+      // until the actual close, allowing the item to be removed
+      // before any coroutine pauses for this task cycle.
+      const next = handles.values().next()
+      if (next.done === true) return
+
+      // eslint-disable-next-line no-await-in-loop -- Must be serialized to prevent
+      await freeHandle(event, next.value)
+    }
   }
 
   /**

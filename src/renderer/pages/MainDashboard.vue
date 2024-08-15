@@ -6,14 +6,12 @@ import { useNextTick } from '../helpers/vue'
 import { useDialogs } from '../modals/dialogs'
 import { useDashboard } from '../stores/dashboard'
 import useSettings from '../stores/settings'
-import useBridgedApi from '../system/bridged'
 import useFirstRun from '../utilities/first'
 import type { I18nSchema } from '../locales/locales'
 
 const settings = useSettings()
 const buttonSize = computed(() => `${settings.iconSize + 12}px`)
 const iconSize = computed(() => `${settings.iconSize}px`)
-const api = useBridgedApi()
 
 const { t } = useI18n<I18nSchema>()
 
@@ -24,7 +22,7 @@ const powerTooltip = computed(() =>
 const dialogs = useDialogs()
 const powerOff = async () => {
   try {
-    await api.system.powerOff()
+    await services.system.powerOff()
   } catch (e) {
     await dialogs.error(e)
   }

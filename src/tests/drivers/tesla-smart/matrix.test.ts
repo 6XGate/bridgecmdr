@@ -19,7 +19,7 @@ beforeEach<MockStreamContext>(async (context) => {
 })
 
 afterEach(async () => {
-  await globalThis.api.freeAllHandles()
+  await globalThis.services.freeAllHandles()
   await port.resetMockPorts()
   vi.resetModules()
 })
@@ -30,7 +30,7 @@ test('available', async () => {
   const { kDeviceSupportsMultipleOutputs } = await import('../../../main/system/driver')
 
   // Raw list.
-  await expect(globalThis.api.driver.list()).resolves.toContainEqual({
+  await expect(globalThis.services.driver.list()).resolves.toContainEqual({
     enable: true,
     guid: kDriverGuid,
     localized: {

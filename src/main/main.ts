@@ -13,6 +13,8 @@ import useLevelServer from './system/level'
 import useStartup from './system/startup'
 import useSystem from './system/system'
 import useUpdater from './system/updater'
+import { logError } from './utilities'
+import { toError } from '@/error-handling'
 
 // In this file you can include the rest of your app"s specific main process
 // code. You can also put them in separate files and require them here.
@@ -76,7 +78,7 @@ async function createWindow() {
 
       return main
     } catch (e) {
-      lastError = e instanceof Error ? e : new Error(String(e))
+      lastError = e
       Logger.warn(e)
 
       // eslint-disable-next-line no-await-in-loop -- Retry loop must be serial.
@@ -84,7 +86,7 @@ async function createWindow() {
     }
   }
 
-  throw lastError
+  throw logError(toError(lastError))
 }
 
 // Add application information.

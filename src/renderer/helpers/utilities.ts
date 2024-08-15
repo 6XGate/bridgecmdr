@@ -4,12 +4,6 @@ import { computed } from 'vue'
 import { useDialogs } from '../modals/dialogs'
 import type { MaybeRefOrGetter } from '@vueuse/shared'
 
-export const tap = <T>(value: T, fn: (param: T) => unknown) => {
-  fn(value)
-
-  return value
-}
-
 export const forceUndefined = <T>() => undefined as T
 
 export const useGuardedAsyncOp = (fn: () => Promise<unknown>) => {

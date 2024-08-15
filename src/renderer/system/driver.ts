@@ -2,16 +2,13 @@ import { createSharedComposable } from '@vueuse/core'
 import { readonly, computed, reactive } from 'vue'
 import i18n from '../plugins/i18n'
 import { trackBusy } from '../utilities/tracking'
-import useBridgedApi from './bridged'
-
-const api = useBridgedApi()
 
 /** The device has no extended capabilities. */
-export const kDeviceHasNoExtraCapabilities = api.driver.capabilities.kDeviceHasNoExtraCapabilities
+export const kDeviceHasNoExtraCapabilities = services.driver.capabilities.kDeviceHasNoExtraCapabilities
 /** The device has multiple output channels. */
-export const kDeviceSupportsMultipleOutputs = api.driver.capabilities.kDeviceSupportsMultipleOutputs
+export const kDeviceSupportsMultipleOutputs = services.driver.capabilities.kDeviceSupportsMultipleOutputs
 /** The device support sending the audio output to a different channel. */
-export const kDeviceCanDecoupleAudioOutput = api.driver.capabilities.kDeviceCanDecoupleAudioOutput
+export const kDeviceCanDecoupleAudioOutput = services.driver.capabilities.kDeviceCanDecoupleAudioOutput
 
 /** Informational metadata about a device and driver. */
 export interface DriverInformation {
@@ -58,7 +55,7 @@ const useDriverCore = createSharedComposable(() => {
       return
     }
 
-    ;(await api.driver.list()).forEach(({ guid, localized, capabilities }) => {
+    ;(await services.driver.list()).forEach(({ guid, localized, capabilities }) => {
       /** The localized driver information made i18n compatible. */
       Object.entries(localized).forEach(([locale, description]) => {
         i18n.global.mergeLocaleMessage(locale as never, {
@@ -93,7 +90,6 @@ const useDriverCore = createSharedComposable(() => {
 /** Use drivers. */
 export const useDrivers = () => {
   const { registry, loadList } = useDriverCore()
-  const { freeHandle } = api
 
   /** Busy tracking. */
   const tracker = trackBusy()
@@ -113,23 +109,23 @@ export const useDrivers = () => {
       throw new Error(`No such driver registered as "${guid}"`)
     }
 
-    const h = await api.driver.open(guid, path)
+    const h = await services.driver.open(guid, path)
 
     const activate = async (inputChannel: number, videoOutputChannel: number, audioOutputChannel: number) => {
-      await api.driver.activate(h, inputChannel, videoOutputChannel, audioOutputChannel)
+      await services.driver.activate(h, inputChannel, videoOutputChannel, audioOutputChannel)
     }
 
     const powerOn = async () => {
-      await api.driver.powerOn(h)
+      await services.driver.powerOn(h)
     }
 
     const powerOff = async () => {
-      await api.driver.powerOff(h)
-      await freeHandle(h)
+      await services.driver.powerOff(h)
+      await services.freeHandle(h)
     }
 
     const close = async () => {
-      await freeHandle(h)
+      await services.freeHandle(h)
     }
 
     return readonly({

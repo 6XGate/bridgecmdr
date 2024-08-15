@@ -7,8 +7,6 @@ import leveldown from 'multileveldown/leveldown'
 // @ts-expect-error -- No types
 import LevelPouch from 'pouchdb-adapter-leveldb-core'
 import { memo } from 'radash'
-import useBridgedApi from '../system/bridged'
-import useHandles from '../system/handles'
 import { toError } from '@/error-handling'
 
 /** @typedef {import('node:stream').Duplex} Duplex */
@@ -24,6 +22,48 @@ import { toError } from '@/error-handling'
 /** @typedef {import('../../preload/api').Handle} Handle */
 
 /**
+ * @param {string} name
+ */
+async function openDatabase(name) {
+  const h = await globalThis.services.level.open(name)
+
+  const readable = new PassThrough({
+    destroy: () => {
+      // eslint-disable-next-line @typescript-eslint/use-unknown-in-catch-callback-variable
+      globalThis.services.freeHandle(h).catch(console.error)
+    }
+  })
+
+  const sender = await globalThis.services.level.activate(h, (message) => {
+    readable.write(message)
+  })
+
+  const writable = new Writable({
+    write: (chunk, _, next) => {
+      sender(chunk)
+      next()
+    }
+  })
+
+  const stream = duplexify(writable, readable)
+
+  /** @type {AbstractLevelDOWN & { createRpcStream: () => Duplex }} */
+  // eslint-disable-next-line -- Eveything is messed up when no typings.
+  const db = leveldown({})
+
+  const client = db.createRpcStream()
+  stream.on('close', () => {
+    client.destroy()
+  })
+
+  pipeline(stream, client, stream, () => {
+    stream.destroy()
+  })
+
+  return db
+}
+
+/**
  * @template K - Key
  * @template V - Value
  *
@@ -31,7 +71,8 @@ import { toError } from '@/error-handling'
  */
 class IpcLevelDown extends AbstractLevelDOWN {
   /** @readonly */
-  #handle
+  #dbPromise
+  // #handle
 
   /** @type {AbstractLevelDOWN | null} */
   #db = null
@@ -45,64 +86,7 @@ class IpcLevelDown extends AbstractLevelDOWN {
   constructor(name) {
     super(name)
 
-    const { level } = useBridgedApi()
-    this.#handle = level.open(name)
-  }
-
-  /**
-   *
-   * @param {Handle} h
-   * @param {AbstractOpenOptions} options
-   * @private
-   */
-  async _doOpen(h, options) {
-    const { level, freeHandle } = useBridgedApi()
-
-    const readable = new PassThrough({
-      destroy: () => {
-        // eslint-disable-next-line @typescript-eslint/use-unknown-in-catch-callback-variable
-        freeHandle(h).catch(console.error)
-      }
-    })
-
-    const sender = await level.activate(h, (message) => {
-      readable.write(message)
-    })
-
-    const writable = new Writable({
-      write: (chunk, _, next) => {
-        sender(chunk)
-        next()
-      }
-    })
-
-    const stream = duplexify(writable, readable)
-
-    /** @type {AbstractLevelDOWN & { createRpcStream: () => Duplex }} */
-    // eslint-disable-next-line -- No types, mo issues
-    const db = leveldown({})
-
-    const client = db.createRpcStream()
-    stream.on('close', () => {
-      client.destroy()
-    })
-
-    pipeline(stream, client, stream, () => {
-      stream.destroy()
-    })
-
-    return await new Promise(
-      /**
-       * @param {(db: AbstractLevelDOWN) => void} resolve
-       * @param {(error: Error) => void} reject
-       */
-      (resolve, reject) => {
-        db.open(options, (error) => {
-          if (error == null) resolve(db)
-          else reject(error)
-        })
-      }
-    )
+    this.#dbPromise = openDatabase(name)
   }
 
   /**
@@ -132,17 +116,10 @@ class IpcLevelDown extends AbstractLevelDOWN {
       return
     }
 
-    this.#handle
-      .then(async (h) => {
-        this.#db = await this._doOpen(h, options)
-        window.addEventListener('beforeunload', () => {
-          this.#db?.close(() => {
-            console.log('Closing database on window unload')
-          })
-        })
-
-        // eslint-disable-next-line promise/no-callback-in-promise -- Required by design
-        cb(undefined)
+    this.#dbPromise
+      .then((db) => {
+        this.#db = db
+        db.open(options, cb)
         return null
       })
       .catch(
@@ -252,61 +229,10 @@ class IpcLevelDown extends AbstractLevelDOWN {
 }
 
 export const useLevelDb = memo(() => {
-  const { level } = useBridgedApi()
-  const { freeHandle } = useHandles()
-
   /**
    * @param {string} name
    */
   const connectSync = (name) => new IpcLevelDown(name)
-
-  /**
-   * @param {string} name
-   */
-  const connect = async (name) => {
-    const h = await level.open(name)
-
-    const readable = new PassThrough({
-      destroy: () => {
-        freeHandle(h).catch(
-          /**
-           * @param {unknown} e
-           */
-          /* v8 ignore next 3 --Rarely reached over IPC. */
-          (e) => {
-            console.error(e)
-          }
-        )
-      }
-    })
-    const sender = await level.activate(h, (message) => {
-      readable.write(message)
-    })
-
-    const writable = new Writable({
-      write: (chunk, _, next) => {
-        sender(chunk)
-        next()
-      }
-    })
-
-    const stream = duplexify(writable, readable)
-
-    /** @type {AbstractLevelDOWN & { createRpcStream: () => Duplex }} */
-    // eslint-disable-next-line -- Eveything is messed up when no typings.
-    const db = leveldown({})
-
-    const client = db.createRpcStream()
-    stream.on('close', () => {
-      client.destroy()
-    })
-
-    pipeline(stream, client, stream, () => {
-      stream.destroy()
-    })
-
-    return db
-  }
 
   /**
    *
@@ -315,7 +241,7 @@ export const useLevelDb = memo(() => {
    * @param {string} name
    */
   const levelup_ = async (name) =>
-    await connect(name).then(
+    await openDatabase(name).then(
       async (db) =>
         await new Promise(
           /**
@@ -339,7 +265,7 @@ export const useLevelDb = memo(() => {
 
   return {
     connectSync,
-    connect,
+    connect: openDatabase,
     levelup: levelup_
   }
 })

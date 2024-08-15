@@ -53,44 +53,6 @@ const props = withDefaults(defineProps<Props>(), {
   itemProps: 'props'
 })
 
-// const props = defineProps({
-//   // // Activator attachment
-//   // activator: [String, Object] as PropType<string | Element | ComponentPublicInstance>,
-//   // activatorProps: Object,
-//   // attach: [String, Boolean, Element] as PropType<string | boolean | Element>,
-//   // // State
-//   // disabled: Boolean,
-//   // persistent: Boolean,
-//   // scrollable: Boolean,
-//   // visible: Boolean,
-//   // // Size and location
-//   // absolute: Boolean,
-//   // fullscreen: Boolean,
-//   // location: String as PropType<Anchor>,
-//   // origin: String as PropType<Origin>,
-//   // height: [String, Number],
-//   // width: [String, Number],
-//   // minHeight: [String, Number],
-//   // minWidth: [String, Number],
-//   // maxHeight: [String, Number],
-//   // maxWidth: [String, Number],
-//   // zIndex: [String, Number],
-//   // // Popup data
-//   // title: String,
-//   // confirmButton: String,
-//   // cancelButton: String,
-//   // withCancel: Boolean,
-//   // // eslint-disable-next-line vue/require-prop-types -- Could be any type and useVModel.
-//   // modelValue: {},
-//   // items: { type: Array as PropType<readonly unknown[]>, required: true },
-//   // itemTitle: { type: [Boolean, String, Array, Function] as PropType<SelectItemKey>, default: 'title' },
-//   // itemType: { type: [Boolean, String, Array, Function] as PropType<SelectItemKey>, default: 'type' },
-//   // itemValue: { type: [Boolean, String, Array, Function] as PropType<SelectItemKey>, default: 'value' },
-//   // itemProps: { type: [Boolean, String, Array, Function] as PropType<SelectItemKey>, default: 'props' },
-//   // mandatory: Boolean,
-//   // multiple: Boolean
-// })
-
 const emit = defineEmits<{
   (on: 'update:modelValue', value: unknown): void
   (on: 'update:visible', value: boolean): void

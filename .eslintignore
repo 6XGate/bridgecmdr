@@ -1,2 +1,4 @@
 *.d.ts
+coverage/**/*
+dist/**/*
 out/**/*

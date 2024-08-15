@@ -49,6 +49,7 @@ export class MockWebContents extends EventEmitter implements WebContents {
   // getUserAgent = () => this.userAgent
   // getZoomFactor = () => this.zoomFactor
   // getZoomLevel = () => this.zoomLevel
+  isDestroyed = () => false
 
   send(channel: string, ...args: unknown[]): void {
     this.reactor.emitToRenderer(channel, ...args)
@@ -102,7 +103,6 @@ export class MockWebContents extends EventEmitter implements WebContents {
   isBeingCaptured = notImplemented()
   isCrashed = notImplemented()
   isCurrentlyAudible = notImplemented()
-  isDestroyed = notImplemented()
   isDevToolsFocused = notImplemented()
   isDevToolsOpened = notImplemented()
   isFocused = notImplemented()

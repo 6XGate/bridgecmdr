@@ -2,7 +2,6 @@ import is from '@sindresorhus/is'
 import { createSharedComposable } from '@vueuse/shared'
 import { ref, computed, readonly, reactive } from 'vue'
 import { trackBusy } from '../utilities/tracking'
-import useBridgedApi from './bridged'
 
 export interface PortData {
   title: string
@@ -12,12 +11,10 @@ export interface PortData {
 const usePorts = createSharedComposable(() => {
   const tracker = trackBusy()
 
-  const api = useBridgedApi()
-
   const items = ref<PortData[]>([])
 
   const all = tracker.track(async () => {
-    const ports = await api.ports.list()
+    const ports = await services.ports.list()
 
     items.value = ports.map((port) => {
       // If there is no PnP ID, then just use the path.

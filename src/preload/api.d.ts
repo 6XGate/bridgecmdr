@@ -180,7 +180,7 @@ export interface LevelApi {
 //
 
 /** Functional APIs */
-export interface BridgedApi {
+export interface MainProcessServices {
   readonly startup: StartupApi
   readonly driver: DriverApi
   readonly ports: PortApi
@@ -220,7 +220,7 @@ export interface AppUpdates extends AppUpdater {
 // The exposed API global structure
 declare global {
   // APIs
-  var api: BridgedApi
+  var services: MainProcessServices
   var app: AppInfo
   var user: UserInfo
   // Events
