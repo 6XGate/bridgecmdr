@@ -1,4 +1,3 @@
-import { contextBridge } from 'electron'
 import useIpc from '../support'
 import type { AppUpdates } from '../api'
 
@@ -13,8 +12,6 @@ const useAppUpdates = (): AppUpdates => {
     onDownloadProgress: ipc.useAddListener('update:download:progress'),
     offDownloadProgress: ipc.useRemoveListener('update:download:progress')
   } satisfies AppUpdates
-
-  contextBridge.exposeInMainWorld('appUpdates', appUpdates)
 
   return appUpdates
 }

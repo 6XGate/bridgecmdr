@@ -25,19 +25,19 @@ const useAppUpdates = () => {
 
   const appUpdater = {
     ...target,
-    checkForUpdates: globalThis.appUpdates.checkForUpdates,
-    downloadUpdate: globalThis.appUpdates.downloadUpdate,
-    cancelUpdate: globalThis.appUpdates.cancelUpdate,
-    installUpdate: globalThis.appUpdates.installUpdate
+    checkForUpdates: globalThis.services.updates.checkForUpdates,
+    downloadUpdate: globalThis.services.updates.downloadUpdate,
+    cancelUpdate: globalThis.services.updates.cancelUpdate,
+    installUpdate: globalThis.services.updates.installUpdate
   }
 
   const progressProxy = (info: ProgressInfo) => {
     appUpdater.dispatchEvent(new UpdateProgressEvent(info))
   }
 
-  globalThis.appUpdates.onDownloadProgress(progressProxy)
+  globalThis.services.updates.onDownloadProgress(progressProxy)
   tryOnScopeDispose(() => {
-    globalThis.appUpdates.offDownloadProgress(progressProxy)
+    globalThis.services.updates.offDownloadProgress(progressProxy)
   })
 
   return appUpdater

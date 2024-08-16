@@ -24,8 +24,8 @@ describe('bad setup', () => {
   })
 
   test('missing environment', () => {
-    expect(() => globalThis.app.name).toThrowError(TypeError)
-    expect(() => globalThis.app.version).toThrowError(TypeError)
+    expect(() => globalThis.application.name).toThrowError(TypeError)
+    expect(() => globalThis.application.version).toThrowError(TypeError)
     expect(() => globalThis.user.name).toThrowError(TypeError)
     expect(() => globalThis.user.locale).toThrowError(TypeError)
   })
@@ -63,7 +63,7 @@ describe('correct setup', () => {
   test('ready', async () => {
     await import('../preload/index')
 
-    expect(globalThis.app).toStrictEqual({
+    expect(globalThis.application).toStrictEqual({
       name: 'BridgeCmdr',
       version: '2.0.0'
     })

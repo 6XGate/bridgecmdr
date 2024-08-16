@@ -1,22 +1,25 @@
 import { contextBridge } from 'electron'
 import useIpc from '../support'
 import useDriverApi from './driver'
+import { useProcessData } from './info/process'
 import useLevelApi from './level'
 import usePortsApi from './ports'
 import useStartupApi from './startup'
 import useSystemApi from './system'
+import useAppUpdates from './updates'
 import type { MainProcessServices } from '../api'
 
-const useBridgedApi = () => {
+const useServices = () => {
   const ipc = useIpc()
 
   const services = {
-    startup: useStartupApi(),
+    process: useProcessData(),
     driver: useDriverApi(),
-    ports: usePortsApi(),
-    system: useSystemApi(),
     level: useLevelApi(),
-    env: { ...process.env },
+    ports: usePortsApi(),
+    startup: useStartupApi(),
+    system: useSystemApi(),
+    updates: useAppUpdates(),
     freeHandle: ipc.useInvoke('handle:free'),
     freeAllHandles: ipc.useInvoke('handle:clean')
   } satisfies MainProcessServices
@@ -26,4 +29,4 @@ const useBridgedApi = () => {
   return services
 }
 
-export default useBridgedApi
+export default useServices

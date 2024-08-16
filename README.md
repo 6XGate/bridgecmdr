@@ -55,6 +55,7 @@ BridgeCmdr uses the following libraries and frameworks are a major part of its m
 | [Vuetify](https://vuetifyjs.com/)                | [MIT](https://github.com/vuetifyjs/vuetify/blob/master/LICENSE.md)       |
 | [PouchDB](https://pouchdb.com/)                  | [Apache 2.0](https://github.com/pouchdb/pouchdb/blob/master/LICENSE)     |
 | [LevelDOWN](https://github.com/Level/leveldown)  | [MIT](https://github.com/Level/leveldown/blob/master/LICENSE)            |
+| [Vue I18n](https://vue-i18n.intlify.dev/)        | [MIT](https://github.com/intlify/vue-i18n/blob/master/LICENSE)           |
 | [SerialPort](https://serialport.io/)             | [MIT](https://github.com/serialport/node-serialport/blob/master/LICENSE) |
 | [Vuelidate](https://vuelidate-next.netlify.app/) | [MIT](https://github.com/vuelidate/vuelidate/blob/next/LICENSE)          |
 
@@ -67,20 +68,21 @@ graphics which are licensed under the
 
 ## Building
 
-The following tools or libraries are used to build BridgeCmdr.
+The following tools or libraries are used to build and maintain BridgeCmdr.
 
 - [TypeScript](https://www.typescriptlang.org/).
+- [Prettier](https://prettier.io/)
 - [ESLint](https://eslint.org/), and the following third-party plug-ins;
   - [ESLint TypeScript plug-in](https://typescript-eslint.io/),
   - [ESLint Import plug-in](https://github.com/benmosher/eslint-plugin-import),
   - [ESLint Promise plug-in](https://github.com/xjamundx/eslint-plugin-promise),
   - [ESLint Node plug-in](https://github.com/eslint-community/eslint-plugin-n),
-  - [Vue.js plug-in](https://eslint.vuejs.org/),
+  - [ESLint Vue.js plug-in](https://eslint.vuejs.org/).
 - [Electron Vite](https://evite.netlify.app/), and the following third-party plug-ins;
-  - [Vue plug-in](https://github.com/vitejs/vite-plugin-vue),
+  - [Vue.js plug-in](https://github.com/vitejs/vite-plugin-vue),
   - [Dart Sass](https://sass-lang.com/dart-sass),
-- [Electron Toolkit](https://github.com/alex8088/electron-toolkit).
-- [Electron Installer (Debian)](https://github.com/electron-userland/electron-installer-debian).
+  - [@intlify/bundle-tools](https://github.com/intlify/bundle-tools).
+- [electron-builder)](https://www.electron.build/).
 - [VisualStudio Code](https://code.visualstudio.com/)
 
 For a complete list of tools, see the `package.json` file. Any other dependencies not listed above
@@ -90,24 +92,18 @@ or in the package file are dependencies of those packages.
 
 [VSCode](https://code.visualstudio.com/) with:
 
-- [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur)
-- [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin)
+- [i18n Ally](https://marketplace.visualstudio.com/items?itemName=Lokalise.i18n-ally)
+- [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar)
 - [Dotenv + Vault](https://marketplace.visualstudio.com/items?itemName=dotenv.dotenv-vscode)
 - [EditorConfig](https://marketplace.visualstudio.com/items?itemName=EditorConfig.EditorConfig)
+- [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
 - [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
 - [Todo Tree](https://marketplace.visualstudio.com/items?itemName=Gruntfuggly.todo-tree)
 - [YAML](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml)
 
 #### Type Support for `.vue` Imports in TS
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin) to make the TypeScript language service aware of `.vue` types.
-
-If the standalone TypeScript plugin doesn't feel fast enough to you, Volar has also implemented a [Take-Over Mode](https://github.com/johnsoncodehk/volar/discussions/471#discussioncomment-1361669) that is more performant. You can enable it by the following steps:
-
-1. Disable the built-in TypeScript Extension
-   1. Run `Extensions: Show Built-in Extensions` from VSCode's command palette
-   2. Find `TypeScript and JavaScript Language Features`, right click and select `Disable (Workspace)`
-2. Reload the VSCode window by running `Developer: Reload Window` from the command palette.
+TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking.
 
 ### Development
 

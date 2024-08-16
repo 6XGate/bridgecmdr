@@ -63,9 +63,9 @@ export interface ListenerOptions {
 
 /** Login start API. */
 export interface StartupApi {
-  checkEnabled: () => Promise<boolean>
-  enable: () => Promise<void>
-  disable: () => Promise<void>
+  readonly checkEnabled: () => Promise<boolean>
+  readonly enable: () => Promise<void>
+  readonly disable: () => Promise<void>
 }
 
 //
@@ -176,17 +176,39 @@ export interface LevelApi {
 }
 
 //
+// Process data
+//
+
+type ProcessType = 'browser' | 'renderer' | 'worker' | 'utility'
+
+export interface ProcessData {
+  readonly appleStore: true | undefined
+  readonly arch: NodeJS.Architecture
+  readonly argv: readonly string[]
+  readonly argv0: string
+  readonly env: ReadonlyDeep<Record<string, string | undefined>>
+  readonly execPath: string
+  readonly platform: NodeJS.Platform
+  readonly resourcesPath: string
+  readonly sandboxed: true | undefined
+  readonly type: ProcessType
+  readonly version: string
+  readonly versions: NodeJS.ProcessVersions
+  readonly windowsStore: true | undefined
+}
+//
 // Exposed APIs
 //
 
 /** Functional APIs */
 export interface MainProcessServices {
-  readonly startup: StartupApi
+  readonly process: ProcessData
   readonly driver: DriverApi
-  readonly ports: PortApi
-  readonly system: SystemApi
   readonly level: LevelApi
-  readonly env: ReadonlyDeep<Record<string, string | undefined>>
+  readonly ports: PortApi
+  readonly startup: StartupApi
+  readonly system: SystemApi
+  readonly updates: AppUpdates
   /** Closes a handle, freeing its resources. */
   readonly freeHandle: (h: Handle) => Promise<void>
   /** Closes all handles for a page. */
@@ -206,23 +228,20 @@ export interface UserInfo {
 }
 
 export interface AppUpdater {
-  checkForUpdates: () => Promise<UpdateInfo | undefined>
-  downloadUpdate: () => Promise<void>
-  cancelUpdate: () => Promise<void>
-  installUpdate: () => Promise<void>
+  readonly checkForUpdates: () => Promise<UpdateInfo | undefined>
+  readonly downloadUpdate: () => Promise<void>
+  readonly cancelUpdate: () => Promise<void>
+  readonly installUpdate: () => Promise<void>
 }
 
 export interface AppUpdates extends AppUpdater {
-  onDownloadProgress: (fn: (progress: ProgressInfo) => void) => void
-  offDownloadProgress: (fn: (progress: ProgressInfo) => void) => void
+  readonly onDownloadProgress: (fn: (progress: ProgressInfo) => void) => void
+  readonly offDownloadProgress: (fn: (progress: ProgressInfo) => void) => void
 }
 
 // The exposed API global structure
 declare global {
-  // APIs
   var services: MainProcessServices
-  var app: AppInfo
+  var application: AppInfo
   var user: UserInfo
-  // Events
-  var appUpdates: AppUpdates
 }

@@ -4,7 +4,6 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import Page from '../components/Page.vue'
-import useAppInfo from '../system/appInfo'
 import { useSources } from '../system/source'
 import { useSwitches } from '../system/switch'
 import { trackBusy } from '../utilities/tracking'
@@ -17,7 +16,7 @@ import type { I18nSchema } from '../locales/locales'
 const { t, n } = useI18n<I18nSchema>()
 const { track, isBusy } = trackBusy()
 const router = useRouter()
-const appInfo = useAppInfo()
+const appInfo = globalThis.application
 
 //
 // Loading sources and switchs so we have a count.

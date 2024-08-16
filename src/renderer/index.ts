@@ -20,7 +20,19 @@ if (import.meta.env.PROD) {
 globalThis.global = globalThis
 globalThis.Buffer = Buffer
 Object.defineProperties((globalThis.process = {} as never), {
-  env: { value: globalThis.services.env },
+  arch: { value: globalThis.services.process.arch },
+  argv: { value: globalThis.services.process.argv },
+  argv0: { value: globalThis.services.process.argv0 },
+  env: { value: globalThis.services.process.env },
+  execPath: { value: globalThis.services.process.execPath },
+  mas: { value: globalThis.services.process.appleStore },
+  platform: { value: globalThis.services.process.platform },
+  resourcesPath: { value: globalThis.services.process.resourcesPath },
+  sandboxed: { value: globalThis.services.process.sandboxed },
+  type: { value: globalThis.services.process.type },
+  version: { value: globalThis.services.process.version },
+  versions: { value: globalThis.services.process.versions },
+  windowsStore: { value: globalThis.services.process.windowsStore },
   nextTick: { value: setImmediate }
 })
 

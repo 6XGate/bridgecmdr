@@ -11,7 +11,7 @@ const useAppInfo = () => {
     version: process.env['app_version_'] as AppInfo['version']
   } satisfies AppInfo
 
-  contextBridge.exposeInMainWorld('app', appInfo)
+  contextBridge.exposeInMainWorld('application', appInfo)
 
   return appInfo
 }
