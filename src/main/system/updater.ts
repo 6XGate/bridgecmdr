@@ -3,10 +3,9 @@ import { writeFile } from 'node:fs/promises'
 import { resolve as resolvePath } from 'node:path'
 import autoBind from 'auto-bind'
 import { app, ipcMain } from 'electron'
-import Logger from 'electron-log'
 import { autoUpdater } from 'electron-updater'
 import { memo } from 'radash'
-import { ipcHandle, ipcProxy, logError } from '../utilities'
+import { ipcHandle, ipcProxy, isNodeError, logError } from '../utilities'
 import type { AppUpdater } from '../../preload/api'
 import type { WebContents } from 'electron'
 import type { UpdateCheckResult, ProgressInfo, CancellationToken } from 'electron-updater'
@@ -26,8 +25,10 @@ const useUpdater = memo(() => {
   /** The internal application updater for AppImage. */
   autoUpdater.autoDownload = false
   autoUpdater.autoInstallOnAppQuit = false
-  autoUpdater.logger = Logger
   autoUpdater.forceDevUpdateConfig = true
+  // FIXME: Find some way to prevent if from logging
+  // errors that are caught and handled.
+  // autoUpdater.logger = Logger
 
   /**
    * Application auto update.
@@ -44,7 +45,16 @@ const useUpdater = memo(() => {
         throw logError(new ReferenceError('Cannot get update information, no check in progress'))
       }
 
-      const result = await this.#checkPromise
+      let result
+      try {
+        result = await this.#checkPromise
+      } catch (cause) {
+        if (isNodeError(cause) && cause.code === 'ENOENT') {
+          return undefined
+        }
+
+        throw cause
+      }
 
       // If the result is null or the cancel token is null, no update is avilable.
       if (result?.cancellationToken == null) {
