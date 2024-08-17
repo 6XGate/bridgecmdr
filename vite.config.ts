@@ -4,10 +4,6 @@ import tsconfigPaths from 'vite-tsconfig-paths'
 import { coverageConfigDefaults, defineConfig } from 'vitest/config'
 
 export default defineConfig({
-  resolve: {
-    // Allow `.js` file endings.
-    alias: [{ find: /^(.*)\.js$/u, replacement: '$1' }]
-  },
   plugins: [
     externalizeDepsPlugin(),
     tsconfigPaths({
@@ -15,6 +11,9 @@ export default defineConfig({
       loose: true
     })
   ],
+  esbuild: {
+    target: ['node20']
+  },
   test: {
     restoreMocks: true,
     unstubEnvs: true,

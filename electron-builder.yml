@@ -1,24 +1,32 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json
-appId: org.sleepingcats.BridgeCmdr
+appId: org.sleepingcats.${name}
 productName: BridgeCmdr
+copyright: 'Copyright ©2019 ${author}'
 artifactName: ${name}-${version}-${arch}.${ext}
 directories:
   buildResources: resources
 files:
-  - '!**/.vscode/*'
-  - '!**/.idea/*'
-  - '!docker/*'
-  - '!.husky/*'
-  - '!src/*'
-  - '!.git/*'
-  - '!{.ncurc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
-  - '!electron.vite.config.{js,ts,mjs,cjs}'
-  - '!{.eslintignore,.eslintrc.cjs}'
-  - '!{.prettierignore,.prettierrc.json}'
-  - '!{.dockerignore,Dockerfile}'
-  - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
-  - '!{tsconfig.json,tsconfig.node.json}'
+  - '!.husky${/*}'
+  - '!**/.vscode${/*}'
+  - '!**/.idea${/*}'
+  - '!.yarn${/*}'
+  - '!coverage${/*}'
+  - '!docker${/*}'
+  - '!logs${/*}'
+  - '!src${/*}'
+  - '!.git${/*}'
+  - '!{.dockerignore|Dockerfile|dev-app-update.yml}'
+  - '!{.env|.env.*|.editorconfig}'
+  - '!{.eslintignore|.eslintrc.cjs}'
+  - '!.git*'
+  - '!{.ncurc.yaml|.nvmrc|.yarnrc.yml}'
   - '!{electron-builder.yml}'
+  - '!electron.vite.config.{js|ts|mjs|cjs}'
+  - '!{.prettierignore|.prettierrc.json|prettier.config.cjs}'
+  - '!{CHANGELOG.md|README.md}'
+  - '!{tsconfig.json|tsconfig.*.json}'
+  - '!vite.config.{js|ts|mjs|cjs}'
+  - '!{yarn.lock|.npmrc|pnpm-lock.yaml}'
 asarUnpack:
   - node_modules/electron-log/**/*
   - resources/**

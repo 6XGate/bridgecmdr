@@ -18,13 +18,15 @@ export default defineConfig({
         loose: true
       })
     ],
+    esbuild: {
+      target: ['chrome126']
+    },
     resolve: {
-      alias: [
-        { find: /^(.*)\.js$/u, replacement: '$1' },
-        { find: 'buffer', replacement: fileURLToPath(new URL('./node_modules/buffer', import.meta.url)) },
-        { find: 'stream', replacement: fileURLToPath(new URL('./node_modules/stream-browserify', import.meta.url)) },
-        { find: 'util', replacement: fileURLToPath(new URL('./node_modules/util', import.meta.url)) }
-      ]
+      alias: {
+        buffer: fileURLToPath(new URL('./node_modules/buffer', import.meta.url)),
+        stream: fileURLToPath(new URL('./node_modules/stream-browserify', import.meta.url)),
+        util: fileURLToPath(new URL('./node_modules/util', import.meta.url))
+      }
     }
   },
   renderer: {
@@ -50,19 +52,12 @@ export default defineConfig({
     esbuild: {
       target: ['chrome126']
     },
-    // build: {
-    //   rollupOptions: {
-    //     output: {
-    //       hoistTransitiveImports: false
-    //     }
-    //   }
-    // },
     resolve: {
-      alias: [
-        { find: 'buffer', replacement: fileURLToPath(new URL('./node_modules/buffer', import.meta.url)) },
-        { find: 'stream', replacement: fileURLToPath(new URL('./node_modules/stream-browserify', import.meta.url)) },
-        { find: 'util', replacement: fileURLToPath(new URL('./node_modules/util', import.meta.url)) }
-      ]
+      alias: {
+        buffer: fileURLToPath(new URL('./node_modules/buffer', import.meta.url)),
+        stream: fileURLToPath(new URL('./node_modules/stream-browserify', import.meta.url)),
+        util: fileURLToPath(new URL('./node_modules/util', import.meta.url))
+      }
     }
   }
 })
