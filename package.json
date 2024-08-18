@@ -13,6 +13,7 @@
     "dev": "cross-env NODE_ENV=development webpack --progress --hide-modules --config build/webpack.config.js",
     "pack": "node build/electron.package.js",
     "start": "electron .",
+    "start:docker": "electron . --no-sandbox --no-xshm",
     "test": "test.js",
     "package": "npm run production ; npm run pack"
   },
