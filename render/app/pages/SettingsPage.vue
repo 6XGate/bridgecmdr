@@ -49,6 +49,15 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                                 </v-list-item-content>
                             </v-list-item>
                         </switch-list>
+                        <v-list-item @click="exportConfig">
+                            <v-list-item-avatar>
+                                <v-icon>mdi-export</v-icon>
+                            </v-list-item-avatar>
+                            <v-list-item-content>
+                                <v-list-item-title>Export configuration</v-list-item-title>
+                                <v-list-item-subtitle>Prepare for BridgeCmdr 2</v-list-item-subtitle>
+                            </v-list-item-content>
+                        </v-list-item>
                     </v-list>
                 </v-card-text>
             </v-card>
@@ -57,9 +66,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 </template>
 
 <script lang="ts">
-    import Vue        from "vue";
-    import SourceList from "./settings/SourceList.vue";
-    import SwitchList from "./settings/SwitchList.vue";
+    import Vue                from "vue";
+    import SourceList         from "./settings/SourceList.vue";
+    import SwitchList         from "./settings/SwitchList.vue";
+    import sourcesController  from "../../controllers/sources";
+    import switchesController from "../../controllers/switches";
+    import tiesController     from "../../controllers/ties";
 
     export default Vue.extend({
         name:       "SettingsPage",
@@ -79,6 +91,25 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             done() {
                 this.visible = false;
                 this.$emit("done");
+            },
+            async exportConfig() {
+                const sources = await sourcesController.all();
+                const switches = await switchesController.all();
+                const ties = await tiesController.all();
+
+                const data = JSON.stringify({ sources, switches, ties });
+                const blob = new Blob([data], { type: "application/json" });
+                const link = document.createElement("a");
+                const url = URL.createObjectURL(blob);
+                link.href = url;
+                link.download = "BridgeCmdr.Config.json";
+                document.body.appendChild(link);
+                link.click();
+
+                queueMicrotask(() => {
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                });
             },
         },
     });
