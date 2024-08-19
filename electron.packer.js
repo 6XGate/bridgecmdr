@@ -35,10 +35,11 @@ packager.source(".").target("linux", "armhf").
         new RegExp("^/[^/]+\\.dic", "u"),
         new RegExp("^/[^/]+\\.packer\\.js", "u"),
         new RegExp("^/[^/]+-lock\\.json", "u"),
+        new RegExp("^/node_modules/\\.", "u"),
 
         // At all levels, exclude these patterns
         new RegExp("/tsconfig.json$", "u"),
-        new RegExp("\\.ts", "u"),
+        new RegExp("\\.ts$", "u"),
     ).
     installer({
         productDescription: "Professional Raspberry Pi A/V switch and monitor controller for retro gaming.",
