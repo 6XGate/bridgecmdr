@@ -43,6 +43,7 @@ lerna-debug.log*
 !.vscode/launch.json
 
 # Local environment data
+compose.override.yml
 .env
 .env.*
 dev-app-update.yml

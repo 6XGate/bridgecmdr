@@ -1,20 +1,54 @@
 #
+# If you are not running on an ARM system, macOS, Linux, or Windows;
 # You will need qemu-user-static or like package installed
 # to provide`qemu-arm-static` for ARM code execution.
 #
+# Docker Desktop provides support for this feature.
+#
 
-FROM debian:latest
+FROM --platform=linux/arm/v7 debian:buster
 
-ADD https://nodejs.org/download/release/v16.20.0/node-v16.20.0-linux-armv7l.tar.xz /downloads/node.tar.xz
-ENV DEBIAN_FRONTEND noninteractive
-RUN apt-get update
-RUN apt-get install -y apt-utils
-RUN apt-get install -y ruby-dev build-essential git python3
-RUN gem install fpm
-RUN tar -xaf /downloads/node.tar.xz --directory /downloads
-RUN cp -R /downloads/node-v16.20.0-linux-armv7l/* /usr/local
-RUN npm i -g npm
+# Install the basics.
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update -y && \
+    apt-get install -y apt-utils && \
+    apt-get upgrade -y && \
+    apt-get install -y build-essential git python3 curl wget bash libatomic1 bash-completion libnss3 && \
+    rm -rf /var/lib/apt/lists && \
+    rm -rf /var/cache/apt
 
-VOLUME /app
-ENV HOME=/app/docker
+# Install the Electron dependencies.
+RUN apt-get update -y && \
+    apt-get install -y xorg gconf2 gconf-service libnotify4 libappindicator1 libxtst6 \
+                       libxss1 libasound2 libgl1-mesa-glx libgl1-mesa-dri && \
+    rm -rf /var/lib/apt/lists && \
+    rm -rf /var/cache/apt
+
+# Install the project dependencies.
 ENV USE_SYSTEM_FPM=true
+RUN apt-get update -y && \
+    apt-get install -y unzip ruby-dev && \
+    gem install fpm && \
+    rm -rf /var/lib/apt/lists && \
+    rm -rf /var/cache/apt
+
+# Default environment.
+ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+
+# Setup user.
+RUN useradd -m builder
+USER builder
+
+# Install node.
+SHELL ["/bin/bash", "-lc"]
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash
+RUN nvm install 20 && \
+    nvm use 20
+
+# Setup entrypoint.
+COPY docker /
+ENTRYPOINT [ "/entrypoint.sh" ]
+CMD ["bash", "-l"]
+
+# Project
+WORKDIR /project
