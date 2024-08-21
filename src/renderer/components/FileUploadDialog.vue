@@ -105,9 +105,14 @@ const showDividers = computed(() => scrolling.value.client.height !== scrolling.
         density="compact"
         @update:model-value="onNewFile" />
       <div class="d-flex justify-center">
-        <VCard variant="outlined" max-width="128px" rounded="lg">
-          <VIcon v-if="image == null" size="128px" :icon="unsetIcon" />
-          <VImg v-else width="128px" max-height="128px" aspect-ratio="1/1" :src="image" :lazy-src="lazySource" />
+        <VCard
+          variant="outlined"
+          width="128"
+          height="128"
+          rounded="lg"
+          class="align-content-center bg-surface-lighten-1">
+          <VIcon v-if="image == null" size="128" :icon="unsetIcon" :cover="false" />
+          <VImg v-else width="128" max-height="128" :aspect-ratio="1" :src="image" :lazy-src="lazySource" />
         </VCard>
       </div>
     </VCardText>

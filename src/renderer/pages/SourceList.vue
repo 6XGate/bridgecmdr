@@ -76,7 +76,12 @@ const { dialogProps: editorProps } = useSourceDialog()
       <template v-for="(item, index) of sources.items" :key="item._id">
         <VDivider v-if="index > 0" class="mx-4" />
         <VListItem :title="item.title" :to="{ name: 'sources-id', params: { id: item._id } }" lines="one">
-          <template #prepend><VAvatar :image="images[index]" :icon="mdiVideoInputHdmi" /></template>
+          <template #prepend>
+            <VAvatar color="surface-lighten-1">
+              <VImg v-if="images[index]" :aspect-ratio="1" :src="images[index]" :cover="false" />
+              <VIcon v-else :icon="mdiVideoInputHdmi" size="36" />
+            </VAvatar>
+          </template>
           <template #append>
             <VTooltip :text="t('action.delete')">
               <template #activator="{ props }">

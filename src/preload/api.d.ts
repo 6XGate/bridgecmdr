@@ -1,6 +1,6 @@
-import type { IpcRendererEvent } from 'electron'
+import type { Dialog, IpcRendererEvent, OpenDialogOptions } from 'electron'
 import type { ProgressInfo, UpdateInfo } from 'electron-updater'
-import type { ReadonlyDeep, Tagged } from 'type-fest'
+import type { ArrayTail, ReadonlyDeep, Tagged } from 'type-fest'
 
 //
 // Internal parts
@@ -158,6 +158,8 @@ export interface PortApi {
 export interface SystemApi {
   /** Powers off the system. */
   readonly powerOff: (interactive?: boolean) => Promise<void>
+  /** Shows the open file dialog. */
+  readonly showOpenDialog: (options: OpenDialogOptions) => Promise<File[] | null>
 }
 
 //
@@ -243,5 +245,6 @@ export interface AppUpdates extends AppUpdater {
 declare global {
   var services: MainProcessServices
   var application: AppInfo
+  var system: System
   var user: UserInfo
 }

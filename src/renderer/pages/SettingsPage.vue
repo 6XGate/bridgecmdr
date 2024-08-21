@@ -1,5 +1,12 @@
 <script setup lang="ts">
-import { mdiAlertCircleOutline, mdiArrowLeft, mdiGamepadVariant, mdiHelpCircleOutline, mdiVideoSwitch } from '@mdi/js'
+import {
+  mdiAlertCircleOutline,
+  mdiArrowLeft,
+  mdiGamepadVariant,
+  mdiHelpCircleOutline,
+  mdiVideoSwitch,
+  mdiSwapVertical
+} from '@mdi/js'
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -70,6 +77,12 @@ onUnmounted(() => {
         :subtitle="t('count.switches', { n: n(switchCount, 'integer') }, switchCount)"
         :to="{ name: 'switches' }" />
       <VListItem
+        :title="t('label.backup')"
+        :prepend-icon="mdiSwapVertical"
+        :subtitle="t('description.backup')"
+        lines="two"
+        :to="{ name: 'settings-backup' }" />
+      <VListItem
         :title="t('label.about')"
         lines="two"
         :prepend-icon="mdiHelpCircleOutline"
@@ -84,6 +97,7 @@ en:
     about: About BridgeCmdr
   description:
     general: Basic settings for BridgeCmdr
+    backup: Import or export setting as a file.
     about: Version {0}
   count:
     sources: No sources | One source | {n} sources

@@ -29,6 +29,7 @@
     "name": "Name",
     "path": "Path",
     "port": "Port",
+    "backup": "Backup settings",
     "settings": "Settings",
     "sources": "Sources",
     "source": "Source",

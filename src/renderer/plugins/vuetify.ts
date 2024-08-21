@@ -38,7 +38,7 @@ const vuetify = createVuetify({
   },
   theme: {
     variations: {
-      colors: ['primary', 'secondary'],
+      colors: ['primary', 'secondary', 'surface'],
       lighten: 4,
       darken: 4
     }

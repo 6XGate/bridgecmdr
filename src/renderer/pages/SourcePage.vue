@@ -186,8 +186,8 @@ const { dialogProps: editorProps } = useTieDialog()
                 @confirm="save" />
             </template>
             <template #activator="{ props: dialog }">
-              <VAvatar id="replacableImage" size="128" v-bind="{ ...hover, ...dialog }">
-                <VImg v-if="image != null" width="128" :src="image" :lazy-src="videoInputHdmiIcon" />
+              <VAvatar id="replacableImage" size="128" v-bind="{ ...hover, ...dialog }" color="surface-lighten-1">
+                <VImg v-if="image != null" width="128" :src="image" :lazy-src="videoInputHdmiIcon" :cover="false" />
                 <VIcon v-else :icon="mdiVideoInputHdmi" />
                 <VOverlay
                   class="align-center justify-center text-center"
