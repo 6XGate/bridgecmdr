@@ -6,7 +6,7 @@ import useDbus from '../helpers/dbus'
 import { ipcHandle, ipcProxy } from '../utilities'
 import type { SystemApi } from '../../preload/api'
 import type { FileData } from '@/struct'
-import type { OpenDialogOptions } from 'electron'
+import type { OpenDialogOptions, SaveDialogOptions } from 'electron'
 import { raiseError } from '@/error-handling'
 
 const useSystem = memo(() => {
@@ -45,12 +45,28 @@ const useSystem = memo(() => {
     )
   })
 
+  const saveFile = ipcHandle(async (ev, source: FileData, options: SaveDialogOptions) => {
+    options.defaultPath = options.defaultPath ?? source.path
+
+    const result = await dialog.showSaveDialog(
+      BrowserWindow.fromWebContents(ev.sender) ?? raiseError(() => new ReferenceError('Invalid window')),
+      options
+    )
+
+    if (result.canceled) return false
+
+    await using file = await open(result.filePath, 'w')
+    await file.writeFile(source.buffer)
+    return true
+  })
+
   ipcMain.handle('system:powerOff', ipcProxy(powerOff))
   ipcMain.handle('system:showOpenDialog', showOpenDialog)
+  ipcMain.handle('system:saveFile', saveFile)
 
   return {
     powerOff
-  } satisfies Omit<SystemApi, 'showOpenDialog'>
+  } satisfies Omit<SystemApi, 'showOpenDialog' | 'saveFile'>
 })
 
 export default useSystem

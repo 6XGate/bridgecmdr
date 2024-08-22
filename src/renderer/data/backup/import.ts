@@ -1,6 +1,7 @@
 import { BlobReader, BlobWriter, TextWriter, ZipReader } from '@zip.js/zip.js'
 import mime from 'mime'
 import { z } from 'zod'
+import useSettings, { ColorScheme, IconSize, PowerOffTaps } from '../../stores/settings'
 import { useDrivers } from '../../system/driver'
 import { useSources } from '../../system/source'
 import { useSwitches } from '../../system/switch'
@@ -43,6 +44,14 @@ const layouts = {
 type V2 = z.output<typeof V2>
 const V2 = z.object({
   version: z.literal(2),
+  settings: z
+    .object({
+      iconSize: IconSize.optional(),
+      colorScheme: ColorScheme.optional(),
+      powerOnSwitchesAtStart: z.boolean().optional(),
+      powerOffWhen: PowerOffTaps.optional()
+    })
+    .optional(),
   layouts: z.object(layouts[1])
 })
 
@@ -60,12 +69,12 @@ const V1 = z
   )
   .pipe(V2)
 
-export const Settings = z.union([V2, V1])
-export type SetV1 = z.output<typeof V1>
-export type SetV2 = z.output<typeof V2>
-export type BackupSettings = z.output<typeof Settings>
+export const BackupSettings = z.union([V2, V1])
+export type BackupSettings = z.output<typeof BackupSettings>
 
 export const importSettings = async (file: File) => {
+  const settings = useSettings()
+
   const zipFile = new BlobReader(file)
   const zipReader = new ZipReader(zipFile)
   const entries = await zipReader.getEntries()
@@ -78,7 +87,12 @@ export const importSettings = async (file: File) => {
   await configEntry.getData(configFile)
   const configData = await configFile.getData()
 
-  const settings = Settings.parse(JSON.parse(configData))
+  const data = BackupSettings.parse(JSON.parse(configData))
+
+  settings.iconSize = data.settings?.iconSize ?? settings.iconSize
+  settings.colorScheme = data.settings?.colorScheme ?? settings.colorScheme
+  settings.powerOnSwitchesAtStart = data.settings?.powerOnSwitchesAtStart ?? settings.powerOnSwitchesAtStart
+  settings.powerOffWhen = data.settings?.powerOffWhen ?? settings.powerOffWhen
 
   const imageCache = new Map<string, File>()
 
@@ -91,7 +105,7 @@ export const importSettings = async (file: File) => {
 
   await Promise.all([
     Promise.all(
-      settings.layouts.sources.map(async (item) => {
+      data.layouts.sources.map(async (item) => {
         if (item.image == null) {
           await sources.add(item)
           return
@@ -121,7 +135,7 @@ export const importSettings = async (file: File) => {
       })
     ),
     Promise.all(
-      settings.layouts.switches.map(async (item) => {
+      data.layouts.switches.map(async (item) => {
         const driver = drivers.items.find((d) => d.guid === item.driverId)
         // Non-fatally skip switches from drivers that don't exist.
         if (driver == null) {
@@ -135,7 +149,7 @@ export const importSettings = async (file: File) => {
   ])
 
   await Promise.all(
-    settings.layouts.ties.map(async (item) => {
+    data.layouts.ties.map(async (item) => {
       const sourceItem = sources.items.find((s) => s._id === item.sourceId)
       const switchItem = switches.items.find((s) => s._id === item.switchId)
       // Non-fatally skip ties that reference missing switches or sources.

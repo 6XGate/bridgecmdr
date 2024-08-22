@@ -1,5 +1,5 @@
 export interface FileData {
   path: string
-  buffer: Buffer
+  buffer: Uint8Array
   type: string
 }

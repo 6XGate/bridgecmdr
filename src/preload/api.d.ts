@@ -1,4 +1,4 @@
-import type { Dialog, IpcRendererEvent, OpenDialogOptions } from 'electron'
+import type { Dialog, IpcRendererEvent, OpenDialogOptions, SaveDialogOptions } from 'electron'
 import type { ProgressInfo, UpdateInfo } from 'electron-updater'
 import type { ArrayTail, ReadonlyDeep, Tagged } from 'type-fest'
 
@@ -160,6 +160,8 @@ export interface SystemApi {
   readonly powerOff: (interactive?: boolean) => Promise<void>
   /** Shows the open file dialog. */
   readonly showOpenDialog: (options: OpenDialogOptions) => Promise<File[] | null>
+  /** Shows the save file dialog to save a file. */
+  readonly saveFile: (file: File, options: SaveDialogOptions) => Promise<boolean>
 }
 
 //

@@ -22,12 +22,16 @@ const router = useRouter()
 // Functionality.
 //
 
+const kFilters = [{ extensions: ['zip'], name: t('description.archive') }]
+
 async function exportToFile() {
   try {
-    await wait(async () => {
-      await exportSettings()
+    const file = await wait(async () => await exportSettings())
+    await globalThis.services.system.saveFile(file, {
+      title: t('label.export'),
+      filters: kFilters,
+      properties: ['showOverwriteConfirmation']
     })
-    throw new Error('not implemented')
   } catch (e) {
     await dialogs.error(e, {
       title: t('error.export')
@@ -39,12 +43,12 @@ async function importFromFile() {
   try {
     const files = await globalThis.services.system.showOpenDialog({
       title: t('label.import'),
-      filters: [{ extensions: ['zip'], name: 'Settings archive' }],
+      filters: kFilters,
       properties: ['openFile', 'dontAddToRecent']
     })
 
-    if (files?.[0] == null) return
-    const file = files[0]
+    const file = files?.at(0)
+    if (file == null) return
 
     await wait(async () => {
       await importSettings(file)
@@ -87,6 +91,7 @@ en:
   description:
     export: Export settings from to archive
     import: Import settings from an archive
+    archive: Settings archive
   error:
     export: Failed to export settings
     import: Failed to import settings
