@@ -6,7 +6,7 @@
 # Docker Desktop provides support for this feature.
 #
 
-FROM --platform=linux/arm/v7 debian:buster
+FROM --platform=linux/arm/v7 debian:bullseye
 
 # Install the basics.
 ENV DEBIAN_FRONTEND=noninteractive
@@ -24,16 +24,9 @@ RUN apt-get update -y && \
     rm -rf /var/lib/apt/lists && \
     rm -rf /var/cache/apt
 
-# Install the project dependencies.
-ENV USE_SYSTEM_FPM=true
-RUN apt-get update -y && \
-    apt-get install -y unzip ruby-dev && \
-    gem install fpm && \
-    rm -rf /var/lib/apt/lists && \
-    rm -rf /var/cache/apt
-
 # Default environment.
 ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+ENV NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt
 
 # Setup user.
 RUN useradd -m builder
@@ -43,7 +36,9 @@ USER builder
 SHELL ["/bin/bash", "-lc"]
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash
 RUN nvm install 20 && \
-    nvm use 20
+    nvm use 20 && \
+    corepack enable && \
+    corepack enable npm
 
 # Setup entrypoint.
 COPY docker /

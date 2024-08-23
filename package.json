@@ -1,9 +1,9 @@
 {
   "name": "bridgecmdr",
   "productName": "BridgeCmdr",
-  "version": "2.0.0-beta.5",
+  "version": "2.0.0-beta.6",
   "description": "Controller for professional A/V monitors and switches",
-  "packageManager": "yarn@4.4.0",
+  "packageManager": "yarn@1.22.22",
   "type": "module",
   "private": true,
   "engines": {
