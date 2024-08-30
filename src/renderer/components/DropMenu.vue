@@ -4,7 +4,6 @@ import { get } from 'radash'
 import { computed, ref, watch, unref } from 'vue'
 import type { Anchor, Origin, SelectItemKey } from '../helpers/vuetify'
 import type { ComponentPublicInstance } from 'vue'
-import type { VListItem } from 'vuetify/components'
 
 interface Props {
   // Activator attachment
