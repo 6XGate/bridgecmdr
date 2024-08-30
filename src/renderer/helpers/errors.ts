@@ -1,46 +1,57 @@
 import { useI18n } from 'vue-i18n'
 import { z } from 'zod'
 import type { I18nSchema } from '../locales/locales'
-import type { Store } from 'pinia'
+import { getMessage, getZodMessage } from '@/error-handling'
 
-export const useErrors = () => {
+interface ErrorMessage {
+  header?: string | undefined
+  message: string
+}
+
+export function useErrors() {
   const { t } = useI18n<I18nSchema>()
 
-  const toPath = (path: (number | string)[]) =>
-    path
-      .map((segment) => (typeof segment === 'number' ? `[${segment}]` : segment))
-      .reduce((p, c) => (c.startsWith('[') ? `${p}${c}` : `${p}.${c}`))
-
-  const toMessage = (e: unknown) => {
-    if (!(e instanceof Error)) {
-      return String(e)
+  function toErrorMessage(error: unknown): ErrorMessage {
+    // Any value that is not an error message may
+    // only be used as the message body.
+    if (!(error instanceof Error)) {
+      return { message: getMessage(error) }
     }
 
-    if (e instanceof z.ZodError) {
-      const flattened = e.flatten((issue) =>
-        issue.path.length > 0 ? `${toPath(issue.path)}: ${issue.message}` : issue.message
-      )
-
-      return (
-        flattened.formErrors[0] ??
-        // Map all fields to their first error, and find the first that has an error.
-        Object.values(flattened.fieldErrors)
-          .map((errors) => errors?.[0])
-          .find((error) => error != null) ??
-        t('error.zod')
-      )
+    // Zod errors may only be used as the message
+    // body. They may be too verbose for the
+    // title.
+    if (error instanceof z.ZodError) {
+      return { message: getZodMessage(error) ?? t('error.zod') }
     }
 
-    return e.message
+    // If the error does not have a cause,
+    // it can only be the message body.
+    if (error.cause == null) {
+      return { message: error.message }
+    }
+
+    // Any non-nullish value that is not an error
+    // can be used as the message body, so this
+    // error may be used as the header.
+    if (!(error.cause instanceof Error)) {
+      return { header: error.message, message: getMessage(error.cause) }
+    }
+
+    // Zod errors may be used as the message body
+    // and this one as the header, but only if
+    // a message can be extracted from the
+    // Zod error; otherwise, this error
+    // will be the message body.
+    if (error.cause instanceof z.ZodError) {
+      const message = getZodMessage(error.cause)
+      return message != null ? { header: error.message, message } : { message: error.message }
+    }
+
+    return { header: error.message, message: error.cause.message }
   }
 
   return {
-    toMessage,
-    raiseNoActiveCurrentError
+    toErrorMessage
   }
-}
-
-type StoreTypes = 'switch' | 'source' | 'tie'
-export function raiseNoActiveCurrentError(type: StoreTypes, store: Store): never {
-  throw new ReferenceError(`No active ${type}; there must be an active source (${store.$id}.current != null)`)
 }

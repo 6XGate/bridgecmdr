@@ -87,8 +87,8 @@ const ErrorModalOptions = z
 export type ErrorModalOptions = z.input<typeof ErrorModalOptions>
 export type ErrorModalConfiguration = z.output<typeof ErrorModalOptions>
 
-export const useDialogs = createSharedComposable(() => {
-  const { toMessage } = useErrors()
+export const useDialogs = createSharedComposable(function () {
+  const { toErrorMessage } = useErrors()
   const alertModal = useAlertModal()
   const confirmModal = useConfirmModal()
 
@@ -98,16 +98,13 @@ export const useDialogs = createSharedComposable(() => {
 
   const confirm = async (...args: Parameters<typeof confirmModal.show>) => await confirmModal.show(...args)
 
-  const error = async (e: unknown, options?: ErrorModalOptions) => {
-    const config = ErrorModalOptions.parse(options)
-    console.error(e)
+  const error = async (cause: unknown, options?: ErrorModalOptions) => {
+    const { header, message } = toErrorMessage(cause)
+    const { title = header, button, color } = ErrorModalOptions.parse(options)
 
-    await alert({
-      title: config.title,
-      message: toMessage(e),
-      button: config.button,
-      color: config.color
-    })
+    console.error(cause)
+
+    await alert({ title, message, button, color })
   }
 
   return {
@@ -117,21 +114,21 @@ export const useDialogs = createSharedComposable(() => {
   }
 })
 
-export const useTieDialog = () => {
+export function useTieDialog() {
   const { smAndDown } = useDisplay()
   const model = useResponsiveModal(smAndDown, { maxWidth: 640, rounded: 'xl' })
 
   return { breakpoint: smAndDown, ...model }
 }
 
-export const useSourceDialog = () => {
+export function useSourceDialog() {
   const { xs } = useDisplay()
   const model = useResponsiveModal(xs, { maxWidth: 480, rounded: 'xl' })
 
   return { breakpoint: xs, ...model }
 }
 
-export const useSwitchDialog = () => {
+export function useSwitchDialog() {
   const { width } = useDisplay()
   const breakpoint = computed(() => width.value <= 700)
 

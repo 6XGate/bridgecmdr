@@ -2,11 +2,10 @@
 import { mdiPower, mdiVideoInputHdmi, mdiWrench } from '@mdi/js'
 import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useNextTick } from '../helpers/vue'
 import { useDialogs } from '../modals/dialogs'
 import { useDashboard } from '../stores/dashboard'
 import useSettings from '../stores/settings'
-import useFirstRun from '../utilities/first'
+import FirstRunLogic from './FirstRunLogic.vue'
 import type { I18nSchema } from '../locales/locales'
 
 const settings = useSettings()
@@ -46,14 +45,11 @@ const powerButton = computed(() =>
 
 const dashboard = useDashboard()
 onMounted(dashboard.refresh)
-
-const firstRun = useFirstRun()
-const doFirstRun = useNextTick(firstRun.doFirstRun)
-onMounted(doFirstRun)
 </script>
 
 <template>
   <VMain scrollable>
+    <FirstRunLogic />
     <VContainer>
       <div v-if="dashboard.isBusy" class="align-center d-flex justify-ceneter">
         <VProgressCircular size="256px" indeterminate />

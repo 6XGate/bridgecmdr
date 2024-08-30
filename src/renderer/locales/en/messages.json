@@ -40,7 +40,6 @@
     "type": "Type"
   },
   "message": {
-    "autoStartConfirm": "Do you want BridgeCmdr to start on boot?",
     "discardChanges": "Do you want to discard these changes?"
   },
   "placeholder": {
