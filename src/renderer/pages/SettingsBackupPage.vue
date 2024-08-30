@@ -41,7 +41,7 @@ async function exportToFile() {
 
 async function importFromFile() {
   try {
-    const files = await globalThis.services.system.showOpenDialog({
+    const files = await globalThis.services.system.openFile({
       title: t('label.import'),
       filters: kFilters,
       properties: ['openFile', 'dontAddToRecent']

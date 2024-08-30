@@ -159,7 +159,7 @@ export interface SystemApi {
   /** Powers off the system. */
   readonly powerOff: (interactive?: boolean) => Promise<void>
   /** Shows the open file dialog. */
-  readonly showOpenDialog: (options: OpenDialogOptions) => Promise<File[] | null>
+  readonly openFile: (options: OpenDialogOptions) => Promise<File[] | null>
   /** Shows the save file dialog to save a file. */
   readonly saveFile: (file: File, options: SaveDialogOptions) => Promise<boolean>
 }

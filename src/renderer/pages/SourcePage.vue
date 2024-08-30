@@ -1,23 +1,11 @@
 <script setup lang="ts">
-import {
-  mdiArrowLeft,
-  mdiCamera,
-  mdiDelete,
-  mdiExport,
-  mdiFileImagePlus,
-  mdiImport,
-  mdiPlus,
-  mdiVideoInputHdmi,
-  mdiVolumeMedium
-} from '@mdi/js'
-import videoInputHdmiIcon from '@mdi/svg/svg/video-input-hdmi.svg'
-import { useObjectUrl } from '@vueuse/core'
+import { mdiArrowLeft, mdiDelete, mdiExport, mdiImport, mdiPlus, mdiVolumeMedium } from '@mdi/js'
 import { computed, ref, onBeforeMount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import FileUploadDialog from '../components/FileUploadDialog.vue'
 import InputDialog from '../components/InputDialog.vue'
 import Page from '../components/Page.vue'
+import ReplacableImage from '../components/ReplacableImage.vue'
 import { toFiles } from '../helpers/attachment'
 import TieDialog from '../modals/TieDialog.vue'
 import { useDialogs, useTieDialog } from '../modals/dialogs'
@@ -57,7 +45,6 @@ const { track, wait, isBusy } = trackBusy()
 const sources = useSources()
 const source = ref<Source>()
 const file = ref<File>()
-const image = useObjectUrl(file)
 
 const loadSource = async () => {
   source.value = { ...(await sources.get(props.id)) }
@@ -86,6 +73,11 @@ const save = async () => {
     await loadTies()
     await dialogs.error(e)
   }
+}
+
+const updateImage = async (newFile: File) => {
+  file.value = newFile
+  await save()
 }
 
 onBeforeMount(track(loadSource))
@@ -169,39 +161,7 @@ const { dialogProps: editorProps } = useTieDialog()
   <Page>
     <div class="overflow-y-auto px-6 py-3">
       <div class="d-flex justify-center mb-5">
-        <VHover v-slot="{ isHovering, props: hover }">
-          <VDialog max-width="320">
-            <template #default="{ isActive }">
-              <FileUploadDialog
-                v-model:visible="isActive.value"
-                v-model="file"
-                title="Source icon"
-                accept="image/*"
-                :icon="mdiCamera"
-                :unset-icon="mdiVideoInputHdmi"
-                :lazy-source="videoInputHdmiIcon"
-                :show-confirm="t('action.save')"
-                mandantory
-                :show-cancel="t('action.discard')"
-                @confirm="save" />
-            </template>
-            <template #activator="{ props: dialog }">
-              <VAvatar id="replacableImage" size="128" v-bind="{ ...hover, ...dialog }" color="surface-lighten-1">
-                <VImg v-if="image != null" width="128" :src="image" :lazy-src="videoInputHdmiIcon" :cover="false" />
-                <VIcon v-else :icon="mdiVideoInputHdmi" />
-                <VOverlay
-                  class="align-center justify-center text-center"
-                  :model-value="isHovering ?? false"
-                  theme="light"
-                  scrim="primary-darken-4"
-                  contained>
-                  <VIcon :icon="mdiFileImagePlus" />
-                  <div>Upload new image</div>
-                </VOverlay>
-              </VAvatar>
-            </template>
-          </VDialog>
-        </VHover>
+        <ReplacableImage :image="file" @update="updateImage" />
       </div>
       <VList v-if="source != null" bg-color="transparent" :disabled="isBusy">
         <InputDialog
@@ -299,9 +259,3 @@ en:
     confirmDeleteTie: Do you want to delete this tie?
     noTies: No ties, add some
 </i18n>
-
-<style lang="scss" scoped>
-#replacableImage {
-  cursor: pointer;
-}
-</style>

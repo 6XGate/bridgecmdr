@@ -10,9 +10,9 @@ type SaveFileMain = (file: FileData, options: SaveDialogOptions) => Promise<bool
 const useSystemApi = () => {
   const ipc = useIpc()
 
-  const showOpenDialogMain: ShowOpenDialogMain = ipc.useInvoke('system:showOpenDialog')
-  async function showOpenDialog(options: OpenDialogOptions) {
-    const files = await showOpenDialogMain(options)
+  const openFileMain: ShowOpenDialogMain = ipc.useInvoke('system:openFile')
+  async function openFile(options: OpenDialogOptions) {
+    const files = await openFileMain(options)
     if (files == null) return null
 
     return files.map(({ path, buffer, type }) => new File([buffer], basename(path), { type }))
@@ -31,7 +31,7 @@ const useSystemApi = () => {
 
   return {
     powerOff: ipc.useInvoke('system:powerOff'),
-    showOpenDialog,
+    openFile,
     saveFile
   } satisfies SystemApi
 }

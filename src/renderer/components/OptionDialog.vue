@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import is from '@sindresorhus/is'
+import { useVModel } from '@vueuse/core'
 import { get } from 'radash'
 import { watch, ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -15,10 +16,11 @@ interface Props {
   activatorProps?: object | undefined
   attach?: string | boolean | Element | undefined
   // State
+  // eslint-disable-next-line vue/no-unused-properties -- useVModel
+  visible?: boolean
   disabled?: boolean
   persistent?: boolean
   scrollable?: boolean
-  visible?: boolean
   // Size and location
   absolute?: boolean
   fullscreen?: boolean
@@ -64,20 +66,11 @@ const confirmLabel = computed(() => props.confirmButton ?? t('common.confirm'))
 const showCancel = computed(() => props.persistent || props.withCancel)
 const cancelLabel = computed(() => props.cancelButton ?? t('common.cancel'))
 
-// eslint-disable-next-line vue/no-setup-props-reactivity-loss -- Watched and updated.
-const isVisible = ref(props.visible)
-watch(
-  () => props.visible,
-  (value) => {
-    isVisible.value = value
-  }
-)
+const isVisible = useVModel(props, 'visible', emit, { passive: true, defaultValue: false })
+
 // HACK: Always use cancelChanges since updateValue will dismiss the dialog after updating the original.
 watch(isVisible, (value) => {
   if (!value) cancelChange()
-})
-watch(isVisible, (value) => {
-  if (value !== props.visible) emit('update:visible', value)
 })
 
 // eslint-disable-next-line vue/no-setup-props-reactivity-loss -- Watched and update.

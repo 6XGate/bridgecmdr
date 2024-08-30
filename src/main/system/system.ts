@@ -25,7 +25,7 @@ const useSystem = memo(() => {
     await powerOffByDbus(interactive)
   }
 
-  const showOpenDialog = ipcHandle(async (ev, options: OpenDialogOptions) => {
+  const openFile = ipcHandle(async (ev, options: OpenDialogOptions) => {
     const result = await dialog.showOpenDialog(
       BrowserWindow.fromWebContents(ev.sender) ?? raiseError(() => new ReferenceError('Invalid window')),
       options
@@ -61,12 +61,12 @@ const useSystem = memo(() => {
   })
 
   ipcMain.handle('system:powerOff', ipcProxy(powerOff))
-  ipcMain.handle('system:showOpenDialog', showOpenDialog)
+  ipcMain.handle('system:openFile', openFile)
   ipcMain.handle('system:saveFile', saveFile)
 
   return {
     powerOff
-  } satisfies Omit<SystemApi, 'showOpenDialog' | 'saveFile'>
+  } satisfies Omit<SystemApi, 'openFile' | 'saveFile'>
 })
 
 export default useSystem

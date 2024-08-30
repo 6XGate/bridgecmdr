@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { mdiCamera, mdiClose, mdiVideoInputHdmi } from '@mdi/js'
-import videoInputHdmiIcon from '@mdi/svg/svg/video-input-hdmi.svg'
-import { useObjectUrl, useVModel } from '@vueuse/core'
-import { computed, reactive, ref, watch } from 'vue'
+import { mdiClose } from '@mdi/js'
+import { useVModel } from '@vueuse/core'
+import { reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import ReplacableImage from '../components/ReplacableImage.vue'
 import { useRules, useValidation } from '../helpers/validation'
 import { useSources } from '../system/source'
 import { useDialogs, useSourceDialog } from './dialogs'
@@ -29,9 +29,7 @@ const { t } = useI18n<I18nSchema>()
 const sources = useSources()
 const source = ref<NewSource>(sources.blank())
 
-const files = ref<File[]>([])
-const file = computed(() => files.value[0])
-const image = useObjectUrl(file)
+const file = ref<File>()
 watch(file, (value) => {
   v$.image.$model = value?.name ?? null
 })
@@ -105,25 +103,8 @@ const { cardProps, isFullscreen } = useSourceDialog()
           :label="t('label.name')"
           :placeholder="t('placeholder.required')"
           v-bind="getStatus(v$.title)" />
-        <VFileInput
-          v-model="files"
-          :label="t('label.image')"
-          accept="image/*"
-          prepend-icon=""
-          :placeholder="t('placeholder.required')"
-          :prepend-inner-icon="mdiCamera"
-          v-bind="getStatus(v$.title)" />
         <div class="d-flex justify-center">
-          <VCard variant="outlined" max-width="128px" rounded="lg">
-            <VIcon v-if="image == null" size="128px" :icon="mdiVideoInputHdmi" />
-            <VImg
-              v-else
-              width="128px"
-              max-height="128px"
-              aspect-ratio="1/1"
-              :src="image"
-              :lazy-src="videoInputHdmiIcon" />
-          </VCard>
+          <ReplacableImage :image="file" @update="file = $event" />
         </div>
       </VForm>
     </VCardText>

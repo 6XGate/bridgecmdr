@@ -50,7 +50,7 @@ const { t } = useI18n<I18nSchema>()
 const confirmLabel = computed(() => props.confirmButton ?? t('common.confirm'))
 const cancelLabel = computed(() => props.cancelButton ?? t('common.cancel'))
 
-const isVisible = useVModel(props, 'visible')
+const isVisible = useVModel(props, 'visible', emit, { passive: true, defaultValue: false })
 
 // HACK: Always use cancelChanges since updateValue will dismiss the dialog after updating the original.
 watch(isVisible, (value) => {
@@ -129,7 +129,7 @@ const disableConfirm = computed(() => props.mandatory && !is.nonEmptyString(inne
 
 <template>
   <VDialog v-model="isVisible" v-bind="dialogProps">
-    <template #activator="scope"><slot name="activator" v-bind="scope"></slot></template>
+    <template #activator="scope"><slot name="activator" v-bind="scope" /></template>
     <VCard>
       <VCardText>
         <div v-if="is.nonEmptyString(title)">{{ title }}</div>
