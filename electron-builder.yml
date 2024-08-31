@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json
 appId: org.sleepingcats.${name}
 productName: BridgeCmdr
-copyright: 'Copyright ©2019 ${author}'
+copyright: 'Copyright ©2019-2024 ${author}'
 artifactName: ${name}-${version}-${arch}.${ext}
 directories:
   buildResources: resources
@@ -39,5 +39,5 @@ linux:
 buildDependenciesFromSource: true
 npmRebuild: true
 publish:
-  provider: generic
-  url: http://localplex.home.sleepingcats.org:9001/bridgecmdr/
+  provider: github
+  protocol: https

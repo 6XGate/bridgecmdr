@@ -19,8 +19,8 @@ RUN apt-get update -y && \
 
 # Install the Electron dependencies.
 RUN apt-get update -y && \
-    apt-get install -y xorg gconf2 gconf-service libnotify4 libappindicator1 libxtst6 \
-                       libxss1 libasound2 libgl1-mesa-glx libgl1-mesa-dri && \
+    apt-get install -y xorg gconf2 gconf-service libnotify4 libappindicator1 libxtst6 libxss1 libasound2 \
+                       libgl1-mesa-glx libgl1-mesa-dri && \
     rm -rf /var/lib/apt/lists && \
     rm -rf /var/cache/apt
 

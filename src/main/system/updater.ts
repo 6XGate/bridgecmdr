@@ -9,17 +9,12 @@ import { ipcHandle, ipcProxy, isNodeError, logError } from '../utilities'
 import type { AppUpdater } from '../../preload/api'
 import type { WebContents } from 'electron'
 import type { UpdateCheckResult, ProgressInfo, CancellationToken } from 'electron-updater'
-import type { Simplify } from 'type-fest'
-import type TypedEmitter from 'typed-emitter'
-import type { EventMap } from 'typed-emitter'
 
-type TypedEventEmitter<T extends EventMap> = TypedEmitter<T>
+interface AppAutoUpdaterEventMap {
+  progress: [progress: ProgressInfo]
+}
 
-type ProgressHandler = (progress: ProgressInfo) => void
-
-type AutoUpdaterEvents = Simplify<{
-  progress: ProgressHandler
-}>
+type ProgressHandler = (...args: AppAutoUpdaterEventMap['progress']) => void
 
 const useUpdater = memo(() => {
   /** The internal application updater for AppImage. */
@@ -28,14 +23,14 @@ const useUpdater = memo(() => {
   autoUpdater.forceDevUpdateConfig = true
   // FIXME: Find some way to prevent if from logging
   // errors that are caught and handled.
-  // autoUpdater.logger = Logger
+  //autoUpdater.logger = Logger
 
   /**
    * Application auto update.
    *
    * We are using a class for EventEmitter's sake, it wants to return this which must be compatible with the API.
    */
-  class AppAutoUpdater extends (EventEmitter as new () => TypedEventEmitter<AutoUpdaterEvents>) implements AppUpdater {
+  class AppAutoUpdater extends EventEmitter<AppAutoUpdaterEventMap> implements AppUpdater {
     #checkPromise: Promise<UpdateCheckResult | null> | undefined = undefined
     #cancelToken: CancellationToken | undefined = undefined
     #donwloadPromise: Promise<string[]> | undefined = undefined
