@@ -23,7 +23,7 @@ const useUpdater = memo(() => {
   autoUpdater.forceDevUpdateConfig = true
   // FIXME: Find some way to prevent if from logging
   // errors that are caught and handled.
-  //autoUpdater.logger = Logger
+  // autoUpdater.logger = Logger
 
   /**
    * Application auto update.

@@ -29,6 +29,11 @@ the execution permission and run it. It is recommended that you use
 something like the `appimagelauncher` to better integrate it with
 you desktop environment.
 
+### Requirements
+
+Currently, BridgeCmdr requires a 32-bit version of Raspberry Pi OS, at least v11, a.k.a. `bullseye`, or later with
+FUSE v2 installed.
+
 ### System Requirements
 
 I've only tested this software on a Raspberry Pi 3 Model B+. In general I would recommend at minimal a Raspberry Pi 3
@@ -121,7 +126,7 @@ based operating system is required. The following steps will get you setup on a 
 
 - For hot-reload development mode: `yarn dev`
 - For product builds: `yarn build`
-- For packaged application: `yarn package`
+- For packaged application: `yarn make`
 
 ### Docker and ARM support
 
