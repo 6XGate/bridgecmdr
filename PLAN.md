@@ -1,0 +1,5 @@
+- v2.1
+  - Switch the majority of the IPC using tRPC.
+    - Level uses a streaming IPC.
+    - Anything passing a file may still require some custom hanlding.
+  - More drivers.

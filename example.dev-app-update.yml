@@ -1,0 +1,5 @@
+owner: 6XGate
+repo: bridgecmdr
+provider: github
+protocol: https
+updaterCacheDirName: bridgecmdr-updater
