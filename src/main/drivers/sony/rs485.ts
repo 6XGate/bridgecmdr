@@ -29,7 +29,7 @@ const sonyRs485Driver = defineDriver({
       const packet = createCommand(destination, source, command, arg0, arg1)
 
       const connection = await createCommandStream(uri, {
-        baudRate: 9600,
+        baudRate: 38400,
         timeout: 5000,
         keepAlive: true
       })

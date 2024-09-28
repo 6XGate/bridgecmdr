@@ -74,7 +74,6 @@ onMounted(dashboard.refresh)
         </VTooltip>
       </template>
       <VSheet color="transparent" class="ma-6" location="bottom right" position="fixed">
-        <!-- TODO: Power button -->
         <VTooltip :text="powerTooltip">
           <template #activator="{ props }">
             <VBtn v-bind="{ ...props, ...powerButton }" :icon="mdiPower" class="ml-3" color="error" />

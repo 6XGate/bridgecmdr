@@ -137,6 +137,7 @@ export const useDashboard = defineStore('dashboard', () => {
   }
 
   const refresh = tracker.track(async () => {
+    items.value = []
     await Promise.all([ties.compact(), sources.compact(), switches.compact()])
     await Promise.all([ties.all(), sources.all(), switches.all()])
     await loadDrivers()
