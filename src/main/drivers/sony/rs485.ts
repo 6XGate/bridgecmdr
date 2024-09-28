@@ -30,8 +30,7 @@ const sonyRs485Driver = defineDriver({
 
       const connection = await createCommandStream(uri, {
         baudRate: 38400,
-        timeout: 5000,
-        keepAlive: true
+        timeout: 5000
       })
 
       // TODO: Other situation handlers...
@@ -57,7 +56,7 @@ const sonyRs485Driver = defineDriver({
     }
 
     const powerOff = async () => {
-      Logger.log('sonyRs485Driver.Power On')
+      Logger.log('sonyRs485Driver.powerOff')
       await sendCommand(kPowerOff)
     }
 

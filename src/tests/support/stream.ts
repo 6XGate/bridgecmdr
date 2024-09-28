@@ -44,7 +44,7 @@ class CommandSequence {
 
     this.position += 1
     const [cmd, sender] = command
-    expect(cmd).toEqual(data)
+    expect(data).toEqual(cmd)
 
     return sender()
   }

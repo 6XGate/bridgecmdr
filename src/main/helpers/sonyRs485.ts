@@ -9,10 +9,10 @@ import { z } from 'zod'
  * protocol, the packet @types use those names.
  *
  * Packet Format
- * - Byte 1:        Packet type
- * - Byte 2:        Packet size (N)
- * - Byte 3 to N-1: Packet data (D)
- * - Byte 3+N:      Packet checksum; ~(sum(D)) - (N - 1)
+ * - Byte 1:      Packet type
+ * - Byte 2:      Packet size (N)
+ * - Byte 3..N-1: Packet data (D)
+ * - Byte 3+N:    Packet checksum; ~(sum(D)) - (N - 1)
  *
  * Packet Type
  * - 2: Command package
@@ -56,6 +56,7 @@ export class CommandBlockError extends SonyDriverError {
   }
 }
 
+/** Calculates the checksum for a packet. */
 export function calculateChecksum(data: Buffer) {
   let x = 0n
   for (const byte of data) {
@@ -63,7 +64,7 @@ export function calculateChecksum(data: Buffer) {
   }
 
   x = ~x & 0xffn
-  x = x - BigInt(data.byteLength - 1)
+  x = x - BigInt(data.byteLength) - 1n
 
   return Number(x)
 }
@@ -71,11 +72,13 @@ export function calculateChecksum(data: Buffer) {
 export type PacketType = z.infer<typeof PacketType>
 export const PacketType = z.number().int().brand('PacketType')
 
+/** Identifies a command packet. */
 export const kCommandPacket = PacketType.parse(0x2)
 
 export type Package = z.infer<typeof Package>
 export const Package = z.instanceof(Buffer).brand('Packet')
 
+/** Create a packet. */
 export function createPacket(type: PacketType, data: Buffer) {
   if (data.byteLength === 0) {
     throw new PacketError('Attempting to send empty packet')
@@ -104,12 +107,15 @@ export function createPacket(type: PacketType, data: Buffer) {
 export type AddressKind = z.infer<typeof AddressKind>
 export const AddressKind = z.number().int().brand('AddressKind')
 
+/** Identifier all monitors. */
 export const kAddressAllMonitors = AddressKind.parse(0xc0)
+/** Identifier a group of monitors. */
 export const kAddressGroup = AddressKind.parse(0x80)
+/** Identifier a single monitor. */
 export const kAddressMonitor = AddressKind.parse(0x00)
 
 export type AddressNumber = z.infer<typeof AddressNumber>
-export const AddressNumber = z.number().int().min(0).max(0xf)
+export const AddressNumber = z.number().int().min(0).max(0x1f)
 
 export type Address = z.infer<typeof Address>
 export const Address = z.number().int().min(0).max(0xff).brand('Address')
