@@ -148,3 +148,13 @@ the systems can be underpowered for such a purpose.
 
 You should now have a package ending in `.AppImage` in the `dist` folder. This package can be run like any other
 AppImage file.
+
+### Releasing
+
+- Start a the build docker conatiner: `docker compose run --build -it --rm build`
+- Fresh install the packages: `yarn --force`
+- Package the application: `yarn make`
+- Land and tag the release.
+- Create a release from the tag and copy the following files to the release assets:
+  - `bridgecmdr-<version>-armv7l.AppImage`
+  - `latest-linux-arm.yml`
