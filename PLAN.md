@@ -1,6 +1,14 @@
-- v2.1
-  - Switch the majority of the IPC using tRPC.
-    - Level uses a streaming IPC, so leave it be for now.
-    - Anything passing a file may still require some custom hanlding.
-  - More drivers.
-  - Move more modules to core.
+- Milestones
+  - v2.1
+    - Switch the majority of the IPC using tRPC.
+      - Level uses a streaming IPC, so leave it be for now.
+      - Anything passing a file may still require some custom hanlding.
+    - More drivers.
+    - Move more modules to core.
+- Drivers
+  - Shinybow
+  - Monoprice Blackbird
+  - J-Tech Digital
+  - ASHATA
+  - TESmart
+  - No Hassle AV
