@@ -1,12 +1,5 @@
 import Logger from 'electron-log'
-import {
-  createAddress,
-  createCommand,
-  kAddressAllMonitors,
-  kPowerOff,
-  kPowerOn,
-  kSetChannel
-} from '../../helpers/sonyRs485'
+import { createAddress, createCommand, kAddressAll, kPowerOff, kPowerOn, kSetChannel } from '../../helpers/sonyRs485'
 import { createCommandStream } from '../../helpers/stream'
 import { defineDriver, kDeviceHasNoExtraCapabilities } from '../../system/driver'
 import type { Command, CommandArg } from '../../helpers/sonyRs485'
@@ -24,13 +17,17 @@ const sonyRs485Driver = defineDriver({
   capabilities: kDeviceHasNoExtraCapabilities,
   setup: async (uri) => {
     const sendCommand = async (command: Command, arg0?: CommandArg, arg1?: CommandArg) => {
-      const source = createAddress(kAddressAllMonitors, 0)
-      const destination = createAddress(kAddressAllMonitors, 0)
+      const source = createAddress(kAddressAll, 0)
+      const destination = createAddress(kAddressAll, 0)
       const packet = createCommand(destination, source, command, arg0, arg1)
 
       const connection = await createCommandStream(uri, {
         baudRate: 38400,
-        timeout: 5000
+        dataBits: 8,
+        stopBits: 1,
+        parity: 'odd',
+        timeout: 5000,
+        keepAlive: true
       })
 
       // TODO: Other situation handlers...

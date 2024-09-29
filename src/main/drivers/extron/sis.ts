@@ -17,6 +17,9 @@ const extronSisDriver = defineDriver({
     const sendCommand = async (command: string) => {
       const connection = await createCommandStream(uri, {
         baudRate: 9600,
+        dataBits: 8,
+        stopBits: 1,
+        parity: 'none',
         timeout: 5000,
         keepAlive: true
       })

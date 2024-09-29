@@ -71,7 +71,7 @@ test<MockStreamContext>('power on', async (context) => {
   const { useDrivers } = await import('../../../renderer/system/driver')
   const { load } = useDrivers()
 
-  const command = Buffer.of(0x02, 4, 0xc0, 0xc0, 0x29, 0x3e, 0x13)
+  const command = Buffer.of(0x02, 4, 0xc0, 0xc0, 0x29, 0x3e, 0x15)
   // Packet type: Command == 0x02
   // Packet contents length: 4
   // Command packet:
@@ -95,7 +95,7 @@ test<MockStreamContext>('power off', async (context) => {
   const { useDrivers } = await import('../../../renderer/system/driver')
   const { load } = useDrivers()
 
-  const commnad = Buffer.of(0x02, 4, 0xc0, 0xc0, 0x2a, 0x3e, 0x12)
+  const commnad = Buffer.of(0x02, 4, 0xc0, 0xc0, 0x2a, 0x3e, 0x14)
   // Packet type: Command == 0x02
   // Packet contents length: 4
   // Command packet:
@@ -120,7 +120,7 @@ test<MockStreamContext>('activate tie', async (context) => {
   const { load } = useDrivers()
 
   const input = 1
-  const command = Buffer.of(0x02, 6, 0xc0, 0xc0, 0x21, 0x00, input, 0x01, 0x55)
+  const command = Buffer.of(0x02, 6, 0xc0, 0xc0, 0x21, 0x00, input, 0x01, 0x57)
   // Packet type: Command == 0x02
   // Packet contents length: 6
   // Command packet:

@@ -64,7 +64,7 @@ export function calculateChecksum(data: Buffer) {
   }
 
   x = ~x & 0xffn
-  x = x - BigInt(data.byteLength) - 1n
+  x = x - (BigInt(data.byteLength) - 1n)
 
   return Number(x)
 }
@@ -92,13 +92,13 @@ export function createPacket(type: PacketType, data: Buffer) {
   const buffer = Buffer.alloc(3 + data.byteLength)
   let pos = 0
 
-  buffer.writeUint8(type, pos)
+  buffer.writeUInt8(type, pos)
   pos += 1
-  buffer.writeUint8(data.byteLength, pos)
+  buffer.writeUInt8(data.byteLength, pos)
   pos += 1
   data.copy(buffer, pos)
   pos += data.byteLength
-  buffer.writeUint8(checksum, pos)
+  buffer.writeUInt8(checksum, pos)
   pos += 1
 
   return Package.parse(buffer.subarray(0, pos))
@@ -107,11 +107,11 @@ export function createPacket(type: PacketType, data: Buffer) {
 export type AddressKind = z.infer<typeof AddressKind>
 export const AddressKind = z.number().int().brand('AddressKind')
 
-/** Identifier all monitors. */
-export const kAddressAllMonitors = AddressKind.parse(0xc0)
-/** Identifier a group of monitors. */
+/** Identifier all devices are being addressed. */
+export const kAddressAll = AddressKind.parse(0xc0)
+/** Identifier a group of monitors are being addressed. */
 export const kAddressGroup = AddressKind.parse(0x80)
-/** Identifier a single monitor. */
+/** Identifier a single monitor are being addressed. */
 export const kAddressMonitor = AddressKind.parse(0x00)
 
 export type AddressNumber = z.infer<typeof AddressNumber>
