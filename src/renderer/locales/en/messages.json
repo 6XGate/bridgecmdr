@@ -1,0 +1,73 @@
+{
+  "product": "BridgeCmdr",
+  "driver": {
+    "provider": "BridgeCmdr contributors"
+  },
+  "action": {
+    "add": "Add",
+    "delete": "Delete",
+    "discard": "Discard",
+    "edit": "Edit",
+    "keep": "Keep",
+    "save": "Save"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "confirm": "OK",
+    "no": "No",
+    "yes": "Yes"
+  },
+  "error": {
+    "zod": "Validation failed"
+  },
+  "label": {
+    "driver": "Driver",
+    "general": "General",
+    "image": "Image",
+    "remote": "Remote host",
+    "loading": "Loading...",
+    "name": "Name",
+    "path": "Path",
+    "port": "Port",
+    "backup": "Backup settings",
+    "settings": "Settings",
+    "sources": "Sources",
+    "source": "Source",
+    "switches": "Switches",
+    "switch": "Switch",
+    "ties": "Ties",
+    "tie": "Tie",
+    "type": "Type"
+  },
+  "message": {
+    "discardChanges": "Do you want to discard these changes?"
+  },
+  "placeholder": {
+    "optional": "optional",
+    "required": "required"
+  },
+  "validations": {
+    "required": "A value is required",
+    "requiredIf": "A value is required",
+    "alpha": "The value must be alphabetic",
+    "alphaNum": "The value must be a mix of alphabetic or numeric",
+    "numeric": "The value must be numeric",
+    "integer": "The value must be an integer",
+    "decimal": "The value must be a number",
+    "email": "The value must be an e-mail address",
+    "ipAddress": "The value must be an IP address",
+    "url": "The value must be a URL",
+    "minLength": "The value must have at least {min} entries",
+    "maxLength": "The value cannot have more than {max} entries",
+    "minValue": "The value must be {min} or more",
+    "maxValue": "The value must be {max} or more",
+    "between": "The value must be between {min} and {max}",
+    "uuid": "The value must be a UUID",
+    "locationPath": "This must be a valid location path",
+    "location": {
+      "port": "This must be a valid port",
+      "ip": "This must be a host or IP address, and optionally port",
+      "path": "This must be a valid path"
+    }
+  }
+}

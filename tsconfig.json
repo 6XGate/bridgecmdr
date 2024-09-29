@@ -1,25 +1,8 @@
 {
-  "compileOnSave": false,
-  "compilerOptions": {
-    "inlineSourceMap": true,
-    "module": "esnext",
-    "moduleResolution": "node",
-    "target": "esnext",
-
-    "allowJs": false,
-    "allowSyntheticDefaultImports": true,
-    "checkJs": false,
-    "disableSizeLimit": true,
-    "emitBOM": false,
-    "esModuleInterop": false,
-    "noImplicitReturns": true,
-    "noEmitHelpers": true,
-    "noEmitOnError": true,
-    "noErrorTruncation": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "resolveJsonModule": true,
-    "strict": true,
-    "types": ["vuetify"]
-  }
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.node.json" },
+    { "path": "./tsconfig.web.json" },
+    { "path": "./tsconfig.test.json" }
+  ]
 }

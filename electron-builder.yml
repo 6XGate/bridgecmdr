@@ -1,0 +1,43 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json
+appId: org.sleepingcats.${name}
+productName: BridgeCmdr
+copyright: 'Copyright ©2019-2024 ${author}'
+artifactName: ${name}-${version}-${arch}.${ext}
+directories:
+  buildResources: resources
+files:
+  - '!.husky${/*}'
+  - '!**/.vscode${/*}'
+  - '!**/.idea${/*}'
+  - '!.yarn${/*}'
+  - '!coverage${/*}'
+  - '!docker${/*}'
+  - '!logs${/*}'
+  - '!src${/*}'
+  - '!.git${/*}'
+  - '!{.dockerignore|Dockerfile|dev-app-update.yml}'
+  - '!{.env|.env.*|.editorconfig}'
+  - '!{.eslintignore|.eslintrc.cjs}'
+  - '!.git*'
+  - '!{.ncurc.yaml|.nvmrc|.yarnrc.yml}'
+  - '!{electron-builder.yml}'
+  - '!electron.vite.config.{js|ts|mjs|cjs}'
+  - '!{.prettierignore|.prettierrc.json|prettier.config.cjs}'
+  - '!{CHANGELOG.md|README.md}'
+  - '!{tsconfig.json|tsconfig.*.json}'
+  - '!vite.config.{js|ts|mjs|cjs}'
+  - '!{yarn.lock|.npmrc|pnpm-lock.yaml}'
+asarUnpack:
+  - node_modules/electron-log/**/*
+  - resources/**
+linux:
+  compression: store
+  target:
+    - AppImage
+  maintainer: Matthew Holder
+  category: Utility
+buildDependenciesFromSource: true
+npmRebuild: true
+publish:
+  provider: github
+  protocol: https

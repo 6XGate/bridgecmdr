@@ -1,0 +1,17 @@
+{
+  "extends": ["@tsconfig/strictest"],
+  "compilerOptions": {
+    "target": "ESNext",
+    "inlineSourceMap": true,
+    "useDefineForClassFields": true,
+    "resolveJsonModule": true,
+    "noEmit": true,
+    "importHelpers": true,
+    "noEmitHelpers": true,
+    "allowSyntheticDefaultImports": true,
+    "allowJs": true,
+    "paths": {
+      "@/*": ["./src/core/*"]
+    }
+  }
+}

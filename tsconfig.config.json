@@ -1,0 +1,9 @@
+{
+  "extends": ["@tsconfig/node20", "./tsconfig.base.json"],
+  "include": ["electron.vite.config.ts", "vite.config.ts", ".eslintrc.cjs", "prettier.config.cjs"],
+  "compilerOptions": {
+    "types": ["node"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler"
+  }
+}
