@@ -7,24 +7,34 @@ const { MockContextBridge } = await import('./context')
 const { MockIpcMain, MockIpcRenderer } = await import('./ipc')
 const { IpcReactor } = await import('./reactor')
 
-export async function electronModule(original: () => Promise<typeof import('electron')>) {
-  const electron = await original()
-
+export function useMocks() {
   const reactor = new IpcReactor()
   const ipcMain = new MockIpcMain(reactor)
   const ipcRenderer = new MockIpcRenderer(reactor)
-  const webContents = new MockWebContents(reactor)
   const contextBridge = new MockContextBridge()
+  const webContent = new MockWebContents(reactor)
+
+  return {
+    reactor,
+    ipcMain,
+    ipcRenderer,
+    contextBridge,
+    webContent
+  }
+}
+
+export async function electronModule(original: () => Promise<typeof import('electron')>) {
+  const electron = await original()
+  const { ipcMain, ipcRenderer, contextBridge } = useMocks()
 
   return {
     ...electron,
     ipcMain,
     ipcRenderer,
-    webContents,
     contextBridge,
     app: {
       getPath: (_name: string) => 'logs'
-    }
+    } as Electron.App
   }
 }
 

@@ -185,6 +185,7 @@ export const useRules = () => {
   //
 
   const uuid = withI18nMessage(
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call -- Can't be help, not well typed.
     helpers.regex(/^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/u),
     { messagePath: () => 'validations.uuid' }
   ) as ValidationRuleWithoutParams

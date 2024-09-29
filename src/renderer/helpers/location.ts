@@ -42,6 +42,7 @@ export const useLocationUtils = (validSwitches: MaybeRefOrGetter<readonly PortDa
 
   const locationPath = helpers.withMessage(
     locMsg,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call -- Can't be help, not well typed.
     (value: unknown) => !(helpers.req(value) as boolean) || isPath(String(value))
   )
 
