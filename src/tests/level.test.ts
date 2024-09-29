@@ -6,7 +6,7 @@ beforeEach(async () => {
   vi.mock(import('electron'), mock.electronModule)
   vi.mock(import('electron-log'))
   await mock.bridgeCmdrBasics()
-  const { default: useLevelServer } = await import('../main/system/level')
+  const { default: useLevelServer } = await import('../main/services/level')
   useLevelServer()
 })
 

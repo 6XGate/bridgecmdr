@@ -12,7 +12,7 @@ beforeEach<MockStreamContext>(async (context) => {
   vi.doMock(import('../../../main/helpers/stream'), stream.commandStreamModule(context))
   await mock.bridgeCmdrBasics()
   await port.createMockPorts()
-  const { default: useDrivers } = await import('../../../main/system/driver')
+  const { default: useDrivers } = await import('../../../main/services/driver')
   const { default: registerDrivers } = await import('../../../main/plugins/drivers')
   useDrivers()
   registerDrivers()
@@ -27,7 +27,9 @@ afterEach(async () => {
 const kDriverGuid = '4C8F2838-C91D-431E-84DD-3666D14A6E2C'
 
 test('available', async () => {
-  const { kDeviceSupportsMultipleOutputs, kDeviceCanDecoupleAudioOutput } = await import('../../../main/system/driver')
+  const { kDeviceSupportsMultipleOutputs, kDeviceCanDecoupleAudioOutput } = await import(
+    '../../../main/services/driver'
+  )
 
   // Raw list.
   await expect(globalThis.services.driver.list()).resolves.toContainEqual({

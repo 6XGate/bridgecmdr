@@ -19,8 +19,12 @@ const powerTooltip = computed(() =>
 )
 
 const dialogs = useDialogs()
+
+const dashboard = useDashboard()
+
 const powerOff = async () => {
   try {
+    await dashboard.powerOff()
     await services.system.powerOff()
   } catch (e) {
     await dialogs.error(e)
@@ -43,7 +47,6 @@ const powerButton = computed(() =>
       }
 )
 
-const dashboard = useDashboard()
 onMounted(dashboard.refresh)
 </script>
 

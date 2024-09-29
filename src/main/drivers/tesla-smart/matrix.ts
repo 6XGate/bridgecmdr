@@ -1,6 +1,6 @@
 import Logger from 'electron-log'
 import { createCommandStream } from '../../helpers/stream'
-import { defineDriver, kDeviceSupportsMultipleOutputs } from '../../system/driver'
+import { defineDriver, kDeviceSupportsMultipleOutputs } from '../../services/driver'
 
 const teslaSmartMatrixDriver = defineDriver({
   enable: true,

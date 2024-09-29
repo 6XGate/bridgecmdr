@@ -145,9 +145,18 @@ export const useDashboard = defineStore('dashboard', () => {
     isReady.value = true
   })
 
+  const powerOff = async () => {
+    await Promise.all(
+      [...loadedDrivers.values()].map(async (driver) => {
+        await driver.powerOff()
+      })
+    )
+  }
+
   return {
     isBusy: computed(() => !isReady.value || tracker.isBusy.value),
     items: computed(() => readonly(items.value)),
-    refresh
+    refresh,
+    powerOff
   }
 })

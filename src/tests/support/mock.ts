@@ -118,6 +118,6 @@ export async function bridgeCmdrBasics() {
 
   await import('../../preload/index')
 
-  const { default: useHandles } = await import('../../main/system/handle')
+  const { default: useHandles } = await import('../../main/services/handle')
   useHandles()
 }
