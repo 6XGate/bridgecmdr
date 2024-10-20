@@ -14,7 +14,7 @@ import useStartup from './services/startup'
 import useSystem from './services/system'
 import useUpdater from './services/updater'
 import { logError } from './utilities'
-import { generate, waitTill } from '@/basics'
+import { waitTill } from '@/basics'
 import { toError } from '@/error-handling'
 
 // In this file you can include the rest of your app"s specific main process
@@ -59,21 +59,24 @@ async function createWindow() {
   const kWait = 2000
   let lastError: unknown
 
-  for await (const tries of generate(3)) {
+  for (let tries = 3; tries > 0; --tries) {
     try {
       // HMR for renderer base on electron-vite cli.
       // Load the remote URL for development or the local html file for production.
       if (is.dev && process.env.ELECTRON_RENDERER_URL != null) {
+        // eslint-disable-next-line no-await-in-loop -- Retry loop must be serial.
         await main.loadURL(process.env.ELECTRON_RENDERER_URL)
       } else {
+        // eslint-disable-next-line no-await-in-loop -- Retry loop must be serial.
         await main.loadFile(joinPath(__dirname, '../renderer/index.html'))
       }
 
       return main
     } catch (e) {
       lastError = e
-      Logger.warn(e, `on try ${tries}`)
+      Logger.warn(e)
 
+      // eslint-disable-next-line no-await-in-loop -- Retry loop must be serial.
       await waitTill(kWait)
     }
   }

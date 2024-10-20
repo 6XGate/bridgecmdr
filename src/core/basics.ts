@@ -1,5 +1,3 @@
-import { range } from 'radash'
-
 /** Provides a means to define a tuple via satisfies. */
 export type Fixed<T = unknown> = [T, ...T[]]
 
@@ -27,10 +25,3 @@ export async function waitTill(timeout: number) {
     setTimeout(resolve, timeout)
   })
 }
-
-/**
- * Provides an iterator for a specified number of iterations.
- * @param iterations - Number of iterations.
- * @returns Generator that will yield the number of iterations.
- */
-export const generate = (iterations: number) => range(iterations - 1)

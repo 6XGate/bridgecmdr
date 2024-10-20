@@ -70,11 +70,13 @@ export const defineDatabase = <Schema extends z.AnyZodObject>(
         }
       }
 
-      for await (const fields of basicIndices) {
+      for (const fields of basicIndices) {
+        // eslint-disable-next-line no-await-in-loop -- Should be serialized.
         await db.createIndex({ index: { fields } })
       }
 
-      for await (const [index, fields] of namedIndices) {
+      for (const [index, fields] of namedIndices) {
+        // eslint-disable-next-line no-await-in-loop -- Should be serialized.
         await db.createIndex({ index: { fields, name: index } })
       }
 
