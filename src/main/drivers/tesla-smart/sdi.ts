@@ -13,8 +13,8 @@ const teslaSmartSdiDriver = defineDriver({
     }
   },
   capabilities: kDeviceHasNoExtraCapabilities,
-  setup: async (uri) => {
-    const sendCommand = async (command: Buffer) => {
+  setup: async function setup(uri) {
+    async function sendCommand(command: Buffer) {
       const connection = await createCommandStream(uri, {
         baudRate: 9600,
         dataBits: 8,
@@ -36,18 +36,18 @@ const teslaSmartSdiDriver = defineDriver({
       await connection.close()
     }
 
-    const activate = async (inputChannel: number) => {
+    async function activate(inputChannel: number) {
       Logger.log(`teslaSmartSdiDriver.activate(${inputChannel})`)
       await sendCommand(Buffer.of(0xaa, 0xcc, 0x01, inputChannel))
     }
 
-    const powerOn = async () => {
+    async function powerOn() {
       Logger.log('teslaSmartSdiDriver.powerOn')
       Logger.debug('teslaSmartSdiDriver.powerOn is a no-op')
       await Promise.resolve()
     }
 
-    const powerOff = async () => {
+    async function powerOff() {
       Logger.log('teslaSmartSdiDriver.powerOff')
       Logger.debug('teslaSmartSdiDriver.powerOff is a no-op')
       await Promise.resolve()

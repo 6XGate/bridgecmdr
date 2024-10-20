@@ -13,8 +13,8 @@ const teslaSmartKvmDriver = defineDriver({
     }
   },
   capabilities: kDeviceHasNoExtraCapabilities,
-  setup: async (uri) => {
-    const sendCommand = async (command: Buffer) => {
+  setup: async function setup(uri) {
+    async function sendCommand(command: Buffer) {
       const connection = await createCommandStream(uri, {
         baudRate: 9600,
         dataBits: 8,
@@ -36,18 +36,18 @@ const teslaSmartKvmDriver = defineDriver({
       await connection.close()
     }
 
-    const activate = async (inputChannel: number) => {
+    async function activate(inputChannel: number) {
       Logger.log(`teslaSmartKvmDriver.activate(${inputChannel})`)
       await sendCommand(Buffer.of(0xaa, 0xbb, 0x03, 0x01, inputChannel, 0xee))
     }
 
-    const powerOn = async () => {
+    async function powerOn() {
       Logger.log('teslaSmartKvmDriver.powerOn')
       Logger.debug('teslaSmartKvmDriver.powerOn is a no-op')
       await Promise.resolve()
     }
 
-    const powerOff = async () => {
+    async function powerOff() {
       Logger.log('teslaSmartKvmDriver.powerOff')
       Logger.debug('teslaSmartKvmDriver.powerOff is a no-op')
       await Promise.resolve()

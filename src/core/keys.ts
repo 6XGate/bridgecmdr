@@ -1,10 +1,8 @@
 import type { Tagged } from 'type-fest'
 
-export type BrandedBases = symbol | number | string
-
 declare const KeyType: unique symbol
 
-export type BrandedKey<Key extends BrandedBases, Kind extends PropertyKey, T> = Tagged<
+export type BrandedKey<Key extends PropertyKey, Kind extends PropertyKey, T> = Tagged<
   Key,
   Kind,
   {

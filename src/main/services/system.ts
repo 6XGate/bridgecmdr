@@ -9,7 +9,7 @@ import type { FileData } from '@/struct'
 import type { OpenDialogOptions, SaveDialogOptions } from 'electron'
 import { raiseError } from '@/error-handling'
 
-const useSystem = memo(() => {
+const useSystem = memo(function useSystem() {
   const { dbusBind } = useDbus()
 
   const powerOffByDbus = dbusBind(
@@ -25,7 +25,7 @@ const useSystem = memo(() => {
     await powerOffByDbus(interactive)
   }
 
-  const openFile = ipcHandle(async (ev, options: OpenDialogOptions) => {
+  const openFile = ipcHandle(async function openFile(ev, options: OpenDialogOptions) {
     const result = await dialog.showOpenDialog(
       BrowserWindow.fromWebContents(ev.sender) ?? raiseError(() => new ReferenceError('Invalid window')),
       options
@@ -45,7 +45,7 @@ const useSystem = memo(() => {
     )
   })
 
-  const saveFile = ipcHandle(async (ev, source: FileData, options: SaveDialogOptions) => {
+  const saveFile = ipcHandle(async function saveFile(ev, source: FileData, options: SaveDialogOptions) {
     options.defaultPath = options.defaultPath ?? source.path
 
     const result = await dialog.showSaveDialog(

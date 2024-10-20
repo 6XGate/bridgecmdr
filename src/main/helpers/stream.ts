@@ -58,7 +58,7 @@ function createStream(stream: Duplex, implementation: StreamImplementation) {
 }
 
 async function createSocketStream(options: NetConnectOpts) {
-  const socket = await new Promise<Socket>((resolve, reject) => {
+  const socket = await new Promise<Socket>(function createSocketStreamInner(resolve, reject) {
     try {
       const stream = createConnection(options, () => {
         resolve(stream)
@@ -107,7 +107,7 @@ async function createNetStream(target: string, options: NetStreamOptions) {
 }
 
 async function createPortStream(path: string, options: PortStreamOptions) {
-  const port = await new Promise<SerialPort>((resolve, reject) => {
+  const port = await new Promise<SerialPort>(function createPortStreamInner(resolve, reject) {
     const stream = new SerialPort({ path, ...options }, (e) => {
       if (e != null) reject(e)
       else resolve(stream)
