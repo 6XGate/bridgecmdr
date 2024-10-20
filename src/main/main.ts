@@ -14,6 +14,7 @@ import useStartup from './services/startup'
 import useSystem from './services/system'
 import useUpdater from './services/updater'
 import { logError } from './utilities'
+import { generate, waitTill } from '@/basics'
 import { toError } from '@/error-handling'
 
 // In this file you can include the rest of your app"s specific main process
@@ -23,12 +24,6 @@ Logger.initialize({ preload: true, spyRendererConsole: true })
 Logger.transports.console.format = '{h}:{i}:{s}.{ms} [{level}] › {text}'
 Logger.transports.file.level = 'debug'
 Logger.errorHandler.startCatching()
-
-async function waitTill(timeout: number) {
-  await new Promise<void>((resolve) => {
-    setTimeout(resolve, timeout)
-  })
-}
 
 async function createWindow() {
   const willStartWithDark = nativeTheme.shouldUseDarkColors || nativeTheme.shouldUseInvertedColorScheme
@@ -53,7 +48,7 @@ async function createWindow() {
     main.webContents.openDevTools({ mode: 'undocked' })
   }
 
-  main.webContents.setWindowOpenHandler((details) => {
+  main.webContents.setWindowOpenHandler(function windowOpenHandler(details) {
     shell.openExternal(details.url).catch((e: unknown) => {
       Logger.error(e)
     })
@@ -64,24 +59,21 @@ async function createWindow() {
   const kWait = 2000
   let lastError: unknown
 
-  for (let tries = 3; tries > 0; --tries) {
+  for await (const tries of generate(3)) {
     try {
       // HMR for renderer base on electron-vite cli.
       // Load the remote URL for development or the local html file for production.
       if (is.dev && process.env.ELECTRON_RENDERER_URL != null) {
-        // eslint-disable-next-line no-await-in-loop -- Retry loop must be serial.
         await main.loadURL(process.env.ELECTRON_RENDERER_URL)
       } else {
-        // eslint-disable-next-line no-await-in-loop -- Retry loop must be serial.
         await main.loadFile(joinPath(__dirname, '../renderer/index.html'))
       }
 
       return main
     } catch (e) {
       lastError = e
-      Logger.warn(e)
+      Logger.warn(e, `on try ${tries}`)
 
-      // eslint-disable-next-line no-await-in-loop -- Retry loop must be serial.
       await waitTill(kWait)
     }
   }

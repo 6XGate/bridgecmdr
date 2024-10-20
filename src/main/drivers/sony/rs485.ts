@@ -15,8 +15,8 @@ const sonyRs485Driver = defineDriver({
     }
   },
   capabilities: kDeviceHasNoExtraCapabilities,
-  setup: async (uri) => {
-    const sendCommand = async (command: Command, arg0?: CommandArg, arg1?: CommandArg) => {
+  setup: async function setup(uri) {
+    async function sendCommand(command: Command, arg0?: CommandArg, arg1?: CommandArg) {
       const source = createAddress(kAddressAll, 0)
       const destination = createAddress(kAddressAll, 0)
       const packet = createCommand(destination, source, command, arg0, arg1)
@@ -42,17 +42,17 @@ const sonyRs485Driver = defineDriver({
       await connection.close()
     }
 
-    const activate = async (inputChannel: number) => {
+    async function activate(inputChannel: number) {
       Logger.log(`sonyRs485Driver.activate(${inputChannel})`)
       await sendCommand(kSetChannel, 1, inputChannel)
     }
 
-    const powerOn = async () => {
+    async function powerOn() {
       Logger.log('sonyRs485Driver.powerOn')
       await sendCommand(kPowerOn)
     }
 
-    const powerOff = async () => {
+    async function powerOff() {
       Logger.log('sonyRs485Driver.powerOff')
       await sendCommand(kPowerOff)
     }

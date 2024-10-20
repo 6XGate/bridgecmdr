@@ -4,7 +4,7 @@ import { SerialPort } from 'serialport'
 import { ipcProxy } from '../utilities'
 import type { PortApi } from '../../preload/api'
 
-const usePorts = memo(() => {
+const usePorts = memo(function usePorts() {
   ipcMain.handle('ports:list', ipcProxy(SerialPort.list))
 
   return {

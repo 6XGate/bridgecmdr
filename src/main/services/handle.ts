@@ -4,6 +4,7 @@ import { ipcHandle, logError } from '../utilities'
 import type { Handle } from '../../preload/api'
 import type { SymbolKey } from '@/keys'
 import type { IpcMainInvokeEvent, WebContents } from 'electron'
+import { warnPromiseFailures } from '@/error-handling'
 
 export type HandleKey<T> = SymbolKey<'handle', T>
 
@@ -21,22 +22,11 @@ async function dummyClose() {
   await Promise.resolve()
 }
 
-// TODO: Would be nice to watch for page reloads and closes to free handles in use by that page.
-// TODO: Register a Handle API for the main process
-// interface HandleApi {
-//   // Closes a singular handle.
-//   close: (h: Handle) => Promise<void>
-//   // Closes all handle for a given web content.
-//   unload: (sender: WebContent) => Promise<void>
-// }
-//
-// May want to add a reference counting or weakset system for this.
-
 /**
  * Allows the use of an opaque handles for referencing
  * resources by the renderer process.
  */
-const useHandles = memo(() => {
+const useHandles = memo(function useHandles() {
   /** The maximum number of handles sans 256. */
   const kMaxHandles = 131072
 
@@ -193,7 +183,7 @@ const useHandles = memo(() => {
       throw logError(new ReferenceError('Invalid handle'))
     }
 
-    // Remove the handle from the tracker tree.
+    // Remove the handle from the tracker tree,
     // do this ealier so if any other task
     // tries to close this handle, it
     // cannot see it.
@@ -219,9 +209,6 @@ const useHandles = memo(() => {
     // If it fails to close, it must throw an
     // error or be silent.
     await descriptor.close(descriptor.resource)
-
-    // // Close the handle.
-    // await closeHandle(handle)
   }
 
   /**
@@ -239,7 +226,7 @@ const useHandles = memo(() => {
       const next = handles.values().next()
       if (next.done === true) return
 
-      // eslint-disable-next-line no-await-in-loop -- Must be serialized to prevent
+      // eslint-disable-next-line no-await-in-loop -- Must be serialized to prevent issues.
       await freeHandle(event, next.value)
     }
   }
@@ -250,14 +237,17 @@ const useHandles = memo(() => {
    * There is no need to handle the free-list or ownership.
    */
   async function shutDown() {
-    await Promise.all(
-      handleMap.map(async (handle) => {
-        if (typeof handle === 'object') {
-          await handle.close(handle.resource)
-        } else {
-          await Promise.resolve()
-        }
-      })
+    warnPromiseFailures(
+      'closing handle failure',
+      await Promise.allSettled(
+        handleMap.map(async function closeHandle(handle) {
+          if (typeof handle === 'object') {
+            await handle.close(handle.resource)
+          } else {
+            await Promise.resolve()
+          }
+        })
+      )
     )
   }
 

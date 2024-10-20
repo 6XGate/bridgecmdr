@@ -1,7 +1,8 @@
+import { memo } from 'radash'
 import { z } from 'zod'
 
 /** Defines the Desktop Entry file data type schemas. */
-const useEntry = () => {
+const useEntry = memo(function useEntry() {
   const Boolean = z.coerce.boolean()
   const String = z.string()
   const StringList = z.string().transform((v) => v.split(';'))
@@ -23,7 +24,7 @@ const useEntry = () => {
     Url,
     Any
   }
-}
+})
 
 /** Desktop Entry file data type schemas. */
 export const Entry = useEntry()
@@ -95,7 +96,7 @@ export const DesktopEntryFile = z
   .catchall(Entry.Section)
 
 /** Makes sure the desktop structure is ready for INI serialization, joining arrays. */
-export const readyEntry = (file: DesktopEntryFile) => {
+export function readyEntry(file: DesktopEntryFile) {
   for (const section of Object.values(file)) {
     for (const [key, value] of Object.entries(section)) {
       if (Array.isArray(value)) {

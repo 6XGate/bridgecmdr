@@ -11,6 +11,7 @@ import type { Driver } from '../system/driver'
 import type { Source } from '../system/source'
 import type { ReadonlyDeep } from 'type-fest'
 import { isNotNullish } from '@/basics'
+import { warnPromiseFailures } from '@/error-handling'
 
 export interface Button {
   readonly guid: string
@@ -49,10 +50,13 @@ export const useDashboard = defineStore('dashboard', () => {
       }
     }
 
-    await Promise.all(
-      closing.map(async (driver) => {
-        await driver.close()
-      })
+    warnPromiseFailures(
+      'driver close failure',
+      await Promise.allSettled(
+        closing.map(async (driver) => {
+          await driver.close()
+        })
+      )
     )
 
     // Load any drivers that are new or are being replaced.
@@ -101,10 +105,13 @@ export const useDashboard = defineStore('dashboard', () => {
         button.isActive = false
       }
 
-      await Promise.all(
-        commands.map(async ({ tie, driver }) => {
-          await driver.activate(tie.inputChannel, tie.outputChannels.video ?? 0, tie.outputChannels.audio ?? 0)
-        })
+      warnPromiseFailures(
+        'tie activation failure',
+        await Promise.allSettled(
+          commands.map(async ({ tie, driver }) => {
+            await driver.activate(tie.inputChannel, tie.outputChannels.video ?? 0, tie.outputChannels.audio ?? 0)
+          })
+        )
       )
     }
 
@@ -146,10 +153,13 @@ export const useDashboard = defineStore('dashboard', () => {
   })
 
   const powerOff = async () => {
-    await Promise.all(
-      [...loadedDrivers.values()].map(async (driver) => {
-        await driver.powerOff()
-      })
+    warnPromiseFailures(
+      'driver power off failure',
+      await Promise.allSettled(
+        [...loadedDrivers.values()].map(async (driver) => {
+          await driver.powerOff()
+        })
+      )
     )
   }
 

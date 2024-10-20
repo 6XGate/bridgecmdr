@@ -13,8 +13,8 @@ const extronSisDriver = defineDriver({
     }
   },
   capabilities: kDeviceSupportsMultipleOutputs | kDeviceCanDecoupleAudioOutput,
-  setup: async (uri) => {
-    const sendCommand = async (command: string) => {
+  setup: async function setup(uri) {
+    async function sendCommand(command: string) {
       const connection = await createCommandStream(uri, {
         baudRate: 9600,
         dataBits: 8,
@@ -36,20 +36,20 @@ const extronSisDriver = defineDriver({
       await connection.close()
     }
 
-    const activate = async (inputChannel: number, videoOutputChannel: number, audioOutputChannel: number) => {
+    async function activate(inputChannel: number, videoOutputChannel: number, audioOutputChannel: number) {
       Logger.log(`extronSisDriver.activate(${inputChannel}, ${videoOutputChannel}, ${audioOutputChannel})`)
       const videoCommand = `${inputChannel}*${videoOutputChannel}%`
       const audioCommand = `${inputChannel}*${audioOutputChannel}$`
       await sendCommand(`${videoCommand}\r\n${audioCommand}\r\n`)
     }
 
-    const powerOn = async () => {
+    async function powerOn() {
       Logger.log('extronSisDriver.powerOn')
       Logger.debug('extronSisDriver.powerOn is a no-op')
       await Promise.resolve()
     }
 
-    const powerOff = async () => {
+    async function powerOff() {
       Logger.log('extronSisDriver.powerOff')
       Logger.debug('extronSisDriver.powerOff is a no-op')
       await Promise.resolve()

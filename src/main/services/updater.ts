@@ -16,7 +16,7 @@ interface AppAutoUpdaterEventMap {
 
 type ProgressHandler = (...args: AppAutoUpdaterEventMap['progress']) => void
 
-const useUpdater = memo(() => {
+const useUpdater = memo(function useUpdater() {
   /** The internal application updater for AppImage. */
   autoUpdater.autoDownload = false
   autoUpdater.autoInstallOnAppQuit = false
@@ -136,7 +136,7 @@ const useUpdater = memo(() => {
   const updater = autoBind(new AppAutoUpdater())
 
   const downloadWaiters = new WeakMap<WebContents, ProgressHandler>()
-  const remoteDownloadUpdate = ipcHandle(async (ev) => {
+  const remoteDownloadUpdate = ipcHandle(async function remoteDownloadUpdate(ev) {
     let handler = downloadWaiters.get(ev.sender)
     if (handler == null) {
       handler = (progress) => {

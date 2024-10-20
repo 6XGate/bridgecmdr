@@ -70,17 +70,13 @@ export const defineDatabase = <Schema extends z.AnyZodObject>(
         }
       }
 
-      const waits: Promise<unknown>[] = []
-
-      for (const fields of basicIndices) {
-        waits.push(db.createIndex({ index: { fields } }))
+      for await (const fields of basicIndices) {
+        await db.createIndex({ index: { fields } })
       }
 
-      for (const [index, fields] of namedIndices) {
-        waits.push(db.createIndex({ index: { fields, name: index } }))
+      for await (const [index, fields] of namedIndices) {
+        await db.createIndex({ index: { fields, name: index } })
       }
-
-      await Promise.all(waits)
 
       return db
     })()
