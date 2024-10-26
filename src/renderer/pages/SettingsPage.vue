@@ -11,6 +11,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import Page from '../components/Page.vue'
+import { useGuardedAsyncOp } from '../helpers/utilities'
 import { useSources } from '../system/source'
 import { useSwitches } from '../system/switch'
 import { trackBusy } from '../utilities/tracking'
@@ -21,7 +22,6 @@ import type { I18nSchema } from '../locales/locales'
 //
 
 const { t, n } = useI18n<I18nSchema>()
-const { track, isBusy } = trackBusy()
 const router = useRouter()
 const appInfo = globalThis.application
 
@@ -34,12 +34,14 @@ const sources = useSources()
 const switches = useSwitches()
 
 // Reduce flicker and shorten the path to the items length of the stores, update
-// them only on our refresh. We will only track the refresh.
+// them only on refresh. We will only track the refresh.
 const sourceCount = ref(0)
 const switchCount = ref(0)
 
+const { isBusy } = trackBusy(sources.isBusy, switches.isBusy)
+
 onMounted(
-  track(async () => {
+  useGuardedAsyncOp(async () => {
     await Promise.all([sources.all(), switches.all()])
     sourceCount.value = sources.items.length
     switchCount.value = switches.items.length
@@ -57,6 +59,7 @@ onUnmounted(() => {
     <VToolbar v-bind="toolbar" :title="t('label.settings')" flat>
       <template #prepend><VBtn :icon="mdiArrowLeft" @click="router.back" /></template>
     </VToolbar>
+    <VProgressLinear v-show="isBusy" indeterminate />
     <VList v-scroll.self="scrolled" bg-color="transparent" :disabled="isBusy">
       <VListItem
         :title="t('label.general')"

@@ -1,79 +1,22 @@
 import { BlobReader, BlobWriter, TextWriter, ZipReader } from '@zip.js/zip.js'
 import mime from 'mime'
 import { z } from 'zod'
-import useSettings, { ColorScheme, IconSize, PowerOffTaps } from '../../stores/settings'
+import useSettings from '../../stores/settings'
 import { useDrivers } from '../../system/driver'
 import { useSources } from '../../system/source'
 import { useSwitches } from '../../system/switch'
 import { useTies } from '../../system/tie'
 
-const DocHeader = z.object({
-  _id: z.string().uuid()
-})
-
-const layouts = {
-  // Layout v1, used in settings for v1 and v2.
-  1: {
-    sources: z.array(
-      DocHeader.extend({
-        title: z.string().min(1),
-        image: z.string().min(1).nullable()
-      })
-    ),
-    switches: z.array(
-      DocHeader.extend({
-        driverId: z.string().uuid(),
-        title: z.string(),
-        path: z.string()
-      })
-    ),
-    ties: z.array(
-      DocHeader.extend({
-        sourceId: z.string().uuid(),
-        switchId: z.string().uuid(),
-        inputChannel: z.number().int(),
-        outputChannels: z.object({
-          video: z.number().int().optional(),
-          audio: z.number().int().optional()
-        })
-      })
-    )
-  }
-}
-
-type V2 = z.output<typeof V2>
-const V2 = z.object({
-  version: z.literal(2),
-  settings: z
-    .object({
-      iconSize: IconSize.optional(),
-      colorScheme: ColorScheme.optional(),
-      powerOnSwitchesAtStart: z.boolean().optional(),
-      powerOffWhen: PowerOffTaps.optional()
-    })
-    .optional(),
-  layouts: z.object(layouts[1])
-})
-
-const V1 = z
-  .object({
-    version: z.literal(1),
-    ...layouts[1]
-  })
-  .transform(
-    ({ sources, switches, ties }) =>
-      ({
-        version: 2,
-        layouts: { sources, switches, ties }
-      }) satisfies V2
-  )
-  .pipe(V2)
-
-export const BackupSettings = z.union([V2, V1])
-export type BackupSettings = z.output<typeof BackupSettings>
-
-export const importSettings = async (file: File) => {
+export async function importSettings(file: File) {
   const settings = useSettings()
+  const formats = await Promise.all([
+    // HACK: Don't use map to retain the tuple, and type for
+    // each element, for z.union, which wants a tuple.
+    import('./formats/version1').then((m) => m.Export),
+    import('./formats/version2').then((m) => m.Export)
+  ])
+
+  const backupSettings = z.union(formats)
 
   const zipFile = new BlobReader(file)
   const zipReader = new ZipReader(zipFile)
@@ -87,7 +30,7 @@ export const importSettings = async (file: File) => {
   await configEntry.getData(configFile)
   const configData = await configFile.getData()
 
-  const data = BackupSettings.parse(JSON.parse(configData))
+  const data = backupSettings.parse(JSON.parse(configData))
 
   settings.iconSize = data.settings?.iconSize ?? settings.iconSize
   settings.colorScheme = data.settings?.colorScheme ?? settings.colorScheme

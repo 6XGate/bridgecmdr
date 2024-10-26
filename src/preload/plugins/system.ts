@@ -1,5 +1,6 @@
 import { basename } from 'node:path'
-import useIpc from '../support'
+import { memo } from 'radash'
+import { useIpc } from '../support'
 import type { SystemApi } from '../api'
 import type { FileData } from '@/struct'
 import type { OpenDialogOptions, SaveDialogOptions } from 'electron'
@@ -7,7 +8,7 @@ import type { OpenDialogOptions, SaveDialogOptions } from 'electron'
 type ShowOpenDialogMain = (options: OpenDialogOptions) => Promise<FileData[] | null>
 type SaveFileMain = (file: FileData, options: SaveDialogOptions) => Promise<boolean>
 
-const useSystemApi = () => {
+const useSystemApi = memo(function useSystemApi() {
   const ipc = useIpc()
 
   const openFileMain: ShowOpenDialogMain = ipc.useInvoke('system:openFile')
@@ -34,6 +35,6 @@ const useSystemApi = () => {
     openFile,
     saveFile
   } satisfies SystemApi
-}
+})
 
 export default useSystemApi

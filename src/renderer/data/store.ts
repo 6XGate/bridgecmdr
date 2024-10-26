@@ -4,12 +4,12 @@ import type { DataSet } from './set'
 import type { Tracker } from '../utilities/tracking'
 import type { z } from 'zod'
 
-export const useDataStore = <Schema extends z.AnyZodObject>(
+export function useDataStore<Schema extends z.AnyZodObject>(
   db: Database<Schema>,
   set: DataSet<Schema>,
   tracker: Tracker
-) => {
-  const all = tracker.track(async () => {
+) {
+  const all = tracker.track(async function all() {
     // Clear the list before load.
     set.initialize([])
 
@@ -17,33 +17,33 @@ export const useDataStore = <Schema extends z.AnyZodObject>(
     set.initialize(await db.all())
   })
 
-  const get = tracker.track(async (...args: Parameters<typeof db.get>) => {
+  const get = tracker.track(async function get(...args: Parameters<typeof db.get>) {
     const doc = await db.get(...args)
     set.current.value = doc
 
     return doc
   })
 
-  const add = tracker.track(async (...args: Parameters<typeof db.add>) => {
+  const add = tracker.track(async function add(...args: Parameters<typeof db.add>) {
     const newDoc = await db.add(...args)
     set.insertItem(newDoc)
 
     return newDoc
   })
 
-  const update = tracker.track(async (...args: Parameters<typeof db.update>) => {
+  const update = tracker.track(async function update(...args: Parameters<typeof db.update>) {
     const newDoc = await db.update(...args)
     set.replaceItem(newDoc)
 
     return newDoc
   })
 
-  const remove = tracker.track(async (...[id, ...args]: Parameters<typeof db.remove>) => {
+  const remove = tracker.track(async function remove(...[id, ...args]: Parameters<typeof db.remove>) {
     await db.remove(id, ...args)
     set.deleteItem(id)
   })
 
-  const dismiss = () => {
+  function dismiss() {
     set.current.value = undefined
   }
 

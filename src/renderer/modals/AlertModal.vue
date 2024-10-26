@@ -12,7 +12,7 @@ const message = ref('')
 const button = ref(t('common.confirm'))
 const color = ref<string>()
 
-onReveal((config) => {
+onReveal(function handleReveal(config) {
   title.value = config.title
   message.value = config.message
   button.value = config.button ?? t('common.confirm')

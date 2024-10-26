@@ -41,7 +41,7 @@ export const defineDatabase = <Schema extends z.AnyZodObject>(
   rawSchema: Schema,
   ...indicesBlocks: Indices[]
 ) =>
-  createSharedComposable(() => {
+  createSharedComposable(function $defineDatabase() {
     type Doc = z.output<Schema>
     type Raw = z.input<Schema>
     type PouchDatabase = InstanceType<typeof PouchDB<Doc>>
@@ -53,7 +53,7 @@ export const defineDatabase = <Schema extends z.AnyZodObject>(
       })
     )
 
-    const booted = (async () => {
+    const booted = (async function booted() {
       const db = new PouchDb<Doc>(name)
       const namedIndices = new Map<string, IndexFields>()
       const basicIndices: IndexFields[] = []
@@ -86,7 +86,7 @@ export const defineDatabase = <Schema extends z.AnyZodObject>(
     /**
      * Compacts the database.
      */
-    const compact = async () => {
+    async function compact() {
       const db = await booted
 
       await db.compact()
@@ -98,10 +98,17 @@ export const defineDatabase = <Schema extends z.AnyZodObject>(
     const query = async <Result>(callback: (current: PouchDatabase) => Promise<Result>) => await callback(await booted)
 
     /**
+     * Defines a database operations.
+     */
+    const defineOperation =
+      <Args extends unknown[], Result>(op: (current: PouchDatabase, ...args: Args) => Promise<Result>) =>
+      async (...args: Args) =>
+        await op(await booted, ...args)
+
+    /**
      * Gets all document from the database.
      */
-    const all = async () => {
-      const db = await booted
+    const all = defineOperation(async function all(db) {
       const response = await db.allDocs({
         include_docs: true,
         attachments: true,
@@ -112,23 +119,19 @@ export const defineDatabase = <Schema extends z.AnyZodObject>(
       })
 
       return response.rows.map((row) => row.doc).filter(isNotNullish)
-    }
+    })
 
     /**
      * Gets the specified document from the database.
      */
-    const get = async (id: DocumentId, attachments = true) => {
-      const db = await booted
-
-      return await db.get<Doc>(id.toUpperCase(), attachments ? { attachments: true, binary: true } : {})
-    }
+    const get = defineOperation(async function get(db, id: DocumentId, attachments?: boolean) {
+      return await db.get<Doc>(id.toUpperCase(), attachments !== false ? { attachments: true, binary: true } : {})
+    })
 
     /**
      * Adds attachments to a document.
      */
-    const addAttachments = async (id: DocumentId, attachments: File[]) => {
-      const db = await booted
-
+    const addAttachments = defineOperation(async function addAttachments(db, id: DocumentId, attachments: File[]) {
       // Add each attachment one-at-a-time, this must be serial.
       for (const attachment of attachments) {
         // eslint-disable-next-line no-await-in-loop -- Must be serialized.
@@ -136,14 +139,12 @@ export const defineDatabase = <Schema extends z.AnyZodObject>(
         // eslint-disable-next-line no-await-in-loop -- Must be serialized.
         await db.putAttachment(id, attachment.name, doc._rev, attachment, attachment.type)
       }
-    }
+    })
 
     /**
      * Adds a document to the database.
      */
-    const add = async (doc: Raw, ...attachments: File[]) => {
-      const db = await booted
-
+    const add = defineOperation(async function add(db, doc: Raw, ...attachments: File[]) {
       const document = schema.parse(doc)
 
       await db.put(document)
@@ -152,13 +153,16 @@ export const defineDatabase = <Schema extends z.AnyZodObject>(
       }
 
       return await get(document._id)
-    }
+    })
 
     /**
      * Updates an existing document in the database.
      */
-    const update = async (doc: DeepReadonly<GetDocument<Doc>>, ...attachments: File[]) => {
-      const db = await booted
+    const update = defineOperation(async function update(
+      db,
+      doc: DeepReadonly<GetDocument<Doc>>,
+      ...attachments: File[]
+    ) {
       const id = doc._id
 
       const document = schema.parse(doc)
@@ -172,16 +176,15 @@ export const defineDatabase = <Schema extends z.AnyZodObject>(
       }
 
       return await get(id)
-    }
+    })
 
     /**
      * Removes a document from the database.
      */
-    const remove = async (id: string) => {
-      const db = await booted
+    const remove = defineOperation(async function remove(db, id: string) {
       const doc = await get(id, false)
       await db.remove(doc)
-    }
+    })
 
     return {
       name$: computed(() => name),

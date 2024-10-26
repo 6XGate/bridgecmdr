@@ -4,9 +4,11 @@ import { onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useNextTick } from '../helpers/vue'
 import { useDialogs } from '../modals/dialogs'
+import { trackBusy } from '../utilities/tracking'
 import type { I18nSchema } from '../locales/locales'
 
 const { t } = useI18n<I18nSchema>()
+const { wait, isBusy } = trackBusy()
 const dialogs = useDialogs()
 const doneFirstRun = useLocalStorage<number>('doneFirstRun', 0)
 
@@ -17,12 +19,12 @@ const steps = [
   },
   // v1: Ask about auto-start file creation.
   async function () {
-    if (await services.startup.checkEnabled()) return
+    if (await wait(services.startup.checkEnabled())) return
     const yes = await dialogs.confirm(t('message.autoStartConfirm'))
     if (!yes) return
 
     try {
-      await services.startup.enable()
+      await wait(services.startup.enable())
     } catch (cause) {
       throw new Error(t('message.autoStartError'), { cause })
     }
@@ -38,7 +40,7 @@ const steps = [
   }
 ]
 
-const doFirstRune = useNextTick(async function () {
+const doFirstRun = useNextTick(async function doFirstRun() {
   console.debug(`Done first steps: ${doneFirstRun.value}`)
   try {
     /* eslint-disable no-await-in-loop */
@@ -58,10 +60,13 @@ const doFirstRune = useNextTick(async function () {
   }
 })
 
-onMounted(doFirstRune)
+onMounted(doFirstRun)
 </script>
 
 <template>
+  <VOverlay :model-value="isBusy">
+    <VProgressCircular indeterminate />
+  </VOverlay>
   <slot />
 </template>
 

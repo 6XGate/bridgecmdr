@@ -7,6 +7,7 @@ import InputDialog from '../components/InputDialog.vue'
 import Page from '../components/Page.vue'
 import ReplacableImage from '../components/ReplacableImage.vue'
 import { toFiles } from '../helpers/attachment'
+import { useGuardedAsyncOp } from '../helpers/utilities'
 import TieDialog from '../modals/TieDialog.vue'
 import { useDialogs, useTieDialog } from '../modals/dialogs'
 import { useDrivers } from '../system/driver'
@@ -36,7 +37,6 @@ const props = defineProps<Props>()
 const { t } = useI18n<I18nSchema>()
 const dialogs = useDialogs()
 const router = useRouter()
-const { track, wait, isBusy } = trackBusy()
 
 //
 // Source
@@ -46,14 +46,14 @@ const sources = useSources()
 const source = ref<Source>()
 const file = ref<File>()
 
-const loadSource = async () => {
+const loadSource = useGuardedAsyncOp(async function loadSource() {
   source.value = { ...(await sources.get(props.id)) }
   file.value = toFiles(source.value._attachments).find(
     (f) => source.value?.image != null && f.name === source.value.image
   )
-}
+})
 
-const save = async () => {
+async function save() {
   if (source.value == null) {
     throw new ReferenceError('No source loaded')
   }
@@ -64,7 +64,7 @@ const save = async () => {
 
   try {
     source.value.image = file.value.name
-    source.value = { ...(await wait(sources.update(source.value, ...[file.value].filter(isNotNullish)))) }
+    source.value = { ...(await sources.update(source.value, ...[file.value].filter(isNotNullish))) }
     file.value = toFiles(source.value._attachments).find(
       (f) => source.value?.image != null && f.name === source.value.image
     )
@@ -75,12 +75,12 @@ const save = async () => {
   }
 }
 
-const updateImage = async (newFile: File) => {
+async function updateImage(newFile: File) {
   file.value = newFile
   await save()
 }
 
-onBeforeMount(track(loadSource))
+onBeforeMount(loadSource)
 
 //
 // Ties
@@ -97,7 +97,7 @@ const drivers = useDrivers()
 const ties = useTies()
 const entries = computed(() =>
   ties.items
-    .map((tie) => {
+    .map(function makeEntriy(tie) {
       const switcher = switches.items.find((s) => s._id === tie.switchId)
       const driver = switcher != null ? drivers.items.find((d) => d.guid === switcher.driverId) : undefined
 
@@ -106,16 +106,15 @@ const entries = computed(() =>
     .filter(isNotNullish)
 )
 
-const loadTies = async () => {
-  await switches.all()
-  await ties.forSource(props.id)
-}
+const loadTies = useGuardedAsyncOp(async function loadTies() {
+  await Promise.all([switches.all(), ties.forSource(props.id)])
+})
 
-onBeforeMount(track(loadTies))
+onBeforeMount(loadTies)
 
-const addTie = async (target: NewTie) => {
+async function addTie(target: NewTie) {
   try {
-    await wait(ties.add(target))
+    await ties.add(target)
   } catch (e) {
     await loadSource()
     await loadTies()
@@ -123,9 +122,9 @@ const addTie = async (target: NewTie) => {
   }
 }
 
-const updateTie = async (target: DeepReadonly<Tie>, changes: NewTie) => {
+async function updateTie(target: DeepReadonly<Tie>, changes: NewTie) {
   try {
-    await wait(ties.update({ ...target, ...changes }))
+    await ties.update({ ...target, ...changes })
   } catch (e) {
     await loadSource()
     await loadTies()
@@ -133,7 +132,7 @@ const updateTie = async (target: DeepReadonly<Tie>, changes: NewTie) => {
   }
 }
 
-const deleteTie = async (id: DocumentId) => {
+async function deleteTie(id: DocumentId) {
   const yes = await dialogs.confirm({
     message: t('message.confirmDeleteTie'),
     confirmButton: t('action.delete'),
@@ -146,7 +145,7 @@ const deleteTie = async (id: DocumentId) => {
   }
 
   try {
-    await wait(ties.remove(id))
+    await ties.remove(id)
   } catch (e) {
     await loadSource()
     await loadTies()
@@ -155,10 +154,13 @@ const deleteTie = async (id: DocumentId) => {
 }
 
 const { dialogProps: editorProps } = useTieDialog()
+
+const { isBusy } = trackBusy(sources.isBusy, switches.isBusy, drivers.isBusy, ties.isBusy)
 </script>
 
 <template>
   <Page>
+    <VProgressLinear v-show="isBusy" indeterminate />
     <div class="overflow-y-auto px-6 py-3">
       <div class="d-flex justify-center mb-5">
         <ReplacableImage :image="file" @update="updateImage" />

@@ -26,7 +26,7 @@ const kFilters = [{ extensions: ['zip'], name: t('description.archive') }]
 
 async function exportToFile() {
   try {
-    const file = await wait(async () => await exportSettings())
+    const file = await wait(exportSettings())
     await globalThis.services.system.saveFile(file, {
       title: t('label.export'),
       filters: kFilters,
@@ -50,9 +50,7 @@ async function importFromFile() {
     const file = files?.at(0)
     if (file == null) return
 
-    await wait(async () => {
-      await importSettings(file)
-    })
+    await wait(importSettings(file))
   } catch (e) {
     await dialogs.error(e, {
       title: t('error.import')
@@ -66,6 +64,7 @@ async function importFromFile() {
     <VToolbar v-bind="toolbar" :title="t('label.backup')" flat>
       <template #prepend><VBtn :icon="mdiArrowLeft" @click="router.back" /></template>
     </VToolbar>
+    <VProgressLinear v-show="isBusy" indeterminate />
     <VList v-scroll.self="scrolled" bg-color="transparent" :disabled="isBusy">
       <VListItem
         :title="t('label.export')"

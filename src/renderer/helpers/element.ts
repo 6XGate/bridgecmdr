@@ -14,13 +14,13 @@ interface ScrollingBounds {
   scrolling: ScrollingBoundsEntry
 }
 
-export const useElementScrollingBounds = (el: MaybeComputedElementRef) => {
+export function useElementScrollingBounds(el: MaybeComputedElementRef) {
   const scrolling = ref<ScrollingBounds>({
     client: { left: 0, top: 0, width: 0, height: 0 },
     scrolling: { left: 0, top: 0, width: 0, height: 0 }
   })
 
-  useResizeObserver(el, (entries) => {
+  useResizeObserver(el, function handleResize(entries) {
     for (const entry of entries) {
       const { target } = entry
       const { scrollLeft, scrollTop, scrollWidth, scrollHeight } = target
@@ -32,7 +32,7 @@ export const useElementScrollingBounds = (el: MaybeComputedElementRef) => {
     }
   })
 
-  const $el = computed(() => {
+  const $el = computed(function findElement() {
     const target = toValue(el)
 
     if (target == null) {
@@ -47,7 +47,7 @@ export const useElementScrollingBounds = (el: MaybeComputedElementRef) => {
   })
 
   const scroll = useScroll($el)
-  watch([scroll.x, scroll.y], (value) => {
+  watch([scroll.x, scroll.y], function handleScroll(value) {
     scrolling.value.client.left = value[0]
     scrolling.value.client.top = value[1]
   })

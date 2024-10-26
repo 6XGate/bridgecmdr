@@ -4,11 +4,11 @@ import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import Page from '../components/Page.vue'
+import { useGuardedAsyncOp } from '../helpers/utilities'
 import SwitchDialog from '../modals/SwitchDialog.vue'
 import { useDialogs, useSwitchDialog } from '../modals/dialogs'
 import { useDrivers } from '../system/driver'
 import { useSwitches } from '../system/switch'
-import { trackBusy } from '../utilities/tracking'
 import type { DocumentId } from '../data/database'
 import type { I18nSchema } from '../locales/locales'
 import type { DriverInformation } from '../system/driver'
@@ -27,7 +27,6 @@ interface Item {
   driver: DriverInformation
 }
 
-const { isBusy, track, wait } = trackBusy()
 const switches = useSwitches()
 const drivers = useDrivers()
 const items = computed(() =>
@@ -40,13 +39,13 @@ const items = computed(() =>
     .filter(isNotNullish)
 )
 
-const refresh = track(async () => {
+const refresh = useGuardedAsyncOp(async () => {
   await switches.all()
 })
 
 onMounted(refresh)
 
-const addSwitch = async (target: NewSwitch) => {
+async function addSwitch(target: NewSwitch) {
   try {
     await switches.add(target)
   } catch (e) {
@@ -55,7 +54,7 @@ const addSwitch = async (target: NewSwitch) => {
   }
 }
 
-const updateSwitch = async (target: DeepReadonly<Switch>, changes: NewSwitch) => {
+async function updateSwitch(target: DeepReadonly<Switch>, changes: NewSwitch) {
   try {
     await switches.update({ ...target, ...changes })
   } catch (e) {
@@ -64,7 +63,7 @@ const updateSwitch = async (target: DeepReadonly<Switch>, changes: NewSwitch) =>
   }
 }
 
-const deleteSwitch = async (id: DocumentId) => {
+async function deleteSwitch(id: DocumentId) {
   const yes = await dialogs.confirm({
     title: t('message.confirmDeleteSwitch'),
     message: t('message.deleteSwitchWarning'),
@@ -78,7 +77,7 @@ const deleteSwitch = async (id: DocumentId) => {
   }
 
   try {
-    await wait(switches.remove(id))
+    await switches.remove(id)
   } catch (e) {
     await refresh()
     await dialogs.error(e)
@@ -93,7 +92,8 @@ const { dialogProps: editorProps } = useSwitchDialog()
     <VToolbar v-bind="toolbar" :title="t('label.switches')">
       <template #prepend><VBtn :icon="mdiArrowLeft" @click="router.back" /></template>
     </VToolbar>
-    <VList v-scroll.self="scrolled" :disabled="isBusy" bg-color="transparent">
+    <VProgressLinear v-show="switches.isBusy" indeterminate />
+    <VList v-scroll.self="scrolled" :disabled="switches.isBusy" bg-color="transparent">
       <template v-for="(item, index) of items" :key="item.switch._id">
         <VDivider v-if="index > 0" class="mx-4" />
         <VDialog v-bind="editorProps">

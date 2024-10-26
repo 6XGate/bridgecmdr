@@ -1,7 +1,8 @@
-import useIpc from '../support'
+import { memo } from 'radash'
+import { useIpc } from '../support'
 import type { StartupApi } from '../api'
 
-const useStartupApi = () => {
+const useStartupApi = memo(function useStartupApi() {
   const ipc = useIpc()
 
   return {
@@ -9,6 +10,6 @@ const useStartupApi = () => {
     enable: ipc.useInvoke('startup:enable'),
     disable: ipc.useInvoke('startup:disable')
   } satisfies StartupApi
-}
+})
 
 export default useStartupApi

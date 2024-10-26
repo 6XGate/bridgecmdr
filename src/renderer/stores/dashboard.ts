@@ -23,19 +23,25 @@ export interface Button {
 
 export const useDashboard = defineStore('dashboard', () => {
   const isReady = ref(false)
-  const tracker = trackBusy()
 
   const drivers = useDrivers()
   const ties = useTies()
   const sources = useSources()
   const switches = useSwitches()
+  const { track, isBusy } = trackBusy(
+    () => !isReady.value,
+    drivers.isBusy,
+    sources.isBusy,
+    switches.isBusy,
+    ties.isBusy
+  )
 
   const loadedDrivers = new Map<DocumentId, Driver>()
 
   const { images, loadImages } = useImages()
   const items = ref<Button[]>([])
 
-  const loadDrivers = async () => {
+  async function loadDrivers() {
     await drivers.all()
 
     // Remove drivers for switches removed
@@ -75,10 +81,10 @@ export const useDashboard = defineStore('dashboard', () => {
     }
   }
 
-  const defineButton = (source: ReadonlyDeep<Source>, index: number): Button => {
+  function defineButton(source: ReadonlyDeep<Source>, index: number): Button {
     const commands = ties.items
       .filter((tie) => tie.sourceId === source._id)
-      .map((tie) => {
+      .map(function makeCommand(tie) {
         const switcher = switches.items.find((item) => tie.switchId === item._id)
         const driver = loadedDrivers.get(tie.switchId)
 
@@ -100,7 +106,7 @@ export const useDashboard = defineStore('dashboard', () => {
       })
       .filter(isNotNullish)
 
-    const activate = async () => {
+    async function activate() {
       for (const button of items.value) {
         button.isActive = false
       }
@@ -124,7 +130,7 @@ export const useDashboard = defineStore('dashboard', () => {
     }
   }
 
-  const prepareButton = (button: Button): Button => {
+  function prepareButton(button: Button) {
     const activate = button.activate
     button.activate = async () => {
       await activate()
@@ -134,7 +140,7 @@ export const useDashboard = defineStore('dashboard', () => {
     return button
   }
 
-  const defineDashboard = async () => {
+  async function defineDashboard() {
     loadImages(
       sources.items.map((source) =>
         toFiles(source._attachments).find((f) => source.image != null && f.name === source.image)
@@ -143,7 +149,7 @@ export const useDashboard = defineStore('dashboard', () => {
     items.value = await Promise.all(sources.items.map(defineButton).map(prepareButton))
   }
 
-  const refresh = tracker.track(async () => {
+  const refresh = track(async function refresh() {
     items.value = []
     await Promise.all([ties.compact(), sources.compact(), switches.compact()])
     await Promise.all([ties.all(), sources.all(), switches.all()])
@@ -152,7 +158,7 @@ export const useDashboard = defineStore('dashboard', () => {
     isReady.value = true
   })
 
-  const powerOff = async () => {
+  async function powerOff() {
     warnPromiseFailures(
       'driver power off failure',
       await Promise.allSettled(
@@ -164,7 +170,7 @@ export const useDashboard = defineStore('dashboard', () => {
   }
 
   return {
-    isBusy: computed(() => !isReady.value || tracker.isBusy.value),
+    isBusy: computed(() => isBusy),
     items: computed(() => readonly(items.value)),
     refresh,
     powerOff

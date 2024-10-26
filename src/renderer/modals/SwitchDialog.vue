@@ -50,12 +50,12 @@ const location = computed({
 })
 const { locationPath, pathTypes, pathType, path } = useLocation(location, () => ports.items)
 
-const confirm = () => {
+function confirm() {
   isVisible.value = false
   emit('confirm', target.value)
 }
 
-const cancelIfConfirmed = async () => {
+async function cancelIfConfirmed() {
   if (!dirty.value) {
     cancel()
 
@@ -74,7 +74,7 @@ const cancelIfConfirmed = async () => {
   }
 }
 
-const cancel = () => {
+function cancel() {
   isVisible.value = false
 }
 

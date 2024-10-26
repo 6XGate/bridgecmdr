@@ -25,8 +25,8 @@ export const PowerOffTaps = z.enum(['single', 'double'])
 export type ColorScheme = z.infer<typeof ColorScheme>
 export const ColorScheme = z.enum(['light', 'dark', 'no-preference'])
 
-const useSchema = <Schema extends JsonType>(schema: Schema, deep = false) =>
-  ({
+function useSchema<Schema extends JsonType>(schema: Schema, deep = false) {
+  return {
     deep,
     listenToStorageChanges: true,
     writeDefaults: true,
@@ -35,20 +35,17 @@ const useSchema = <Schema extends JsonType>(schema: Schema, deep = false) =>
       read: (raw) => JsonValue.pipe(schema).parse(raw),
       write: (value) => JSON.stringify(value)
     }
-  }) satisfies UseStorageOptions<z.output<Schema>>
+  } satisfies UseStorageOptions<z.output<Schema>>
+}
 
 const useSettings = defineStore('settings', () => {
-  const iconSize = useUserStorage<IconSize>('iconSize', 128, useSchema(IconSize))
+  const iconSize = useUserStorage('iconSize', 128, useSchema(IconSize))
   const iconSizes = readonly(kIconSizes)
 
   const preferredColorScheme = usePreferredColorScheme()
-  const colorScheme = useUserStorage<ColorScheme>(
-    'colorScheme',
-    'no-preference',
-    useSchema(ColorScheme.catch('no-preference'))
-  )
+  const colorScheme = useUserStorage('colorScheme', 'no-preference', useSchema(ColorScheme.catch('no-preference')))
   const colorSchemes = readonly(ColorScheme.options)
-  const activeColorScheme = computed(() => {
+  const activeColorScheme = computed(function getActiveColorSchema() {
     if (colorScheme.value === 'no-preference') {
       return preferredColorScheme.value === 'no-preference' ? 'light' : 'dark'
     }
@@ -56,9 +53,9 @@ const useSettings = defineStore('settings', () => {
     return colorScheme.value
   })
 
-  const powerOnSwitchesAtStart = useUserStorage<boolean>('powerOnSwitchesAtStart', false, useSchema(z.boolean()))
+  const powerOnSwitchesAtStart = useUserStorage('powerOnSwitchesAtStart', false, useSchema(z.boolean()))
 
-  const powerOffWhen = useUserStorage<PowerOffTaps>('powerOffWhen', 'single', useSchema(PowerOffTaps))
+  const powerOffWhen = useUserStorage('powerOffWhen', 'single', useSchema(PowerOffTaps))
   const powerOffWhenOptions = readonly(PowerOffTaps.options)
 
   return {
