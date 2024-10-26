@@ -6,6 +6,7 @@ import { useSources } from '../system/source'
 import { useSwitches } from '../system/switch'
 import { useTies } from '../system/tie'
 import { trackBusy } from '../utilities/tracking'
+import useSettings from './settings'
 import type { DocumentId } from '../data/database'
 import type { Driver } from '../system/driver'
 import type { Source } from '../system/source'
@@ -24,6 +25,7 @@ export interface Button {
 export const useDashboard = defineStore('dashboard', function defineDashboard() {
   const isReady = ref(false)
 
+  const settings = useSettings()
   const drivers = useDrivers()
   const ties = useTies()
   const sources = useSources()
@@ -149,12 +151,29 @@ export const useDashboard = defineStore('dashboard', function defineDashboard() 
     items.value = await Promise.all(sources.items.map(defineButton).map(prepareButton))
   }
 
+  let poweredOn = false
+  async function powerOnOnce() {
+    if (poweredOn) return
+    if (!settings.powerOnSwitchesAtStart) return
+    warnPromiseFailures(
+      'driver power off failure',
+      await Promise.allSettled(
+        [...loadedDrivers.values()].map(async (driver) => {
+          await driver.powerOn()
+        })
+      )
+    )
+
+    poweredOn = true
+  }
+
   const refresh = tracker.track(async function refresh() {
     items.value = []
     await Promise.all([ties.compact(), sources.compact(), switches.compact()])
     await Promise.all([ties.all(), sources.all(), switches.all()])
     await loadDrivers()
     await setupDashboard()
+    await powerOnOnce()
     isReady.value = true
   })
 
