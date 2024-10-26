@@ -38,7 +38,7 @@ function useSchema<Schema extends JsonType>(schema: Schema, deep = false) {
   } satisfies UseStorageOptions<z.output<Schema>>
 }
 
-const useSettings = defineStore('settings', () => {
+const useSettings = defineStore('settings', function defineSettings() {
   const iconSize = useUserStorage('iconSize', 128, useSchema(IconSize))
   const iconSizes = readonly(kIconSizes)
 

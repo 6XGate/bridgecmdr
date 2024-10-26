@@ -155,7 +155,12 @@ async function deleteTie(id: DocumentId) {
 
 const { dialogProps: editorProps } = useTieDialog()
 
-const { isBusy } = trackBusy(sources.isBusy, switches.isBusy, drivers.isBusy, ties.isBusy)
+const { isBusy } = trackBusy(
+  () => sources.isBusy,
+  () => switches.isBusy,
+  () => drivers.isBusy,
+  () => ties.isBusy
+)
 </script>
 
 <template>

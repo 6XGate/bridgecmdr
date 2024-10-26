@@ -38,7 +38,10 @@ const switches = useSwitches()
 const sourceCount = ref(0)
 const switchCount = ref(0)
 
-const { isBusy } = trackBusy(sources.isBusy, switches.isBusy)
+const { isBusy } = trackBusy(
+  () => sources.isBusy,
+  () => switches.isBusy
+)
 
 onMounted(
   useGuardedAsyncOp(async () => {
