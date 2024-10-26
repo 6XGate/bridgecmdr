@@ -53,10 +53,10 @@ const CardProps = ResponsiveModalOptions.pick({
   rounded: true
 })
 
-export const useResponsiveModal = (
+export function useResponsiveModal(
   breakpoint: MaybeRefOrGetter<boolean>,
   options: MaybeRefOrGetter<ResponsiveModalOptions> = {}
-) => {
+) {
   const dialogProps = computed(() =>
     toValue(breakpoint)
       ? { fullscreen: true, scrim: false, scrollable: true }

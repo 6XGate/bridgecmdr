@@ -13,11 +13,11 @@ import type { Ref } from 'vue'
 
 export type PathType = 'port' | 'ip' | 'path'
 
-export const useLocationUtils = (validSwitches: MaybeRefOrGetter<readonly PortData[]>) => {
+export function useLocationUtils(validSwitches: MaybeRefOrGetter<readonly PortData[]>) {
   const { t } = useI18n<I18nSchema>()
 
   // TODO: Proper checks.
-  const isPath = (value: string) => {
+  function isPath(value: string) {
     switch (true) {
       case value.startsWith('port:'):
         return toValue(validSwitches).find((port) => port.value === value.substring(5)) != null
@@ -28,7 +28,7 @@ export const useLocationUtils = (validSwitches: MaybeRefOrGetter<readonly PortDa
     }
   }
 
-  const locMsg = ({ $model }: MessageProps) => {
+  function locMsg({ $model }: MessageProps) {
     const path = String($model)
     switch (true) {
       case path.startsWith('port:'):
@@ -46,7 +46,7 @@ export const useLocationUtils = (validSwitches: MaybeRefOrGetter<readonly PortDa
     (value: unknown) => !(helpers.req(value) as boolean) || isPath(String(value))
   )
 
-  const splitPath = (value: string | undefined) => {
+  function splitPath(value: string | undefined) {
     if (value == null) {
       return undefined
     }
@@ -72,7 +72,7 @@ interface LocationTypeMetaData {
   value: PathType
 }
 
-export const useLocation = (location: Ref<string>, validSwitches: MaybeRefOrGetter<readonly PortData[]>) => {
+export function useLocation(location: Ref<string>, validSwitches: MaybeRefOrGetter<readonly PortData[]>) {
   const { t } = useI18n<I18nSchema>()
   const { locationPath, splitPath } = useLocationUtils(validSwitches)
 

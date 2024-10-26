@@ -37,7 +37,9 @@ watch(file, (value) => {
 // v-model
 const isVisible = useVModel(props, 'visible', emit)
 
-const confirm = async () => {
+// TODO: Track confirm or move logic to parent (SourceList).
+
+async function confirm() {
   try {
     const result = await sources.add(source.value, ...[file.value].filter(isNotNullish))
     isVisible.value = false
@@ -49,7 +51,7 @@ const confirm = async () => {
   }
 }
 
-const cancelIfConfirmed = async () => {
+async function cancelIfConfirmed() {
   if (!dirty.value) {
     cancel()
 
@@ -68,7 +70,7 @@ const cancelIfConfirmed = async () => {
   }
 }
 
-const cancel = () => {
+function cancel() {
   isVisible.value = false
 }
 

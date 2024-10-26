@@ -28,7 +28,7 @@ interface ValidationCacheEntry {
 
 type RuleCollection<T> = ValidationRuleCollection<T> | undefined
 
-export const useValidation = <
+export function useValidation<
   SArgs extends unknown[],
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Matching Vuelidate.
   SRoot extends { [key in keyof VArgs]: any },
@@ -38,7 +38,7 @@ export const useValidation = <
   state: SRoot | Ref<SRoot> | ToRefs<SRoot>,
   submit: (...args: SArgs) => unknown,
   globalConfig?: GlobalConfig
-) => {
+) {
   const config = { ...(globalConfig ?? {}) } satisfies GlobalConfig
   const v$ = unref(useVuelidate(validationsArgs, state, config))
 
@@ -57,7 +57,7 @@ export const useValidation = <
     cache.clear()
   }
 
-  const checkNestedDirty = (validation: BaseValidation) => {
+  function checkNestedDirty(validation: BaseValidation) {
     if (validation.$dirty) {
       return true
     }
@@ -79,7 +79,7 @@ export const useValidation = <
 
   const dirty = computed(() => checkNestedDirty(v$))
 
-  const getEntry = <T, VRules extends RuleCollection<T>>(validator: BaseValidation<T, VRules>) => {
+  function getEntry<T, VRules extends RuleCollection<T>>(validator: BaseValidation<T, VRules>) {
     let entry = cache.get(validator.$path)
     if (entry != null) {
       return entry
@@ -104,19 +104,23 @@ export const useValidation = <
     return entry
   }
 
-  const getMessages = <T, VRules extends RuleCollection<T>>(validator: BaseValidation<T, VRules>) =>
-    getEntry(validator).status?.errorMessages
+  function getMessages<T, VRules extends RuleCollection<T>>(validator: BaseValidation<T, VRules>) {
+    return getEntry(validator).status?.errorMessages
+  }
 
-  const getClass = <T, VRules extends RuleCollection<T>>(validator: BaseValidation<T, VRules>) =>
-    getEntry(validator).class
+  function getClass<T, VRules extends RuleCollection<T>>(validator: BaseValidation<T, VRules>) {
+    return getEntry(validator).class
+  }
 
-  const getColor = <T, VRules extends RuleCollection<T>>(validator: BaseValidation<T, VRules>) =>
-    getEntry(validator).status?.color
+  function getColor<T, VRules extends RuleCollection<T>>(validator: BaseValidation<T, VRules>) {
+    return getEntry(validator).status?.color
+  }
 
-  const getStatus = <T, VRules extends RuleCollection<T>>(validator: BaseValidation<T, VRules>) =>
-    getEntry(validator).status
+  function getStatus<T, VRules extends RuleCollection<T>>(validator: BaseValidation<T, VRules>) {
+    return getEntry(validator).status
+  }
 
-  const handleCall = async (fn: () => unknown) => {
+  async function handleCall(fn: () => unknown) {
     touch()
 
     const good = await v$.$validate()
@@ -127,11 +131,11 @@ export const useValidation = <
     await fn()
   }
 
-  const guardCall =
-    <Args extends unknown[]>(fn: (...args: Args) => unknown) =>
-    async (...args: Args) => {
+  function guardCall<Args extends unknown[]>(fn: (...args: Args) => unknown) {
+    return async (...args: Args) => {
       await handleCall(() => fn(...args))
     }
+  }
 
   return {
     dirty,
@@ -147,18 +151,16 @@ export const useValidation = <
   }
 }
 
-export const useRules = () => {
+export function useRules() {
   //
   // i18n
   //
-
   const { t } = useI18n<I18nSchema>()
   const withI18nMessage = createI18nMessage({ t })
 
   //
   // Built-in Vuelidate rules
   //
-
   const required = withI18nMessage(builtInRules.required)
   const requiredIf = withI18nMessage(builtInRules.requiredIf, { withArguments: true })
   const requiredUnless = withI18nMessage(builtInRules.requiredIf, { withArguments: true })
@@ -183,7 +185,6 @@ export const useRules = () => {
   //
   // Custom rules
   //
-
   const uuid = withI18nMessage(
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call -- Can't be help, not well typed.
     helpers.regex(/^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/u),
@@ -307,7 +308,7 @@ export { zodIpV4Address as ipV4Address }
 
 const kIpPair = /^[0-9A-Fa-f]{1,4}$/u
 
-const parsePossibleIpString = (value: string) => {
+function parsePossibleIpString(value: string) {
   // Split on the ':', results in some empty strings with compact.
   const parts = value.split(':')
 
@@ -333,7 +334,7 @@ const parsePossibleIpString = (value: string) => {
   return [parts] satisfies Fixed
 }
 
-const isValidFullIpV6 = (value: string[]) => {
+function isValidFullIpV6(value: string[]) {
   const last = value.pop()
 
   // IPv4 translation.
@@ -345,7 +346,7 @@ const isValidFullIpV6 = (value: string[]) => {
   return value.length === 7 && value.every((p) => kIpPair.test(p)) && kIpPair.test(last ?? '')
 }
 
-const isValidCompactIpV6 = ([left, right]: [string[], string[]]) => {
+function isValidCompactIpV6([left, right]: [string[], string[]]) {
   // Undefind if right is empty.
   const last = right.pop()
 
@@ -365,7 +366,7 @@ const isValidCompactIpV6 = ([left, right]: [string[], string[]]) => {
   )
 }
 
-export const isIpV6Address = (value: string) => {
+export function isIpV6Address(value: string) {
   if (value === '::') {
     // Zero address short-circuit.
     return true
@@ -382,14 +383,16 @@ export const isIpV6Address = (value: string) => {
 const zodIpV6Address = z.string().refine(isIpV6Address)
 export { zodIpV6Address as ipV6Address }
 
-export const isHost = (value: string) => isHostName(value) || isIpV4Address(value) || isIpV6Address(value)
+export function isHost(value: string) {
+  return isHostName(value) || isIpV4Address(value) || isIpV6Address(value)
+}
 
 const zodHost = z.string().refine(isHost)
 export { zodHost as host }
 
 const kHostWithOptionalPort = /^((?:\[[A-Fa-f0-9.:]+\])|(?:[\p{N}\p{L}.-]+))(?::([1-9][0-9]*))?$/u
 
-export const zodParseHostWithOptionalPort = (value: string) => {
+export function zodParseHostWithOptionalPort(value: string) {
   const match = kHostWithOptionalPort.exec(value)
 
   if (match == null) {
@@ -407,7 +410,7 @@ export const zodParseHostWithOptionalPort = (value: string) => {
   return [host, port] satisfies Fixed
 }
 
-export const parseHostWithOptionalPort = (value: string) => {
+export function parseHostWithOptionalPort(value: string) {
   const result = zodParseHostWithOptionalPort(value)
   if (result == null) {
     return undefined
@@ -431,7 +434,7 @@ export const isHostWithOptionalPort = (value: string) => {
   return result?.[0].success === true && result[1].success
 }
 
-const zodHostWithOptionalPort = z.string().transform((value, ctx) => {
+const zodHostWithOptionalPort = z.string().transform(function splitHostAndPort(value, ctx) {
   const result = parseHostWithOptionalPort(value)
   if (result == null) {
     ctx.addIssue({

@@ -55,7 +55,7 @@ export interface TypedEventTargetEx<Events extends EventMap> extends TypedEventT
   emit: <E extends keyof Events>(event: Parameters<Events[E]>[0]) => boolean
 }
 
-const useTypedEventTarget = <Events extends EventMap>(existing?: EventTarget) => {
+function useTypedEventTarget<Events extends EventMap>(existing?: EventTarget) {
   const target = (existing ?? new EventTarget()) as TypedEventTarget<Events>
 
   const addEventListener = target.addEventListener.bind(target)

@@ -34,7 +34,7 @@ useEventListener(appUpdater, 'progress', (ev: UpdateProgressEvent) => {
   progress.value = ev
 })
 
-const checkForUpdate = async () => {
+async function checkForUpdate() {
   const info = await appUpdater.checkForUpdates()
   if (info == null) {
     return
@@ -73,7 +73,7 @@ const kRoundTo = {
   kb: 1024
 }
 
-const roundByteSize = (amount: number, type: 'size' | 'speed' = 'size') => {
+function roundByteSize(amount: number, type: 'size' | 'speed' = 'size') {
   switch (true) {
     case amount > kRoundTo.gb:
       return n(amount / kRoundTo.gb, { ...kRoundOptions, unit: type === 'speed' ? 'gigabyte-per-second' : 'gigabyte' })

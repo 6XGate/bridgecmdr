@@ -1,7 +1,7 @@
 import { nextTick } from 'vue'
 import { useDialogs } from '../modals/dialogs'
 
-export const useNextTick = (fn: () => unknown) => {
+export function useNextTick(fn: () => unknown) {
   const dialogs = useDialogs()
 
   return () => {

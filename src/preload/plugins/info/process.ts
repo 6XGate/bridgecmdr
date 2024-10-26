@@ -1,6 +1,7 @@
+import { memo } from 'radash'
 import type { ProcessData } from '../../api'
 
-export function useProcessData() {
+const useProcessData = memo(function useProcessData() {
   const data = {
     appleStore: process.mas || undefined,
     arch: process.arch,
@@ -18,4 +19,6 @@ export function useProcessData() {
   } satisfies ProcessData
 
   return data
-}
+})
+
+export default useProcessData

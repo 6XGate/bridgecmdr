@@ -45,25 +45,26 @@ export interface Driver {
 }
 
 /** Core parts of the drive system, so we don't hold any component's effect scope in memory. */
-const useDriverCore = createSharedComposable(() => {
+const useDriverCore = createSharedComposable(function useDriverCore() {
   const registry = reactive(new Map<string, DriverInformation>())
 
   /** Loads the drivers, using the first i18n we can get. */
-  const loadList = async () => {
+  async function loadList() {
     if (registry.size > 0) {
       // Already loaded...
       return
     }
 
-    ;(await services.driver.list()).forEach(({ guid, localized, capabilities }) => {
+    const drivers = await services.driver.list()
+    for (const { guid, localized, capabilities } of drivers) {
       /** The localized driver information made i18n compatible. */
-      Object.entries(localized).forEach(([locale, description]) => {
+      for (const [locale, description] of Object.entries(localized)) {
         i18n.global.mergeLocaleMessage(locale as never, {
           $driver: {
             [guid]: { ...description }
           }
         })
-      })
+      }
 
       registry.set(
         guid,
@@ -81,14 +82,14 @@ const useDriverCore = createSharedComposable(() => {
           capabilities
         })
       )
-    })
+    }
   }
 
   return { registry, loadList }
 })
 
 /** Use drivers. */
-export const useDrivers = () => {
+export function useDrivers() {
   const { registry, loadList } = useDriverCore()
 
   /** Busy tracking. */
@@ -98,12 +99,12 @@ export const useDrivers = () => {
   const items = computed(() => Array.from(registry.values()))
 
   /** Loads information about all the drivers. */
-  const all = tracker.track(async () => {
+  const all = tracker.track(async function all() {
     await loadList()
   })
 
   /** Loads a driver registered in the registry. */
-  const load = async (guid: string, path: string): Promise<Driver> => {
+  async function load(guid: string, path: string): Promise<Driver> {
     await loadList()
     if (!registry.has(guid)) {
       throw new Error(`No such driver registered as "${guid}"`)
@@ -111,20 +112,20 @@ export const useDrivers = () => {
 
     const h = await services.driver.open(guid, path)
 
-    const activate = async (inputChannel: number, videoOutputChannel: number, audioOutputChannel: number) => {
+    async function activate(inputChannel: number, videoOutputChannel: number, audioOutputChannel: number) {
       await services.driver.activate(h, inputChannel, videoOutputChannel, audioOutputChannel)
     }
 
-    const powerOn = async () => {
+    async function powerOn() {
       await services.driver.powerOn(h)
     }
 
-    const powerOff = async () => {
+    async function powerOff() {
       await services.driver.powerOff(h)
       await services.freeHandle(h)
     }
 
-    const close = async () => {
+    async function close() {
       await services.freeHandle(h)
     }
 

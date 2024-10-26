@@ -1,7 +1,8 @@
-import useIpc from '../support'
+import { memo } from 'radash'
+import { useIpc } from '../support'
 import type { DriverApi } from '../api'
 
-const useDriverApi = () => {
+const useDriverApi = memo(function useDriverApi() {
   const ipc = useIpc()
 
   return {
@@ -16,6 +17,6 @@ const useDriverApi = () => {
     powerOn: ipc.useInvoke('driver:powerOn'),
     powerOff: ipc.useInvoke('driver:powerOff')
   } satisfies DriverApi
-}
+})
 
 export default useDriverApi

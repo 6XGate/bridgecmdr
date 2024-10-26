@@ -15,7 +15,7 @@ export class UpdateProgressEvent extends Event implements ProgressInfo {
   }
 }
 
-const useAppUpdates = () => {
+function useAppUpdates() {
   // eslint-disable-next-line @typescript-eslint/consistent-type-definitions -- Inapropriate, type !== interface
   type Events = {
     progress: (ev: UpdateProgressEvent) => void
@@ -31,7 +31,7 @@ const useAppUpdates = () => {
     installUpdate: globalThis.services.updates.installUpdate
   }
 
-  const progressProxy = (info: ProgressInfo) => {
+  function progressProxy(info: ProgressInfo) {
     appUpdater.dispatchEvent(new UpdateProgressEvent(info))
   }
 

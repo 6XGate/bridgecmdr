@@ -13,7 +13,7 @@ const teslaSmartMatrixDriver = defineDriver({
     }
   },
   capabilities: kDeviceSupportsMultipleOutputs,
-  setup: async (uri) => {
+  setup: async function setup(uri) {
     const sendCommand = async (command: Buffer) => {
       const connection = await createCommandStream(uri, {
         baudRate: 9600,
@@ -38,7 +38,7 @@ const teslaSmartMatrixDriver = defineDriver({
 
     const toChannel = (n: number) => String(n).padStart(2, '0')
 
-    const activate = async (inputChannel: number, outputChannel: number) => {
+    async function activate(inputChannel: number, outputChannel: number) {
       Logger.log(`teslaSmartMatrixDriver.activate(${inputChannel}, ${outputChannel})`)
       const command = `MT00SW${toChannel(inputChannel)}${toChannel(outputChannel)}NT`
       await sendCommand(Buffer.from(command, 'ascii'))
@@ -46,13 +46,13 @@ const teslaSmartMatrixDriver = defineDriver({
       await Promise.resolve()
     }
 
-    const powerOn = async () => {
+    async function powerOn() {
       Logger.log('teslaSmartMatrixDriver.powerOn')
       Logger.debug('teslaSmartMatrixDriver.powerOn is a no-op')
       await Promise.resolve()
     }
 
-    const powerOff = async () => {
+    async function powerOff() {
       Logger.log('teslaSmartMatrixDriver.powerOff')
       Logger.debug('teslaSmartMatrixDriver.powerOff is a no-op')
       await Promise.resolve()

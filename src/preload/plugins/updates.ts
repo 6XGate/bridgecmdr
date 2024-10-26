@@ -1,7 +1,8 @@
-import useIpc from '../support'
+import { memo } from 'radash'
+import { useIpc } from '../support'
 import type { AppUpdates } from '../api'
 
-const useAppUpdates = (): AppUpdates => {
+const useAppUpdates = memo(function useAppUpdates(): AppUpdates {
   const ipc = useIpc()
 
   const appUpdates = {
@@ -14,6 +15,6 @@ const useAppUpdates = (): AppUpdates => {
   } satisfies AppUpdates
 
   return appUpdates
-}
+})
 
 export default useAppUpdates

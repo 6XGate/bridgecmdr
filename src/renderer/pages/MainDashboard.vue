@@ -2,6 +2,7 @@
 import { mdiPower, mdiVideoInputHdmi, mdiWrench } from '@mdi/js'
 import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useGuardedAsyncOp } from '../helpers/utilities'
 import { useDialogs } from '../modals/dialogs'
 import { useDashboard } from '../stores/dashboard'
 import useSettings from '../stores/settings'
@@ -22,7 +23,7 @@ const dialogs = useDialogs()
 
 const dashboard = useDashboard()
 
-const powerOff = async () => {
+async function powerOff() {
   try {
     await dashboard.powerOff()
     await services.system.powerOff()
@@ -33,21 +34,11 @@ const powerOff = async () => {
   globalThis.close()
 }
 
-const powerButton = computed(() =>
-  settings.powerOffWhen === 'double'
-    ? {
-        onDblclick: async () => {
-          await powerOff()
-        }
-      }
-    : {
-        onClick: async () => {
-          await powerOff()
-        }
-      }
+const powerButtonProps = computed(() =>
+  settings.powerOffWhen === 'double' ? { onDblclick: powerOff } : { onClick: powerOff }
 )
 
-onMounted(dashboard.refresh)
+onMounted(useGuardedAsyncOp(dashboard.refresh))
 </script>
 
 <template>
@@ -79,7 +70,7 @@ onMounted(dashboard.refresh)
       <VSheet color="transparent" class="ma-6" location="bottom right" position="fixed">
         <VTooltip :text="powerTooltip">
           <template #activator="{ props }">
-            <VBtn v-bind="{ ...props, ...powerButton }" :icon="mdiPower" class="ml-3" color="error" />
+            <VBtn v-bind="{ ...props, ...powerButtonProps }" :icon="mdiPower" class="ml-3" color="error" />
           </template>
         </VTooltip>
         <VTooltip :text="t('tooltip.openSettings')" left>

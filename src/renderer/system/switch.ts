@@ -18,22 +18,24 @@ export const Switch = z.object({
 
 export const useSwitchesDatabase = defineDatabase('switches', Switch)
 
-export const useSwitches = defineStore('switches', () => {
+export const useSwitches = defineStore('switches', function defineSwitches() {
   const tracker = trackBusy()
   const db = useSwitchesDatabase()
   const set = useDataSet(Switch)
   const store = useDataStore(db, set, tracker)
 
-  const blank = (): NewSwitch => ({
-    driverId: forceUndefined(),
-    title: forceUndefined(),
-    path: 'port:'
-  })
+  function blank(): NewSwitch {
+    return {
+      driverId: forceUndefined(),
+      title: forceUndefined(),
+      path: 'port:'
+    }
+  }
 
   const tiesDb = useTiesDatabase()
   const ties = useTies()
 
-  const remove = tracker.track(async (...[id, ...args]: Parameters<typeof db.remove>) => {
+  const remove = tracker.track(async function remove(...[id, ...args]: Parameters<typeof db.remove>) {
     await db.remove(id, ...args)
     set.deleteItem(id)
 

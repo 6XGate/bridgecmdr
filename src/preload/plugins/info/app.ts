@@ -1,8 +1,9 @@
 import is from '@sindresorhus/is'
 import { contextBridge } from 'electron'
+import { memo } from 'radash'
 import type { AppInfo } from '../../api'
 
-const useAppInfo = () => {
+const useAppInfo = memo(function useAppInfo() {
   if (!is.nonEmptyString(process.env['app_name_'])) throw new ReferenceError('Missing appInfo.name')
   if (!is.nonEmptyString(process.env['app_version_'])) throw new ReferenceError('Missing appInfo.version')
 
@@ -14,6 +15,6 @@ const useAppInfo = () => {
   contextBridge.exposeInMainWorld('application', appInfo)
 
   return appInfo
-}
+})
 
 export default useAppInfo

@@ -1,9 +1,10 @@
 import { ipcRenderer } from 'electron'
-import useIpc from '../support'
+import { memo } from 'radash'
+import { useIpc } from '../support'
 import type { Handle, LevelApi, Messanger } from '../api'
 import type { IpcRendererEvent } from 'electron'
 
-export default function useLevelApi() {
+const useLevelApi = memo(function useLevelApi() {
   const ipc = useIpc()
 
   type GetChannel = (h: Handle) => Promise<`level:${string}`>
@@ -30,4 +31,6 @@ export default function useLevelApi() {
     open: ipc.useInvoke('database:open'),
     activate
   } satisfies LevelApi
-}
+})
+
+export default useLevelApi

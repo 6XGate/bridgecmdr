@@ -20,6 +20,11 @@ export async function exportSettings() {
   const zipFile = new BlobWriter()
   const zipWriter = new ZipWriter(zipFile)
 
+  // FIXME: Images should be given unique names rather than
+  // relying on the name used in the "source" document.
+  // This will prevent any issues where two or more
+  // "source" documents share the same image name.
+
   const configText = new TextReader(
     JSON.stringify({
       version: 2,

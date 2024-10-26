@@ -5,7 +5,7 @@ import { toError } from '@/error-handling'
 
 type Trackable<T> = (() => PromiseLike<T>) | (() => Promise<T>) | (() => T) | PromiseLike<T> | Promise<T>
 
-export const trackBusy = (...chain: MaybeRefOrGetter<boolean>[]) => {
+export function trackBusy(...chain: MaybeRefOrGetter<boolean>[]) {
   /** The busy weight. */
   const weight = ref(0)
 
@@ -13,7 +13,7 @@ export const trackBusy = (...chain: MaybeRefOrGetter<boolean>[]) => {
   const error = shallowRef<Error>()
 
   /** Tracks an asynchronous operation or promise, return its result. */
-  const wait = async <R>(trackable: Trackable<R>) => {
+  async function wait<R>(trackable: Trackable<R>) {
     try {
       ++weight.value
       const result = await (typeof trackable === 'function' ? trackable() : trackable)
@@ -30,10 +30,9 @@ export const trackBusy = (...chain: MaybeRefOrGetter<boolean>[]) => {
   }
 
   /** Wraps an asynchronous operation. */
-  const track =
-    <R, Args extends unknown[]>(cb: (...args: Args) => PromiseLike<R>) =>
-    async (...args: Args) =>
-      await wait(() => cb(...args))
+  function track<R, Args extends unknown[]>(cb: (...args: Args) => PromiseLike<R>) {
+    return async (...args: Args) => await wait(() => cb(...args))
+  }
 
   return {
     isBusy: computed(() => chain.some((r) => toValue(r)) || weight.value > 0),

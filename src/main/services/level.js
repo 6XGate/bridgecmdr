@@ -4,13 +4,14 @@ import { app, ipcMain } from 'electron'
 import level from 'level'
 // @ts-expect-error -- No types
 import multileveldown from 'multileveldown'
+import { memo } from 'radash'
 import { ipcHandle, logError } from '../utilities'
 import useHandles from './handle'
 
 /** @typedef {`level:${string}`} Channel */
 /** @typedef {import('level').LevelDB} LevelDB */
 
-export default function useLevelServer() {
+const useLevelServer = memo(function useLevelServer() {
   const kLevelDatabaseHandle =
     /** @type {import('./handle').HandleKey<{ channel: Channel; stream: import('node:stream').Duplex }>} */
     (Symbol.for('@level'))
@@ -19,8 +20,8 @@ export default function useLevelServer() {
   /**
    * @param {string} path
    */
-  const openDatabase = async (path) =>
-    await new Promise(
+  async function openDatabase(path) {
+    return await new Promise(
       /**
        *
        * @param {(db: LevelDB) => void} resolve
@@ -33,12 +34,13 @@ export default function useLevelServer() {
         })
       }
     )
+  }
 
   const open = ipcHandle(
     /**
      * @param {string} name
      */
-    async (event, name) => {
+    async function open(event, name) {
       if (name.endsWith(':close')) {
         throw logError(new SyntaxError("Database names cannot end in ':close'"))
       }
@@ -98,7 +100,7 @@ export default function useLevelServer() {
      * @param {import('../../preload/api').Handle} handle
      * @returns
      */
-    async (event, handle) => {
+    async function getChannel(event, handle) {
       const { channel } = openHandle(event, kLevelDatabaseHandle, handle)
       return await Promise.resolve(channel)
     }
@@ -106,4 +108,6 @@ export default function useLevelServer() {
 
   ipcMain.handle('database:open', open)
   ipcMain.handle('database:channel', getChannel)
-}
+})
+
+export default useLevelServer

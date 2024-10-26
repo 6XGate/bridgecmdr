@@ -5,10 +5,10 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import Page from '../components/Page.vue'
 import { toFiles, useObjectUrls } from '../helpers/attachment'
+import { useGuardedAsyncOp } from '../helpers/utilities'
 import SourceDialog from '../modals/SourceDialog.vue'
 import { useDialogs, useSourceDialog } from '../modals/dialogs'
 import { useSources } from '../system/source'
-import { trackBusy } from '../utilities/tracking'
 import type { DocumentId } from '../data/database'
 import type { I18nSchema } from '../locales/locales'
 import type { Source } from '../system/source'
@@ -19,7 +19,6 @@ import type { Source } from '../system/source'
 
 const { t } = useI18n<I18nSchema>()
 const router = useRouter()
-const { track, isBusy } = trackBusy()
 const dialogs = useDialogs()
 
 //
@@ -34,13 +33,13 @@ const files = computed(() =>
 )
 const images = useObjectUrls(files)
 
-const refresh = track(async () => {
+const refresh = useGuardedAsyncOp(async function refresh() {
   await sources.all()
 })
 
 onBeforeMount(refresh)
 
-const showSource = async (source: Source) => {
+async function showSource(source: Source) {
   await router.push({ name: 'sources-id', params: { id: source._id } })
 }
 
@@ -72,7 +71,8 @@ const { dialogProps: editorProps } = useSourceDialog()
     <VToolbar v-bind="toolbar" :title="t('label.sources')">
       <template #prepend><VBtn :icon="mdiArrowLeft" @click="router.back" /></template>
     </VToolbar>
-    <VList v-scroll.self="scrolled" bg-color="transparent" :disabled="isBusy">
+    <VProgressLinear v-show="sources.isBusy" indeterminate />
+    <VList v-scroll.self="scrolled" bg-color="transparent" :disabled="sources.isBusy">
       <template v-for="(item, index) of sources.items" :key="item._id">
         <VDivider v-if="index > 0" class="mx-4" />
         <VListItem :title="item.title" :to="{ name: 'sources-id', params: { id: item._id } }" lines="one">

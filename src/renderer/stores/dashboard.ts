@@ -11,6 +11,7 @@ import type { Driver } from '../system/driver'
 import type { Source } from '../system/source'
 import type { ReadonlyDeep } from 'type-fest'
 import { isNotNullish } from '@/basics'
+import { warnPromiseFailures } from '@/error-handling'
 
 export interface Button {
   readonly guid: string
@@ -20,21 +21,27 @@ export interface Button {
   activate: () => Promise<void>
 }
 
-export const useDashboard = defineStore('dashboard', () => {
+export const useDashboard = defineStore('dashboard', function defineDashboard() {
   const isReady = ref(false)
-  const tracker = trackBusy()
 
   const drivers = useDrivers()
   const ties = useTies()
   const sources = useSources()
   const switches = useSwitches()
+  const tracker = trackBusy(
+    () => !isReady.value,
+    () => drivers.isBusy,
+    () => sources.isBusy,
+    () => switches.isBusy,
+    () => ties.isBusy
+  )
 
   const loadedDrivers = new Map<DocumentId, Driver>()
 
   const { images, loadImages } = useImages()
   const items = ref<Button[]>([])
 
-  const loadDrivers = async () => {
+  async function loadDrivers() {
     await drivers.all()
 
     // Remove drivers for switches removed
@@ -49,10 +56,13 @@ export const useDashboard = defineStore('dashboard', () => {
       }
     }
 
-    await Promise.all(
-      closing.map(async (driver) => {
-        await driver.close()
-      })
+    warnPromiseFailures(
+      'driver close failure',
+      await Promise.allSettled(
+        closing.map(async (driver) => {
+          await driver.close()
+        })
+      )
     )
 
     // Load any drivers that are new or are being replaced.
@@ -71,10 +81,10 @@ export const useDashboard = defineStore('dashboard', () => {
     }
   }
 
-  const defineButton = (source: ReadonlyDeep<Source>, index: number): Button => {
+  function defineButton(source: ReadonlyDeep<Source>, index: number): Button {
     const commands = ties.items
       .filter((tie) => tie.sourceId === source._id)
-      .map((tie) => {
+      .map(function makeCommand(tie) {
         const switcher = switches.items.find((item) => tie.switchId === item._id)
         const driver = loadedDrivers.get(tie.switchId)
 
@@ -96,15 +106,18 @@ export const useDashboard = defineStore('dashboard', () => {
       })
       .filter(isNotNullish)
 
-    const activate = async () => {
+    async function activate() {
       for (const button of items.value) {
         button.isActive = false
       }
 
-      await Promise.all(
-        commands.map(async ({ tie, driver }) => {
-          await driver.activate(tie.inputChannel, tie.outputChannels.video ?? 0, tie.outputChannels.audio ?? 0)
-        })
+      warnPromiseFailures(
+        'tie activation failure',
+        await Promise.allSettled(
+          commands.map(async ({ tie, driver }) => {
+            await driver.activate(tie.inputChannel, tie.outputChannels.video ?? 0, tie.outputChannels.audio ?? 0)
+          })
+        )
       )
     }
 
@@ -117,7 +130,7 @@ export const useDashboard = defineStore('dashboard', () => {
     }
   }
 
-  const prepareButton = (button: Button): Button => {
+  function prepareButton(button: Button) {
     const activate = button.activate
     button.activate = async () => {
       await activate()
@@ -127,7 +140,7 @@ export const useDashboard = defineStore('dashboard', () => {
     return button
   }
 
-  const defineDashboard = async () => {
+  async function setupDashboard() {
     loadImages(
       sources.items.map((source) =>
         toFiles(source._attachments).find((f) => source.image != null && f.name === source.image)
@@ -136,25 +149,28 @@ export const useDashboard = defineStore('dashboard', () => {
     items.value = await Promise.all(sources.items.map(defineButton).map(prepareButton))
   }
 
-  const refresh = tracker.track(async () => {
+  const refresh = tracker.track(async function refresh() {
     items.value = []
     await Promise.all([ties.compact(), sources.compact(), switches.compact()])
     await Promise.all([ties.all(), sources.all(), switches.all()])
     await loadDrivers()
-    await defineDashboard()
+    await setupDashboard()
     isReady.value = true
   })
 
-  const powerOff = async () => {
-    await Promise.all(
-      [...loadedDrivers.values()].map(async (driver) => {
-        await driver.powerOff()
-      })
+  async function powerOff() {
+    warnPromiseFailures(
+      'driver power off failure',
+      await Promise.allSettled(
+        [...loadedDrivers.values()].map(async (driver) => {
+          await driver.powerOff()
+        })
+      )
     )
   }
 
   return {
-    isBusy: computed(() => !isReady.value || tracker.isBusy.value),
+    isBusy: computed(() => tracker.isBusy.value),
     items: computed(() => readonly(items.value)),
     refresh,
     powerOff

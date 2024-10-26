@@ -1,7 +1,8 @@
 import { contextBridge } from 'electron'
-import useIpc from '../support'
+import { memo } from 'radash'
+import { useIpc } from '../support'
 import useDriverApi from './driver'
-import { useProcessData } from './info/process'
+import useProcessData from './info/process'
 import useLevelApi from './level'
 import usePortsApi from './ports'
 import useStartupApi from './startup'
@@ -9,7 +10,7 @@ import useSystemApi from './system'
 import useAppUpdates from './updates'
 import type { MainProcessServices } from '../api'
 
-const useServices = () => {
+const useServices = memo(function useServices() {
   const ipc = useIpc()
 
   const services = {
@@ -27,6 +28,6 @@ const useServices = () => {
   contextBridge.exposeInMainWorld('services', services)
 
   return services
-}
+})
 
 export default useServices
