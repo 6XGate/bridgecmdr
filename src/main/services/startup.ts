@@ -10,7 +10,7 @@ import { DesktopEntryFile, readyEntry } from '../support/desktop'
 import { ipcProxy } from '../utilities'
 import type { StartupApi } from '../../preload/api'
 
-const useStartup = memo(async () => {
+const useStartup = memo(async function useStartup() {
   const configPath = xdgConfig != null ? resolvePath(xdgConfig) : resolvePath(homedir(), '.config')
 
   const autoStartDir = joinPath(configPath, 'autostart')

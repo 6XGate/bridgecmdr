@@ -15,7 +15,7 @@ declare global {
  *
  * Needed for any modules that required the Web Crypto API.
  */
-const useCrypto = memo(() => {
+const useCrypto = memo(function useCrypto() {
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Ensuring it is Polyfilled.
   if (globalThis.crypto == null) {
     globalThis.crypto = webcrypto as never

@@ -20,7 +20,7 @@ export interface AsyncStorageEventInitDict {
   readonly storageArea: StorageLikeAsync | null
 }
 
-const emit = (data: AsyncStorageEventInitDict) => {
+function emit(data: AsyncStorageEventInitDict) {
   const event = new StorageEvent('storage', {
     ...data,
     // Need to force the type.
@@ -34,7 +34,7 @@ const emit = (data: AsyncStorageEventInitDict) => {
   globalThis.dispatchEvent(event)
 }
 
-export const defineAsyncStorage = <T extends StorageLikeAsync>(setup: () => T) => {
+export function defineAsyncStorage<T extends StorageLikeAsync>(setup: () => T) {
   const storageArea = setup()
 
   return () => ({
@@ -52,12 +52,12 @@ export const defineAsyncStorage = <T extends StorageLikeAsync>(setup: () => T) =
   })
 }
 
-export const createUserStorage = defineAsyncStorage(() => {
+export const createUserStorage = defineAsyncStorage(function createUserStorage() {
   const { levelup } = useLevelDb()
 
   const dbPromise = levelup('_userStorage')
 
-  const getItem = async (key: string) => {
+  async function getItem(key: string) {
     const db = await dbPromise
 
     try {
@@ -67,19 +67,19 @@ export const createUserStorage = defineAsyncStorage(() => {
     }
   }
 
-  const setItem = async (key: string, value: string) => {
+  async function setItem(key: string, value: string) {
     const db = await dbPromise
 
     await db.put(key, value)
   }
 
-  const removeItem = async (key: string) => {
+  async function removeItem(key: string) {
     const db = await dbPromise
 
     await db.del(key)
   }
 
-  const clear = async () => {
+  async function clear() {
     const db = await dbPromise
 
     await db.clear()

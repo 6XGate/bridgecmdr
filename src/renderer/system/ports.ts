@@ -8,15 +8,15 @@ export interface PortData {
   value: string
 }
 
-const usePorts = createSharedComposable(() => {
+const usePorts = createSharedComposable(function usePorts() {
   const tracker = trackBusy()
 
   const items = ref<PortData[]>([])
 
-  const all = tracker.track(async () => {
+  const all = tracker.track(async function all() {
     const ports = await services.ports.list()
 
-    items.value = ports.map((port) => {
+    items.value = ports.map(function mapPortData(port) {
       // If there is no PnP ID, then just use the path.
       if (!is.nonEmptyString(port.pnpId)) {
         return {

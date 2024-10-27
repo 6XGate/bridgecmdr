@@ -1,8 +1,9 @@
 import is from '@sindresorhus/is'
 import { contextBridge } from 'electron'
+import { memo } from 'radash'
 import type { UserInfo } from '../../api'
 
-const useUserInfo = () => {
+const useUserInfo = memo(function useUserInfo() {
   if (!is.nonEmptyString(process.env['USER'])) throw new ReferenceError('Missing user info')
   if (!is.nonEmptyString(process.env['user_locale_'])) throw new ReferenceError('Missing locale info')
 
@@ -14,6 +15,6 @@ const useUserInfo = () => {
   contextBridge.exposeInMainWorld('user', userInfo)
 
   return userInfo
-}
+})
 
 export default useUserInfo

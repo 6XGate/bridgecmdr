@@ -50,7 +50,7 @@ const target = ref<NewTie>({
   ...(props.source != null ? { sourceId: props.source._id } : {})
 })
 
-const syncChannels = () => {
+function syncChannels() {
   if (keepChannelsSynced.value) {
     target.value.outputChannels.audio = target.value.outputChannels.video
   }
@@ -87,7 +87,7 @@ const canDecoupleAudio = computed(
     Boolean((driver.value?.capabilities ?? 0) & kDeviceCanDecoupleAudioOutput)
 )
 
-const confirm = () => {
+function confirm() {
   if (!hasOutputChannel.value) {
     // Ensure the video channel is undefined if no output channel is supported.
     target.value.outputChannels.video = undefined
@@ -102,7 +102,7 @@ const confirm = () => {
   emit('confirm', target.value)
 }
 
-const cancelIfConfirmed = async () => {
+async function cancelIfConfirmed() {
   if (!dirty.value) {
     cancel()
 
@@ -121,7 +121,7 @@ const cancelIfConfirmed = async () => {
   }
 }
 
-const cancel = () => {
+function cancel() {
   isVisible.value = false
 }
 

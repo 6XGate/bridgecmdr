@@ -72,13 +72,9 @@ async function openDatabase(name) {
 class IpcLevelDown extends AbstractLevelDOWN {
   /** @readonly */
   #dbPromise
-  // #handle
 
   /** @type {AbstractLevelDOWN | null} */
   #db = null
-
-  // /** @type {AbstractLevelDOWN['status']} */
-  // #status = 'new'
 
   /**
    * @param {string} name
@@ -235,13 +231,12 @@ export const useLevelDb = memo(() => {
   const connectSync = (name) => new IpcLevelDown(name)
 
   /**
-   *
    * @template K
    * @template V
    * @param {string} name
    */
-  const levelup_ = async (name) =>
-    await openDatabase(name).then(
+  async function levelupProxy(name) {
+    return await openDatabase(name).then(
       async (db) =>
         await new Promise(
           /**
@@ -262,21 +257,21 @@ export const useLevelDb = memo(() => {
           }
         )
     )
+  }
 
   return {
     connectSync,
     connect: openDatabase,
-    levelup: levelup_
+    levelup: levelupProxy
   }
 })
 
-export const useLevelAdapter = memo(() => {
+export const useLevelAdapter = memo(function useLevelAdapter() {
   const { connectSync } = useLevelDb()
 
   /** @typedef {Record<string, unknown>} LevelPouch */
 
   /**
-   *
    * @this {Partial<LevelPouch>}
    * @param {*} opts
    * @param {(error?: Error | undefined) => void} cb

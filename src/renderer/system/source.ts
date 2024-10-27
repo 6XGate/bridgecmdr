@@ -17,21 +17,23 @@ export const Source = z.object({
 
 export const useSourcesDatabase = defineDatabase('sources', Source)
 
-export const useSources = defineStore('sources', () => {
+export const useSources = defineStore('sources', function defineSources() {
   const tracker = trackBusy()
   const db = useSourcesDatabase()
   const set = useDataSet(Source)
   const store = useDataStore(db, set, tracker)
 
-  const blank = (): NewSource => ({
-    title: forceUndefined(),
-    image: null
-  })
+  function blank(): NewSource {
+    return {
+      title: forceUndefined(),
+      image: null
+    }
+  }
 
   const tiesDb = useTiesDatabase()
   const ties = useTies()
 
-  const remove = tracker.track(async (...[id, ...args]: Parameters<typeof db.remove>) => {
+  const remove = tracker.track(async function remove(...[id, ...args]: Parameters<typeof db.remove>) {
     await db.remove(id, ...args)
     set.deleteItem(id)
 

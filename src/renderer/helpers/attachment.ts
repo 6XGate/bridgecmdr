@@ -6,7 +6,7 @@ import { isNotNullish } from '@/basics'
 
 /* eslint-disable n/no-unsupported-features/node-builtins -- In browser environment. */
 
-export const toFile = (id: string, attachment: Attachment) => {
+export function toFile(id: string, attachment: Attachment) {
   if (!('data' in attachment)) {
     return undefined
   }
@@ -14,7 +14,7 @@ export const toFile = (id: string, attachment: Attachment) => {
   return new File([attachment.data], id, { type: attachment.content_type })
 }
 
-export const toFiles = (attachments?: Attachments) => {
+export function toFiles(attachments?: Attachments) {
   if (attachments == null) {
     return []
   }
@@ -24,18 +24,18 @@ export const toFiles = (attachments?: Attachments) => {
     .filter(isNotNullish)
 }
 
-export const useImages = () => {
+export function useImages() {
   const images = ref<(string | undefined)[]>([])
 
   const unloadImages = () => {
-    images.value.forEach((image) => {
+    for (const image of images.value) {
       if (image != null) {
         URL.revokeObjectURL(image)
       }
-    })
+    }
   }
 
-  const loadImages = (files: (File | undefined)[]) => {
+  function loadImages(files: (File | undefined)[]) {
     unloadImages()
     images.value = files.map((file) => (file != null ? URL.createObjectURL(file) : undefined))
   }
@@ -45,9 +45,9 @@ export const useImages = () => {
   return { images, loadImages }
 }
 
-export const useObjectUrls = (sources: MaybeRef<(Blob | MediaSource | undefined)[]>) => {
+export function useObjectUrls(sources: MaybeRef<(Blob | MediaSource | undefined)[]>) {
   const urls = ref<(string | undefined)[]>([])
-  const release = () => {
+  function release() {
     for (const url of urls.value) {
       if (url != null) {
         URL.revokeObjectURL(url)
@@ -59,7 +59,7 @@ export const useObjectUrls = (sources: MaybeRef<(Blob | MediaSource | undefined)
 
   watch(
     () => unref(sources),
-    (files) => {
+    function handleSourceChange(files) {
       release()
       for (const file of files) {
         urls.value.push(file != null ? URL.createObjectURL(file) : undefined)

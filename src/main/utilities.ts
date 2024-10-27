@@ -1,11 +1,11 @@
 import Logger from 'electron-log'
 import type { IpcResponse } from '../preload/api'
+import type { MaybePromise } from '@/basics'
 import type { IpcMainInvokeEvent } from 'electron'
 import { toError } from '@/error-handling'
 
-export const ipcProxy =
-  <Args extends unknown[], Result>(fn: (...args: Args) => Result | Promise<Result>) =>
-  async (...[, ...args]: [IpcMainInvokeEvent, ...Args]): Promise<IpcResponse<Result>> => {
+export const ipcProxy = <Args extends unknown[], Result>(fn: (...args: Args) => MaybePromise<Result>) =>
+  async function ipcProxied(...[, ...args]: [IpcMainInvokeEvent, ...Args]): Promise<IpcResponse<Result>> {
     try {
       return { value: await fn(...args) }
     } catch (e) {
@@ -13,9 +13,10 @@ export const ipcProxy =
     }
   }
 
-export const ipcHandle =
-  <Args extends unknown[], Result>(fn: (ev: IpcMainInvokeEvent, ...args: Args) => Result | Promise<Result>) =>
-  async (ev: IpcMainInvokeEvent, ...args: Args): Promise<IpcResponse<Result>> => {
+export const ipcHandle = <Args extends unknown[], Result>(
+  fn: (ev: IpcMainInvokeEvent, ...args: Args) => MaybePromise<Result>
+) =>
+  async function ipcHandled(ev: IpcMainInvokeEvent, ...args: Args): Promise<IpcResponse<Result>> {
     try {
       return { value: await fn(ev, ...args) }
     } catch (e) {

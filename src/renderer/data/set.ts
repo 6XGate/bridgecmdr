@@ -3,27 +3,27 @@ import type { DocumentId, DocumentOf } from './database'
 import type { Ref } from 'vue'
 import type { z } from 'zod'
 
-export const useDataSet = <Schema extends z.AnyZodObject>(_: Schema) => {
+export function useDataSet<Schema extends z.AnyZodObject>(_: Schema) {
   type Document = DocumentOf<Schema>
 
   const items: Ref<Document[]> = ref([])
 
   const current = ref<Document>()
 
-  const initialize = (docs: Document[]) => {
+  function initialize(docs: Document[]) {
     items.value = [...docs]
-    docs.forEach((doc) => {
+    for (const doc of docs) {
       if (doc._id === current.value?._id) {
         current.value = doc
       }
-    })
+    }
   }
 
-  const insertItem = (doc: Document) => {
+  function insertItem(doc: Document) {
     items.value.push(doc)
   }
 
-  const replaceItem = (doc: Document) => {
+  function replaceItem(doc: Document) {
     const idx = items.value.findIndex((item) => item._id === doc._id)
     if (idx !== -1) {
       items.value.splice(idx, 1, doc)
@@ -36,7 +36,7 @@ export const useDataSet = <Schema extends z.AnyZodObject>(_: Schema) => {
     }
   }
 
-  const deleteItem = (id: DocumentId) => {
+  function deleteItem(id: DocumentId) {
     const idx = items.value.findIndex((item) => item._id === id)
     if (idx !== -1) {
       items.value.splice(idx, 1)
@@ -47,7 +47,7 @@ export const useDataSet = <Schema extends z.AnyZodObject>(_: Schema) => {
     }
   }
 
-  const clearItems = () => {
+  function clearItems() {
     items.value = []
   }
 

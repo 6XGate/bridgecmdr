@@ -14,6 +14,7 @@ import useStartup from './services/startup'
 import useSystem from './services/system'
 import useUpdater from './services/updater'
 import { logError } from './utilities'
+import { waitTill } from '@/basics'
 import { toError } from '@/error-handling'
 
 // In this file you can include the rest of your app"s specific main process
@@ -23,12 +24,6 @@ Logger.initialize({ preload: true, spyRendererConsole: true })
 Logger.transports.console.format = '{h}:{i}:{s}.{ms} [{level}] › {text}'
 Logger.transports.file.level = 'debug'
 Logger.errorHandler.startCatching()
-
-async function waitTill(timeout: number) {
-  await new Promise<void>((resolve) => {
-    setTimeout(resolve, timeout)
-  })
-}
 
 async function createWindow() {
   const willStartWithDark = nativeTheme.shouldUseDarkColors || nativeTheme.shouldUseInvertedColorScheme
@@ -53,7 +48,7 @@ async function createWindow() {
     main.webContents.openDevTools({ mode: 'undocked' })
   }
 
-  main.webContents.setWindowOpenHandler((details) => {
+  main.webContents.setWindowOpenHandler(function windowOpenHandler(details) {
     shell.openExternal(details.url).catch((e: unknown) => {
       Logger.error(e)
     })

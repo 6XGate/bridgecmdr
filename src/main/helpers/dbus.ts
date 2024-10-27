@@ -27,7 +27,7 @@ interface KeyMap {
   objpath: string
 }
 
-const useDbus = memo(() => {
+const useDbus = memo(function useDbus() {
   /**
    * Targets bus.
    */
@@ -227,7 +227,7 @@ const useDbus = memo(() => {
 
   /** Encodes the parameters based on a binding schema. */
   function encodeParams(schema: SchemaType[], args: unknown[]) {
-    return schema.map((type, index) => {
+    return schema.map(function encodeParam(type, index) {
       // NOTE: All logic here depends on TypeScript type
       // checking to ensure all strings and data are
       // correct, only the nullish check is done.
@@ -282,7 +282,7 @@ const useDbus = memo(() => {
     member: string,
     schema: Schema
   ): (...args: ArgsFromSchame<Schema>) => Promise<string> {
-    return async (...args) => {
+    return async function dbusCall(...args) {
       const params = encodeParams(schema, args)
 
       return await dbusSend(target, dest, path, ifname, member, ...params)

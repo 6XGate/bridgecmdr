@@ -25,23 +25,25 @@ export const useTiesDatabase = defineDatabase('ties', Tie, {
   switchId: ['switchId']
 })
 
-export const useTies = defineStore('ties', () => {
+export const useTies = defineStore('ties', function defineTies() {
   const tracker = trackBusy()
   const db = useTiesDatabase()
   const set = useDataSet(Tie)
   const store = useDataStore(db, set, tracker)
 
-  const blank = (): NewTie => ({
-    sourceId: forceUndefined(),
-    switchId: forceUndefined(),
-    inputChannel: forceUndefined(),
-    outputChannels: {
-      video: undefined,
-      audio: undefined
+  function blank(): NewTie {
+    return {
+      sourceId: forceUndefined(),
+      switchId: forceUndefined(),
+      inputChannel: forceUndefined(),
+      outputChannels: {
+        video: undefined,
+        audio: undefined
+      }
     }
-  })
+  }
 
-  const forSwitch = tracker.track(async (id: DocumentId) => {
+  const forSwitch = tracker.track(async function forSwitch(id: DocumentId) {
     // Clear the list before load.
     set.initialize([])
 
@@ -51,7 +53,7 @@ export const useTies = defineStore('ties', () => {
     )
   })
 
-  const forSource = tracker.track(async (id: DocumentId) => {
+  const forSource = tracker.track(async function forSource(id: DocumentId) {
     // Clear the list before load.
     set.initialize([])
 

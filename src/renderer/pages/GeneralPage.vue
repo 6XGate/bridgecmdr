@@ -15,9 +15,11 @@ import OptionDialog from '../components/OptionDialog.vue'
 import Page from '../components/Page.vue'
 import { useGuardedAsyncOp } from '../helpers/utilities'
 import useSettings from '../stores/settings'
+import { trackBusy } from '../utilities/tracking'
 import type { I18nSchema } from '../locales/locales'
 
 const { t } = useI18n<I18nSchema>()
+const { isBusy, wait } = trackBusy()
 
 const settings = useSettings()
 
@@ -42,28 +44,28 @@ const powerOffWhenOptions = settings.powerOffWhenOptions.map((option) => ({
 }))
 
 const autoStartEnabled = ref(false)
-const enableAutoStart = async () => {
-  await settings.enableAutoStart()
+async function enableAutoStart() {
+  await wait(settings.enableAutoStart())
   autoStartEnabled.value = true
 }
-const disableAutoStart = async () => {
-  await settings.disableAutoStart()
+async function disableAutoStart() {
+  await wait(settings.disableAutoStart())
   autoStartEnabled.value = false
 }
-const toggleAutoStart = async () => {
+async function toggleAutoStart() {
   if (autoStartEnabled.value) await disableAutoStart()
   else await enableAutoStart()
 }
 
-const closeApp = () => {
+function closeApp() {
   globalThis.close()
 }
 
-const load = useGuardedAsyncOp(async () => {
-  autoStartEnabled.value = await settings.checkAutoStart()
-})
+async function load() {
+  autoStartEnabled.value = await wait(settings.checkAutoStart())
+}
 
-onBeforeMount(load)
+onBeforeMount(useGuardedAsyncOp(load))
 </script>
 
 <template>
@@ -71,7 +73,8 @@ onBeforeMount(load)
     <VToolbar v-bind="toolbar" :title="t('label.general')">
       <template #prepend><VBtn :icon="mdiArrowLeft" @click="router.back" /></template>
     </VToolbar>
-    <VList v-scroll.self="scrolled" bg-color="transparent">
+    <VProgressLinear v-show="isBusy" indeterminate />
+    <VList v-scroll.self="scrolled" :disabled="isBusy" bg-color="transparent">
       <VListItem
         :title="t('option.autoStart')"
         lines="two"

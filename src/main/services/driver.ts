@@ -91,7 +91,7 @@ interface DriverBackEnd {
   register: (factory: DriverFactory | undefined) => void
 }
 
-const useDrivers = memo(() => {
+const useDrivers = memo(function useDrivers() {
   const { createHandle, openHandle } = useHandles()
   const kDriverHandle = Symbol.for('@driver') as HandleKey<Driver>
 
@@ -111,7 +111,7 @@ const useDrivers = memo(() => {
   }
 
   /** Loads a driver registered in the registry. */
-  const open = ipcHandle(async (event, guid: string, path: string) => {
+  const open = ipcHandle(async function open(event, guid: string, path: string) {
     const factory = registry.get(guid)
     if (factory == null) {
       throw logError(new Error(`No such driver registered as "${guid}"`))

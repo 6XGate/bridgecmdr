@@ -53,7 +53,7 @@ const ConfirmModalOptions = z
 export type ConfirmModalOptions = z.input<typeof ConfirmModalOptions>
 export type ConfirmModalConfiguration = z.output<typeof ConfirmModalOptions>
 
-export const useConfirmModal = createSharedComposable(() => {
+export const useConfirmModal = createSharedComposable(function useConfirmModal() {
   const { isRevealed, onReveal, confirm, cancel, reveal } = useConfirmDialog<ConfirmModalConfiguration, never, never>()
 
   const show = async (options: ConfirmModalOptions) => {
@@ -87,7 +87,7 @@ const ErrorModalOptions = z
 export type ErrorModalOptions = z.input<typeof ErrorModalOptions>
 export type ErrorModalConfiguration = z.output<typeof ErrorModalOptions>
 
-export const useDialogs = createSharedComposable(function () {
+export const useDialogs = createSharedComposable(function useDialogs() {
   const { toErrorMessage } = useErrors()
   const alertModal = useAlertModal()
   const confirmModal = useConfirmModal()
