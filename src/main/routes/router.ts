@@ -6,6 +6,7 @@ import useSourcesRouter from './data/sources'
 import useUserStoreRouter from './data/storage'
 import useSwitchesRouter from './data/switches'
 import useTiesRouter from './data/ties'
+import useDriversRouter from './drivers'
 import useSerialPortRouter from './ports'
 import useStartupRouter from './startup'
 
@@ -17,6 +18,7 @@ export const useAppRouter = memo(() =>
     // Functional service routes
     ports: useSerialPortRouter(),
     startup: useStartupRouter(),
+    drivers: useDriversRouter(),
     // Data service routes
     storage: useUserStoreRouter(),
     ties: useTiesRouter(),

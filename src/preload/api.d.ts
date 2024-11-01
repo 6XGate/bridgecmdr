@@ -12,11 +12,23 @@ export type { UserInfo } from '../main/info/user'
 export type { AppConfig } from '../main/info/config'
 export type { AppRouter } from '../main/routes/router'
 export type { DocumentId } from '../main/services/database'
+export type { ApiLocales } from '../main/services/locale'
 export type { UserStore } from '../main/dao/storage'
 export type { PortEntry } from '../main/services/ports'
 export type { Source, NewSource, SourceUpdate } from '../main/dao/sources'
 export type { Switch, NewSwitch, SwitchUpdate } from '../main/dao/switches'
 export type { Tie, NewTie, TieUpdate } from '../main/dao/ties'
+export type { ApiLocales } from '../main/locale'
+
+export type {
+  Driver,
+  DriverData,
+  LocalizedDriverDescriptor,
+  // Cannot be exported as values, but they are literals.
+  kDeviceCanDecoupleAudioOutput,
+  kDeviceHasNoExtraCapabilities,
+  kDeviceSupportsMultipleOutputs
+} from '../main/services/drivers'
 
 //
 // Internal parts
@@ -41,76 +53,9 @@ export type IpcResponse<T> = IpcReturnedValue<T> | IpcThrownError
 // Common parts
 //
 
-/** Supported API locales. */
-export type ApiLocales = 'en'
-
-/** Opaque handles. */
-export type Handle = Tagged<number, 'Handle'>
-
 /** Event listener attachment options */
 export interface ListenerOptions {
   once?: boolean | undefined
-}
-
-//
-// Driver API
-//
-
-/** Defines the localized metadata about a driver. */
-export interface LocalizedDriverDescriptor {
-  /** Defines the title for the driver in a specific locale. */
-  readonly title: string
-  /** Defines the company for the driver in a specific locale. */
-  readonly company: string
-  /** Defines the provider for the driver in a specific locale. */
-  readonly provider: string
-}
-
-/** Defines basic metadata about a device and driver. */
-export interface DriverData {
-  /**
-   * Indicates whether the driver is enabled, this is to allow partially coded drivers to be
-   * commited, but not usable to the UI or other code.
-   */
-  readonly enable: boolean
-  /** A unique identifier for the driver. */
-  readonly guid: string
-  /** Defines the localized driver information in all supported locales. */
-  readonly localized: {
-    /** Defines the localized driver information in a specific locale. */
-    readonly [locale in ApiLocales]: LocalizedDriverDescriptor
-  }
-  /** Defines the capabilities of the device driven by the driver. */
-  readonly capabilities: number
-}
-
-export interface DriverApi {
-  readonly capabilities: {
-    readonly kDeviceHasNoExtraCapabilities: 0
-    readonly kDeviceSupportsMultipleOutputs: 1
-    readonly kDeviceCanDecoupleAudioOutput: 2
-  }
-  /** Lists registered drivers. */
-  readonly list: () => Promise<DriverData[]>
-  /** Loads a driver. */
-  readonly open: (guid: string, uri: string) => Promise<Handle>
-  /** Powers on the switch or monitor. */
-  readonly powerOn: (h: Handle) => Promise<void>
-  /** Closes the device to which the driver is attached. */
-  readonly powerOff: (h: Handle) => Promise<void>
-  /**
-   * Sets input and output ties.
-   *
-   * @param inputChannel The input channel to tie.
-   * @param videoOutputChannel The output video channel to tie.
-   * @param audioOutputChannel The output audio channel to tie.
-   */
-  readonly activate: (
-    h: Handle,
-    inputChannel: number,
-    videoOutputChannel: number,
-    audioOutputChannel: number
-  ) => Promise<void>
 }
 
 //
@@ -155,13 +100,8 @@ export interface ProcessData {
 /** Functional APIs */
 export interface MainProcessServices {
   readonly process: ProcessData
-  readonly driver: DriverApi
   readonly system: SystemApi
   readonly updates: AppUpdates
-  /** Closes a handle, freeing its resources. */
-  readonly freeHandle: (h: Handle) => Promise<void>
-  /** Closes all handles for a page. */
-  readonly freeAllHandles: () => Promise<void>
 }
 
 export interface AppUpdater {

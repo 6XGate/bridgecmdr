@@ -10,7 +10,7 @@ import { filesToAttachment, toFiles } from '../helpers/attachment'
 import { useGuardedAsyncOp } from '../helpers/utilities'
 import TieDialog from '../modals/TieDialog.vue'
 import { useDialogs, useTieDialog } from '../modals/dialogs'
-import { useDrivers } from '../services/driver'
+import useDrivers from '../services/driver'
 import { useSources } from '../services/sources'
 import { useSwitches } from '../services/switches'
 import { useTies } from '../services/ties'
@@ -113,6 +113,7 @@ const loadTies = useGuardedAsyncOp(async function loadTies() {
 })
 
 onBeforeMount(loadTies)
+onBeforeMount(drivers.all)
 
 async function addTie(target: NewTie) {
   try {

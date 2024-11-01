@@ -1,9 +1,9 @@
 import Logger from 'electron-log'
-import { defineDriver, kDeviceHasNoExtraCapabilities } from '../../services/driver'
+import { defineDriver, kDeviceHasNoExtraCapabilities } from '../../services/drivers'
 import { createCommandStream } from '../../services/stream'
 
 const teslaSmartSdiDriver = defineDriver({
-  enable: true,
+  enabled: true,
   guid: 'DDB13CBC-ABFC-405E-9EA6-4A999F9A16BD',
   localized: {
     en: {
@@ -13,8 +13,8 @@ const teslaSmartSdiDriver = defineDriver({
     }
   },
   capabilities: kDeviceHasNoExtraCapabilities,
-  setup: async function setup(uri) {
-    async function sendCommand(command: Buffer) {
+  setup: () => {
+    async function sendCommand(uri: string, command: Buffer) {
       const connection = await createCommandStream(uri, {
         baudRate: 9600,
         dataBits: 8,
@@ -36,9 +36,9 @@ const teslaSmartSdiDriver = defineDriver({
       await connection.close()
     }
 
-    async function activate(inputChannel: number) {
-      Logger.log(`teslaSmartSdiDriver.activate(${inputChannel})`)
-      await sendCommand(Buffer.of(0xaa, 0xcc, 0x01, inputChannel))
+    async function activate(uri: string, input: number) {
+      Logger.log(`teslaSmartSdiDriver.activate(${input})`)
+      await sendCommand(uri, Buffer.of(0xaa, 0xcc, 0x01, input))
     }
 
     async function powerOn() {
@@ -53,11 +53,11 @@ const teslaSmartSdiDriver = defineDriver({
       await Promise.resolve()
     }
 
-    return await Promise.resolve({
+    return {
       activate,
       powerOn,
       powerOff
-    })
+    }
   }
 })
 

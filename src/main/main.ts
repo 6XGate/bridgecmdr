@@ -5,11 +5,8 @@ import { app, shell, BrowserWindow, nativeTheme } from 'electron'
 import Logger from 'electron-log'
 import appIcon from '../../resources/icon.png?asset&asarUnpack'
 import useAppConfig from './info/config'
-import registerDrivers from './plugins/drivers'
 import useCrypto from './plugins/webcrypto'
 import useApiServer from './server'
-import useDrivers from './services/driver'
-import useHandles from './services/handle'
 import useSystem from './services/system'
 import useUpdater from './services/updater'
 import { logError } from './utilities'
@@ -98,14 +95,6 @@ app.on('window-all-closed', () => {
   }
 })
 
-// Make sure all handles have been closed.
-const { shutDown } = useHandles()
-app.on('will-quit', () => {
-  process.nextTick(async () => {
-    await shutDown()
-  })
-})
-
 // Default open or close DevTools by F12 in development
 // and ignore CommandOrControl + R in production.
 // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
@@ -144,7 +133,5 @@ useApiServer()
 useCrypto()
 useUpdater()
 useSystem()
-useDrivers()
-registerDrivers()
 
 await createWindow()

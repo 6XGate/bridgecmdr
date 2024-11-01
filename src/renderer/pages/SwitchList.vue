@@ -7,7 +7,7 @@ import Page from '../components/Page.vue'
 import { useGuardedAsyncOp } from '../helpers/utilities'
 import SwitchDialog from '../modals/SwitchDialog.vue'
 import { useDialogs, useSwitchDialog } from '../modals/dialogs'
-import { useDrivers } from '../services/driver'
+import useDrivers from '../services/driver'
 import { useSwitches } from '../services/switches'
 import type { I18nSchema } from '../locales/locales'
 import type { DriverInformation } from '../services/driver'
@@ -40,6 +40,7 @@ const items = computed(() =>
 )
 
 const refresh = useGuardedAsyncOp(async () => {
+  // TODO: await drivers.all(), with busy tracking
   await switches.all()
 })
 

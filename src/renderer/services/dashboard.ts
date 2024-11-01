@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, readonly, ref } from 'vue'
 import { toFiles, useImages } from '../helpers/attachment'
-import { useDrivers } from './driver'
+import useDrivers from './driver'
 import useSettings from './settings'
 import { useSources } from './sources'
 import { useSwitches } from './switches'
@@ -58,27 +58,17 @@ export const useDashboard = defineStore('dashboard', function defineDashboard() 
       }
     }
 
-    warnPromiseFailures(
-      'driver close failure',
-      await Promise.allSettled(
-        closing.map(async (driver) => {
-          await driver.close()
-        })
-      )
-    )
-
     // Load any drivers that are new or are being replaced.
-    const loading: Promise<[DocumentId, Driver]>[] = []
+    const loading = new Array<[string, Driver]>()
     for (const switcher of switches.items) {
       const driver = loadedDrivers.get(switcher._id)
       if (driver == null || driver.uri !== switcher.path) {
-        loading.push(drivers.load(switcher.driverId, switcher.path).then((loaded) => [switcher._id, loaded]))
+        loading.push([switcher._id, drivers.load(switcher.driverId, switcher.path)])
       }
     }
 
     // Add the replaced and new driver to the loaded registry.
-    const loaded = await Promise.all(loading)
-    for (const [guid, driver] of loaded) {
+    for (const [guid, driver] of loading) {
       loadedDrivers.set(guid, driver)
     }
   }

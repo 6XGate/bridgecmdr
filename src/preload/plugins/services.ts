@@ -1,22 +1,15 @@
 import { contextBridge } from 'electron'
 import { memo } from 'radash'
-import { useIpc } from '../support'
-import useDriverApi from './services/driver'
 import useProcessData from './services/process'
 import useSystemApi from './services/system'
 import useAppUpdates from './services/updates'
 import type { MainProcessServices } from '../api'
 
 const useServices = memo(function useServices() {
-  const ipc = useIpc()
-
   const services = {
     process: useProcessData(),
-    driver: useDriverApi(),
     system: useSystemApi(),
-    updates: useAppUpdates(),
-    freeHandle: ipc.useInvoke('handle:free'),
-    freeAllHandles: ipc.useInvoke('handle:clean')
+    updates: useAppUpdates()
   } satisfies MainProcessServices
 
   contextBridge.exposeInMainWorld('services', services)

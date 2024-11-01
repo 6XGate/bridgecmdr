@@ -6,10 +6,11 @@
       - Drivers will require an overhaul to no longer need handles.
     - More drivers.
     - Move more modules to core.
+    - Wrap some Electron APIs as services for easier mocking without electron itself.
 - Drivers
   - Shinybow
   - Monoprice Blackbird
-  - J-Tech Digital
-  - ASHATA
-  - TESmart
-  - No Hassle AV
+  - J-Tech Digital -- Need to find actual command list.
+  - ASHATA -- Now unable to find.
+  - TESmart -- Brand of Tesla Elec (like TelsaSmart)
+  - No Hassle AV -- Need to contact.

@@ -67,24 +67,6 @@ export async function electronModule(original: () => Promise<typeof import('elec
 //   }
 // }
 
-export function electronProcess() {
-  vi.stubGlobal('process', {
-    ...globalThis.process,
-    get browser() {
-      return true
-    },
-    get contextIsolated() {
-      return true
-    },
-    get versions() {
-      return {
-        chrome: '126.0.6478.185',
-        electron: '31.3.1'
-      }
-    }
-  })
-}
-
 export function console() {
   const error = vi.spyOn(globalThis.console, 'error').mockReturnValue()
   const warn = vi.spyOn(globalThis.console, 'warn').mockReturnValue()
@@ -99,28 +81,4 @@ export function console() {
     log,
     debug
   }
-}
-
-/** Mocks DOM global EventTarget. */
-export async function globalEventTarget() {
-  const { default: autoBind } = await import('auto-bind')
-
-  for (const [prop, value] of Object.entries(autoBind(new EventTarget()))) {
-    vi.stubGlobal(prop, value)
-  }
-}
-
-export function bridgeCmdrEnv() {
-  vi.stubEnv('rpc_url_', 'http://127.0.0.1:7180')
-}
-
-export async function bridgeCmdrBasics() {
-  electronProcess()
-  await globalEventTarget()
-  bridgeCmdrEnv()
-
-  await import('../../preload/index')
-
-  const { default: useHandles } = await import('../../main/services/handle')
-  useHandles()
 }

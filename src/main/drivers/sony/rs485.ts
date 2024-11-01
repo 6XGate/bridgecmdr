@@ -1,11 +1,18 @@
 import Logger from 'electron-log'
-import { defineDriver, kDeviceHasNoExtraCapabilities } from '../../services/driver'
-import { createAddress, createCommand, kAddressAll, kPowerOff, kPowerOn, kSetChannel } from '../../services/sonyRs485'
+import { defineDriver, kDeviceHasNoExtraCapabilities } from '../../services/drivers'
 import { createCommandStream } from '../../services/stream'
-import type { Command, CommandArg } from '../../services/sonyRs485'
+import {
+  createAddress,
+  createCommand,
+  kAddressAll,
+  kPowerOff,
+  kPowerOn,
+  kSetChannel
+} from '../../services/support/sonyRs485'
+import type { Command, CommandArg } from '../../services/support/sonyRs485'
 
 const sonyRs485Driver = defineDriver({
-  enable: true,
+  enabled: true,
   guid: '8626D6D3-C211-4D21-B5CC-F5E3B50D9FF0',
   localized: {
     en: {
@@ -15,8 +22,8 @@ const sonyRs485Driver = defineDriver({
     }
   },
   capabilities: kDeviceHasNoExtraCapabilities,
-  setup: async function setup(uri) {
-    async function sendCommand(command: Command, arg0?: CommandArg, arg1?: CommandArg) {
+  setup: () => {
+    async function sendCommand(uri: string, command: Command, arg0?: CommandArg, arg1?: CommandArg) {
       const source = createAddress(kAddressAll, 0)
       const destination = createAddress(kAddressAll, 0)
       const packet = createCommand(destination, source, command, arg0, arg1)
@@ -42,26 +49,26 @@ const sonyRs485Driver = defineDriver({
       await connection.close()
     }
 
-    async function activate(inputChannel: number) {
-      Logger.log(`sonyRs485Driver.activate(${inputChannel})`)
-      await sendCommand(kSetChannel, 1, inputChannel)
+    async function activate(uri: string, input: number) {
+      Logger.log(`sonyRs485Driver.activate(${input})`)
+      await sendCommand(uri, kSetChannel, 1, input)
     }
 
-    async function powerOn() {
+    async function powerOn(uri: string) {
       Logger.log('sonyRs485Driver.powerOn')
-      await sendCommand(kPowerOn)
+      await sendCommand(uri, kPowerOn)
     }
 
-    async function powerOff() {
+    async function powerOff(uri: string) {
       Logger.log('sonyRs485Driver.powerOff')
-      await sendCommand(kPowerOff)
+      await sendCommand(uri, kPowerOff)
     }
 
-    return await Promise.resolve({
+    return {
       activate,
       powerOn,
       powerOff
-    })
+    }
   }
 })
 

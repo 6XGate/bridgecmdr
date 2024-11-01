@@ -10,12 +10,7 @@ if (!process.contextIsolated) {
 
 try {
   // Register services and setup to free all handles when the window closes.
-  const services = useServices()
-  globalThis.addEventListener('beforeunload', () => {
-    services.freeAllHandles().catch((e: unknown) => {
-      console.error(e)
-    })
-  })
+  useServices()
 
   useAppConfig()
 } catch (e) {
