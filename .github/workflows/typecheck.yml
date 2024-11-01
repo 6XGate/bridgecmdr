@@ -1,6 +1,9 @@
 name: TypeScript checks
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [$default-branch, $protected-branches]
+  pull_request: {}
 
 jobs:
   eslint:
@@ -20,7 +23,8 @@ jobs:
           check-latest: true
       - name: Setup yarn
         run: |
-          corepack enable yarn@1
+          corepack enable yarn
+          corepack install
       - name: Install dependencies
         run: |
           yarn --frozen-lockfile --ignore-scripts
