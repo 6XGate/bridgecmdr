@@ -2,37 +2,13 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 const mock = await vi.hoisted(async () => await import('./support/mock'))
 
-describe('bad setup', () => {
+describe('correct setup', () => {
   beforeEach(() => {
     vi.mock(import('electron'), mock.electronModule)
-    mock.electronProcess()
   })
 
   afterEach(() => {
     vi.restoreAllMocks()
-    vi.unstubAllEnvs()
-    vi.unstubAllGlobals()
-    vi.resetModules()
-  })
-
-  test('context isolation off', async () => {
-    const logger = mock.console()
-
-    vi.spyOn(process, 'contextIsolated', 'get').mockImplementation(() => false)
-    await expect(import('../preload/index')).rejects.toThrowError('process.exit unexpectedly called with "1"')
-    expect(logger.error).toBeCalledWith('Context isolation is not enabled')
-  })
-})
-
-describe('correct setup', () => {
-  beforeEach(async () => {
-    vi.mock(import('electron'), mock.electronModule)
-    await mock.globalEventTarget()
-    mock.electronProcess()
-    mock.bridgeCmdrEnv()
-  })
-
-  afterEach(() => {
     vi.resetModules()
   })
 

@@ -7,7 +7,7 @@ on:
 
 jobs:
   eslint:
-    name: Run eslint scanning
+    name: Run coverage scanning
     runs-on: ubuntu-latest
     permissions:
       contents: read
