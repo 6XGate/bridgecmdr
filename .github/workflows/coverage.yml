@@ -30,4 +30,5 @@ jobs:
           yarn --frozen-lockfile
       - name: Check test coverage
         run: |
+          mkdir logs
           yarn coverage
