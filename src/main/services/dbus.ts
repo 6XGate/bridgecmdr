@@ -260,7 +260,7 @@ const useDbus = memo(function useDbus() {
         return `${type}:"${arg as string}"`
       }
 
-      return `${type}:${String(arg)}`
+      return `${type}:${String(arg as never)}`
     })
   }
 

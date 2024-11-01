@@ -3,6 +3,7 @@ import { useAsyncState, useLocalStorage, watchOnce } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
 import { useDialogs } from '../modals/dialogs'
 import { useClient } from '../services/rpc'
+import useStartup from '../services/startup'
 import { trackBusy } from '../services/tracking'
 import type { I18nSchema } from '../locales/locales'
 
@@ -16,6 +17,8 @@ const { state: appInfo, isReady } = useAsyncState(async () => await useClient().
   version: 'Loading...'
 })
 
+const startup = useStartup()
+
 const steps = [
   // v0: does nothing...
   async () => {
@@ -23,12 +26,12 @@ const steps = [
   },
   // v1: Ask about auto-start file creation.
   async function () {
-    if (await wait(services.startup.checkEnabled())) return
+    if (await wait(startup.checkEnabled())) return
     const yes = await dialogs.confirm(t('message.autoStartConfirm', [appInfo.value.name]))
     if (!yes) return
 
     try {
-      await wait(services.startup.enable())
+      await wait(startup.enable())
     } catch (cause) {
       throw new Error(t('message.autoStartError'), { cause })
     }

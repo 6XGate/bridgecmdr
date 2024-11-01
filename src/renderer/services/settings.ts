@@ -2,6 +2,7 @@ import { usePreferredColorScheme } from '@vueuse/core'
 import { defineStore } from 'pinia'
 import { readonly, computed } from 'vue'
 import { z } from 'zod'
+import useStartup from './startup'
 import { useUserStorage } from './storage'
 import type { UseStorageOptions } from '@vueuse/core'
 
@@ -58,6 +59,8 @@ const useSettings = defineStore('settings', function defineSettings() {
   const powerOffWhen = useUserStorage('powerOffWhen', 'single', useSchema(PowerOffTaps))
   const powerOffWhenOptions = readonly(PowerOffTaps.options)
 
+  const startup = useStartup()
+
   return {
     iconSize,
     iconSizes,
@@ -67,9 +70,9 @@ const useSettings = defineStore('settings', function defineSettings() {
     powerOnSwitchesAtStart,
     powerOffWhen,
     powerOffWhenOptions,
-    checkAutoStart: services.startup.checkEnabled,
-    enableAutoStart: services.startup.enable,
-    disableAutoStart: services.startup.disable
+    checkAutoStart: startup.checkEnabled,
+    enableAutoStart: startup.enable,
+    disableAutoStart: startup.disable
   }
 })
 

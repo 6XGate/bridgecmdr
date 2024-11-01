@@ -7,21 +7,23 @@ import useUserStoreRouter from './data/storage'
 import useSwitchesRouter from './data/switches'
 import useTiesRouter from './data/ties'
 import useSerialPortRouter from './ports'
+import useStartupRouter from './startup'
 
-export const useAppRouter = memo(function useAppRouter() {
-  return router({
+export const useAppRouter = memo(() =>
+  router({
     // Informational routes
     appInfo: procedure.query(useAppInfo),
     userInfo: procedure.query(useUserInfo),
     // Functional service routes
     ports: useSerialPortRouter(),
+    startup: useStartupRouter(),
     // Data service routes
     storage: useUserStoreRouter(),
     ties: useTiesRouter(),
     switches: useSwitchesRouter(),
     sources: useSourcesRouter()
   })
-})
+)
 
 export type AppRouter = ReturnType<typeof useAppRouter>
 export const createCaller = createCallerFactory(useAppRouter())

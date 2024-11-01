@@ -1,8 +1,8 @@
 import Logger from 'electron-log'
-import { createAddress, createCommand, kAddressAll, kPowerOff, kPowerOn, kSetChannel } from '../../helpers/sonyRs485'
-import { createCommandStream } from '../../helpers/stream'
 import { defineDriver, kDeviceHasNoExtraCapabilities } from '../../services/driver'
-import type { Command, CommandArg } from '../../helpers/sonyRs485'
+import { createAddress, createCommand, kAddressAll, kPowerOff, kPowerOn, kSetChannel } from '../../services/sonyRs485'
+import { createCommandStream } from '../../services/stream'
+import type { Command, CommandArg } from '../../services/sonyRs485'
 
 const sonyRs485Driver = defineDriver({
   enable: true,

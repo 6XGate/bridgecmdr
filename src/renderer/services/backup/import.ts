@@ -4,9 +4,9 @@ import { z } from 'zod'
 import { fileToAttachment } from '../../helpers/attachment'
 import { useDrivers } from '../driver'
 import useSettings from '../settings'
-import { useSources } from '../source'
-import { useSwitches } from '../switch'
-import { useTies } from '../tie'
+import { useSources } from '../sources'
+import { useSwitches } from '../switches'
+import { useTies } from '../ties'
 
 export async function importSettings(file: File) {
   const settings = useSettings()

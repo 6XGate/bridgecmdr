@@ -2,9 +2,9 @@ import { BlobReader, BlobWriter, TextReader, ZipWriter } from '@zip.js/zip.js'
 import { pick } from 'radash'
 import { toFiles } from '../../helpers/attachment'
 import useSettings from '../settings'
-import { useSources } from '../source'
-import { useSwitches } from '../switch'
-import { useTies } from '../tie'
+import { useSources } from '../sources'
+import { useSwitches } from '../switches'
+import { useTies } from '../ties'
 import { isNotNullish } from '@/basics'
 
 export async function exportSettings() {

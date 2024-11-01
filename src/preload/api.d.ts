@@ -53,17 +53,6 @@ export interface ListenerOptions {
 }
 
 //
-// Login start API
-//
-
-/** Login start API. */
-export interface StartupApi {
-  readonly checkEnabled: () => Promise<boolean>
-  readonly enable: () => Promise<void>
-  readonly disable: () => Promise<void>
-}
-
-//
 // Driver API
 //
 
@@ -167,7 +156,6 @@ export interface ProcessData {
 export interface MainProcessServices {
   readonly process: ProcessData
   readonly driver: DriverApi
-  readonly startup: StartupApi
   readonly system: SystemApi
   readonly updates: AppUpdates
   /** Closes a handle, freeing its resources. */

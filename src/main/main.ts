@@ -10,7 +10,6 @@ import useCrypto from './plugins/webcrypto'
 import useApiServer from './server'
 import useDrivers from './services/driver'
 import useHandles from './services/handle'
-import useStartup from './services/startup'
 import useSystem from './services/system'
 import useUpdater from './services/updater'
 import { logError } from './utilities'
@@ -147,6 +146,5 @@ useUpdater()
 useSystem()
 useDrivers()
 registerDrivers()
-await useStartup()
 
 await createWindow()

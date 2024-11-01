@@ -9,7 +9,7 @@ beforeEach<MockStreamContext>(async (context) => {
   vi.mock(import('electron'), mock.electronModule)
   vi.mock(import('electron-log'))
   vi.mock(import('serialport'), port.serialPortModule)
-  vi.doMock(import('../../../main/helpers/stream'), stream.commandStreamModule(context))
+  vi.doMock(import('../../../main/services/stream'), stream.commandStreamModule(context))
   await mock.bridgeCmdrBasics()
   await port.createMockPorts()
   const { default: useDrivers } = await import('../../../main/services/driver')

@@ -9,7 +9,7 @@ import { useDrivers } from '../services/driver'
 import usePorts from '../services/ports'
 import { useDialogs, useSwitchDialog } from './dialogs'
 import type { I18nSchema } from '../locales/locales'
-import type { NewSwitch } from '../services/switch'
+import type { NewSwitch } from '../services/switches'
 import type { DeepReadonly } from 'vue'
 import { deepClone } from '@/object'
 
