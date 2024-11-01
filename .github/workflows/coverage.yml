@@ -27,7 +27,7 @@ jobs:
           corepack install
       - name: Install dependencies
         run: |
-          yarn --frozen-lockfile --ignore-scripts
+          yarn --frozen-lockfile
       - name: Check test coverage
         run: |
           yarn coverage
