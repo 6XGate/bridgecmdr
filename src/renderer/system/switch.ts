@@ -1,28 +1,15 @@
 import { defineStore } from 'pinia'
-import { z } from 'zod'
-import { defineDatabase, DocumentId } from '../data/database'
-import { useDataSet } from '../data/set'
-import { useDataStore } from '../data/store'
 import { forceUndefined } from '../helpers/utilities'
-import { trackBusy } from '../utilities/tracking'
-import { useTies, useTiesDatabase } from './tie'
-import type { DocumentOf } from '../data/database'
+import { useClient } from '../services/rpc'
+import { useDataStore } from '../services/store'
+import type { NewSwitch, Switch, SwitchUpdate } from '../../preload/api'
+import type { DocumentId } from '../services/store'
 
-export type NewSwitch = z.input<typeof Switch>
-export type Switch = DocumentOf<typeof Switch>
-export const Switch = z.object({
-  driverId: DocumentId,
-  title: z.string().min(1),
-  path: z.string().min(1)
-})
-
-export const useSwitchesDatabase = defineDatabase('switches', Switch)
+export type { NewSwitch, Switch, SwitchUpdate } from '../../preload/api'
 
 export const useSwitches = defineStore('switches', function defineSwitches() {
-  const tracker = trackBusy()
-  const db = useSwitchesDatabase()
-  const set = useDataSet(Switch)
-  const store = useDataStore(db, set, tracker)
+  const { switches } = useClient()
+  const store = useDataStore<Switch>()
 
   function blank(): NewSwitch {
     return {
@@ -32,28 +19,36 @@ export const useSwitches = defineStore('switches', function defineSwitches() {
     }
   }
 
-  const tiesDb = useTiesDatabase()
-  const ties = useTies()
+  const compact = store.defineOperation(async () => {
+    await switches.compact.mutate()
+  })
 
-  const remove = tracker.track(async function remove(...[id, ...args]: Parameters<typeof db.remove>) {
-    await db.remove(id, ...args)
-    set.deleteItem(id)
+  const all = store.defineFetchMany(async () => await switches.all.query())
 
-    const related = await tiesDb
-      .query(async (backend) => await backend.find({ selector: { switchId: id } }))
-      .then((r) => r.docs)
+  const get = store.defineFetch(async (id: DocumentId) => await switches.get.query(id))
 
-    await Promise.all(
-      related.map(async (tie) => {
-        await ties.remove(tie._id)
-      })
-    )
+  const add = store.defineInsertion(async (document: NewSwitch) => await switches.add.mutate(document))
+
+  const update = store.defineMutation(async (document: SwitchUpdate) => await switches.update.mutate(document))
+
+  const remove = store.defineRemoval(async (id: DocumentId) => {
+    await switches.remove.mutate(id)
+    return id
   })
 
   return {
-    ...store,
-    compact: tracker.track(db.compact),
+    isBusy: store.isBusy,
+    error: store.error,
+    items: store.items,
+    current: store.current,
+    blank,
+    compact,
+    all,
+    get,
+    add,
+    update,
     remove,
-    blank
+    dismiss: store.unsetCurrent,
+    clear: store.clearItems
   }
 })

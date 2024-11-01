@@ -22,30 +22,6 @@ describe('bad setup', () => {
     await expect(import('../preload/index')).rejects.toThrowError('process.exit unexpectedly called with "1"')
     expect(logger.error).toBeCalledWith('Context isolation is not enabled')
   })
-
-  test('missing environment', () => {
-    expect(() => globalThis.application.name).toThrowError(TypeError)
-    expect(() => globalThis.application.version).toThrowError(TypeError)
-    expect(() => globalThis.user.name).toThrowError(TypeError)
-    expect(() => globalThis.user.locale).toThrowError(TypeError)
-  })
-
-  test('app info', async () => {
-    const { default: useAppInfo } = await import('../preload/plugins/info/app')
-
-    expect(() => useAppInfo()).toThrowError('Missing appInfo.name')
-    vi.stubEnv('app_name_', 'BridgeCmdr')
-    expect(() => useAppInfo()).toThrowError('Missing appInfo.version')
-  })
-
-  test('user info', async () => {
-    const { default: useUserInfo } = await import('../preload/plugins/info/user')
-
-    vi.stubEnv('USER', '') // HACK: Only way to clear a variables.
-    expect(() => useUserInfo()).toThrowError('Missing user info')
-    vi.stubEnv('USER', 'Charles')
-    expect(() => useUserInfo()).toThrowError('Missing locale info')
-  })
 })
 
 describe('correct setup', () => {
@@ -61,15 +37,19 @@ describe('correct setup', () => {
   })
 
   test('ready', async () => {
-    await import('../preload/index')
+    const os = await import('node:os')
+    const { default: useAppInfo } = await import('../main/info/app')
+    const { default: useUserInfo } = await import('../main/info/user')
+    const appInfo = useAppInfo()
+    const userInfo = useUserInfo()
 
-    expect(globalThis.application).toStrictEqual({
-      name: 'BridgeCmdr',
-      version: '2.0.0'
+    expect(appInfo).toStrictEqual({
+      name: 'BridgeCmdr==mock==',
+      version: '2.0.0==mock=='
     })
-    expect(globalThis.user).toStrictEqual({
-      name: 'Charles',
-      locale: 'en'
+    expect(userInfo).toStrictEqual({
+      name: os.userInfo().username,
+      locale: 'en==mock=='
     })
   })
 })

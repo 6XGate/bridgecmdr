@@ -4,12 +4,12 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { app, shell, BrowserWindow, nativeTheme } from 'electron'
 import Logger from 'electron-log'
 import appIcon from '../../resources/icon.png?asset&asarUnpack'
+import useAppConfig from './info/config'
 import registerDrivers from './plugins/drivers'
-import usePorts from './plugins/ports'
 import useCrypto from './plugins/webcrypto'
+import useApiServer from './server'
 import useDrivers from './services/driver'
 import useHandles from './services/handle'
-import useLevelServer from './services/level'
 import useStartup from './services/startup'
 import useSystem from './services/system'
 import useUpdater from './services/updater'
@@ -37,7 +37,9 @@ async function createWindow() {
     useContentSize: true,
     webPreferences: {
       preload: joinPath(__dirname, '../preload/index.mjs'),
-      sandbox: false
+      sandbox: false,
+      // TODO: Properly setup CORS for the app.
+      webSecurity: false
     }
   })
 
@@ -83,11 +85,6 @@ async function createWindow() {
 
   throw logError(toError(lastError))
 }
-
-// Add application information.
-process.env['app_version_'] = app.getVersion()
-process.env['app_name_'] = app.getName()
-process.env['user_locale_'] = app.getLocale()
 
 // Let's change the web session path.
 const configDir = app.getPath('userData')
@@ -142,11 +139,12 @@ await app.whenReady()
 // Set app user model id for windows
 electronApp.setAppUserModelId('org.sleepingcats.BridgeCmdr')
 
+useAppConfig()
+
+useApiServer()
 useCrypto()
-usePorts()
 useUpdater()
 useSystem()
-useLevelServer()
 useDrivers()
 registerDrivers()
 await useStartup()

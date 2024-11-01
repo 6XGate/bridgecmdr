@@ -44,7 +44,7 @@ test('available', async () => {
   })
 
   // Localized list.
-  const { useDrivers } = await import('../../../renderer/system/driver')
+  const { useDrivers } = await import('../../../renderer/services/driver')
   const drivers = useDrivers()
   await expect(drivers.all()).resolves.toBeUndefined()
   expect(drivers.items).toContainEqual({
@@ -57,7 +57,7 @@ test('available', async () => {
 })
 
 test('connect', async () => {
-  const { useDrivers } = await import('../../../renderer/system/driver')
+  const { useDrivers } = await import('../../../renderer/services/driver')
   const { load } = useDrivers()
 
   await expect(load(kDriverGuid, 'port:/dev/ttyS0')).resolves.not.toBeNull()
@@ -68,7 +68,7 @@ test<MockStreamContext>('power on', async (context) => {
 
   context.stream = new stream.MockCommandStream()
 
-  const { useDrivers } = await import('../../../renderer/system/driver')
+  const { useDrivers } = await import('../../../renderer/services/driver')
   const { load } = useDrivers()
 
   const command = Buffer.of(0x02, 4, 0xc0, 0xc0, 0x29, 0x3e, 0x15)
@@ -92,7 +92,7 @@ test<MockStreamContext>('power off', async (context) => {
 
   context.stream = new stream.MockCommandStream()
 
-  const { useDrivers } = await import('../../../renderer/system/driver')
+  const { useDrivers } = await import('../../../renderer/services/driver')
   const { load } = useDrivers()
 
   const commnad = Buffer.of(0x02, 4, 0xc0, 0xc0, 0x2a, 0x3e, 0x14)
@@ -116,7 +116,7 @@ test<MockStreamContext>('activate tie', async (context) => {
 
   context.stream = new stream.MockCommandStream()
 
-  const { useDrivers } = await import('../../../renderer/system/driver')
+  const { useDrivers } = await import('../../../renderer/services/driver')
   const { load } = useDrivers()
 
   const input = 1

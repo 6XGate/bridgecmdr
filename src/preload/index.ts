@@ -1,7 +1,6 @@
 /* eslint-disable n/no-process-exit -- No real way to do this otherwise */
 
-import useAppInfo from './plugins/info/app'
-import useUserInfo from './plugins/info/user'
+import useAppConfig from './plugins/info/config'
 import useServices from './plugins/services'
 
 if (!process.contextIsolated) {
@@ -18,8 +17,7 @@ try {
     })
   })
 
-  useAppInfo()
-  useUserInfo()
+  useAppConfig()
 } catch (e) {
   console.error('Preload error', e)
   process.exit(1)

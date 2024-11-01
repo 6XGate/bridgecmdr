@@ -1,31 +1,26 @@
 import type { Dialog, IpcRendererEvent, OpenDialogOptions, SaveDialogOptions } from 'electron'
 import type { ProgressInfo, UpdateInfo } from 'electron-updater'
 import type { ArrayTail, ReadonlyDeep, Tagged } from 'type-fest'
+import type { AppConfig } from '../main/info/config'
+
+//
+// Exposed from main
+//
+
+export type { AppInfo } from '../main/info/app'
+export type { UserInfo } from '../main/info/user'
+export type { AppConfig } from '../main/info/config'
+export type { AppRouter } from '../main/routes/router'
+export type { DocumentId } from '../main/services/database'
+export type { UserStore } from '../main/dao/storage'
+export type { PortEntry } from '../main/services/ports'
+export type { Source, NewSource, SourceUpdate } from '../main/dao/sources'
+export type { Switch, NewSwitch, SwitchUpdate } from '../main/dao/switches'
+export type { Tie, NewTie, TieUpdate } from '../main/dao/ties'
 
 //
 // Internal parts
 //
-
-/** Defines an event handler callback for a specific type of event. */
-type EventHandlerCallback<E extends Event> = (ev: E) => unknown
-/** Defines an event handler object for a specific type of event. */
-interface EventHandlerObject<E extends Event> {
-  handleEvent: EventHandlerCallback<E>
-}
-
-/** Defines an event handler for a specific type of event. */
-type EventHandler<E extends Event> = EventHandlerCallback<E> | EventHandlerObject<E>
-
-/** Defines an event target for a specific type of event. */
-interface EventTargetEx<E extends Event> extends EventTarget {
-  addEventListener(type: E['type'], callback: EventHandler<E> | null): void
-  addEventListener(type: E['type'], callback: EventHandler<E> | null, useCapture: boolean): void
-  addEventListener(type: E['type'], callback: EventHandler<E> | null, options: EventListenerOptions): void
-  removeEventListener(type: E['type'], callback: EventHandler<E> | null): void
-  removeEventListener(type: E['type'], callback: EventHandler<E> | null, useCapture: boolean): void
-  removeEventListener(type: E['type'], callback: EventHandler<E> | null, options: EventListenerOptions): void
-  dispatchEvent(event: E): boolean
-}
 
 /** Internal IPC response structure */
 export interface IpcReturnedValue<T> {
@@ -130,27 +125,6 @@ export interface DriverApi {
 }
 
 //
-// Serial port API
-//
-
-// HACK: Workaround legacy TypeDefinition from serialport PortInfo.
-interface PortInfo {
-  path: string
-  manufacturer: string | undefined
-  serialNumber: string | undefined
-  pnpId: string | undefined
-  locationId: string | undefined
-  productId: string | undefined
-  vendorId: string | undefined
-}
-
-/** Exposed serial port APIs. */
-export interface PortApi {
-  /** Lists available serial ports. */
-  readonly list: () => Promise<PortInfo[]>
-}
-
-//
 // Session control API
 //
 
@@ -162,21 +136,6 @@ export interface SystemApi {
   readonly openFile: (options: OpenDialogOptions) => Promise<File[] | null>
   /** Shows the save file dialog to save a file. */
   readonly saveFile: (file: File, options: SaveDialogOptions) => Promise<boolean>
-}
-
-//
-// LevelDown proxy API
-//
-
-export type LevelKey = string | Buffer
-export type LevelValue = string | Buffer
-
-export type Messanger = (message: unknown) => void
-
-/** Level RPC API. */
-export interface LevelApi {
-  readonly open: (name: string) => Promise<Handle>
-  readonly activate: (h: Handle, receiver: Messanger) => Promise<Messanger>
 }
 
 //
@@ -208,8 +167,6 @@ export interface ProcessData {
 export interface MainProcessServices {
   readonly process: ProcessData
   readonly driver: DriverApi
-  readonly level: LevelApi
-  readonly ports: PortApi
   readonly startup: StartupApi
   readonly system: SystemApi
   readonly updates: AppUpdates
@@ -217,18 +174,6 @@ export interface MainProcessServices {
   readonly freeHandle: (h: Handle) => Promise<void>
   /** Closes all handles for a page. */
   readonly freeAllHandles: () => Promise<void>
-}
-
-/** Basic application information. */
-export interface AppInfo {
-  readonly name: string
-  readonly version: `${number}.${number}.${number}`
-}
-
-/** Basic user information. */
-export interface UserInfo {
-  readonly name: string
-  readonly locale: string
 }
 
 export interface AppUpdater {
@@ -246,7 +191,5 @@ export interface AppUpdates extends AppUpdater {
 // The exposed API global structure
 declare global {
   var services: MainProcessServices
-  var application: AppInfo
-  var system: System
-  var user: UserInfo
+  var configuration: AppConfig
 }

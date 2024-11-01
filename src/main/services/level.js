@@ -1,113 +1,100 @@
 import { resolve as resolvePath } from 'node:path'
-import { Duplex, PassThrough, pipeline, Writable } from 'node:stream'
-import { app, ipcMain } from 'electron'
-import level from 'level'
+import { app } from 'electron'
+import levelDown from 'leveldown'
+import levelUp from 'levelup'
 // @ts-expect-error -- No types
-import multileveldown from 'multileveldown'
+import LevelPouch from 'pouchdb-adapter-leveldb-core'
 import { memo } from 'radash'
-import { ipcHandle, logError } from '../utilities'
-import useHandles from './handle'
 
-/** @typedef {`level:${string}`} Channel */
-/** @typedef {import('level').LevelDB} LevelDB */
+//
+// NOTE: While PouchDB has a built-in LevelDB adapter, we want to have
+// as minimum of an external footprint as possible. This will be
+// done by using our own quick-and-dirty adapter that just
+// uses the PouchDB built in adapter.
+//
 
-const useLevelServer = memo(function useLevelServer() {
-  const kLevelDatabaseHandle =
-    /** @type {import('./handle').HandleKey<{ channel: Channel; stream: import('node:stream').Duplex }>} */
-    (Symbol.for('@level'))
-  const { createHandle, openHandle } = useHandles()
+/** @template ALD @typedef {import('levelup').LevelUp<ALD>} LevelUp<ALD> */
+/** @typedef {(err: Error | undefined) => void} ErrorCallback */
+/** @typedef {import('leveldown').LevelDown} LevelDown */
 
-  /**
-   * @param {string} path
-   */
-  async function openDatabase(path) {
-    return await new Promise(
-      /**
-       *
-       * @param {(db: LevelDB) => void} resolve
-       * @param {(error: Error | undefined) => void} reject
-       */
-      (resolve, reject) => {
-        const db = level(path, {}, (error) => {
-          if (error == null) resolve(db)
-          else reject(error)
-        })
-      }
-    )
-  }
-
-  const open = ipcHandle(
+export const useLevelDb = memo(function useLevelDb() {
+  const leveldown = memo(
     /**
      * @param {string} name
      */
-    async function open(event, name) {
-      if (name.endsWith(':close')) {
-        throw logError(new SyntaxError("Database names cannot end in ':close'"))
-      }
-
-      // Don't allow any path separating characters.
-      if (/[/\\.:]/u.test(name)) {
-        throw logError(new Error('Only a file name, without extension or relative path, may be specified'))
-      }
-
+    function leveldown(name) {
       const path = resolvePath(app.getPath('userData'), name)
+      const db = levelDown(path)
 
-      const sender = event.sender
-
-      const db = await openDatabase(path)
-      // eslint-disable-next-line -- No types, mo errors.
-      const host = multileveldown.server(db)
-      /** @type {Channel} */
-      const channel = `level:${name}`
-
-      const readable = new PassThrough()
-      const writable = new Writable({
-        write: (chunk, _, next) => {
-          sender.send(channel, chunk)
-          next()
-        }
+      app.on('before-quit', () => {
+        db.close((err) => {
+          if (err != null) console.error(err)
+        })
       })
 
-      const stream = Duplex.from({ writable, readable })
-      /**
-       * @param {*} _
-       * @param {unknown} msg
-       */
-      const receiver = (_, msg) => {
-        readable.write(msg)
-      }
-
-      ipcMain.on(channel, receiver)
-      pipeline(stream, host, stream, () => {
-        stream.destroy()
-      })
-
-      const handle = createHandle(event, kLevelDatabaseHandle, { channel, stream }, async () => {
-        await db.close()
-
-        // eslint-disable-next-line -- No types, mo errors.
-        host.destroy()
-        ipcMain.off(channel, receiver)
-        if (!event.sender.isDestroyed()) event.sender.send(`${channel}:close`)
-      })
-
-      return await Promise.resolve(handle)
+      return db
     }
   )
 
-  const getChannel = ipcHandle(
+  const levelup = memo(
     /**
-     * @param {import('../../preload/api').Handle} handle
-     * @returns
+     * @param {string} name
      */
-    async function getChannel(event, handle) {
-      const { channel } = openHandle(event, kLevelDatabaseHandle, handle)
-      return await Promise.resolve(channel)
+    async function levelup(name) {
+      const db = leveldown(name)
+      return await new Promise(
+        /**
+         * @param {(db: LevelUp<LevelDown>) => void} resolve
+         * @param {(error: Error) => void} reject
+         */
+        (resolve, reject) => {
+          /**
+           * @param {Error|undefined} error
+           */
+          const cb = (error) => {
+            if (error == null) resolve(up)
+            else reject(error)
+          }
+
+          const up = levelUp(db, cb)
+        }
+      )
     }
   )
 
-  ipcMain.handle('database:open', open)
-  ipcMain.handle('database:channel', getChannel)
+  return {
+    leveldown,
+    levelup
+  }
 })
 
-export default useLevelServer
+export const useLevelAdapter = memo(function useLevelAdapter() {
+  const { leveldown } = useLevelDb()
+
+  /** @typedef {Record<string, unknown>} LevelPouch */
+
+  /**
+   * @this {Partial<LevelPouch>}
+   * @param {Record<string, unknown>} opts
+   * @param {ErrorCallback} cb
+   */
+  function MainDown(opts, cb) {
+    // eslint-disable-next-line -- Eveything is messed up with no typings.
+    LevelPouch.call(this, { ...opts, db: leveldown }, cb)
+  }
+
+  MainDown.valid = function () {
+    return true
+  }
+
+  MainDown.use_prefix = true
+
+  /** @type {PouchDB.Plugin<PouchDB.Static>} */
+  const plugin = (pouch) => {
+    // @ts-expect-error -- Not defined in the types.
+    // eslint-disable-next-line -- Eveything is messed up with no typings.
+    pouch.adapter('maindb', MainDown, true)
+  }
+
+  return plugin
+})

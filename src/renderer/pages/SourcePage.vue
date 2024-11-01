@@ -6,21 +6,21 @@ import { useRouter } from 'vue-router'
 import InputDialog from '../components/InputDialog.vue'
 import Page from '../components/Page.vue'
 import ReplacableImage from '../components/ReplacableImage.vue'
-import { toFiles } from '../helpers/attachment'
+import { filesToAttachment, toFiles } from '../helpers/attachment'
 import { useGuardedAsyncOp } from '../helpers/utilities'
 import TieDialog from '../modals/TieDialog.vue'
 import { useDialogs, useTieDialog } from '../modals/dialogs'
-import { useDrivers } from '../system/driver'
-import { useSources } from '../system/source'
-import { useSwitches } from '../system/switch'
-import { useTies } from '../system/tie'
-import { trackBusy } from '../utilities/tracking'
-import type { DocumentId } from '../data/database'
+import { useDrivers } from '../services/driver'
+import { useSources } from '../services/source'
+import { useSwitches } from '../services/switch'
+import { useTies } from '../services/tie'
+import { trackBusy } from '../services/tracking'
 import type { I18nSchema } from '../locales/locales'
-import type { DriverInformation } from '../system/driver'
-import type { Source } from '../system/source'
-import type { Switch } from '../system/switch'
-import type { NewTie, Tie } from '../system/tie'
+import type { DriverInformation } from '../services/driver'
+import type { Source } from '../services/source'
+import type { DocumentId } from '../services/store'
+import type { Switch } from '../services/switch'
+import type { NewTie, Tie } from '../services/tie'
 import type { DeepReadonly } from 'vue'
 import { isNotNullish } from '@/basics'
 
@@ -64,7 +64,9 @@ async function save() {
 
   try {
     source.value.image = file.value.name
-    source.value = { ...(await sources.update(source.value, ...[file.value].filter(isNotNullish))) }
+    source.value = {
+      ...(await sources.update(source.value, ...(await filesToAttachment([file.value].filter(isNotNullish)))))
+    }
     file.value = toFiles(source.value._attachments).find(
       (f) => source.value?.image != null && f.name === source.value.image
     )

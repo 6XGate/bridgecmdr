@@ -33,7 +33,13 @@ export async function electronModule(original: () => Promise<typeof import('elec
     ipcRenderer,
     contextBridge,
     app: {
-      getPath: (_name: string) => 'logs'
+      getName: () => 'BridgeCmdr==mock==',
+      getVersion: () => '2.0.0==mock==',
+      getLocale: () => 'en==mock==',
+      getPath: (_name: string) => 'logs',
+      on(_name: string, _ev: unknown) {
+        return this
+      }
     } as Electron.App
   }
 }
@@ -105,10 +111,7 @@ export async function globalEventTarget() {
 }
 
 export function bridgeCmdrEnv() {
-  vi.stubEnv('app_name_', 'BridgeCmdr')
-  vi.stubEnv('app_version_', '2.0.0')
-  vi.stubEnv('USER', 'Charles')
-  vi.stubEnv('user_locale_', 'en')
+  vi.stubEnv('rpc_url_', 'http://127.0.0.1:7180')
 }
 
 export async function bridgeCmdrBasics() {
