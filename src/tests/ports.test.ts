@@ -1,91 +1,93 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-import type { PortInfo } from '../preload/api'
+import { afterEach, describe, expect, test, vi } from 'vitest'
 
-const mock = await vi.hoisted(async () => await import('./support/mock'))
-const port = await vi.hoisted(async () => await import('./support/serial'))
-
-interface PortContext {
-  ports: PortInfo[]
-}
-
-beforeEach(async () => {
-  vi.mock(import('electron'), mock.electronModule)
-  vi.mock(import('electron-log'))
-  vi.mock(import('serialport'), port.serialPortModule)
-  await mock.bridgeCmdrBasics()
-  await port.createMockPorts()
-})
-
-afterEach(async () => {
-  await globalThis.services.freeAllHandles()
-  await port.resetMockPorts()
+afterEach(() => {
+  vi.restoreAllMocks()
   vi.resetModules()
 })
 
-test('list raw port', async () => {
-  const ports = await globalThis.services.ports.list()
-  expect(ports).toMatchObject([
+test('no ports', async () => {
+  const { SerialPort } = await import('serialport')
+  vi.spyOn(SerialPort, 'list').mockResolvedValue([])
+  const { default: useSerialPorts } = await import('../main/services/ports')
+  const ports = await useSerialPorts().list()
+  expect(ports).toStrictEqual([])
+})
+
+test('list simple ports', async () => {
+  const { SerialPort } = await import('serialport')
+  vi.spyOn(SerialPort, 'list').mockResolvedValue([
     {
+      locationId: undefined,
+      manufacturer: 'Mock Serial Port',
       path: '/dev/ttyS0',
-      manufacturer: 'Mock Serial Port',
-      vendorId: '8086',
-      productId: '8087'
+      pnpId: undefined,
+      productId: '8087',
+      serialNumber: '1',
+      vendorId: '8086'
     },
     {
+      locationId: undefined,
+      manufacturer: 'Mock Serial Port',
       path: '/dev/ttyS1',
-      manufacturer: 'Mock Serial Port',
-      vendorId: '8086',
-      productId: '8087'
+      pnpId: undefined,
+      serialNumber: '2',
+      productId: '8087',
+      vendorId: '8086'
     },
     {
+      locationId: undefined,
+      manufacturer: 'Mock Serial Port',
+      pnpId: undefined,
+      serialNumber: '3',
       path: '/dev/ttyS2',
+      productId: '8087',
+      vendorId: '8086'
+    }
+  ])
+
+  const { default: useSerialPorts } = await import('../main/services/ports')
+  const ports = await useSerialPorts().list()
+  expect(ports).toEqual([
+    {
+      locationId: undefined,
       manufacturer: 'Mock Serial Port',
-      vendorId: '8086',
-      productId: '8087'
-    }
-  ])
-})
-
-test('list ports', async () => {
-  const { default: usePorts } = await import('../renderer/system/ports')
-
-  const ports = usePorts()
-  await expect(ports.all()).resolves.toBeUndefined()
-  expect(ports.items).toMatchObject([
-    {
+      path: '/dev/ttyS0',
+      pnpId: undefined,
+      productId: '8087',
+      serialNumber: '1',
       title: '/dev/ttyS0',
-      value: '/dev/ttyS0'
+      value: '/dev/ttyS0',
+      vendorId: '8086'
     },
     {
+      locationId: undefined,
+      manufacturer: 'Mock Serial Port',
+      path: '/dev/ttyS1',
+      pnpId: undefined,
+      serialNumber: '2',
+      productId: '8087',
       title: '/dev/ttyS1',
-      value: '/dev/ttyS1'
+      value: '/dev/ttyS1',
+      vendorId: '8086'
     },
     {
+      locationId: undefined,
+      manufacturer: 'Mock Serial Port',
+      pnpId: undefined,
+      serialNumber: '3',
+      path: '/dev/ttyS2',
+      productId: '8087',
       title: '/dev/ttyS2',
-      value: '/dev/ttyS2'
+      value: '/dev/ttyS2',
+      vendorId: '8086'
     }
   ])
 })
 
-describe('parsing port info', () => {
-  beforeEach<PortContext>((context) => {
-    context.ports = []
-    vi.spyOn(globalThis.services.ports, 'list').mockImplementation(async () => await Promise.resolve(context.ports))
-  })
-
-  afterEach<PortContext>(() => {
-    vi.restoreAllMocks()
-  })
-
-  test<PortContext>('no ports', async () => {
-    const { default: usePorts } = await import('../renderer/system/ports')
-    const ports = usePorts()
-    await ports.all()
-    expect(ports.items).toStrictEqual([])
-  })
-
-  test<PortContext>('USB PnP ID ports', async (context) => {
-    context.ports = [
+describe('parsing PnP ID', () => {
+  test('USB PnP ID ports', async () => {
+    const { SerialPort } = await import('serialport')
+    vi.spyOn(SerialPort, 'list').mockResolvedValue([
       {
         manufacturer: 'FTDI',
         serialNumber: 'XXXXXXXX',
@@ -95,21 +97,29 @@ describe('parsing port info', () => {
         productId: '6001',
         path: '/dev/ttyUSB0'
       }
-    ]
+    ])
 
-    const { default: usePorts } = await import('../renderer/system/ports')
-    const ports = usePorts()
-    await ports.all()
-    expect(ports.items).toStrictEqual([
+    const { default: useSerialPorts } = await import('../main/services/ports')
+    const ports = await useSerialPorts().list()
+    expect(ports).toStrictEqual([
       {
+        locationId: undefined,
+        manufacturer: 'FTDI',
+        path: '/dev/ttyUSB0',
+        pnpId: 'usb-FTDI_FT232R_USB_UART_XXXXXXXX-if00-port0',
+        productId: '6001',
+        serialNumber: 'XXXXXXXX',
         title: 'FTDI FT232R USB UART XXXXXXXX',
-        value: '/dev/ttyUSB0'
+        value: '/dev/ttyUSB0',
+        vendorId: '0403'
       }
     ])
   })
 
-  test<PortContext>('Unknown PnP ID ports', async (context) => {
-    context.ports = [
+  test('Unknown PnP ID ports', async () => {
+    const { SerialPort } = await import('serialport')
+    vi.spyOn(SerialPort, 'list').mockResolvedValue([
+      // Missing port and interface.
       {
         manufacturer: 'FTDI',
         serialNumber: 'XXXXXXXX',
@@ -119,6 +129,7 @@ describe('parsing port info', () => {
         productId: '6001',
         path: '/dev/ttyUSB0'
       },
+      // Missing bus.
       {
         manufacturer: 'FTDI',
         serialNumber: 'XXXXXXXX',
@@ -128,6 +139,7 @@ describe('parsing port info', () => {
         productId: '6001',
         path: '/dev/ttyUSB1'
       },
+      // Missing bus, port, and interface.
       {
         manufacturer: 'FTDI',
         serialNumber: 'XXXXXXXX',
@@ -137,6 +149,7 @@ describe('parsing port info', () => {
         productId: '6001',
         path: '/dev/ttyUSB2'
       },
+      // Missing a lot.
       {
         manufacturer: 'FTDI',
         serialNumber: 'XXXXXXXX',
@@ -146,27 +159,54 @@ describe('parsing port info', () => {
         productId: '6001',
         path: '/dev/ttyUSB3'
       }
-    ]
+    ])
 
-    const { default: usePorts } = await import('../renderer/system/ports')
-    const ports = usePorts()
-    await ports.all()
-    expect(ports.items).toStrictEqual([
+    const { default: useSerialPorts } = await import('../main/services/ports')
+    const ports = await useSerialPorts().list()
+    expect(ports).toStrictEqual([
       {
+        locationId: undefined,
+        manufacturer: 'FTDI',
+        path: '/dev/ttyUSB0',
+        pnpId: 'usb-FTDI_FT232R_USB_UART_XXXXXXXX',
+        productId: '6001',
+        serialNumber: 'XXXXXXXX',
         title: '/dev/ttyUSB0',
-        value: '/dev/ttyUSB0'
+        value: '/dev/ttyUSB0',
+        vendorId: '0403'
       },
       {
+        locationId: undefined,
+        manufacturer: 'FTDI',
+        path: '/dev/ttyUSB1',
+        pnpId: 'FTDI_FT232R_USB_UART_XXXXXXXX-if00-port0',
+        productId: '6001',
+        serialNumber: 'XXXXXXXX',
         title: '/dev/ttyUSB1',
-        value: '/dev/ttyUSB1'
+        value: '/dev/ttyUSB1',
+        vendorId: '0403'
       },
       {
+        locationId: undefined,
+        manufacturer: 'FTDI',
+        path: '/dev/ttyUSB2',
+        pnpId: 'FTDI_FT232R_USB_UART_XXXXXXXX',
+        productId: '6001',
+        serialNumber: 'XXXXXXXX',
         title: '/dev/ttyUSB2',
-        value: '/dev/ttyUSB2'
+        value: '/dev/ttyUSB2',
+        vendorId: '0403'
       },
       {
+        locationId: undefined,
+        manufacturer: 'FTDI',
+        path: '/dev/ttyUSB3',
+        pnpId: 'if00-port0-port1',
+        productId: '6001',
+        serialNumber: 'XXXXXXXX',
         title: '/dev/ttyUSB3',
-        value: '/dev/ttyUSB3'
+        value: '/dev/ttyUSB3',
+        vendorId: '0403'
       }
     ])
   })

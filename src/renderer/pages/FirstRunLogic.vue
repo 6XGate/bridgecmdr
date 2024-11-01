@@ -1,16 +1,23 @@
 <script setup lang="ts">
-import { useLocalStorage } from '@vueuse/core'
-import { onMounted } from 'vue'
+import { useAsyncState, useLocalStorage, watchOnce } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
-import { useNextTick } from '../helpers/vue'
 import { useDialogs } from '../modals/dialogs'
-import { trackBusy } from '../utilities/tracking'
+import { useClient } from '../services/rpc'
+import useStartup from '../services/startup'
+import { trackBusy } from '../services/tracking'
 import type { I18nSchema } from '../locales/locales'
 
 const { t } = useI18n<I18nSchema>()
 const { wait, isBusy } = trackBusy()
 const dialogs = useDialogs()
 const doneFirstRun = useLocalStorage<number>('doneFirstRun', 0)
+
+const { state: appInfo, isReady } = useAsyncState(async () => await useClient().appInfo.query(), {
+  name: 'Loading...',
+  version: 'Loading...'
+})
+
+const startup = useStartup()
 
 const steps = [
   // v0: does nothing...
@@ -19,12 +26,12 @@ const steps = [
   },
   // v1: Ask about auto-start file creation.
   async function () {
-    if (await wait(services.startup.checkEnabled())) return
-    const yes = await dialogs.confirm(t('message.autoStartConfirm'))
+    if (await wait(startup.checkEnabled())) return
+    const yes = await dialogs.confirm(t('message.autoStartConfirm', [appInfo.value.name]))
     if (!yes) return
 
     try {
-      await wait(services.startup.enable())
+      await wait(startup.enable())
     } catch (cause) {
       throw new Error(t('message.autoStartError'), { cause })
     }
@@ -40,7 +47,7 @@ const steps = [
   }
 ]
 
-const doFirstRun = useNextTick(async function doFirstRun() {
+watchOnce(isReady, async function doFirstRun() {
   console.debug(`Done first steps: ${doneFirstRun.value}`)
   try {
     /* eslint-disable no-await-in-loop */
@@ -59,8 +66,6 @@ const doFirstRun = useNextTick(async function doFirstRun() {
     await dialogs.error(cause)
   }
 })
-
-onMounted(doFirstRun)
 </script>
 
 <template>
@@ -75,7 +80,7 @@ en:
   label:
     v1Settings: Old setting not migrated
   message:
-    autoStartConfirm: Do you want BridgeCmdr to start on boot?
+    autoStartConfirm: Do you want {0} to start on boot?
     autoStartError: Unable to create start-up entry
     v1Settings: |
       Due to unavoidable reasons, your data from v1.x cannot migrate to v2.x automatically.

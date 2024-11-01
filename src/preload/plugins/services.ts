@@ -1,13 +1,10 @@
 import { contextBridge } from 'electron'
 import { memo } from 'radash'
 import { useIpc } from '../support'
-import useDriverApi from './driver'
-import useProcessData from './info/process'
-import useLevelApi from './level'
-import usePortsApi from './ports'
-import useStartupApi from './startup'
-import useSystemApi from './system'
-import useAppUpdates from './updates'
+import useDriverApi from './services/driver'
+import useProcessData from './services/process'
+import useSystemApi from './services/system'
+import useAppUpdates from './services/updates'
 import type { MainProcessServices } from '../api'
 
 const useServices = memo(function useServices() {
@@ -16,9 +13,6 @@ const useServices = memo(function useServices() {
   const services = {
     process: useProcessData(),
     driver: useDriverApi(),
-    level: useLevelApi(),
-    ports: usePortsApi(),
-    startup: useStartupApi(),
     system: useSystemApi(),
     updates: useAppUpdates(),
     freeHandle: ipc.useInvoke('handle:free'),

@@ -3,10 +3,10 @@ import { mdiArrowLeft, mdiExport, mdiImport } from '@mdi/js'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import Page from '../components/Page.vue'
-import { exportSettings } from '../data/backup/export'
-import { importSettings } from '../data/backup/import'
 import { useDialogs } from '../modals/dialogs'
-import { trackBusy } from '../utilities/tracking'
+import { exportSettings } from '../services/backup/export'
+import { importSettings } from '../services/backup/import'
+import { trackBusy } from '../services/tracking'
 import type { I18nSchema } from '../locales/locales'
 
 //

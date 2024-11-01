@@ -1,27 +1,30 @@
 import { tryOnScopeDispose } from '@vueuse/core'
+import { map } from 'radash'
 import { computed, readonly, ref, unref, watch } from 'vue'
-import type { Attachment, Attachments } from '../data/database'
 import type { MaybeRef } from '@vueuse/core'
+import { Attachment } from '@/attachments'
 import { isNotNullish } from '@/basics'
 
 /* eslint-disable n/no-unsupported-features/node-builtins -- In browser environment. */
 
-export function toFile(id: string, attachment: Attachment) {
-  if (!('data' in attachment)) {
-    return undefined
-  }
-
-  return new File([attachment.data], id, { type: attachment.content_type })
+export function toFile(attachment: Attachment) {
+  return new File([attachment], attachment.name, { type: attachment.type })
 }
 
-export function toFiles(attachments?: Attachments) {
+export function toFiles(attachments?: Attachment[] | null) {
   if (attachments == null) {
     return []
   }
 
-  return Object.entries(attachments)
-    .map((entry) => toFile(...entry))
-    .filter(isNotNullish)
+  return attachments.map(toFile).filter(isNotNullish)
+}
+
+export async function fileToAttachment(file: File) {
+  return new Attachment(file.name, file.type, await file.arrayBuffer())
+}
+
+export async function filesToAttachment(files: File[]) {
+  return await map(files, fileToAttachment)
 }
 
 export function useImages() {

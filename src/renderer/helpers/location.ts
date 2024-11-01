@@ -4,8 +4,8 @@ import { computed, readonly } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { isHostWithOptionalPort } from './validation'
 import type { I18nSchema } from '../locales/locales'
-import type { PortData } from '../system/ports'
-import type { NewSwitch } from '../system/switch'
+import type { PortEntry } from '../services/ports'
+import type { NewSwitch } from '../services/switches'
 import type { Fixed } from '@/basics'
 import type { MessageProps } from '@vuelidate/validators'
 import type { MaybeRefOrGetter } from '@vueuse/shared'
@@ -13,7 +13,7 @@ import type { Ref } from 'vue'
 
 export type PathType = 'port' | 'ip' | 'path'
 
-export function useLocationUtils(validSwitches: MaybeRefOrGetter<readonly PortData[]>) {
+export function useLocationUtils(validSwitches: MaybeRefOrGetter<readonly PortEntry[]>) {
   const { t } = useI18n<I18nSchema>()
 
   // TODO: Proper checks.
@@ -72,7 +72,7 @@ interface LocationTypeMetaData {
   value: PathType
 }
 
-export function useLocation(location: Ref<string>, validSwitches: MaybeRefOrGetter<readonly PortData[]>) {
+export function useLocation(location: Ref<string>, validSwitches: MaybeRefOrGetter<readonly PortEntry[]>) {
   const { t } = useI18n<I18nSchema>()
   const { locationPath, splitPath } = useLocationUtils(validSwitches)
 
@@ -138,7 +138,7 @@ export function useLocation(location: Ref<string>, validSwitches: MaybeRefOrGett
 
 export const useSwitchLocation = (
   switcher: MaybeRefOrGetter<NewSwitch>,
-  validSwitches: MaybeRefOrGetter<readonly PortData[]>
+  validSwitches: MaybeRefOrGetter<readonly PortEntry[]>
 ) => {
   const location = computed({
     get: () => toValue(switcher).path,

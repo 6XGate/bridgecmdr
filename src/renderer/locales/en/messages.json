@@ -1,5 +1,4 @@
 {
-  "product": "BridgeCmdr",
   "driver": {
     "provider": "BridgeCmdr contributors"
   },

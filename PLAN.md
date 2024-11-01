@@ -1,8 +1,9 @@
 - Milestones
   - v2.1
     - Switch the majority of the IPC using tRPC.
-      - Level uses a streaming IPC, so leave it be for now.
-      - Anything passing a file may still require some custom hanlding.
+      - Updater will require websocket for subscriptions.
+      - System will require moving the open and save file support to DOM APIs.
+      - Drivers will require an overhaul to no longer need handles.
     - More drivers.
     - Move more modules to core.
 - Drivers

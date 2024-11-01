@@ -1,6 +1,6 @@
 import Logger from 'electron-log'
-import { createCommandStream } from '../../helpers/stream'
 import { defineDriver, kDeviceCanDecoupleAudioOutput, kDeviceSupportsMultipleOutputs } from '../../services/driver'
+import { createCommandStream } from '../../services/stream'
 
 const extronSisDriver = defineDriver({
   enable: true,

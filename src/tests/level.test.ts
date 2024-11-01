@@ -1,4 +1,4 @@
-import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest'
+import { test, expect, vi, beforeEach, afterEach } from 'vitest'
 
 const mock = await vi.hoisted(async () => await import('./support/mock'))
 
@@ -6,8 +6,6 @@ beforeEach(async () => {
   vi.mock(import('electron'), mock.electronModule)
   vi.mock(import('electron-log'))
   await mock.bridgeCmdrBasics()
-  const { default: useLevelServer } = await import('../main/services/level')
-  useLevelServer()
 })
 
 afterEach(async () => {
@@ -16,7 +14,7 @@ afterEach(async () => {
 })
 
 test('basics', async () => {
-  const { useLevelDb } = await import('../renderer/data/level')
+  const { useLevelDb } = await import('../main/services/level')
 
   const { levelup } = useLevelDb()
   const connectSpy = vi.fn(levelup)
@@ -27,16 +25,4 @@ test('basics', async () => {
   await expect(db.put('test', 'test')).resolves.toBeUndefined()
   await expect(db.get('test')).resolves.toEqual(Buffer.from('test'))
   await expect(db.close()).resolves.toBeUndefined()
-})
-
-describe('forbidden names', () => {
-  test('ending in ":close"', async () => {
-    const { useLevelDb } = await import('../renderer/data/level')
-    const { connect } = useLevelDb()
-
-    await expect(connect('test:close')).rejects.toThrowError("Database names cannot end in ':close'")
-    await expect(connect('test/close')).rejects.toThrowError(
-      'Only a file name, without extension or relative path, may be specified'
-    )
-  })
 })
