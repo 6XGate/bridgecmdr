@@ -4,24 +4,25 @@ import type { ArrayTail, ReadonlyDeep, Tagged } from 'type-fest'
 import type { AppConfig } from '../main/info/config'
 
 //
-// Exposed from main
+// Exposed via tRPC
 //
 
 export type { AppInfo } from '../main/info/app'
-export type { UserInfo } from '../main/info/user'
 export type { AppConfig } from '../main/info/config'
+export type { UserInfo } from '../main/info/user'
+
 export type { AppRouter } from '../main/routes/router'
 export type { DocumentId } from '../main/services/database'
 export type { ApiLocales } from '../main/services/locale'
-export type { UserStore } from '../main/dao/storage'
 export type { PortEntry } from '../main/services/ports'
+export type { UpdateInfo, ProgressInfo } from '../main/services/updater'
+
 export type { Source, NewSource, SourceUpdate } from '../main/dao/sources'
 export type { Switch, NewSwitch, SwitchUpdate } from '../main/dao/switches'
 export type { Tie, NewTie, TieUpdate } from '../main/dao/ties'
 export type { ApiLocales } from '../main/locale'
 
 export type {
-  Driver,
   DriverData,
   LocalizedDriverDescriptor,
   // Cannot be exported as values, but they are literals.
@@ -101,19 +102,6 @@ export interface ProcessData {
 export interface MainProcessServices {
   readonly process: ProcessData
   readonly system: SystemApi
-  readonly updates: AppUpdates
-}
-
-export interface AppUpdater {
-  readonly checkForUpdates: () => Promise<UpdateInfo | undefined>
-  readonly downloadUpdate: () => Promise<void>
-  readonly cancelUpdate: () => Promise<void>
-  readonly installUpdate: () => Promise<void>
-}
-
-export interface AppUpdates extends AppUpdater {
-  readonly onDownloadProgress: (fn: (progress: ProgressInfo) => void) => void
-  readonly offDownloadProgress: (fn: (progress: ProgressInfo) => void) => void
 }
 
 // The exposed API global structure

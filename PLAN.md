@@ -3,10 +3,9 @@
     - Switch the majority of the IPC using tRPC.
       - Updater will require websocket for subscriptions.
       - System will require moving the open and save file support to DOM APIs.
-      - Drivers will require an overhaul to no longer need handles.
+      - Wrap some Electron APIs as services for easier mocking without electron itself.
     - More drivers.
     - Move more modules to core.
-    - Wrap some Electron APIs as services for easier mocking without electron itself.
 - Drivers
   - Shinybow
   - Monoprice Blackbird

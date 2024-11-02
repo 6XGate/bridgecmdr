@@ -9,6 +9,7 @@ import useTiesRouter from './data/ties'
 import useDriversRouter from './drivers'
 import useSerialPortRouter from './ports'
 import useStartupRouter from './startup'
+import useUpdaterRouter from './updater'
 
 export const useAppRouter = memo(() =>
   router({
@@ -23,7 +24,8 @@ export const useAppRouter = memo(() =>
     storage: useUserStoreRouter(),
     ties: useTiesRouter(),
     switches: useSwitchesRouter(),
-    sources: useSourcesRouter()
+    sources: useSourcesRouter(),
+    updates: useUpdaterRouter()
   })
 )
 

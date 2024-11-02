@@ -8,7 +8,6 @@ import useAppConfig from './info/config'
 import useCrypto from './plugins/webcrypto'
 import useApiServer from './server'
 import useSystem from './services/system'
-import useUpdater from './services/updater'
 import { logError } from './utilities'
 import { waitTill } from '@/basics'
 import { toError } from '@/error-handling'
@@ -131,7 +130,6 @@ useAppConfig()
 
 useApiServer()
 useCrypto()
-useUpdater()
 useSystem()
 
 await createWindow()
