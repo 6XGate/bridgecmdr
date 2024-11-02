@@ -25,8 +25,7 @@ export const useLevelDb = memo(function useLevelDb() {
     function leveldown(name) {
       const path = resolvePath(app.getPath('userData'), name)
       const db = levelDown(path)
-
-      app.on('before-quit', () => {
+      app.on('will-quit', () => {
         db.close((err) => {
           if (err != null) console.error(err)
         })

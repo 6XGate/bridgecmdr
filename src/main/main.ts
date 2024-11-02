@@ -3,17 +3,11 @@ import process from 'node:process'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { app, shell, BrowserWindow, nativeTheme } from 'electron'
 import Logger from 'electron-log'
+import { sleep } from 'radash'
 import appIcon from '../../resources/icon.png?asset&asarUnpack'
 import useAppConfig from './info/config'
-import registerDrivers from './plugins/drivers'
-import useCrypto from './plugins/webcrypto'
 import useApiServer from './server'
-import useDrivers from './services/driver'
-import useHandles from './services/handle'
-import useSystem from './services/system'
-import useUpdater from './services/updater'
 import { logError } from './utilities'
-import { waitTill } from '@/basics'
 import { toError } from '@/error-handling'
 
 // In this file you can include the rest of your app"s specific main process
@@ -78,7 +72,7 @@ async function createWindow() {
       Logger.warn(e)
 
       // eslint-disable-next-line no-await-in-loop -- Retry loop must be serial.
-      await waitTill(kWait)
+      await sleep(kWait)
     }
   }
 
@@ -96,14 +90,6 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
   }
-})
-
-// Make sure all handles have been closed.
-const { shutDown } = useHandles()
-app.on('will-quit', () => {
-  process.nextTick(async () => {
-    await shutDown()
-  })
 })
 
 // Default open or close DevTools by F12 in development
@@ -141,10 +127,5 @@ electronApp.setAppUserModelId('org.sleepingcats.BridgeCmdr')
 useAppConfig()
 
 useApiServer()
-useCrypto()
-useUpdater()
-useSystem()
-useDrivers()
-registerDrivers()
 
 await createWindow()

@@ -1,7 +1,7 @@
-import { memo } from 'radash'
+import { createSharedComposable } from '@vueuse/shared'
 import { useClient } from './rpc'
 
-const useStartup = memo(function useStartup() {
+const useStartup = createSharedComposable(function useStartup() {
   const client = useClient()
   const checkEnabled = async () => await client.startup.checkEnabled.query()
   const enable = async () => {

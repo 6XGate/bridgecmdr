@@ -1,7 +1,6 @@
 import { memo } from 'radash'
 import { useLevelDb } from '../services/level'
 
-export type UserStore = ReturnType<typeof useUserStore>
 const useUserStore = memo(function useUserStore() {
   const { levelup } = useLevelDb()
 

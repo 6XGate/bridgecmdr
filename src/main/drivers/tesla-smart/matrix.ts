@@ -1,9 +1,9 @@
 import Logger from 'electron-log'
-import { defineDriver, kDeviceSupportsMultipleOutputs } from '../../services/driver'
+import { defineDriver, kDeviceSupportsMultipleOutputs } from '../../services/drivers'
 import { createCommandStream } from '../../services/stream'
 
 const teslaSmartMatrixDriver = defineDriver({
-  enable: true,
+  enabled: true,
   guid: '671824ED-0BC4-43A6-85CC-4877890A7722',
   localized: {
     en: {
@@ -13,8 +13,8 @@ const teslaSmartMatrixDriver = defineDriver({
     }
   },
   capabilities: kDeviceSupportsMultipleOutputs,
-  setup: async function setup(uri) {
-    const sendCommand = async (command: Buffer) => {
+  setup: () => {
+    const sendCommand = async (uri: string, command: Buffer) => {
       const connection = await createCommandStream(uri, {
         baudRate: 9600,
         dataBits: 8,
@@ -38,10 +38,10 @@ const teslaSmartMatrixDriver = defineDriver({
 
     const toChannel = (n: number) => String(n).padStart(2, '0')
 
-    async function activate(inputChannel: number, outputChannel: number) {
-      Logger.log(`teslaSmartMatrixDriver.activate(${inputChannel}, ${outputChannel})`)
-      const command = `MT00SW${toChannel(inputChannel)}${toChannel(outputChannel)}NT`
-      await sendCommand(Buffer.from(command, 'ascii'))
+    async function activate(uri: string, input: number, output: number) {
+      Logger.log(`teslaSmartMatrixDriver.activate(${input}, ${output})`)
+      const command = `MT00SW${toChannel(input)}${toChannel(output)}NT`
+      await sendCommand(uri, Buffer.from(command, 'ascii'))
 
       await Promise.resolve()
     }
@@ -58,11 +58,11 @@ const teslaSmartMatrixDriver = defineDriver({
       await Promise.resolve()
     }
 
-    return await Promise.resolve({
+    return {
       activate,
       powerOn,
       powerOff
-    })
+    }
   }
 })
 

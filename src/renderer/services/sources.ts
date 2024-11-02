@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { forceUndefined } from '../helpers/utilities'
+import { forceUndefined } from '../hooks/utilities'
 import { useClient } from './rpc'
 import { useDataStore } from './store'
 import type { DocumentId } from './store'

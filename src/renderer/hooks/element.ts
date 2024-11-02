@@ -1,6 +1,5 @@
 import { useScroll, useResizeObserver } from '@vueuse/core'
-import { toValue } from '@vueuse/shared'
-import { watch, computed, ref } from 'vue'
+import { toValue, watch, computed, ref } from 'vue'
 import type { MaybeComputedElementRef } from '@vueuse/core'
 
 interface ScrollingBoundsEntry {

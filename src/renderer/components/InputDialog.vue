@@ -3,7 +3,7 @@ import is from '@sindresorhus/is'
 import { useVModel } from '@vueuse/core'
 import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type { Anchor, Origin } from '../helpers/vuetify'
+import type { Anchor, Origin } from '../hooks/vuetify'
 import type { I18nSchema } from '../locales/locales'
 import type { ComponentPublicInstance } from 'vue'
 

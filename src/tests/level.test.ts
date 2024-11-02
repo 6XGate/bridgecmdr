@@ -2,14 +2,13 @@ import { test, expect, vi, beforeEach, afterEach } from 'vitest'
 
 const mock = await vi.hoisted(async () => await import('./support/mock'))
 
-beforeEach(async () => {
+beforeEach(() => {
   vi.mock(import('electron'), mock.electronModule)
   vi.mock(import('electron-log'))
-  await mock.bridgeCmdrBasics()
 })
 
-afterEach(async () => {
-  await globalThis.services.freeAllHandles()
+afterEach(() => {
+  vi.restoreAllMocks()
   vi.resetModules()
 })
 

@@ -1,15 +1,30 @@
 - Milestones
   - v2.1
-    - Switch the majority of the IPC using tRPC.
-      - Updater will require websocket for subscriptions.
-      - System will require moving the open and save file support to DOM APIs.
-      - Drivers will require an overhaul to no longer need handles.
+    - (#86) Add a means to select a not-in-use port for the tRPC channel.
+    - (#85) Attempt to secure `serialport` interactione.
+    - (#78) Switch the majority of the IPC using tRPC.
+    - (#87) Attempt to secure local RPC channel.
     - More drivers.
+      - (#88) Add means to mark and label experimental drivers.
+      - (#83) Shinybow
+      - (#84) TESmart
+  - v2.2
     - Move more modules to core.
+    - tRPC over Electron IPC.
+    - Wrap some Electron APIs as services for easier mocking without electron itself.
+    - Rearrangeable dashboard icons.
+    - More drivers.
+      - Monoprice Blackbird
+  - v3.0
+    - Remote UI support
+      - Need settings toggle to control it's activation.
+      - Need security or authentication method, preferrably just a PIN code.
+      - Need a means to identify it's URL via the local UI.
+      - May need a way to disable the power-off button in the remote UI.
 - Drivers
   - Shinybow
   - Monoprice Blackbird
-  - J-Tech Digital
-  - ASHATA
-  - TESmart
-  - No Hassle AV
+  - J-Tech Digital -- Need to find actual command list.
+  - ASHATA -- Now unable to find.
+  - TESmart -- Brand of Tesla Elec (like TelsaSmart)
+  - No Hassle AV -- Need to contact.

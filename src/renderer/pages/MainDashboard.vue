@@ -2,9 +2,10 @@
 import { mdiPower, mdiVideoInputHdmi, mdiWrench } from '@mdi/js'
 import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useGuardedAsyncOp } from '../helpers/utilities'
+import { useGuardedAsyncOp } from '../hooks/utilities'
 import { useDialogs } from '../modals/dialogs'
 import { useDashboard } from '../services/dashboard'
+import { useClient } from '../services/rpc'
 import useSettings from '../services/settings'
 import FirstRunLogic from './FirstRunLogic.vue'
 import type { I18nSchema } from '../locales/locales'
@@ -23,10 +24,12 @@ const dialogs = useDialogs()
 
 const dashboard = useDashboard()
 
+const client = useClient()
+
 async function powerOff() {
   try {
     await dashboard.powerOff()
-    await services.system.powerOff()
+    await client.system.powerOff.mutate()
   } catch (e) {
     await dialogs.error(e)
   }

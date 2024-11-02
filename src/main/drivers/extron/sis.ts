@@ -1,9 +1,9 @@
 import Logger from 'electron-log'
-import { defineDriver, kDeviceCanDecoupleAudioOutput, kDeviceSupportsMultipleOutputs } from '../../services/driver'
+import { defineDriver, kDeviceCanDecoupleAudioOutput, kDeviceSupportsMultipleOutputs } from '../../services/drivers'
 import { createCommandStream } from '../../services/stream'
 
 const extronSisDriver = defineDriver({
-  enable: true,
+  enabled: true,
   guid: '4C8F2838-C91D-431E-84DD-3666D14A6E2C',
   localized: {
     en: {
@@ -13,8 +13,8 @@ const extronSisDriver = defineDriver({
     }
   },
   capabilities: kDeviceSupportsMultipleOutputs | kDeviceCanDecoupleAudioOutput,
-  setup: async function setup(uri) {
-    async function sendCommand(command: string) {
+  setup: () => {
+    async function sendCommand(uri: string, command: string) {
       const connection = await createCommandStream(uri, {
         baudRate: 9600,
         dataBits: 8,
@@ -36,11 +36,11 @@ const extronSisDriver = defineDriver({
       await connection.close()
     }
 
-    async function activate(inputChannel: number, videoOutputChannel: number, audioOutputChannel: number) {
-      Logger.log(`extronSisDriver.activate(${inputChannel}, ${videoOutputChannel}, ${audioOutputChannel})`)
-      const videoCommand = `${inputChannel}*${videoOutputChannel}%`
-      const audioCommand = `${inputChannel}*${audioOutputChannel}$`
-      await sendCommand(`${videoCommand}\r\n${audioCommand}\r\n`)
+    async function activate(uri: string, input: number, videoOutput: number, audioOutput: number) {
+      Logger.log(`extronSisDriver.activate(${input}, ${videoOutput}, ${audioOutput})`)
+      const videoCommand = `${input}*${videoOutput}%`
+      const audioCommand = `${input}*${audioOutput}$`
+      await sendCommand(uri, `${videoCommand}\r\n${audioCommand}\r\n`)
     }
 
     async function powerOn() {
@@ -55,11 +55,11 @@ const extronSisDriver = defineDriver({
       await Promise.resolve()
     }
 
-    return await Promise.resolve({
+    return {
       activate,
       powerOn,
       powerOff
-    })
+    }
   }
 })
 

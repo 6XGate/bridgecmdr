@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { useAsyncState, useLocalStorage, watchOnce } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
+import { trackBusy } from '../hooks/tracking'
 import { useDialogs } from '../modals/dialogs'
 import { useClient } from '../services/rpc'
 import useStartup from '../services/startup'
-import { trackBusy } from '../services/tracking'
 import type { I18nSchema } from '../locales/locales'
 
 const { t } = useI18n<I18nSchema>()

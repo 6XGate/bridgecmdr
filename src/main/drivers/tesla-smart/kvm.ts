@@ -1,9 +1,9 @@
 import Logger from 'electron-log'
-import { defineDriver, kDeviceHasNoExtraCapabilities } from '../../services/driver'
+import { defineDriver, kDeviceHasNoExtraCapabilities } from '../../services/drivers'
 import { createCommandStream } from '../../services/stream'
 
 const teslaSmartKvmDriver = defineDriver({
-  enable: true,
+  enabled: true,
   guid: '91D5BC95-A8E2-4F58-BCAC-A77BA1054D61',
   localized: {
     en: {
@@ -13,8 +13,8 @@ const teslaSmartKvmDriver = defineDriver({
     }
   },
   capabilities: kDeviceHasNoExtraCapabilities,
-  setup: async function setup(uri) {
-    async function sendCommand(command: Buffer) {
+  setup: () => {
+    async function sendCommand(uri: string, command: Buffer) {
       const connection = await createCommandStream(uri, {
         baudRate: 9600,
         dataBits: 8,
@@ -36,9 +36,9 @@ const teslaSmartKvmDriver = defineDriver({
       await connection.close()
     }
 
-    async function activate(inputChannel: number) {
-      Logger.log(`teslaSmartKvmDriver.activate(${inputChannel})`)
-      await sendCommand(Buffer.of(0xaa, 0xbb, 0x03, 0x01, inputChannel, 0xee))
+    async function activate(uri: string, input: number) {
+      Logger.log(`teslaSmartKvmDriver.activate(${input})`)
+      await sendCommand(uri, Buffer.of(0xaa, 0xbb, 0x03, 0x01, input, 0xee))
     }
 
     async function powerOn() {
@@ -53,11 +53,11 @@ const teslaSmartKvmDriver = defineDriver({
       await Promise.resolve()
     }
 
-    return await Promise.resolve({
+    return {
       activate,
       powerOn,
       powerOff
-    })
+    }
   }
 })
 

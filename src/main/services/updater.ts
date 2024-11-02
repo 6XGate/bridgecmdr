@@ -2,19 +2,23 @@ import EventEmitter from 'node:events'
 import { writeFile } from 'node:fs/promises'
 import { resolve as resolvePath } from 'node:path'
 import autoBind from 'auto-bind'
-import { app, ipcMain } from 'electron'
+import { app } from 'electron'
 import { autoUpdater } from 'electron-updater'
 import { memo } from 'radash'
-import { ipcHandle, ipcProxy, isNodeError, logError } from '../utilities'
-import type { AppUpdater } from '../../preload/api'
-import type { WebContents } from 'electron'
-import type { UpdateCheckResult, ProgressInfo, CancellationToken } from 'electron-updater'
+import { isNodeError, logError } from '../utilities'
+import type { UpdateCheckResult, ProgressInfo, CancellationToken, UpdateInfo } from 'electron-updater'
 
-interface AppAutoUpdaterEventMap {
+export type { UpdateInfo, ProgressInfo } from 'electron-updater'
+
+export interface AppUpdaterEventMap {
+  checking: []
+  available: [info: UpdateInfo | null]
   progress: [progress: ProgressInfo]
+  downloaded: [info: UpdateInfo]
+  cancelled: []
 }
 
-type ProgressHandler = (...args: AppAutoUpdaterEventMap['progress']) => void
+export type AppUpdater = ReturnType<typeof useUpdater>
 
 const useUpdater = memo(function useUpdater() {
   /** The internal application updater for AppImage. */
@@ -28,14 +32,33 @@ const useUpdater = memo(function useUpdater() {
   /**
    * Application auto update.
    *
-   * We are using a class for EventEmitter's sake, it wants to return this which must be compatible with the API.
+   * We are using a class for EventEmitter's sake.
    */
-  class AppAutoUpdater extends EventEmitter<AppAutoUpdaterEventMap> implements AppUpdater {
+  class AppUpdater extends EventEmitter<AppUpdaterEventMap> {
     #checkPromise: Promise<UpdateCheckResult | null> | undefined = undefined
     #cancelToken: CancellationToken | undefined = undefined
     #donwloadPromise: Promise<string[]> | undefined = undefined
 
-    async #getUpdateInfo() {
+    constructor() {
+      super()
+      autoUpdater.on('checking-for-update', () => {
+        this.emit('checking')
+      })
+      autoUpdater.on('update-available', (info) => {
+        this.emit('available', info)
+      })
+      autoUpdater.on('update-not-available', () => {
+        this.emit('available', null)
+      })
+      autoUpdater.on('update-downloaded', (info) => {
+        this.emit('downloaded', info)
+      })
+      autoUpdater.on('update-cancelled', () => {
+        this.emit('cancelled')
+      })
+    }
+
+    private async getUpdateInfo() {
       if (this.#checkPromise == null) {
         throw logError(new ReferenceError('Cannot get update information, no check in progress'))
       }
@@ -45,7 +68,7 @@ const useUpdater = memo(function useUpdater() {
         result = await this.#checkPromise
       } catch (cause) {
         if (isNodeError(cause) && cause.code === 'ENOENT') {
-          return undefined
+          return null
         }
 
         throw cause
@@ -53,7 +76,7 @@ const useUpdater = memo(function useUpdater() {
 
       // If the result is null or the cancel token is null, no update is avilable.
       if (result?.cancellationToken == null) {
-        return undefined
+        return null
       }
 
       this.#cancelToken = result.cancellationToken
@@ -61,7 +84,7 @@ const useUpdater = memo(function useUpdater() {
       return result.updateInfo
     }
 
-    async #checkForUpdates() {
+    private async attemptCheckForUpdates() {
       if (this.#donwloadPromise != null) {
         throw logError(new ReferenceError('Update download already in progress'))
       }
@@ -76,7 +99,7 @@ const useUpdater = memo(function useUpdater() {
 
         this.#checkPromise = autoUpdater.checkForUpdates()
 
-        return await this.#getUpdateInfo()
+        return await this.getUpdateInfo()
       } finally {
         this.#checkPromise = undefined
       }
@@ -84,13 +107,13 @@ const useUpdater = memo(function useUpdater() {
 
     async checkForUpdates() {
       if (this.#checkPromise != null) {
-        return await this.#getUpdateInfo()
+        return await this.getUpdateInfo()
       }
 
-      return await this.#checkForUpdates()
+      return await this.attemptCheckForUpdates()
     }
 
-    async #downloadUpdate() {
+    private async attemptDownloadUpdate() {
       if (this.#cancelToken == null) {
         throw logError(new ReferenceError('No update available for download, check first'))
       }
@@ -112,7 +135,7 @@ const useUpdater = memo(function useUpdater() {
       if (this.#donwloadPromise != null) {
         await this.#donwloadPromise
       } else {
-        await this.#downloadUpdate()
+        await this.attemptDownloadUpdate()
       }
     }
 
@@ -133,33 +156,7 @@ const useUpdater = memo(function useUpdater() {
     }
   }
 
-  const updater = autoBind(new AppAutoUpdater())
-
-  const downloadWaiters = new WeakMap<WebContents, ProgressHandler>()
-  const remoteDownloadUpdate = ipcHandle(async function remoteDownloadUpdate(ev) {
-    let handler = downloadWaiters.get(ev.sender)
-    if (handler == null) {
-      handler = (progress) => {
-        ev.sender.send('update:download:progress', progress)
-      }
-      downloadWaiters.set(ev.sender, handler)
-    }
-
-    try {
-      updater.on('progress', handler)
-      await updater.downloadUpdate()
-    } finally {
-      updater.off('progress', handler)
-      downloadWaiters.delete(ev.sender)
-    }
-  })
-
-  ipcMain.handle('update:check', ipcProxy(updater.checkForUpdates.bind(updater)))
-  ipcMain.handle('update:download', remoteDownloadUpdate)
-  ipcMain.handle('update:cancel', ipcProxy(updater.cancelUpdate.bind(updater)))
-  ipcMain.handle('update:install', ipcProxy(updater.installUpdate.bind(updater)))
-
-  return updater
+  return autoBind(new AppUpdater())
 })
 
 export default useUpdater

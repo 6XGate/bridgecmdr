@@ -1,7 +1,7 @@
 import { createSharedComposable } from '@vueuse/shared'
 import { ref, computed, readonly, reactive } from 'vue'
+import { trackBusy } from '../hooks/tracking'
 import { useClient } from './rpc'
-import { trackBusy } from './tracking'
 import type { PortEntry } from '../../preload/api'
 
 export type { PortEntry } from '../../preload/api'

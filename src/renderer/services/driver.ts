@@ -1,68 +1,72 @@
-import { createSharedComposable } from '@vueuse/core'
-import { readonly, computed, reactive } from 'vue'
+import { createSharedComposable } from '@vueuse/shared'
+import { computed, reactive, readonly, ref, shallowReadonly } from 'vue'
+import { trackBusy } from '../hooks/tracking'
 import i18n from '../plugins/i18n'
-import { trackBusy } from './tracking'
+import { useClient } from './rpc'
+import type {
+  kDeviceHasNoExtraCapabilities as HasNoExtraCapabilities,
+  kDeviceSupportsMultipleOutputs as SupportsMultipleOutputs,
+  kDeviceCanDecoupleAudioOutput as CanDecoupleAudioOutput,
+  LocalizedDriverDescriptor
+} from '../../preload/api'
 
 /** The device has no extended capabilities. */
-export const kDeviceHasNoExtraCapabilities = services.driver.capabilities.kDeviceHasNoExtraCapabilities
+export type kDeviceHasNoExtraCapabilities = HasNoExtraCapabilities
+export const kDeviceHasNoExtraCapabilities: HasNoExtraCapabilities = 0
 /** The device has multiple output channels. */
-export const kDeviceSupportsMultipleOutputs = services.driver.capabilities.kDeviceSupportsMultipleOutputs
+export type kDeviceSupportsMultipleOutputs = SupportsMultipleOutputs
+export const kDeviceSupportsMultipleOutputs: SupportsMultipleOutputs = 1
 /** The device support sending the audio output to a different channel. */
-export const kDeviceCanDecoupleAudioOutput = services.driver.capabilities.kDeviceCanDecoupleAudioOutput
+export type kDeviceCanDecoupleAudioOutput = CanDecoupleAudioOutput
+export const kDeviceCanDecoupleAudioOutput: CanDecoupleAudioOutput = 2
 
 /** Informational metadata about a device and driver. */
-export interface DriverInformation {
+export interface DriverInformation extends LocalizedDriverDescriptor {
   /** A unique identifier for the driver. */
   readonly guid: string
-  /** Defines the title for the driver in a specific locale. */
-  readonly title: string
-  /** Defines the company for the driver in a specific locale. */
-  readonly company: string
-  /** Defines the provider for the driver in a specific locale. */
-  readonly provider: string
   /** Defines the capabilities of the device driven by the driver. */
   readonly capabilities: number
 }
 
 /** Driver to interact with switching devices. */
-export interface Driver {
+export interface Driver extends DriverInformation {
   /**
    * Sets input and output ties.
    *
-   * @param inputChannel The input channel to tie.
-   * @param videoOutputChannel The output video channel to tie.
-   * @param audioOutputChannel The output audio channel to tie.
+   * @param input The input channel to tie.
+   * @param videoOutput The output video channel to tie.
+   * @param audioOutput The output audio channel to tie.
    */
-  readonly activate: (inputChannel: number, videoOutputChannel: number, audioOutputChannel: number) => Promise<void>
+  readonly activate: (input: number, videoOutput: number, audioOutput: number) => Promise<void>
   /** Powers on the switch or monitor. */
   readonly powerOn: () => Promise<void>
   /** Powers on the switch or monitor and closes the driver. */
   readonly powerOff: () => Promise<void>
-  /** Closes the driver. */
-  readonly close: () => Promise<void>
   /** The URI to the device being driven. */
   readonly uri: string
 }
 
-/** Core parts of the drive system, so we don't hold any component's effect scope in memory. */
-const useDriverCore = createSharedComposable(function useDriverCore() {
-  const registry = reactive(new Map<string, DriverInformation>())
+const useDrivers = createSharedComposable(function useDrivers() {
+  const client = useClient()
 
-  /** Loads the drivers, using the first i18n we can get. */
-  async function loadList() {
-    if (registry.size > 0) {
-      // Already loaded...
-      return
-    }
+  /** Busy tracking. */
+  const tracker = trackBusy()
 
-    const drivers = await services.driver.list()
-    for (const { guid, localized, capabilities } of drivers) {
+  /** The registered drivers. */
+  const items = ref(new Array<DriverInformation>())
+
+  const registry = new Map<string, DriverInformation>()
+
+  async function all() {
+    if (items.value.length > 0) return items.value
+    const drivers = await tracker.wait(client.drivers.all.query())
+    for (const {
+      metadata: { guid, localized, capabilities }
+    } of drivers) {
       /** The localized driver information made i18n compatible. */
       for (const [locale, description] of Object.entries(localized)) {
         i18n.global.mergeLocaleMessage(locale as never, {
-          $driver: {
-            [guid]: { ...description }
-          }
+          $driver: { [guid]: { ...description } }
         })
       }
 
@@ -83,66 +87,49 @@ const useDriverCore = createSharedComposable(function useDriverCore() {
         })
       )
     }
+
+    items.value = Array.from(registry.values())
+    return items.value
   }
 
-  return { registry, loadList }
-})
-
-/** Use drivers. */
-export function useDrivers() {
-  const { registry, loadList } = useDriverCore()
-
-  /** Busy tracking. */
-  const tracker = trackBusy()
-
-  /** The registered drivers. */
-  const items = computed(() => Array.from(registry.values()))
-
-  /** Loads information about all the drivers. */
-  const all = tracker.track(async function all() {
-    await loadList()
-  })
-
-  /** Loads a driver registered in the registry. */
-  async function load(guid: string, path: string): Promise<Driver> {
-    await loadList()
-    if (!registry.has(guid)) {
-      throw new Error(`No such driver registered as "${guid}"`)
+  function load(guid: string, uri: string): Driver {
+    if (items.value.length === 0) {
+      throw new ReferenceError(`No driver "${guid}"`)
     }
 
-    const h = await services.driver.open(guid, path)
+    const driver = registry.get(guid)
+    if (driver == null) {
+      throw new ReferenceError(`No driver "${guid}"`)
+    }
 
-    async function activate(inputChannel: number, videoOutputChannel: number, audioOutputChannel: number) {
-      await services.driver.activate(h, inputChannel, videoOutputChannel, audioOutputChannel)
+    async function activate(input: number, videoOutput: number, audioOutput: number) {
+      await client.drivers.activate.mutate([guid, uri, input, videoOutput, audioOutput])
     }
 
     async function powerOn() {
-      await services.driver.powerOn(h)
+      await client.drivers.powerOn.mutate([guid, uri])
     }
 
     async function powerOff() {
-      await services.driver.powerOff(h)
-      await services.freeHandle(h)
-    }
-
-    async function close() {
-      await services.freeHandle(h)
+      await client.drivers.powerOff.mutate([guid, uri])
     }
 
     return readonly({
+      ...driver,
       activate,
       powerOn,
       powerOff,
-      close,
-      uri: path
+      uri
     })
   }
 
   return reactive({
     isBusy: tracker.isBusy,
     error: tracker.error,
-    items: computed(() => readonly(items.value)),
+    items: computed(() => shallowReadonly(items.value)),
     all,
     load
   })
-}
+})
+
+export default useDrivers

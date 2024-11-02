@@ -1,8 +1,8 @@
 import { BlobReader, BlobWriter, TextWriter, ZipReader } from '@zip.js/zip.js'
 import mime from 'mime'
 import { z } from 'zod'
-import { fileToAttachment } from '../../helpers/attachment'
-import { useDrivers } from '../driver'
+import { toAttachment } from '../../support/files'
+import useDrivers from '../driver'
 import useSettings from '../settings'
 import { useSources } from '../sources'
 import { useSwitches } from '../switches'
@@ -58,7 +58,7 @@ export async function importSettings(file: File) {
         const type = mime.getType(item.image) ?? 'application/octet-stream'
         let imageAttachment = imageCache.get(item.image)
         if (imageAttachment != null) {
-          await sources.add(item, await fileToAttachment(imageAttachment))
+          await sources.add(item, await toAttachment(imageAttachment))
           return
         }
 
@@ -75,7 +75,7 @@ export async function importSettings(file: File) {
         const imageData = await imageFile.getData()
         imageAttachment = new File([imageData], item.image, { type })
         imageCache.set(item.image, imageAttachment)
-        await sources.add(item, await fileToAttachment(imageAttachment))
+        await sources.add(item, await toAttachment(imageAttachment))
       })
     ),
     Promise.all(

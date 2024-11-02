@@ -1,5 +1,5 @@
 import { computed, nextTick, ref, shallowReadonly } from 'vue'
-import { trackBusy } from './tracking'
+import { trackBusy } from '../hooks/tracking'
 import type { DocumentId } from '../../preload/api'
 import type { Ref } from 'vue'
 
