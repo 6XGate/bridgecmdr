@@ -1,8 +1,8 @@
-import { memo } from 'radash'
+import { createSharedComposable } from '@vueuse/shared'
 import { computed, reactive, readonly, ref, shallowReadonly } from 'vue'
+import { trackBusy } from '../hooks/tracking'
 import i18n from '../plugins/i18n'
 import { useClient } from './rpc'
-import { trackBusy } from './tracking'
 import type {
   kDeviceHasNoExtraCapabilities as HasNoExtraCapabilities,
   kDeviceSupportsMultipleOutputs as SupportsMultipleOutputs,
@@ -46,7 +46,7 @@ export interface Driver extends DriverInformation {
   readonly uri: string
 }
 
-const useDrivers = memo(function useDrivers() {
+const useDrivers = createSharedComposable(function useDrivers() {
   const client = useClient()
 
   /** Busy tracking. */

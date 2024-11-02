@@ -1,6 +1,6 @@
 import { BlobReader, BlobWriter, TextReader, ZipWriter } from '@zip.js/zip.js'
 import { pick } from 'radash'
-import { toFiles } from '../../helpers/attachment'
+import { toFiles } from '../../support/files'
 import useSettings from '../settings'
 import { useSources } from '../sources'
 import { useSwitches } from '../switches'

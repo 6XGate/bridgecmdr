@@ -1,6 +1,5 @@
 import { helpers } from '@vuelidate/validators'
-import { toValue } from '@vueuse/shared'
-import { computed, readonly } from 'vue'
+import { toValue, computed, readonly } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { isHostWithOptionalPort } from './validation'
 import type { I18nSchema } from '../locales/locales'
@@ -8,8 +7,7 @@ import type { PortEntry } from '../services/ports'
 import type { NewSwitch } from '../services/switches'
 import type { Fixed } from '@/basics'
 import type { MessageProps } from '@vuelidate/validators'
-import type { MaybeRefOrGetter } from '@vueuse/shared'
-import type { Ref } from 'vue'
+import type { MaybeRefOrGetter, Ref } from 'vue'
 
 export type PathType = 'port' | 'ip' | 'path'
 

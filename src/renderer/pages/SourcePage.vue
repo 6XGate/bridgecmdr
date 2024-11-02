@@ -6,15 +6,15 @@ import { useRouter } from 'vue-router'
 import InputDialog from '../components/InputDialog.vue'
 import Page from '../components/Page.vue'
 import ReplacableImage from '../components/ReplacableImage.vue'
-import { filesToAttachment, toFiles } from '../helpers/attachment'
-import { useGuardedAsyncOp } from '../helpers/utilities'
+import { trackBusy } from '../hooks/tracking'
+import { useGuardedAsyncOp } from '../hooks/utilities'
 import TieDialog from '../modals/TieDialog.vue'
 import { useDialogs, useTieDialog } from '../modals/dialogs'
 import useDrivers from '../services/driver'
 import { useSources } from '../services/sources'
 import { useSwitches } from '../services/switches'
 import { useTies } from '../services/ties'
-import { trackBusy } from '../services/tracking'
+import { toAttachments, toFiles } from '../support/files'
 import type { I18nSchema } from '../locales/locales'
 import type { DriverInformation } from '../services/driver'
 import type { Source } from '../services/sources'
@@ -65,7 +65,7 @@ async function save() {
   try {
     source.value.image = file.value.name
     source.value = {
-      ...(await sources.update(source.value, ...(await filesToAttachment([file.value].filter(isNotNullish)))))
+      ...(await sources.update(source.value, ...(await toAttachments([file.value]))))
     }
     file.value = toFiles(source.value._attachments).find(
       (f) => source.value?.image != null && f.name === source.value.image

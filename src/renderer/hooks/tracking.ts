@@ -1,6 +1,5 @@
-import { toValue } from '@vueuse/core'
-import { computed, ref, shallowRef } from 'vue'
-import type { MaybeRefOrGetter } from '@vueuse/core'
+import { toValue, computed, ref, shallowRef } from 'vue'
+import type { MaybeRefOrGetter } from 'vue'
 import { toError } from '@/error-handling'
 
 type Trackable<T> = (() => PromiseLike<T>) | (() => Promise<T>) | (() => T) | PromiseLike<T> | Promise<T>

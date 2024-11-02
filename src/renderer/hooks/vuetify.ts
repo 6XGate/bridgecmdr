@@ -1,9 +1,7 @@
-import { toValue } from '@vueuse/shared'
-import { computed, ref } from 'vue'
+import { toValue, computed, ref } from 'vue'
 import { z } from 'zod'
 import { useElementScrollingBounds } from './element'
-import type { MaybeRefOrGetter } from '@vueuse/shared'
-import type { ComponentPublicInstance } from 'vue'
+import type { MaybeRefOrGetter, ComponentPublicInstance } from 'vue'
 
 const Block = ['top', 'bottom'] as const
 type Block = (typeof Block)[number]

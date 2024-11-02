@@ -1,4 +1,4 @@
-import { tryOnScopeDispose } from '@vueuse/core'
+import { createSharedComposable, tryOnScopeDispose } from '@vueuse/core'
 import useTypedEventTarget from '../support/events'
 import { useClient } from './rpc'
 import type { ProgressInfo } from 'electron-updater'
@@ -16,7 +16,7 @@ export class UpdateProgressEvent extends Event implements ProgressInfo {
   }
 }
 
-function useAppUpdates() {
+const useAppUpdates = createSharedComposable(function useAppUpdates() {
   const client = useClient()
 
   // eslint-disable-next-line @typescript-eslint/consistent-type-definitions -- Inapropriate, type !== interface
@@ -70,6 +70,6 @@ function useAppUpdates() {
   })
 
   return appUpdater
-}
+})
 
 export default useAppUpdates

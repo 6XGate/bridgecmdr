@@ -1,7 +1,7 @@
+import { randomUUID } from 'node:crypto'
 import PouchDb from 'pouchdb-core'
 import find from 'pouchdb-find'
 import { map, memo } from 'radash'
-import { v4 as uuid } from 'uuid'
 import { z } from 'zod'
 import { useLevelAdapter } from './level'
 import type { IterableElement, Simplify } from 'type-fest'
@@ -181,7 +181,7 @@ function defineDatabaseCore<RawSchema extends z.AnyZodObject>(
    * Adds a document to the database.
    */
   const add = defineOperation(async function add(db, document: Insertable, ...attachments: Attachment[]) {
-    const doc = { ...document, _id: uuid().toUpperCase() }
+    const doc = { ...document, _id: randomUUID().toUpperCase() }
     await db.put(doc)
     if (attachments.length > 0) {
       await addAttachments(doc._id, attachments)

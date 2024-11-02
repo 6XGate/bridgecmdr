@@ -1,7 +1,7 @@
-import { useStorageAsync } from '@vueuse/core'
-import { memo } from 'radash'
+import { createSharedComposable, useStorageAsync } from '@vueuse/core'
 import { useClient } from './rpc'
-import type { MaybeRefOrGetter, UseStorageAsyncOptions, RemovableRef } from '@vueuse/core'
+import type { RemovableRef, UseStorageAsyncOptions } from '@vueuse/core'
+import type { MaybeRefOrGetter } from 'vue'
 
 // To make this work well, we will require async methods.
 export interface StorageLikeAsync {
@@ -21,7 +21,7 @@ interface AsyncStorageEventInitDict {
   readonly storageArea: StorageLikeAsync | null
 }
 
-const useUserStore = memo(function useUserStore() {
+const useUserStore = createSharedComposable(function useUserStore() {
   const client = useClient()
 
   function emit(data: AsyncStorageEventInitDict) {

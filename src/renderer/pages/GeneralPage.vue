@@ -14,10 +14,10 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import OptionDialog from '../components/OptionDialog.vue'
 import Page from '../components/Page.vue'
-import { useGuardedAsyncOp } from '../helpers/utilities'
+import { trackBusy } from '../hooks/tracking'
+import { useGuardedAsyncOp } from '../hooks/utilities'
 import { useClient } from '../services/rpc'
 import useSettings from '../services/settings'
-import { trackBusy } from '../services/tracking'
 import type { I18nSchema } from '../locales/locales'
 
 const { t } = useI18n<I18nSchema>()

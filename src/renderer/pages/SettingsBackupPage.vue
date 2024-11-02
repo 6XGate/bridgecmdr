@@ -3,10 +3,11 @@ import { mdiArrowLeft, mdiExport, mdiImport } from '@mdi/js'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import Page from '../components/Page.vue'
+import { trackBusy } from '../hooks/tracking'
 import { useDialogs } from '../modals/dialogs'
 import { exportSettings } from '../services/backup/export'
 import { importSettings } from '../services/backup/import'
-import { trackBusy } from '../services/tracking'
+import { openFile, saveFile } from '../support/files'
 import type { I18nSchema } from '../locales/locales'
 
 //
@@ -22,16 +23,10 @@ const router = useRouter()
 // Functionality.
 //
 
-const kFilters = [{ extensions: ['zip'], name: t('description.archive') }]
-
 async function exportToFile() {
   try {
     const file = await wait(exportSettings())
-    await globalThis.services.system.saveFile(file, {
-      title: t('label.export'),
-      filters: kFilters,
-      properties: ['showOverwriteConfirmation']
-    })
+    await saveFile(file)
   } catch (e) {
     await dialogs.error(e, {
       title: t('error.export')
@@ -41,11 +36,7 @@ async function exportToFile() {
 
 async function importFromFile() {
   try {
-    const files = await globalThis.services.system.openFile({
-      title: t('label.import'),
-      filters: kFilters,
-      properties: ['openFile', 'dontAddToRecent']
-    })
+    const files = await openFile({ accepts: '.zip' })
 
     const file = files?.at(0)
     if (file == null) return

@@ -2,8 +2,8 @@ import { createSharedComposable, useConfirmDialog } from '@vueuse/core'
 import { computed } from 'vue'
 import { useDisplay } from 'vuetify'
 import { z } from 'zod'
-import { useErrors } from '../helpers/errors'
-import { useResponsiveModal } from '../helpers/vuetify'
+import { useErrors } from '../hooks/errors'
+import { useResponsiveModal } from '../hooks/vuetify'
 
 export const AlertModalOptions = z
   .string()

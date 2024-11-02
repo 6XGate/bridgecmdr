@@ -2,7 +2,7 @@
 import { useVModel } from '@vueuse/core'
 import { get } from 'radash'
 import { computed, ref, watch, unref } from 'vue'
-import type { Anchor, Origin, SelectItemKey } from '../helpers/vuetify'
+import type { Anchor, Origin, SelectItemKey } from '../hooks/vuetify'
 import type { ComponentPublicInstance } from 'vue'
 
 interface Props {

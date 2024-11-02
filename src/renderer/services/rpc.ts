@@ -1,10 +1,10 @@
 import { createTRPCProxyClient, createWSClient, httpLink, wsLink } from '@trpc/client'
-import { memo } from 'radash'
+import { createGlobalState } from '@vueuse/shared'
 import type { AppRouter } from '../../preload/api'
 import useSuperJson from '@/rpc'
 import { getServerUrl } from '@/url'
 
-export const useClient = memo(function useClient() {
+export const useClient = createGlobalState(function useClient() {
   function useHttpClient() {
     return createTRPCProxyClient<AppRouter>({
       transformer: useSuperJson(),
