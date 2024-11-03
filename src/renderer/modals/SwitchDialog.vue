@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { mdiClose } from '@mdi/js'
+import { mdiClose, mdiFlask } from '@mdi/js'
 import { useVModel } from '@vueuse/core'
 import { computed, ref, reactive, onBeforeMount } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -48,7 +48,10 @@ const location = computed({
     v$.path.$model = v
   }
 })
+
 const { locationPath, pathTypes, pathType, path } = useLocation(location, () => ports.items)
+
+const driver = computed(() => drivers.items.find((d) => d.guid === target.value.driverId))
 
 function confirm() {
   isVisible.value = false
@@ -123,7 +126,26 @@ const isBusy = computed(() => drivers.isBusy || ports.isBusy)
           variant="outlined"
           :loading="drivers.isBusy"
           :placeholder="t('placeholder.required')"
-          v-bind="getStatus(v$.driverId)" />
+          v-bind="getStatus(v$.driverId)">
+          <template v-if="driver?.experimental === true" #append-inner>
+            <VTooltip :text="t('label.experimental')">
+              <template #activator="{ props: tooltipProps }">
+                <VIcon v-bind="tooltipProps" :icon="mdiFlask" />
+              </template>
+            </VTooltip>
+          </template>
+          <template #item="{ props: itemProps, item }">
+            <VListItem v-bind="itemProps">
+              <template v-if="item.raw.experimental" #append>
+                <VTooltip :text="t('label.experimental')">
+                  <template #activator="{ props: tooltipProps }">
+                    <VIcon v-bind="tooltipProps" :icon="mdiFlask" />
+                  </template>
+                </VTooltip>
+              </template>
+            </VListItem>
+          </template>
+        </VSelect>
         <div class="colg d-flex flex-wrap justify-start">
           <VSelect v-model="pathType" class="flex-grow-0 w-175px" :items="pathTypes" variant="outlined" item-props />
           <VTextField
@@ -136,6 +158,7 @@ const isBusy = computed(() => drivers.isBusy || ports.isBusy)
             v-else
             v-model="path"
             :items="ports.items"
+            item-value="path"
             variant="outlined"
             :loading="ports.isBusy"
             :placeholder="t('placeholder.required')"
@@ -159,6 +182,7 @@ en:
   label:
     addSwitch: Add switch
     editSwitch: Edit switch
+    experimental: Experimental driver
   message:
     discardNew: Do you want to discard this switch?
 </i18n>

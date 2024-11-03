@@ -3,8 +3,10 @@
 //
 
 import { memo } from 'radash'
+import useSerialPorts from './ports'
 import type { ApiLocales } from './locale'
 import type { MaybePromise } from '@/basics'
+import { isIpOrValidPort } from '@/location'
 
 /** The device has no extended capabilities. */
 export type kDeviceHasNoExtraCapabilities = typeof kDeviceHasNoExtraCapabilities
@@ -20,8 +22,22 @@ export const kDeviceCanDecoupleAudioOutput = 2
 // Driver definition
 //
 
+export interface DriverBasicInformation {
+  /**
+   * Indicates whether the driver is enabled, this is to allow partially coded drivers to be
+   * commited, but not usable to the UI or other code.
+   */
+  readonly enabled: boolean
+  /** Indicates whether the driver is experimental, usually due to lack of testing. */
+  readonly experimental: boolean
+  /** A unique identifier for the driver. */
+  readonly guid: string
+  /** Defines the capabilities of the device driven by the driver. */
+  readonly capabilities: number
+}
+
 /** Defines the localized metadata about a driver. */
-export interface LocalizedDriverDescriptor {
+export interface LocalizedDriverInformation {
   /** Defines the title for the driver in a specific locale. */
   readonly title: string
   /** Defines the company for the driver in a specific locale. */
@@ -31,18 +47,9 @@ export interface LocalizedDriverDescriptor {
 }
 
 /** Defines basic metadata about a device and driver. */
-export interface DriverData {
-  /**
-   * Indicates whether the driver is enabled, this is to allow partially coded drivers to be
-   * commited, but not usable to the UI or other code.
-   */
-  readonly enabled: boolean
-  /** A unique identifier for the driver. */
-  readonly guid: string
+export interface DriverInformation extends DriverBasicInformation {
   /** Defines the localized driver information in all supported locales. */
-  readonly localized: Readonly<Record<ApiLocales, LocalizedDriverDescriptor>>
-  /** Defines the capabilities of the device driven by the driver. */
-  readonly capabilities: number
+  readonly localized: Readonly<Record<ApiLocales, LocalizedDriverInformation>>
 }
 
 /** Interacts with a device. */
@@ -77,58 +84,21 @@ export interface DriverBindings {
   readonly powerOff?: (uri: string) => Promise<void>
 }
 
-export interface DefineDriverOptions extends DriverData {
+export interface DefineDriverOptions extends DriverInformation {
   setup: () => DriverBindings
 }
 
-async function noOpPower() {
+async function noOpBinding() {
   /* no-op is not defined in setup */ await Promise.resolve()
 }
 
 const registry = new Map<string, Driver>()
 
-export interface Driver {
-  /**
-   * Indicates whether the driver is enabled, this is to allow partially coded drivers to be
-   * commited, but not usable to the UI or other code.
-   */
-  readonly enabled: boolean
-  /** A unique identifier for the driver. */
-  readonly guid: string
-  /** Defines the capabilities of the device driven by the driver. */
-  readonly capabilities: number
+export interface Driver extends DriverBasicInformation, Required<DriverBindings> {
   /** Raw metadata from the registration options. */
-  readonly metadata: DriverData
+  readonly metadata: DriverInformation
   /** Gets the localized driver information. */
-  getInfo: (locale: ApiLocales) => LocalizedDriverDescriptor
-  /**
-   * Activates input and output ties.
-   *
-   * @param uri - URI identifying the location of the device.
-   * @param inputChannel - The input channel to tie.
-   * @param videoOutputChannel - The output video channel to tie.
-   * @param audioOutputChannel - The output audio channel to tie.
-   */
-  readonly activate: (
-    uri: string,
-    inputChannel: number,
-    videoOutputChannel: number,
-    audioOutputChannel: number
-  ) => Promise<void>
-
-  /**
-   * Powers on the switch or monitor.
-   *
-   * @param uri - URI identifying the location of the device.
-   */
-  readonly powerOn: (uri: string) => Promise<void>
-
-  /**
-   * Powers off the switch or monitor.
-   *
-   * @param uri - URI identifying the location of the device.
-   */
-  readonly powerOff: (uri: string) => Promise<void>
+  getInfo: (locale: ApiLocales) => LocalizedDriverInformation
 }
 
 export function defineDriver(options: DefineDriverOptions) {
@@ -143,6 +113,7 @@ export function defineDriver(options: DefineDriverOptions) {
 
     return {
       enabled: info.enabled,
+      experimental: info.experimental,
       guid: info.guid,
       ...localizedInfo,
       capabilities: info.capabilities
@@ -150,10 +121,14 @@ export function defineDriver(options: DefineDriverOptions) {
   })
 
   existing = Object.freeze({
-    powerOn: noOpPower,
-    powerOff: noOpPower,
+    // Optional bindings will be no-op.
+    powerOn: noOpBinding,
+    powerOff: noOpBinding,
+    // Provided bindings.
     ...implemented,
+    // Information and informational functionality.
     enabled: info.enabled,
+    experimental: info.experimental,
     guid: info.guid,
     capabilities: info.capabilities,
     metadata: info,
@@ -166,6 +141,8 @@ export function defineDriver(options: DefineDriverOptions) {
 
 const useDrivers = memo(function useDriver() {
   const drivers = import.meta.glob('../drivers/**/*')
+  const ports = useSerialPorts()
+
   const booted = Promise.all(
     Object.values(drivers).map(async (factory) => {
       await factory()
@@ -179,17 +156,19 @@ const useDrivers = memo(function useDriver() {
     }
   }
 
-  const all = defineOperation(() => Array.from(registry.values()))
+  const all = defineOperation(() => Array.from(registry.values()).filter((driver) => driver.enabled))
 
   const get = defineOperation((guid: string) => registry.get(guid) ?? null)
 
   function defineDriverOperation<Args extends unknown[], Result>(
-    op: (driver: Driver, ...args: Args) => MaybePromise<Result>
+    op: (driver: Driver, uri: string, ...args: Args) => MaybePromise<Result>
   ) {
-    return async (guid: string, ...args: Args) => {
+    return async (guid: string, uri: string, ...args: Args) => {
       const driver = await get(guid)
       if (driver == null) throw new ReferenceError(`No such driver: "${guid}"`)
-      return await op(driver, ...args)
+      const valid = await ports.listPorts()
+      if (!isIpOrValidPort(uri, valid)) throw new TypeError(`"${uri}" is not a valid location`)
+      return await op(driver, uri, ...args)
     }
   }
 

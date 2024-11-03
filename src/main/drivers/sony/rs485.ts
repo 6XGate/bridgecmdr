@@ -13,6 +13,7 @@ import type { Command, CommandArg } from '../../services/support/sonyRs485'
 
 const sonyRs485Driver = defineDriver({
   enabled: true,
+  experimental: false,
   guid: '8626D6D3-C211-4D21-B5CC-F5E3B50D9FF0',
   localized: {
     en: {

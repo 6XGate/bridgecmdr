@@ -7,7 +7,8 @@ import type {
   kDeviceHasNoExtraCapabilities as HasNoExtraCapabilities,
   kDeviceSupportsMultipleOutputs as SupportsMultipleOutputs,
   kDeviceCanDecoupleAudioOutput as CanDecoupleAudioOutput,
-  LocalizedDriverDescriptor
+  LocalizedDriverInformation,
+  DriverBasicInformation
 } from '../../preload/api'
 
 /** The device has no extended capabilities. */
@@ -21,11 +22,8 @@ export type kDeviceCanDecoupleAudioOutput = CanDecoupleAudioOutput
 export const kDeviceCanDecoupleAudioOutput: CanDecoupleAudioOutput = 2
 
 /** Informational metadata about a device and driver. */
-export interface DriverInformation extends LocalizedDriverDescriptor {
-  /** A unique identifier for the driver. */
-  readonly guid: string
-  /** Defines the capabilities of the device driven by the driver. */
-  readonly capabilities: number
+export interface DriverInformation extends DriverBasicInformation, LocalizedDriverInformation {
+  // Just combines the locatized information with the basic information.
 }
 
 /** Driver to interact with switching devices. */
@@ -61,7 +59,7 @@ const useDrivers = createSharedComposable(function useDrivers() {
     if (items.value.length > 0) return items.value
     const drivers = await tracker.wait(client.drivers.all.query())
     for (const {
-      metadata: { guid, localized, capabilities }
+      metadata: { enabled, experimental, guid, localized, capabilities }
     } of drivers) {
       /** The localized driver information made i18n compatible. */
       for (const [locale, description] of Object.entries(localized)) {
@@ -73,6 +71,8 @@ const useDrivers = createSharedComposable(function useDrivers() {
       registry.set(
         guid,
         readonly({
+          enabled,
+          experimental,
           guid,
           get title() {
             return i18n.global.t(`$driver.${guid}.title`)

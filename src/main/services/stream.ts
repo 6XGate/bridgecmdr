@@ -2,12 +2,10 @@ import { createConnection } from 'node:net'
 import { pipeline, finished } from 'node:stream/promises'
 import { SerialPort } from 'serialport'
 import { z } from 'zod'
-import type { Socket, NetConnectOpts, IpcNetConnectOpts, TcpNetConnectOpts } from 'node:net'
+import type { Socket, NetConnectOpts, TcpNetConnectOpts } from 'node:net'
 import type { Duplex } from 'node:stream'
 import type { Simplify } from 'type-fest'
 import { toError } from '@/error-handling'
-
-export type IpcStreamOptions = Omit<IpcNetConnectOpts, 'path'>
 
 export type NetStreamOptions = Omit<TcpNetConnectOpts, 'host' | 'port'>
 
@@ -86,10 +84,6 @@ async function createSocketStream(options: NetConnectOpts) {
   return createStream(socket, { close })
 }
 
-async function createIpcStream(path: string, options: IpcStreamOptions) {
-  return await createSocketStream({ path, ...options })
-}
-
 const kHostWithOptionalPort = /^((?:\[[A-Fa-f0-9.:]+\])|(?:[\p{N}\p{L}.-]+))(?::([1-9][0-9]*))?$/u
 
 async function createNetStream(target: string, options: NetStreamOptions) {
@@ -130,7 +124,7 @@ async function createPortStream(path: string, options: PortStreamOptions) {
   return createStream(port, { close })
 }
 
-export type CommandStreamOptions = IpcStreamOptions | NetStreamOptions | PortStreamOptions
+export type CommandStreamOptions = NetStreamOptions | PortStreamOptions
 
 export type CommandStream = ReturnType<typeof createStream>
 
@@ -143,5 +137,5 @@ export async function createCommandStream(path: string, options: CommandStreamOp
     return await createNetStream(path.substring(3), options as NetStreamOptions)
   }
 
-  return await createIpcStream(path, options as IpcStreamOptions)
+  throw new TypeError('Unsupport stream address')
 }

@@ -4,6 +4,7 @@ import { createCommandStream } from '../../services/stream'
 
 const extronSisDriver = defineDriver({
   enabled: true,
+  experimental: false,
   guid: '4C8F2838-C91D-431E-84DD-3666D14A6E2C',
   localized: {
     en: {
