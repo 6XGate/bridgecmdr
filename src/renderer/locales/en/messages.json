@@ -26,7 +26,6 @@
     "remote": "Remote host",
     "loading": "Loading...",
     "name": "Name",
-    "path": "Path",
     "port": "Port",
     "backup": "Backup settings",
     "settings": "Settings",
@@ -66,7 +65,7 @@
     "location": {
       "port": "This must be a valid port",
       "ip": "This must be a host or IP address, and optionally port",
-      "path": "This must be a valid path"
+      "invalid": "This must be a valid location"
     }
   }
 }

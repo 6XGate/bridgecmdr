@@ -30,9 +30,7 @@ async function createWindow() {
     useContentSize: true,
     webPreferences: {
       preload: joinPath(__dirname, '../preload/index.mjs'),
-      sandbox: false,
-      // TODO: Properly setup CORS for the app.
-      webSecurity: false
+      sandbox: false
     }
   })
 
@@ -83,13 +81,9 @@ async function createWindow() {
 const configDir = app.getPath('userData')
 app.setPath('sessionData', resolvePath(configDir, '.websession'))
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
+// Quit when all windows are closed.
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
-  }
+  app.quit()
 })
 
 // Default open or close DevTools by F12 in development
@@ -103,16 +97,6 @@ app.on('browser-window-created', (...[, window]) => {
 process.on('SIGTERM', () => {
   for (const window of BrowserWindow.getAllWindows()) {
     window.close()
-  }
-})
-
-app.on('activate', () => {
-  // On macOS it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
-  if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow().catch((e: unknown) => {
-      Logger.error(e)
-    })
   }
 })
 

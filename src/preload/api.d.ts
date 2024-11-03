@@ -20,8 +20,10 @@ export type { Tie, NewTie, TieUpdate } from '../main/dao/ties'
 export type { ApiLocales } from '../main/locale'
 
 export type {
-  DriverData,
-  LocalizedDriverDescriptor,
+  DriverBindings,
+  DriverInformation,
+  DriverBasicInformation,
+  LocalizedDriverInformation,
   // Cannot be exported as values, but they are literals.
   kDeviceCanDecoupleAudioOutput,
   kDeviceHasNoExtraCapabilities,

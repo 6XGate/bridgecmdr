@@ -4,6 +4,7 @@ import { createCommandStream } from '../../services/stream'
 
 const teslaSmartMatrixDriver = defineDriver({
   enabled: true,
+  experimental: true,
   guid: '671824ED-0BC4-43A6-85CC-4877890A7722',
   localized: {
     en: {
