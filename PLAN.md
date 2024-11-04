@@ -1,8 +1,6 @@
 - Milestones
   - v2.1
     - (#86) Add a means to select a not-in-use port for the tRPC channel.
-    - More drivers.
-      - (#83) Shinybow
   - v2.2
     - Move more modules to core.
     - tRPC over Electron IPC.
@@ -21,7 +19,6 @@
       - Need a means to identify it's URL via the local UI.
       - May need a way to disable the power-off button in the remote UI.
 - Drivers
-  - Shinybow
   - Monoprice Blackbird
   - J-Tech Digital -- Need to find actual command list.
   - ASHATA -- Now unable to find.
