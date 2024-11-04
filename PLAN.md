@@ -1,11 +1,8 @@
 - Milestones
   - v2.1
     - (#86) Add a means to select a not-in-use port for the tRPC channel.
-    - (#85) Attempt to secure `serialport` interactione.
     - More drivers.
-      - (#88) Add means to mark and label experimental drivers.
       - (#83) Shinybow
-      - (#84) TESmart
   - v2.2
     - Move more modules to core.
     - tRPC over Electron IPC.
@@ -28,5 +25,4 @@
   - Monoprice Blackbird
   - J-Tech Digital -- Need to find actual command list.
   - ASHATA -- Now unable to find.
-  - TESmart -- Brand of Tesla Elec (like TelsaSmart)
   - No Hassle AV -- Need to contact.

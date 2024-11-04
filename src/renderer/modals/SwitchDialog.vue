@@ -3,6 +3,7 @@ import { mdiClose, mdiFlask } from '@mdi/js'
 import { useVModel } from '@vueuse/core'
 import { computed, ref, reactive, onBeforeMount } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { Highlight } from '../components/Highlight'
 import { useLocation } from '../hooks/location'
 import { useRules, useValidation } from '../hooks/validation'
 import useDrivers from '../services/driver'
@@ -52,6 +53,7 @@ const location = computed({
 const { locationPath, pathTypes, pathType, path } = useLocation(location, () => ports.items)
 
 const driver = computed(() => drivers.items.find((d) => d.guid === target.value.driverId))
+const driverSerach = ref('')
 
 function confirm() {
   isVisible.value = false
@@ -119,10 +121,12 @@ const isBusy = computed(() => drivers.isBusy || ports.isBusy)
           v-bind="getStatus(v$.title)" />
         <VSelect
           v-model="v$.driverId.$model"
+          v-model:search="driverSerach"
           :label="t('label.driver')"
           :items="drivers.items"
           item-title="title"
           item-value="guid"
+          :menu-props="{ location: 'center' }"
           variant="outlined"
           :loading="drivers.isBusy"
           :placeholder="t('placeholder.required')"
@@ -136,6 +140,7 @@ const isBusy = computed(() => drivers.isBusy || ports.isBusy)
           </template>
           <template #item="{ props: itemProps, item }">
             <VListItem v-bind="itemProps">
+              <template #title><Highlight :text="item.title" :search="driverSerach"></Highlight></template>
               <template v-if="item.raw.experimental" #append>
                 <VTooltip :text="t('label.experimental')">
                   <template #activator="{ props: tooltipProps }">
