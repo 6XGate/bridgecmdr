@@ -18,10 +18,10 @@ afterEach(async () => {
   vi.resetModules()
 })
 
-const kDriverGuid = '671824ED-0BC4-43A6-85CC-4877890A7722'
+const kDriverGuid = '01B8884C-1D7D-4451-883D-3C8F18E17B14'
 
 test('available', async () => {
-  const { default: driver } = await import('../../../main/drivers/tesla-smart/matrix')
+  const { default: driver } = await import('../../../main/drivers/tesmart/matrix')
   const { default: useDrivers } = await import('../../../main/services/drivers')
 
   const drivers = useDrivers()
@@ -71,7 +71,7 @@ test<MockStreamContext>('activate tie', async (context) => {
   const drivers = useDrivers()
 
   const input = 1
-  const output = 2
+  const output = 20
 
   const toResp = (n: number) => String(n).padStart(2, '0')
   const command = `MT00SW${toResp(input)}${toResp(output)}NT\r\n`

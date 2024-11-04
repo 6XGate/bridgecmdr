@@ -18,10 +18,10 @@ afterEach(async () => {
   vi.resetModules()
 })
 
-const kDriverGuid = '671824ED-0BC4-43A6-85CC-4877890A7722'
+const kDriverGuid = '75FB7ED2-EE3A-46D5-B11F-7D8C3C208E7C'
 
 test('available', async () => {
-  const { default: driver } = await import('../../../main/drivers/tesla-smart/matrix')
+  const { default: driver } = await import('../../../main/drivers/shinybow/v2')
   const { default: useDrivers } = await import('../../../main/services/drivers')
 
   const drivers = useDrivers()
@@ -38,9 +38,9 @@ test<MockStreamContext>('power on', async (context) => {
   const { default: useDrivers } = await import('../../../main/services/drivers')
   const drivers = useDrivers()
 
-  // Power on is a no-op
+  const command = `POWER 01;\r\n`
 
-  context.stream.withSequence()
+  context.stream.withSequence().on(Buffer.from(command), () => Buffer.from('Good'))
 
   await expect(drivers.powerOn(kDriverGuid, 'port:/dev/ttyS0')).resolves.toBeUndefined()
   context.stream.sequence.expectDone()
@@ -54,9 +54,9 @@ test<MockStreamContext>('power off', async (context) => {
   const { default: useDrivers } = await import('../../../main/services/drivers')
   const drivers = useDrivers()
 
-  // Power off is a no-op
+  const command = `POWER 00;\r\n`
 
-  context.stream.withSequence()
+  context.stream.withSequence().on(Buffer.from(command), () => Buffer.from('Good'))
 
   await expect(drivers.powerOff(kDriverGuid, 'port:/dev/ttyS0')).resolves.toBeUndefined()
   context.stream.sequence.expectDone()
@@ -71,12 +71,11 @@ test<MockStreamContext>('activate tie', async (context) => {
   const drivers = useDrivers()
 
   const input = 1
-  const output = 2
-
+  const output = 20
   const toResp = (n: number) => String(n).padStart(2, '0')
-  const command = `MT00SW${toResp(input)}${toResp(output)}NT\r\n`
+  const command = `OUTPUT${toResp(output)} ${toResp(input)};\r\n`
 
-  context.stream.withSequence().on(Buffer.from(command, 'ascii'), () => Buffer.from('Good'))
+  context.stream.withSequence().on(Buffer.from(command), () => Buffer.from('Good'))
 
   await expect(drivers.activate(kDriverGuid, 'port:/dev/ttyS0', input, output, 0)).resolves.toBeUndefined()
   context.stream.sequence.expectDone()
