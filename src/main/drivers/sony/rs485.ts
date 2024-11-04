@@ -1,15 +1,5 @@
-import Logger from 'electron-log'
 import { defineDriver, kDeviceHasNoExtraCapabilities } from '../../services/drivers'
-import { createCommandStream } from '../../services/stream'
-import {
-  createAddress,
-  createCommand,
-  kAddressAll,
-  kPowerOff,
-  kPowerOn,
-  kSetChannel
-} from '../../services/support/sonyRs485'
-import type { Command, CommandArg } from '../../services/support/sonyRs485'
+import { useSonyBvmProtocol } from '../../services/protocols/sonyBvm'
 
 const sonyRs485Driver = defineDriver({
   enabled: true,
@@ -23,54 +13,7 @@ const sonyRs485Driver = defineDriver({
     }
   },
   capabilities: kDeviceHasNoExtraCapabilities,
-  setup: () => {
-    async function sendCommand(uri: string, command: Command, arg0?: CommandArg, arg1?: CommandArg) {
-      const source = createAddress(kAddressAll, 0)
-      const destination = createAddress(kAddressAll, 0)
-      const packet = createCommand(destination, source, command, arg0, arg1)
-
-      const connection = await createCommandStream(uri, {
-        baudRate: 38400,
-        dataBits: 8,
-        stopBits: 1,
-        parity: 'odd',
-        timeout: 5000,
-        keepAlive: true
-      })
-
-      // TODO: Other situation handlers...
-      connection.on('data', (data) => {
-        Logger.debug(`sonyRs485Driver: return: ${String(data)}`)
-      })
-      connection.on('error', (error) => {
-        Logger.error(`sonyRs485Driver: ${error.message}`)
-      })
-
-      await connection.write(packet)
-      await connection.close()
-    }
-
-    async function activate(uri: string, input: number) {
-      Logger.log(`sonyRs485Driver.activate(${input})`)
-      await sendCommand(uri, kSetChannel, 1, input)
-    }
-
-    async function powerOn(uri: string) {
-      Logger.log('sonyRs485Driver.powerOn')
-      await sendCommand(uri, kPowerOn)
-    }
-
-    async function powerOff(uri: string) {
-      Logger.log('sonyRs485Driver.powerOff')
-      await sendCommand(uri, kPowerOff)
-    }
-
-    return {
-      activate,
-      powerOn,
-      powerOff
-    }
-  }
+  setup: useSonyBvmProtocol
 })
 
 export default sonyRs485Driver

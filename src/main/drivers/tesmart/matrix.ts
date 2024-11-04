@@ -1,13 +1,13 @@
 import { defineDriver, kDeviceSupportsMultipleOutputs } from '../../services/drivers'
 import { useTeslaElecMatrixProtocol } from '../../services/protocols/teslaElec'
 
-const teslaSmartMatrixDriver = defineDriver({
+const tesmartMatrixDriver = defineDriver({
   enabled: true,
   experimental: true,
-  guid: '671824ED-0BC4-43A6-85CC-4877890A7722',
+  guid: '01B8884C-1D7D-4451-883D-3C8F18E17B14',
   localized: {
     en: {
-      title: 'Tesla smart matrix-compatible switch',
+      title: 'TESmart matrix-compatible switch',
       company: 'Tesla Elec Technology Co.,Ltd',
       provider: 'BridgeCmdr contributors'
     }
@@ -16,4 +16,4 @@ const teslaSmartMatrixDriver = defineDriver({
   setup: useTeslaElecMatrixProtocol
 })
 
-export default teslaSmartMatrixDriver
+export default tesmartMatrixDriver

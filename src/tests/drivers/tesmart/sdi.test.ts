@@ -18,10 +18,10 @@ afterEach(async () => {
   vi.resetModules()
 })
 
-const kDriverGuid = '671824ED-0BC4-43A6-85CC-4877890A7722'
+const kDriverGuid = '8C524E65-83EF-4AEF-B0DA-29C4582AA4A0'
 
 test('available', async () => {
-  const { default: driver } = await import('../../../main/drivers/tesla-smart/matrix')
+  const { default: driver } = await import('../../../main/drivers/tesmart/sdi')
   const { default: useDrivers } = await import('../../../main/services/drivers')
 
   const drivers = useDrivers()
@@ -71,13 +71,10 @@ test<MockStreamContext>('activate tie', async (context) => {
   const drivers = useDrivers()
 
   const input = 1
-  const output = 2
+  const command = Buffer.of(0xaa, 0xcc, 0x01, input)
 
-  const toResp = (n: number) => String(n).padStart(2, '0')
-  const command = `MT00SW${toResp(input)}${toResp(output)}NT\r\n`
+  context.stream.withSequence().on(Buffer.from(command), () => Buffer.from('Good'))
 
-  context.stream.withSequence().on(Buffer.from(command, 'ascii'), () => Buffer.from('Good'))
-
-  await expect(drivers.activate(kDriverGuid, 'port:/dev/ttyS0', input, output, 0)).resolves.toBeUndefined()
+  await expect(drivers.activate(kDriverGuid, 'port:/dev/ttyS0', input, 0, 0)).resolves.toBeUndefined()
   context.stream.sequence.expectDone()
 })
