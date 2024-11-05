@@ -36,7 +36,6 @@ useTitle(() => appInfo.value.name)
 const appUpdater = useAppUpdates()
 const progress = ref<ProgressInfo>()
 useEventListener(appUpdater, 'progress', (ev: UpdateProgressEvent) => {
-  console.log(ev)
   progress.value = ev
 })
 

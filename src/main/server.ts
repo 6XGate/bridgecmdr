@@ -1,12 +1,11 @@
-import { createHTTPServer } from '@trpc/server/adapters/standalone'
 import { applyWSSHandler } from '@trpc/server/adapters/ws'
 import Logger from 'electron-log'
+import { range } from 'radash'
 import { WebSocketServer } from 'ws'
-import useAppConfig from './info/config'
 import { useAppRouter } from './routes/router'
-import { getServerUrl } from '@/url'
+import { createStandaloneContext } from './services/trpc'
 
-function startWebSocketServer(url: URL, host: string, port: number) {
+function startWebSocketServer(url: string, host: string, port: number) {
   // TODO: Authentication via the IPC, later we'll implement a proper authentication model.
 
   process.env['WS_NO_UTF_8_VALIDATE'] = '1'
@@ -17,7 +16,7 @@ function startWebSocketServer(url: URL, host: string, port: number) {
     Logger.info(`RPC server at ${url}`)
   })
 
-  const handler = applyWSSHandler({ wss, router: useAppRouter() })
+  const handler = applyWSSHandler({ wss, router: useAppRouter(), createContext: createStandaloneContext })
 
   process.on('exit', () => {
     handler.broadcastReconnectNotification()
@@ -30,32 +29,41 @@ function startWebSocketServer(url: URL, host: string, port: number) {
   })
 }
 
-function startHttpServer(url: URL, host: string, port: number) {
-  // TODO: Authentication via the IPC, later we'll implement a proper authentication model.
-
-  const server = createHTTPServer({
-    router: useAppRouter()
-  })
-
-  server.server.on('listening', () => {
-    Logger.info(`RPC server at ${url}`)
-  })
-
-  server.listen(port, host)
-  process.on('exit', () => {
-    server.server.close()
-  })
-
-  process.on('SIGTERM', () => {
-    server.server.close()
-  })
-}
+// TODO: Maybe usable for the remote server one day.
+// function startHttpServer(url: URL, host: string, port: number) {
+//   // TODO: Authentication via the IPC, later we'll implement a proper authentication model.
+//
+//   const server = createHTTPServer({
+//     router: useAppRouter()
+//   })
+//
+//   server.server.on('listening', () => {
+//     Logger.info(`RPC server at ${url}`)
+//   })
+//
+//   server.listen(port, host)
+//   process.on('exit', () => {
+//     server.server.close()
+//   })
+//
+//   process.on('SIGTERM', () => {
+//     server.server.close()
+//   })
+// }
 
 export default function useApiServer() {
-  const config = useAppConfig()
-  const url = new URL(config.rpcUrl)
-  const [host, port, protocol] = getServerUrl(url, 7180)
+  let cause
+  const host = '127.0.0.1'
+  for (const port of range(7000, 8000)) {
+    const url = `ws://${host}:${port}`
+    try {
+      startWebSocketServer(url, host, port)
+      return port
+    } catch (err) {
+      cause = err
+      console.warn(`Unable to bind server to ${url}`, cause)
+    }
+  }
 
-  if (protocol === 'http:') startHttpServer(url, host, port)
-  if (protocol === 'ws:') startWebSocketServer(url, host, port)
+  throw new Error('No port available for the server within 7000-8000', { cause })
 }

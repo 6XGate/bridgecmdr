@@ -4,6 +4,7 @@ import { useTeslaElecKvmProtocol } from '../../services/protocols/teslaElec'
 const tesmartKvmDriver = defineDriver({
   enabled: true,
   experimental: true,
+  kind: 'switch',
   guid: '2B4EDB8E-D2D6-4809-BA18-D5B1785DA028',
   localized: {
     en: {

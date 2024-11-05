@@ -77,8 +77,6 @@ export class MockCommandStream implements CommandStream {
       data = Buffer.from(data, 'ascii')
     }
 
-    console.log(data)
-
     this.events.emit('write', data)
     this.received.push(data)
     if (this.#sequence == null) {

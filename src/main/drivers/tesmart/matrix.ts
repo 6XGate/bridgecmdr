@@ -4,6 +4,7 @@ import { useTeslaElecMatrixProtocol } from '../../services/protocols/teslaElec'
 const tesmartMatrixDriver = defineDriver({
   enabled: true,
   experimental: true,
+  kind: 'switch',
   guid: '01B8884C-1D7D-4451-883D-3C8F18E17B14',
   localized: {
     en: {

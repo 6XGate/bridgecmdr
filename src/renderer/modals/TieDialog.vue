@@ -159,7 +159,7 @@ const { cardProps, isFullscreen, body, showDividers } = useTieDialog()
       <VForm :disabled="isBusy">
         <VSelect
           v-model="v$.switchId.$model"
-          :label="t('label.switch')"
+          :label="t('label.switchOrMonitor')"
           :items="switches.items"
           item-title="title"
           item-value="_id"

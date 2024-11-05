@@ -4,6 +4,7 @@ import { useShinybowV3Protocol } from '../../services/protocols/shinybow'
 const shinybowV3 = defineDriver({
   enabled: true,
   experimental: true,
+  kind: 'switch',
   guid: 'BBED08A1-C749-4733-8F2E-96C9B56C0C41',
   localized: {
     en: {

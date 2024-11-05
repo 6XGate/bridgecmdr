@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { mdiArrowLeft, mdiDelete, mdiPlus, mdiVideoSwitch } from '@mdi/js'
+import { mdiArrowLeft, mdiDelete, mdiPlus, mdiMonitor, mdiVideoSwitch } from '@mdi/js'
 import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -11,7 +11,6 @@ import useDrivers from '../services/driver'
 import { useSwitches } from '../services/switches'
 import type { I18nSchema } from '../locales/locales'
 import type { DriverInformation } from '../services/driver'
-import type { DocumentId } from '../services/store'
 import type { NewSwitch, Switch } from '../services/switches'
 import type { DeepReadonly } from 'vue'
 import { isNotNullish } from '@/basics'
@@ -64,9 +63,11 @@ async function updateSwitch(target: DeepReadonly<Switch>, changes: NewSwitch) {
   }
 }
 
-async function deleteSwitch(id: DocumentId) {
+async function deleteSwitch(item: Item) {
+  const kind = item.driver.kind === 'monitor' ? t('label.monitor') : t('label.switch')
+
   const yes = await dialogs.confirm({
-    title: t('message.confirmDeleteSwitch'),
+    title: t('message.confirmDeleteDevice', [kind]),
     message: t('message.deleteSwitchWarning'),
     confirmButton: t('action.delete'),
     cancelButton: t('action.keep'),
@@ -78,7 +79,7 @@ async function deleteSwitch(id: DocumentId) {
   }
 
   try {
-    await switches.remove(id)
+    await switches.remove(item.switch._id)
   } catch (e) {
     await refresh()
     await dialogs.error(e)
@@ -90,7 +91,7 @@ const { dialogProps: editorProps } = useSwitchDialog()
 
 <template>
   <Page v-slot="{ toolbar, scrolled }">
-    <VToolbar v-bind="toolbar" :title="t('label.switches')">
+    <VToolbar v-bind="toolbar" :title="t('label.switchesAndMonitors')">
       <template #prepend><VBtn :icon="mdiArrowLeft" @click="router.back" /></template>
     </VToolbar>
     <VProgressLinear v-show="switches.isBusy" indeterminate />
@@ -108,16 +109,12 @@ const { dialogProps: editorProps } = useSwitchDialog()
           <template #activator="{ props: dailog }">
             <VListItem v-bind="dailog" :title="item.switch.title" :subtitle="item.driver.title">
               <template #prepend>
-                <VAvatar :icon="mdiVideoSwitch" />
+                <VAvatar :icon="item.driver.kind === 'monitor' ? mdiMonitor : mdiVideoSwitch" />
               </template>
               <template #append>
                 <VTooltip :text="t('action.delete')">
                   <template #activator="{ props: tooltip }">
-                    <VBtn
-                      v-bind="tooltip"
-                      :icon="mdiDelete"
-                      variant="text"
-                      @click.prevent.stop="deleteSwitch(item.switch._id)" />
+                    <VBtn v-bind="tooltip" :icon="mdiDelete" variant="text" @click.prevent.stop="deleteSwitch(item)" />
                   </template>
                 </VTooltip>
               </template>
@@ -127,7 +124,7 @@ const { dialogProps: editorProps } = useSwitchDialog()
       </template>
     </VList>
     <VSheet class="ma-6" color="transparent" location="bottom right" position="fixed">
-      <VTooltip :text="t('action.addSwitch')">
+      <VTooltip :text="t('action.addDevice')">
         <template #activator="{ props }">
           <VDialog v-bind="editorProps">
             <template #default="{ isActive }">
@@ -150,8 +147,11 @@ const { dialogProps: editorProps } = useSwitchDialog()
 <i18n lang="yaml">
 en:
   action:
-    addSwitch: New switch
+    addDevice: New switch or monitor
   message:
-    confirmDeleteSwitch: Do you want to remove this switch?
+    confirmDeleteDevice: Do you want to remove this {0}?
     deleteSwitchWarning: This will also remove any tie relationships on sources.
+  label:
+    monitor: monitor
+    switch: switch
 </i18n>

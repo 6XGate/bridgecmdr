@@ -33,8 +33,6 @@ const dialogs = useDialogs()
 
 const isVisible = useVModel(props, 'visible', emit)
 
-const title = computed(() => (props.editing ? t('label.addSwitch') : t('label.editSwitch')))
-
 const drivers = useDrivers()
 onBeforeMount(drivers.all)
 
@@ -54,6 +52,7 @@ const { locationPath, pathTypes, pathType, path } = useLocation(location, () => 
 
 const driver = computed(() => drivers.items.find((d) => d.guid === target.value.driverId))
 const driverSerach = ref('')
+const driverKind = computed(() => (driver.value?.kind === 'monitor' ? t('label.monitor') : t('label.switch')))
 
 function confirm() {
   isVisible.value = false
@@ -68,7 +67,7 @@ async function cancelIfConfirmed() {
   }
 
   const yes = await dialogs.confirm({
-    message: props.editing ? t('message.discardChanges') : t('message.discardNew'),
+    message: props.editing ? t('message.discardChanges') : t('message.discardNew', [driverKind.value]),
     color: 'primary',
     confirmButton: t('action.discard'),
     cancelButton: t('common.cancel')
@@ -95,6 +94,10 @@ const { dirty, getStatus, submit, v$ } = useValidation(rules, target, confirm)
 const { cardProps, isFullscreen, body, showDividers } = useSwitchDialog()
 
 const isBusy = computed(() => drivers.isBusy || ports.isBusy)
+
+const title = computed(() =>
+  props.editing ? t('label.addDevice', [driverKind.value]) : t('label.editDevice', [driverKind.value])
+)
 </script>
 
 <template>
@@ -185,9 +188,11 @@ const isBusy = computed(() => drivers.isBusy || ports.isBusy)
 <i18n lang="yaml">
 en:
   label:
-    addSwitch: Add switch
-    editSwitch: Edit switch
+    monitor: monitor
+    switch: switch
+    addDevice: Add {0}
+    editDevice: Edit {0}
     experimental: Experimental driver
   message:
-    discardNew: Do you want to discard this switch?
+    discardNew: Do you want to discard this {0}?
 </i18n>
