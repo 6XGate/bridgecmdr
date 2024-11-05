@@ -5,8 +5,8 @@ import { app, shell, BrowserWindow, nativeTheme } from 'electron'
 import Logger from 'electron-log'
 import { sleep } from 'radash'
 import appIcon from '../../resources/icon.png?asset&asarUnpack'
-import useAppConfig from './info/config'
 import useApiServer from './server'
+import { getAuthToken } from './services/trpc'
 import { logError } from './utilities'
 import { toError } from '@/error-handling'
 
@@ -18,30 +18,27 @@ Logger.transports.console.format = '{h}:{i}:{s}.{ms} [{level}] › {text}'
 Logger.transports.file.level = 'debug'
 Logger.errorHandler.startCatching()
 
-async function createWindow() {
+async function createWindow(port: number) {
   const willStartWithDark = nativeTheme.shouldUseDarkColors || nativeTheme.shouldUseInvertedColorScheme
 
-  const main = new BrowserWindow({
+  const window = new BrowserWindow({
     width: 800,
     height: 480,
     backgroundColor: willStartWithDark ? '#121212' : 'white',
     icon: appIcon,
     show: true,
-    useContentSize: true,
-    webPreferences: {
-      preload: joinPath(__dirname, '../preload/index.mjs'),
-      sandbox: false
-    }
+    useContentSize: true
   })
 
-  main.removeMenu()
+  window.removeMenu()
   if (import.meta.env.PROD) {
-    main.setFullScreen(true)
+    window.setFullScreen(true)
   } else {
-    main.webContents.openDevTools({ mode: 'undocked' })
+    window.webContents.openDevTools({ mode: 'undocked' })
   }
 
-  main.webContents.setWindowOpenHandler(function windowOpenHandler(details) {
+  // Open all new window links in the system browser.
+  window.webContents.setWindowOpenHandler(function windowOpenHandler(details) {
     shell.openExternal(details.url).catch((e: unknown) => {
       Logger.error(e)
     })
@@ -52,28 +49,32 @@ async function createWindow() {
   const kWait = 2000
   let lastError: unknown
 
+  /* eslint-disable no-await-in-loop -- Retry loop must be serial. */
   for (let tries = 3; tries > 0; --tries) {
     try {
       // HMR for renderer base on electron-vite cli.
       // Load the remote URL for development or the local html file for production.
       if (is.dev && process.env.ELECTRON_RENDERER_URL != null) {
-        // eslint-disable-next-line no-await-in-loop -- Retry loop must be serial.
-        await main.loadURL(process.env.ELECTRON_RENDERER_URL)
+        const url = new URL(process.env.ELECTRON_RENDERER_URL)
+        url.searchParams.set('port', String(port))
+        url.searchParams.set('auth', getAuthToken())
+        await window.loadURL(url.toString())
       } else {
-        // eslint-disable-next-line no-await-in-loop -- Retry loop must be serial.
-        await main.loadFile(joinPath(__dirname, '../renderer/index.html'))
+        await window.loadFile(joinPath(__dirname, '../renderer/index.html'), {
+          query: { port: String(port), auth: getAuthToken() }
+        })
       }
 
-      return main
+      return window
     } catch (e) {
       lastError = e
       Logger.warn(e)
 
-      // eslint-disable-next-line no-await-in-loop -- Retry loop must be serial.
       await sleep(kWait)
     }
   }
 
+  /* eslint-enable no-await-in-loop */
   throw logError(toError(lastError))
 }
 
@@ -101,15 +102,13 @@ process.on('SIGTERM', () => {
 })
 
 // This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
+// initialization and is ready to create browser
+// windows. Some APIs can only be used after
+// this event occurs.
 await app.whenReady()
 
 // Set app user model id for windows
 electronApp.setAppUserModelId('org.sleepingcats.BridgeCmdr')
 
-useAppConfig()
-
-useApiServer()
-
-await createWindow()
+const port = useApiServer()
+await createWindow(port)

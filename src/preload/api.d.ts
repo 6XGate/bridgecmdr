@@ -5,7 +5,6 @@ import type { AppConfig } from '../main/info/config'
 //
 
 export type { AppInfo } from '../main/info/app'
-export type { AppConfig } from '../main/info/config'
 export type { UserInfo } from '../main/info/user'
 
 export type { AppRouter } from '../main/routes/router'
@@ -20,6 +19,7 @@ export type { Tie, NewTie, TieUpdate } from '../main/dao/ties'
 export type { ApiLocales } from '../main/locale'
 
 export type {
+  DriverKind,
   DriverBindings,
   DriverInformation,
   DriverBasicInformation,
@@ -29,12 +29,3 @@ export type {
   kDeviceHasNoExtraCapabilities,
   kDeviceSupportsMultipleOutputs
 } from '../main/services/drivers'
-
-//
-// Exposed APIs
-//
-
-// The exposed API global structure
-declare global {
-  var configuration: AppConfig
-}

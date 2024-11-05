@@ -18,6 +18,8 @@ export const kDeviceSupportsMultipleOutputs = 1
 export type kDeviceCanDecoupleAudioOutput = typeof kDeviceCanDecoupleAudioOutput
 export const kDeviceCanDecoupleAudioOutput = 2
 
+export type DriverKind = 'monitor' | 'switch'
+
 //
 // Driver definition
 //
@@ -30,6 +32,8 @@ export interface DriverBasicInformation {
   readonly enabled: boolean
   /** Indicates whether the driver is experimental, usually due to lack of testing. */
   readonly experimental: boolean
+  /** Identifies the kind of device driven by the driver. */
+  readonly kind: DriverKind
   /** A unique identifier for the driver. */
   readonly guid: string
   /** Defines the capabilities of the device driven by the driver. */
@@ -114,6 +118,7 @@ export function defineDriver(options: DefineDriverOptions) {
     return {
       enabled: info.enabled,
       experimental: info.experimental,
+      kind: info.kind,
       guid: info.guid,
       ...localizedInfo,
       capabilities: info.capabilities
@@ -129,6 +134,7 @@ export function defineDriver(options: DefineDriverOptions) {
     // Information and informational functionality.
     enabled: info.enabled,
     experimental: info.experimental,
+    kind: info.kind,
     guid: info.guid,
     capabilities: info.capabilities,
     metadata: info,

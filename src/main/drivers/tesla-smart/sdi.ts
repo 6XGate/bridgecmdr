@@ -4,6 +4,7 @@ import { useTeslaElecSdiProtocol } from '../../services/protocols/teslaElec'
 const teslaSmartSdiDriver = defineDriver({
   enabled: true,
   experimental: true,
+  kind: 'switch',
   guid: 'DDB13CBC-ABFC-405E-9EA6-4A999F9A16BD',
   localized: {
     en: {

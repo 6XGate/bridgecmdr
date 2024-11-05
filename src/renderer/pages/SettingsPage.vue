@@ -87,10 +87,10 @@ onUnmounted(() => {
         :subtitle="t('count.sources', { n: n(sourceCount, 'integer') }, sourceCount)"
         :to="{ name: 'sources' }" />
       <VListItem
-        :title="t('label.switches')"
+        :title="t('label.switchesAndMonitors')"
         lines="two"
         :prepend-icon="mdiVideoSwitch"
-        :subtitle="t('count.switches', { n: n(switchCount, 'integer') }, switchCount)"
+        :subtitle="t('count.switchesAndMonitors', { n: n(switchCount, 'integer') }, switchCount)"
         :to="{ name: 'switches' }" />
       <VListItem
         :title="t('label.backup')"
@@ -117,5 +117,5 @@ en:
     about: Version {0}
   count:
     sources: No sources | One source | {n} sources
-    switches: No switches | One switch | {n} switches
+    switchesAndMonitors: No devices | One device | {n} devices
 </i18n>

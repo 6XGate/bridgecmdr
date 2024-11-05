@@ -207,13 +207,14 @@ const { isBusy } = trackBusy(
                   :text="String(entry.tie.inputChannel)"
                   label />
                 <VChip
+                  v-if="entry.tie.outputChannels.video"
                   :prepend-icon="mdiExport"
                   class="mr-1"
                   size="x-small"
                   :text="String(entry.tie.outputChannels.video)"
                   label />
                 <VChip
-                  v-if="entry.tie.outputChannels.audio != null"
+                  v-if="entry.tie.outputChannels.audio"
                   :prepend-icon="mdiVolumeMedium"
                   class="mr-1"
                   size="x-small"

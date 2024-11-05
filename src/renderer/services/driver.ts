@@ -59,7 +59,7 @@ const useDrivers = createSharedComposable(function useDrivers() {
     if (items.value.length > 0) return items.value
     const drivers = await tracker.wait(client.drivers.all.query())
     for (const {
-      metadata: { enabled, experimental, guid, localized, capabilities }
+      metadata: { enabled, experimental, kind, guid, localized, capabilities }
     } of drivers) {
       /** The localized driver information made i18n compatible. */
       for (const [locale, description] of Object.entries(localized)) {
@@ -73,6 +73,7 @@ const useDrivers = createSharedComposable(function useDrivers() {
         readonly({
           enabled,
           experimental,
+          kind,
           guid,
           get title() {
             return i18n.global.t(`$driver.${guid}.title`)

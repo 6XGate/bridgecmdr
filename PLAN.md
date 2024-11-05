@@ -1,6 +1,4 @@
 - Milestones
-  - v2.1
-    - (#86) Add a means to select a not-in-use port for the tRPC channel.
   - v2.2
     - Move more modules to core.
     - tRPC over Electron IPC.
