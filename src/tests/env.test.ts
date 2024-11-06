@@ -4,7 +4,8 @@ const mock = await vi.hoisted(async () => await import('./support/mock'))
 
 describe('correct setup', () => {
   beforeEach(() => {
-    vi.mock(import('electron'), mock.electronModule)
+    vi.mock('electron', mock.electronModule)
+    vi.mock('electron-log', mock.elctronLogModule)
   })
 
   afterEach(() => {

@@ -3,8 +3,8 @@ import { test, expect, vi, beforeEach, afterEach } from 'vitest'
 const mock = await vi.hoisted(async () => await import('./support/mock'))
 
 beforeEach(() => {
-  vi.mock(import('electron'), mock.electronModule)
-  vi.mock(import('electron-log'))
+  vi.mock('electron', mock.electronModule)
+  vi.mock('electron-log', mock.elctronLogModule)
 })
 
 afterEach(() => {

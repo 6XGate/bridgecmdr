@@ -6,9 +6,9 @@ const port = await vi.hoisted(async () => await import('../../support/serial'))
 const stream = await vi.hoisted(async () => await import('../../support/stream'))
 
 beforeEach<MockStreamContext>(async (context) => {
-  vi.mock(import('electron-log'))
-  vi.mock(import('serialport'), port.serialPortModule)
-  vi.doMock(import('../../../main/services/stream'), stream.commandStreamModule(context))
+  vi.mock('electron-log')
+  vi.mock('serialport', port.serialPortModule)
+  vi.doMock('../../../main/services/stream', stream.commandStreamModule(context))
   await port.createMockPorts()
 })
 
