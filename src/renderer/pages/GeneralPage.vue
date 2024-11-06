@@ -8,18 +8,25 @@ import {
   mdiThemeLightDark,
   mdiViewDashboard
 } from '@mdi/js'
+import { useAsyncState } from '@vueuse/core'
 import { onBeforeMount, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import OptionDialog from '../components/OptionDialog.vue'
 import Page from '../components/Page.vue'
-import { useGuardedAsyncOp } from '../helpers/utilities'
-import useSettings from '../stores/settings'
-import { trackBusy } from '../utilities/tracking'
+import { trackBusy } from '../hooks/tracking'
+import { useGuardedAsyncOp } from '../hooks/utilities'
+import { useClient } from '../services/rpc'
+import useSettings from '../services/settings'
 import type { I18nSchema } from '../locales/locales'
 
 const { t } = useI18n<I18nSchema>()
 const { isBusy, wait } = trackBusy()
+
+const { state: appInfo } = useAsyncState(async () => await useClient().appInfo.query(), {
+  name: 'Loading...',
+  version: 'Loading...'
+})
 
 const settings = useSettings()
 
@@ -78,7 +85,7 @@ onBeforeMount(useGuardedAsyncOp(load))
       <VListItem
         :title="t('option.autoStart')"
         lines="two"
-        :subtitle="t('description.autoStart')"
+        :subtitle="t('description.autoStart', [appInfo.name])"
         :prepend-icon="mdiRefreshAuto"
         @click="toggleAutoStart">
         <template #append>
@@ -141,7 +148,7 @@ onBeforeMount(useGuardedAsyncOp(load))
       <VListItem
         :title="t('option.powerOnSwitchesAtStart')"
         lines="two"
-        :subtitle="t('description.powerOnSwitchesAtStart')"
+        :subtitle="t('description.powerOnSwitchesAtStart', [appInfo.name])"
         :prepend-icon="mdiPowerSocket"
         @click="settings.powerOnSwitchesAtStart = !settings.powerOnSwitchesAtStart">
         <template #append>
@@ -150,9 +157,9 @@ onBeforeMount(useGuardedAsyncOp(load))
         </template>
       </VListItem>
       <VListItem
-        :title="t('option.closeApp')"
+        :title="t('option.closeApp', [appInfo.name])"
         lines="two"
-        :subtitle="t('description.closeApp')"
+        :subtitle="t('description.closeApp', [appInfo.name])"
         :prepend-icon="mdiExitRun"
         @click="closeApp" />
     </VList>
@@ -167,11 +174,11 @@ en:
     colorTheme: Color theme
     powerOffWhen: Power button will power off when
     powerOnSwitchesAtStart: Auto power on
-    closeApp: Close BridgeCmdr
+    closeApp: Close {0}
   description:
-    autoStart: Start BridgeCmdr when the system starts
-    powerOnSwitchesAtStart: Power on switches & monitors when BridgeCmdr starts
-    closeApp: Close BridgeCmdr without powering down
+    autoStart: Start {0} when the system starts
+    powerOnSwitchesAtStart: Power on switches & monitors when {0} starts
+    closeApp: Close {0} without powering down
   label:
     iconSize: Icon size
     powerOffWhen: Power off by

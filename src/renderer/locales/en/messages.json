@@ -1,5 +1,4 @@
 {
-  "product": "BridgeCmdr",
   "driver": {
     "provider": "BridgeCmdr contributors"
   },
@@ -21,22 +20,23 @@
     "zod": "Validation failed"
   },
   "label": {
+    "backup": "Backup settings",
     "driver": "Driver",
     "general": "General",
     "image": "Image",
-    "remote": "Remote host",
     "loading": "Loading...",
     "name": "Name",
-    "path": "Path",
     "port": "Port",
-    "backup": "Backup settings",
+    "remote": "Remote host",
     "settings": "Settings",
-    "sources": "Sources",
     "source": "Source",
-    "switches": "Switches",
+    "sources": "Sources",
     "switch": "Switch",
-    "ties": "Ties",
+    "switches": "Switches",
+    "switchesAndMonitors": "Switches and Monitors",
+    "switchOrMonitor": "Switch or monitor",
     "tie": "Tie",
+    "ties": "Ties",
     "type": "Type"
   },
   "message": {
@@ -67,7 +67,7 @@
     "location": {
       "port": "This must be a valid port",
       "ip": "This must be a host or IP address, and optionally port",
-      "path": "This must be a valid path"
+      "invalid": "This must be a valid location"
     }
   }
 }

@@ -1,15 +1,16 @@
 <script setup lang="ts">
-import { useEventListener, useTitle } from '@vueuse/core'
-import { watch, ref, onMounted } from 'vue'
+import { useAsyncState, useEventListener, useTitle, watchOnce } from '@vueuse/core'
+import { watch, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useTheme } from 'vuetify'
 import AlertModal from './modals/AlertModal.vue'
 import ConfirmModal from './modals/ConfirmModal.vue'
 import { useDialogs } from './modals/dialogs'
-import useSettings from './stores/settings'
-import useAppUpdates from './system/appUpdates'
+import useAppUpdates from './services/appUpdates'
+import { useClient } from './services/rpc'
+import useSettings from './services/settings'
 import type { I18nSchema } from './locales/locales'
-import type { UpdateProgressEvent } from './system/appUpdates'
+import type { UpdateProgressEvent } from './services/appUpdates'
 import type { ProgressInfo } from 'electron-updater'
 
 const settings = useSettings()
@@ -25,23 +26,33 @@ watch(
 const dialogs = useDialogs()
 const { t, n } = useI18n<I18nSchema>()
 
-useTitle(t('product'))
+const { state: appInfo, isReady } = useAsyncState(async () => await useClient().appInfo.query(), {
+  name: 'Loading...',
+  version: 'Loading...'
+})
+
+useTitle(() => appInfo.value.name)
 
 const appUpdater = useAppUpdates()
 const progress = ref<ProgressInfo>()
 useEventListener(appUpdater, 'progress', (ev: UpdateProgressEvent) => {
-  console.log(ev)
   progress.value = ev
 })
 
-async function checkForUpdate() {
-  const info = await appUpdater.checkForUpdates()
-  if (info == null) {
+watchOnce(isReady, async function checkForUpdate() {
+  let info
+  try {
+    info = await appUpdater.checkForUpdates()
+    if (info == null) {
+      return
+    }
+  } catch (cause) {
+    console.warn('Update check failed:', cause)
     return
   }
 
   const yes = await dialogs.confirm({
-    title: t('message.confirmUpdate'),
+    title: t('message.confirmUpdate', [appInfo.value.name]),
     message: t('message.versionAvailale', { version: info.version }),
     confirmButton: t('action.update'),
     cancelButton: t('action.later')
@@ -59,7 +70,7 @@ async function checkForUpdate() {
       progress.value = undefined
     }
   }
-}
+})
 
 const kRoundOptions = {
   style: 'unit',
@@ -85,10 +96,6 @@ function roundByteSize(amount: number, type: 'size' | 'speed' = 'size') {
       return n(amount, { ...kRoundOptions, unit: type === 'speed' ? 'byte-per-second' : 'byte' })
   }
 }
-
-onMounted(async () => {
-  await checkForUpdate()
-})
 </script>
 
 <template>
@@ -124,7 +131,7 @@ onMounted(async () => {
 <i18n lang="yaml">
 en:
   message:
-    confirmUpdate: Do you want to update BridgeCmdr?
+    confirmUpdate: Do you want to update {0}?
     versionAvailale: The new version, {version}, is available for download.
     progress: Downloaded {amount} of {total} at {speed}...
     updateReady: Download complete, ready to restart and update

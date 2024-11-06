@@ -4,14 +4,14 @@ import { useVModel } from '@vueuse/core'
 import { computed, ref, reactive, watch, onBeforeMount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import NumberInput from '../components/NumberInput.vue'
-import { useRules, useValidation } from '../helpers/validation'
-import { kDeviceCanDecoupleAudioOutput, kDeviceSupportsMultipleOutputs, useDrivers } from '../system/driver'
-import { useSources } from '../system/source'
-import { useSwitches } from '../system/switch'
+import { useRules, useValidation } from '../hooks/validation'
+import useDrivers, { kDeviceCanDecoupleAudioOutput, kDeviceSupportsMultipleOutputs } from '../services/driver'
+import { useSources } from '../services/sources'
+import { useSwitches } from '../services/switches'
 import { useDialogs, useTieDialog } from './dialogs'
 import type { I18nSchema } from '../locales/locales'
-import type { Source } from '../system/source'
-import type { NewTie } from '../system/tie'
+import type { Source } from '../services/sources'
+import type { NewTie } from '../services/ties'
 import type { DeepReadonly } from 'vue'
 import { deepClone } from '@/object'
 
@@ -159,7 +159,7 @@ const { cardProps, isFullscreen, body, showDividers } = useTieDialog()
       <VForm :disabled="isBusy">
         <VSelect
           v-model="v$.switchId.$model"
-          :label="t('label.switch')"
+          :label="t('label.switchOrMonitor')"
           :items="switches.items"
           item-title="title"
           item-value="_id"

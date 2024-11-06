@@ -28,7 +28,7 @@ module.exports = defineConfig(({ useVue, useNode, useTypeScript }) => {
         }
       },
       {
-        files: ['src/renderer/**/*.ts', 'src/renderer/**/*.js', 'src/renderer/**/*.vue'],
+        files: ['src/renderer/**/*.ts', 'src/renderer/**/*.tsx', 'src/renderer/**/*.js', 'src/renderer/**/*.vue'],
         parserOptions: {
           project: './tsconfig.web.json'
         }

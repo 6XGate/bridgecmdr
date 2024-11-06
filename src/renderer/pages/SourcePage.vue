@@ -6,21 +6,21 @@ import { useRouter } from 'vue-router'
 import InputDialog from '../components/InputDialog.vue'
 import Page from '../components/Page.vue'
 import ReplacableImage from '../components/ReplacableImage.vue'
-import { toFiles } from '../helpers/attachment'
-import { useGuardedAsyncOp } from '../helpers/utilities'
+import { trackBusy } from '../hooks/tracking'
+import { useGuardedAsyncOp } from '../hooks/utilities'
 import TieDialog from '../modals/TieDialog.vue'
 import { useDialogs, useTieDialog } from '../modals/dialogs'
-import { useDrivers } from '../system/driver'
-import { useSources } from '../system/source'
-import { useSwitches } from '../system/switch'
-import { useTies } from '../system/tie'
-import { trackBusy } from '../utilities/tracking'
-import type { DocumentId } from '../data/database'
+import useDrivers from '../services/driver'
+import { useSources } from '../services/sources'
+import { useSwitches } from '../services/switches'
+import { useTies } from '../services/ties'
+import { toAttachments, toFiles } from '../support/files'
 import type { I18nSchema } from '../locales/locales'
-import type { DriverInformation } from '../system/driver'
-import type { Source } from '../system/source'
-import type { Switch } from '../system/switch'
-import type { NewTie, Tie } from '../system/tie'
+import type { DriverInformation } from '../services/driver'
+import type { Source } from '../services/sources'
+import type { DocumentId } from '../services/store'
+import type { Switch } from '../services/switches'
+import type { NewTie, Tie } from '../services/ties'
 import type { DeepReadonly } from 'vue'
 import { isNotNullish } from '@/basics'
 
@@ -64,7 +64,9 @@ async function save() {
 
   try {
     source.value.image = file.value.name
-    source.value = { ...(await sources.update(source.value, ...[file.value].filter(isNotNullish))) }
+    source.value = {
+      ...(await sources.update(source.value, ...(await toAttachments([file.value]))))
+    }
     file.value = toFiles(source.value._attachments).find(
       (f) => source.value?.image != null && f.name === source.value.image
     )
@@ -111,6 +113,7 @@ const loadTies = useGuardedAsyncOp(async function loadTies() {
 })
 
 onBeforeMount(loadTies)
+onBeforeMount(drivers.all)
 
 async function addTie(target: NewTie) {
   try {
@@ -204,13 +207,14 @@ const { isBusy } = trackBusy(
                   :text="String(entry.tie.inputChannel)"
                   label />
                 <VChip
+                  v-if="entry.tie.outputChannels.video"
                   :prepend-icon="mdiExport"
                   class="mr-1"
                   size="x-small"
                   :text="String(entry.tie.outputChannels.video)"
                   label />
                 <VChip
-                  v-if="entry.tie.outputChannels.audio != null"
+                  v-if="entry.tie.outputChannels.audio"
                   :prepend-icon="mdiVolumeMedium"
                   class="mr-1"
                   size="x-small"

@@ -4,6 +4,7 @@ import videoInputHdmiIcon from '@mdi/svg/svg/video-input-hdmi.svg'
 import { useObjectUrl } from '@vueuse/core'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { openFile } from '../support/files'
 
 const props = defineProps<{
   image?: File | undefined
@@ -20,16 +21,7 @@ const file = computed(() => props.image)
 const url = useObjectUrl(file)
 
 async function selectImage() {
-  const results = await globalThis.services.system.openFile({
-    title: t('label.select'),
-    filters: [
-      { extensions: ['svg', 'png', 'gif', 'jpg', 'jpeg'], name: t('filter.all') },
-      { extensions: ['jpg', 'jpeg'], name: t('filter.jpg') },
-      { extensions: ['svg'], name: t('filter.svg') },
-      { extensions: ['png'], name: t('filter.png') },
-      { extensions: ['gif'], name: t('filter.gif') }
-    ]
-  })
+  const results = await openFile({ accepts: 'image/*' })
 
   const newFile = results?.at(0) ?? null
   if (newFile != null) {

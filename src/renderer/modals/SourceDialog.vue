@@ -4,12 +4,12 @@ import { useVModel } from '@vueuse/core'
 import { reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ReplacableImage from '../components/ReplacableImage.vue'
-import { useRules, useValidation } from '../helpers/validation'
-import { useSources } from '../system/source'
+import { useRules, useValidation } from '../hooks/validation'
+import { useSources } from '../services/sources'
+import { toAttachments } from '../support/files'
 import { useDialogs, useSourceDialog } from './dialogs'
 import type { I18nSchema } from '../locales/locales'
-import type { NewSource, Source } from '../system/source'
-import { isNotNullish } from '@/basics'
+import type { NewSource, Source } from '../services/sources'
 import { toError } from '@/error-handling'
 
 const props = defineProps<{
@@ -41,7 +41,7 @@ const isVisible = useVModel(props, 'visible', emit)
 
 async function confirm() {
   try {
-    const result = await sources.add(source.value, ...[file.value].filter(isNotNullish))
+    const result = await sources.add(source.value, ...(await toAttachments([file.value])))
     isVisible.value = false
     emit('confirm', result)
   } catch (e) {

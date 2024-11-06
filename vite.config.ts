@@ -19,6 +19,7 @@ export default defineConfig({
     unstubEnvs: true,
     unstubGlobals: true,
     coverage: {
+      reportOnFailure: true,
       exclude: [
         // Ignore the ouput directories.
         'dist/**',
