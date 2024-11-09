@@ -7,14 +7,16 @@ import {
   mdiVideoSwitch,
   mdiSwapVertical
 } from '@mdi/js'
+import { useAsyncState } from '@vueuse/core'
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import Page from '../components/Page.vue'
-import { useGuardedAsyncOp } from '../helpers/utilities'
-import { useSources } from '../system/source'
-import { useSwitches } from '../system/switch'
-import { trackBusy } from '../utilities/tracking'
+import { trackBusy } from '../hooks/tracking'
+import { useGuardedAsyncOp } from '../hooks/utilities'
+import { useClient } from '../services/rpc'
+import { useSources } from '../services/sources'
+import { useSwitches } from '../services/switches'
 import type { I18nSchema } from '../locales/locales'
 
 //
@@ -23,7 +25,15 @@ import type { I18nSchema } from '../locales/locales'
 
 const { t, n } = useI18n<I18nSchema>()
 const router = useRouter()
-const appInfo = globalThis.application
+
+//
+// Application info
+//
+
+const { state: appInfo } = useAsyncState(async () => await useClient().appInfo.query(), {
+  name: 'Loading...',
+  version: 'Loading...'
+})
 
 //
 // Loading sources and switchs so we have a count.
@@ -68,7 +78,7 @@ onUnmounted(() => {
         :title="t('label.general')"
         lines="two"
         :prepend-icon="mdiAlertCircleOutline"
-        :subtitle="t('description.general')"
+        :subtitle="t('description.general', [appInfo.name])"
         :to="{ name: 'settings-general' }" />
       <VListItem
         :title="t('label.sources')"
@@ -77,10 +87,10 @@ onUnmounted(() => {
         :subtitle="t('count.sources', { n: n(sourceCount, 'integer') }, sourceCount)"
         :to="{ name: 'sources' }" />
       <VListItem
-        :title="t('label.switches')"
+        :title="t('label.switchesAndMonitors')"
         lines="two"
         :prepend-icon="mdiVideoSwitch"
-        :subtitle="t('count.switches', { n: n(switchCount, 'integer') }, switchCount)"
+        :subtitle="t('count.switchesAndMonitors', { n: n(switchCount, 'integer') }, switchCount)"
         :to="{ name: 'switches' }" />
       <VListItem
         :title="t('label.backup')"
@@ -89,7 +99,7 @@ onUnmounted(() => {
         lines="two"
         :to="{ name: 'settings-backup' }" />
       <VListItem
-        :title="t('label.about')"
+        :title="t('label.about', [appInfo.name])"
         lines="two"
         :prepend-icon="mdiHelpCircleOutline"
         :subtitle="t('description.about', [appInfo.version])" />
@@ -100,12 +110,12 @@ onUnmounted(() => {
 <i18n lang="yaml">
 en:
   label:
-    about: About BridgeCmdr
+    about: About {0}
   description:
-    general: Basic settings for BridgeCmdr
+    general: Basic settings for {0}
     backup: Import or export setting as a file.
     about: Version {0}
   count:
     sources: No sources | One source | {n} sources
-    switches: No switches | One switch | {n} switches
+    switchesAndMonitors: No devices | One device | {n} devices
 </i18n>

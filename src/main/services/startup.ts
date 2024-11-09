@@ -1,14 +1,12 @@
 import { unlink as deleteFile, mkdir, stat, writeFile, readFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { resolve as resolvePath, join as joinPath } from 'node:path'
-import { app, ipcMain } from 'electron'
+import { app } from 'electron'
 import Logger from 'electron-log'
 import * as INI from 'ini'
 import { memo } from 'radash'
 import { xdgConfig } from 'xdg-basedir'
-import { DesktopEntryFile, readyEntry } from '../support/desktop'
-import { ipcProxy } from '../utilities'
-import type { StartupApi } from '../../preload/api'
+import { DesktopEntryFile, readyEntry } from './desktop'
 
 const useStartup = memo(async function useStartup() {
   const configPath = xdgConfig != null ? resolvePath(xdgConfig) : resolvePath(homedir(), '.config')
@@ -47,7 +45,6 @@ const useStartup = memo(async function useStartup() {
     await deleteFile(autoStartPath)
   }
 
-  //
   /** Ensure that the file is valid and still points to the right location. */
   async function checkUp() {
     const enabled = await checkEnabled()
@@ -77,15 +74,11 @@ const useStartup = memo(async function useStartup() {
 
   await checkUp()
 
-  ipcMain.handle('startup:checkEnabled', ipcProxy(checkEnabled))
-  ipcMain.handle('startup:enable', ipcProxy(enable))
-  ipcMain.handle('startup:disable', ipcProxy(disable))
-
   return {
     checkEnabled,
     enable,
     disable
-  } satisfies StartupApi
+  }
 })
 
 export default useStartup

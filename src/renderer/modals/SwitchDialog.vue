@@ -1,15 +1,16 @@
 <script setup lang="ts">
-import { mdiClose } from '@mdi/js'
+import { mdiClose, mdiFlask } from '@mdi/js'
 import { useVModel } from '@vueuse/core'
 import { computed, ref, reactive, onBeforeMount } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useLocation } from '../helpers/location'
-import { useRules, useValidation } from '../helpers/validation'
-import { useDrivers } from '../system/driver'
-import usePorts from '../system/ports'
+import { Highlight } from '../components/Highlight'
+import { useLocation } from '../hooks/location'
+import { useRules, useValidation } from '../hooks/validation'
+import useDrivers from '../services/driver'
+import usePorts from '../services/ports'
 import { useDialogs, useSwitchDialog } from './dialogs'
 import type { I18nSchema } from '../locales/locales'
-import type { NewSwitch } from '../system/switch'
+import type { NewSwitch } from '../services/switches'
 import type { DeepReadonly } from 'vue'
 import { deepClone } from '@/object'
 
@@ -32,8 +33,6 @@ const dialogs = useDialogs()
 
 const isVisible = useVModel(props, 'visible', emit)
 
-const title = computed(() => (props.editing ? t('label.addSwitch') : t('label.editSwitch')))
-
 const drivers = useDrivers()
 onBeforeMount(drivers.all)
 
@@ -48,7 +47,12 @@ const location = computed({
     v$.path.$model = v
   }
 })
+
 const { locationPath, pathTypes, pathType, path } = useLocation(location, () => ports.items)
+
+const driver = computed(() => drivers.items.find((d) => d.guid === target.value.driverId))
+const driverSerach = ref('')
+const driverKind = computed(() => (driver.value?.kind === 'monitor' ? t('label.monitor') : t('label.switch')))
 
 function confirm() {
   isVisible.value = false
@@ -63,7 +67,7 @@ async function cancelIfConfirmed() {
   }
 
   const yes = await dialogs.confirm({
-    message: props.editing ? t('message.discardChanges') : t('message.discardNew'),
+    message: props.editing ? t('message.discardChanges') : t('message.discardNew', [driverKind.value]),
     color: 'primary',
     confirmButton: t('action.discard'),
     cancelButton: t('common.cancel')
@@ -90,6 +94,10 @@ const { dirty, getStatus, submit, v$ } = useValidation(rules, target, confirm)
 const { cardProps, isFullscreen, body, showDividers } = useSwitchDialog()
 
 const isBusy = computed(() => drivers.isBusy || ports.isBusy)
+
+const title = computed(() =>
+  props.editing ? t('label.addDevice', [driverKind.value]) : t('label.editDevice', [driverKind.value])
+)
 </script>
 
 <template>
@@ -116,14 +124,36 @@ const isBusy = computed(() => drivers.isBusy || ports.isBusy)
           v-bind="getStatus(v$.title)" />
         <VSelect
           v-model="v$.driverId.$model"
+          v-model:search="driverSerach"
           :label="t('label.driver')"
           :items="drivers.items"
           item-title="title"
           item-value="guid"
+          :menu-props="{ location: 'center' }"
           variant="outlined"
           :loading="drivers.isBusy"
           :placeholder="t('placeholder.required')"
-          v-bind="getStatus(v$.driverId)" />
+          v-bind="getStatus(v$.driverId)">
+          <template v-if="driver?.experimental === true" #append-inner>
+            <VTooltip :text="t('label.experimental')">
+              <template #activator="{ props: tooltipProps }">
+                <VIcon v-bind="tooltipProps" :icon="mdiFlask" />
+              </template>
+            </VTooltip>
+          </template>
+          <template #item="{ props: itemProps, item }">
+            <VListItem v-bind="itemProps">
+              <template #title><Highlight :text="item.title" :search="driverSerach"></Highlight></template>
+              <template v-if="item.raw.experimental" #append>
+                <VTooltip :text="t('label.experimental')">
+                  <template #activator="{ props: tooltipProps }">
+                    <VIcon v-bind="tooltipProps" :icon="mdiFlask" />
+                  </template>
+                </VTooltip>
+              </template>
+            </VListItem>
+          </template>
+        </VSelect>
         <div class="colg d-flex flex-wrap justify-start">
           <VSelect v-model="pathType" class="flex-grow-0 w-175px" :items="pathTypes" variant="outlined" item-props />
           <VTextField
@@ -136,6 +166,7 @@ const isBusy = computed(() => drivers.isBusy || ports.isBusy)
             v-else
             v-model="path"
             :items="ports.items"
+            item-value="path"
             variant="outlined"
             :loading="ports.isBusy"
             :placeholder="t('placeholder.required')"
@@ -157,8 +188,11 @@ const isBusy = computed(() => drivers.isBusy || ports.isBusy)
 <i18n lang="yaml">
 en:
   label:
-    addSwitch: Add switch
-    editSwitch: Edit switch
+    monitor: monitor
+    switch: switch
+    addDevice: Add {0}
+    editDevice: Edit {0}
+    experimental: Experimental driver
   message:
-    discardNew: Do you want to discard this switch?
+    discardNew: Do you want to discard this {0}?
 </i18n>

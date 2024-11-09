@@ -25,7 +25,7 @@ export function getMessage(cause: unknown) {
   if (cause instanceof Error) return cause.message
   if (cause == null) return `BadError: ${cause}`
   if (typeof cause === 'string') return cause
-  if (typeof cause !== 'object') return String(cause)
+  if (typeof cause !== 'object') return String(cause as never)
   if (!('message' in cause)) return `BadError: ${Object.prototype.toString.call(cause)}`
   if (typeof cause.message !== 'string') return String(cause.message)
   return cause.message

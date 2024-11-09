@@ -151,8 +151,8 @@ AppImage file.
 
 ### Releasing
 
-- Start a the build docker conatiner: `docker compose run --build -it --rm build`
-- Fresh install the packages: `yarn --force`
+- Start the build docker conatiner: `docker compose run --build -it --rm build`
+- Fresh install the packages: `yarn --force --frozen-lockfile`
 - Package the application: `yarn make`
 - Land and tag the release.
 - Create a release from the tag and copy the following files to the release assets:
