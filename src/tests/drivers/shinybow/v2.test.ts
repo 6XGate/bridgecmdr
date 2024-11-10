@@ -27,7 +27,17 @@ test('available', async () => {
   const drivers = useDrivers()
 
   await expect(drivers.registered()).resolves.toContainEqual(driver)
-  await expect(drivers.get(kDriverGuid)).resolves.toEqual(driver)
+  await expect(drivers.allInfo()).resolves.toContainEqual(driver.metadata)
+  await expect(drivers.get(kDriverGuid)).resolves.toStrictEqual(driver)
+  const { capabilities, enabled, experimental, guid, kind } = driver.metadata
+  expect(driver.getInfo('en')).toStrictEqual({
+    ...driver.metadata.localized.en,
+    capabilities,
+    enabled,
+    experimental,
+    guid,
+    kind
+  })
 })
 
 test<MockStreamContext>('power on', async (context) => {

@@ -25,7 +25,7 @@ class CommandSequence {
   }
 
   expectDone() {
-    expect(this.position).toEqual(this.definition.length)
+    expect(this.position).toStrictEqual(this.definition.length)
   }
 
   on(...definition: CommandDefinition) {
@@ -42,7 +42,7 @@ class CommandSequence {
 
     this.position += 1
     const [cmd, sender] = command
-    expect(data).toEqual(cmd)
+    expect(data).toStrictEqual(cmd)
 
     return sender()
   }

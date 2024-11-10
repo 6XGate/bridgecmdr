@@ -78,27 +78,23 @@ export interface DriverBindings {
    *
    * @param uri - URI identifying the location of the device.
    */
-  readonly powerOn?: (uri: string) => Promise<void>
+  readonly powerOn: (uri: string) => Promise<void>
 
   /**
    * Powers off the switch or monitor.
    *
    * @param uri - URI identifying the location of the device.
    */
-  readonly powerOff?: (uri: string) => Promise<void>
+  readonly powerOff: (uri: string) => Promise<void>
 }
 
 export interface DefineDriverOptions extends DriverInformation {
   setup: () => DriverBindings
 }
 
-async function noOpBinding() {
-  /* no-op is not defined in setup */ await Promise.resolve()
-}
-
 const registry = new Map<string, Driver>()
 
-export interface Driver extends DriverBasicInformation, Required<DriverBindings> {
+export interface Driver extends DriverBasicInformation, DriverBindings {
   /** Raw metadata from the registration options. */
   readonly metadata: DriverInformation
   /** Gets the localized driver information. */
@@ -126,9 +122,6 @@ export function defineDriver(options: DefineDriverOptions) {
   })
 
   existing = Object.freeze({
-    // Optional bindings will be no-op.
-    powerOn: noOpBinding,
-    powerOff: noOpBinding,
     // Provided bindings.
     ...implemented,
     // Information and informational functionality.

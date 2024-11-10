@@ -5,10 +5,9 @@ import type { RpcInterface } from './index'
 // Exposed via tRPC
 //
 
-export type { AppInfo } from '../main/info/app'
-export type { UserInfo } from '../main/info/user'
-
 export type { AppRouter } from '../main/routes/router'
+export type { AppInfo } from '../main/services/app'
+export type { UserInfo } from '../main/services/user'
 export type { DocumentId } from '../main/services/database'
 export type { ApiLocales } from '../main/services/locale'
 export type { PortEntry } from '../main/services/ports'

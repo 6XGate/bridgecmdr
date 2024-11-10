@@ -1,20 +1,22 @@
 - Milestones
   - v2.2
     - Move more modules to core.
-    - tRPC over Electron IPC.
-    - Wrap some Electron APIs as services for easier mocking without electron itself.
     - (#74) Rearrangeable dashboard icons.
+    - More drivers.
+      - Monoprice Blackbird
+  - v2.3
     - Determine which drivers are being using by the public at large to remove the experimental mark; options:
       - Add a opt-in telemetry feature to see which drivers are being used, should be an ask to send survey sort of thing.
       - Ask users to submit survey somewhere, likely with a pop-up in the app to the direct them to the survey.
-    - More drivers.
-      - Monoprice Blackbird
+    - Add test coverage for some rendering process parts.
+      - Import and export.
   - v3.0
     - (#92) Remote UI support
       - Need settings toggle to control it's activation.
       - Need security or authentication method, preferrably just a PIN code.
       - Need a means to identify it's URL via the local UI.
       - May need a way to disable the power-off button in the remote UI.
+    - Possible move to 64-bit ARM.
 - Drivers
   - Monoprice Blackbird
   - J-Tech Digital -- Need to find actual command list.
