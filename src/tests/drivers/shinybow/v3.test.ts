@@ -26,7 +26,7 @@ test('available', async () => {
 
   const drivers = useDrivers()
 
-  await expect(drivers.all()).resolves.toContainEqual(driver)
+  await expect(drivers.registered()).resolves.toContainEqual(driver)
   await expect(drivers.get(kDriverGuid)).resolves.toEqual(driver)
 })
 

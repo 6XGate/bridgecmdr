@@ -1,6 +1,6 @@
 import { createSharedComposable, tryOnScopeDispose } from '@vueuse/core'
 import useTypedEventTarget from '../support/events'
-import { useClient } from './rpc'
+import { useClient } from './rpc/trpc'
 import type { ProgressInfo } from 'electron-updater'
 
 export class UpdateProgressEvent extends Event implements ProgressInfo {

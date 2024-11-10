@@ -1,6 +1,5 @@
+import type { IsAny } from 'type-fest'
 import type { z } from 'zod'
-
-export type ToError<E> = E extends Error ? E : Error
 
 const toPath = (path: (number | string)[]) =>
   path
@@ -31,9 +30,12 @@ export function getMessage(cause: unknown) {
   return cause.message
 }
 
-export function toError<Cause>(cause: Cause) {
-  if (cause instanceof Error) return cause as ToError<Cause>
-  return new Error(String(cause)) as ToError<Cause>
+export type AsError<T> = IsAny<T> extends true ? Error : T extends Error ? T : Error
+
+export function toError<Cause>(cause: Cause): AsError<Cause>
+export function toError(cause: unknown) {
+  if (cause instanceof Error) return cause
+  return new Error(getMessage(cause))
 }
 
 export function raiseError(factory: () => Error): never {

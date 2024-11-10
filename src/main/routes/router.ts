@@ -1,7 +1,7 @@
 import { memo } from 'radash'
 import useAppInfo from '../info/app'
 import useUserInfo from '../info/user'
-import { createCallerFactory, procedure, router } from '../services/trpc'
+import { procedure, router } from '../services/rpc/trpc'
 import useSourcesRouter from './data/sources'
 import useUserStoreRouter from './data/storage'
 import useSwitchesRouter from './data/switches'
@@ -32,4 +32,3 @@ export const useAppRouter = memo(() =>
 )
 
 export type AppRouter = ReturnType<typeof useAppRouter>
-export const createCaller = createCallerFactory(useAppRouter())
