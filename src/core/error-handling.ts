@@ -1,14 +1,10 @@
+import { toObjectPath } from './basics'
 import type { IsAny } from 'type-fest'
 import type { z } from 'zod'
 
-const toPath = (path: (number | string)[]) =>
-  path
-    .map((segment) => (typeof segment === 'number' ? `[${segment}]` : segment))
-    .reduce((p, c) => (c.startsWith('[') ? `${p}${c}` : `${p}.${c}`))
-
 export function getZodMessage(e: z.ZodError) {
   const flattened = e.flatten((issue) =>
-    issue.path.length > 0 ? `${toPath(issue.path)}: ${issue.message}` : issue.message
+    issue.path.length > 0 ? `${toObjectPath(issue.path)}: ${issue.message}` : issue.message
   )
 
   return (
