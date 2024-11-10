@@ -162,7 +162,13 @@ const useDrivers = memo(function useDriver() {
     }
   }
 
-  const all = defineOperation(() => Array.from(registry.values()).filter((driver) => driver.enabled))
+  const registered = defineOperation(() => Array.from(registry.values()).filter((driver) => driver.enabled))
+
+  const allInfo = defineOperation(() =>
+    Array.from(registry.values())
+      .filter((driver) => driver.enabled)
+      .map((d) => d.metadata)
+  )
 
   const get = defineOperation((guid: string) => registry.get(guid) ?? null)
 
@@ -193,7 +199,8 @@ const useDrivers = memo(function useDriver() {
   })
 
   return {
-    all,
+    registered,
+    allInfo,
     get,
     activate,
     powerOn,

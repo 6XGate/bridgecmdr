@@ -1,5 +1,5 @@
 import { createSharedComposable, useStorageAsync } from '@vueuse/core'
-import { useClient } from './rpc'
+import { useClient } from './rpc/trpc'
 import type { RemovableRef, UseStorageAsyncOptions } from '@vueuse/core'
 import type { MaybeRefOrGetter } from 'vue'
 

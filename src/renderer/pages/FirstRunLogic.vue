@@ -3,7 +3,7 @@ import { useAsyncState, useLocalStorage, watchOnce } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
 import { trackBusy } from '../hooks/tracking'
 import { useDialogs } from '../modals/dialogs'
-import { useClient } from '../services/rpc'
+import { useClient } from '../services/rpc/trpc'
 import useStartup from '../services/startup'
 import type { I18nSchema } from '../locales/locales'
 

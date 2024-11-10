@@ -16,7 +16,7 @@ import OptionDialog from '../components/OptionDialog.vue'
 import Page from '../components/Page.vue'
 import { trackBusy } from '../hooks/tracking'
 import { useGuardedAsyncOp } from '../hooks/utilities'
-import { useClient } from '../services/rpc'
+import { useClient } from '../services/rpc/trpc'
 import useSettings from '../services/settings'
 import type { I18nSchema } from '../locales/locales'
 

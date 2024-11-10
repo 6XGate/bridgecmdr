@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { forceUndefined } from '../hooks/utilities'
-import { useClient } from './rpc'
+import { useClient } from './rpc/trpc'
 import { useDataStore } from './store'
 import type { DocumentId } from './store'
 import type { NewSource, Source, SourceUpdate } from '../../preload/api'

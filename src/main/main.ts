@@ -5,8 +5,8 @@ import { app, shell, BrowserWindow, nativeTheme } from 'electron'
 import Logger from 'electron-log'
 import { sleep } from 'radash'
 import appIcon from '../../resources/icon.png?asset&asarUnpack'
-import useApiServer from './server'
-import { getAuthToken } from './services/trpc'
+import { useAppRouter } from './routes/router'
+import { createIpcHandler } from './services/rpc/ipc'
 import { logError } from './utilities'
 import { toError } from '@/error-handling'
 
@@ -18,7 +18,7 @@ Logger.transports.console.format = '{h}:{i}:{s}.{ms} [{level}] › {text}'
 Logger.transports.file.level = 'debug'
 Logger.errorHandler.startCatching()
 
-async function createWindow(port: number) {
+async function createWindow() {
   const willStartWithDark = nativeTheme.shouldUseDarkColors || nativeTheme.shouldUseInvertedColorScheme
 
   const window = new BrowserWindow({
@@ -27,7 +27,11 @@ async function createWindow(port: number) {
     backgroundColor: willStartWithDark ? '#121212' : 'white',
     icon: appIcon,
     show: true,
-    useContentSize: true
+    useContentSize: true,
+    webPreferences: {
+      preload: joinPath(__dirname, '../preload/index.mjs'),
+      sandbox: false
+    }
   })
 
   window.removeMenu()
@@ -55,14 +59,9 @@ async function createWindow(port: number) {
       // HMR for renderer base on electron-vite cli.
       // Load the remote URL for development or the local html file for production.
       if (is.dev && process.env.ELECTRON_RENDERER_URL != null) {
-        const url = new URL(process.env.ELECTRON_RENDERER_URL)
-        url.searchParams.set('port', String(port))
-        url.searchParams.set('auth', getAuthToken())
-        await window.loadURL(url.toString())
+        await window.loadURL(process.env.ELECTRON_RENDERER_URL)
       } else {
-        await window.loadFile(joinPath(__dirname, '../renderer/index.html'), {
-          query: { port: String(port), auth: getAuthToken() }
-        })
+        await window.loadFile(joinPath(__dirname, '../renderer/index.html'))
       }
 
       return window
@@ -110,5 +109,7 @@ await app.whenReady()
 // Set app user model id for windows
 electronApp.setAppUserModelId('org.sleepingcats.BridgeCmdr')
 
-const port = useApiServer()
-await createWindow(port)
+// If macOS close vs quit behavior is reimplemented, we will have
+// to make sure port and handler are accessible earlier.
+const handler = createIpcHandler({ router: useAppRouter() })
+handler.attachWindow(await createWindow())

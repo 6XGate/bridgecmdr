@@ -1,5 +1,5 @@
 import { createSharedComposable } from '@vueuse/shared'
-import { useClient } from './rpc'
+import { useClient } from './rpc/trpc'
 
 const useStartup = createSharedComposable(function useStartup() {
   const client = useClient()

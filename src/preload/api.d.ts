@@ -1,4 +1,5 @@
 import type { AppConfig } from '../main/info/config'
+import type { RpcInterface } from './index'
 
 //
 // Exposed via tRPC
@@ -29,3 +30,7 @@ export type {
   kDeviceHasNoExtraCapabilities,
   kDeviceSupportsMultipleOutputs
 } from '../main/services/drivers'
+
+declare global {
+  var rpc: RpcInterface
+}

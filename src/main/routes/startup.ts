@@ -1,6 +1,6 @@
 import { memo } from 'radash'
+import { procedure, router } from '../services/rpc/trpc'
 import useStartup from '../services/startup'
-import { procedure, router } from '../services/trpc'
 
 const useStartupRouter = memo(function useStartupRouter() {
   const startup = useStartup()

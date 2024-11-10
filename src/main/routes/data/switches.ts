@@ -1,6 +1,6 @@
 import { NewSwitch, SwitchUpdate, useSwitchesDatabase } from '../../dao/switches'
 import { DocumentId } from '../../services/database'
-import { procedure, router } from '../../services/trpc'
+import { procedure, router } from '../../services/rpc/trpc'
 
 export { Switch, NewSwitch, SwitchUpdate } from '../../dao/switches'
 
