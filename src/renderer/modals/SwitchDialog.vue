@@ -12,7 +12,6 @@ import { useDialogs, useSwitchDialog } from './dialogs'
 import type { I18nSchema } from '../locales/locales'
 import type { NewSwitch } from '../services/switches'
 import type { DeepReadonly } from 'vue'
-import { deepClone } from '@/object'
 
 const props = defineProps<{
   // Dialog
@@ -40,7 +39,7 @@ const ports = usePorts()
 onBeforeMount(ports.all)
 
 // eslint-disable-next-line vue/no-setup-props-reactivity-loss -- Prop reactivity not desired.
-const target = ref<NewSwitch>(deepClone(props.switch))
+const target = ref<NewSwitch>(structuredClone(props.switch))
 const location = computed({
   get: () => v$.path.$model,
   set: (v) => {

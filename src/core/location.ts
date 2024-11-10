@@ -4,17 +4,19 @@ import type { PortInfo } from '../main/services/ports'
 
 export type LocationType = 'port' | 'ip'
 
+/** Determines if a value is a serial port or simplify has the `ip:` prefix. */
 export function isIpOrValidPort(value: string, ports: readonly PortInfo[]) {
   switch (true) {
     case value.startsWith('port:'):
       return ports.find((port) => port.path === value.substring(5)) != null
-    case value.startsWith('ip:') && value[3] !== '/' && !value.slice(3).startsWith('file:'):
+    case value.startsWith('ip:') && value[3] !== '/' && !value.slice(3).startsWith('file:') && value.length > 3:
       return true
     default:
       return false
   }
 }
 
+/** Determines if a value is a serial port or IP address format. */
 export function isValidLocation(value: string, ports: readonly PortInfo[]) {
   switch (true) {
     case value.startsWith('port:'):
@@ -23,21 +25,6 @@ export function isValidLocation(value: string, ports: readonly PortInfo[]) {
       return isHostWithOptionalPort(value.substring(3))
     default:
       return false
-  }
-}
-
-export function splitPath(value: string | undefined) {
-  if (value == null) {
-    return null
-  }
-
-  switch (true) {
-    case value.startsWith('port:'):
-      return ['port' as const, value.substring(5)] satisfies Fixed
-    case value.startsWith('ip:'):
-      return ['ip' as const, value.substring(3)] satisfies Fixed
-    default:
-      return null
   }
 }
 
@@ -60,40 +47,6 @@ function zodParseHostWithOptionalPort(value: string) {
   const port = z.coerce.number().positive().int().optional().safeParse(match[2])
 
   return [host, port] satisfies Fixed
-}
-
-export const hostWithOptionalPortSchema = z.string().transform(function splitHostAndPort(value, ctx) {
-  const result = parseHostWithOptionalPort(value)
-  if (result == null) {
-    ctx.addIssue({
-      message: 'Not a valid host or host:port combination',
-      code: 'invalid_string',
-      validation: 'regex',
-      fatal: true
-    })
-
-    return z.NEVER
-  }
-
-  return result
-})
-
-export function parseHostWithOptionalPort(value: string) {
-  const result = zodParseHostWithOptionalPort(value)
-  if (result == null) {
-    return undefined
-  }
-
-  const [host, port] = result
-  if (!host.success) {
-    return undefined
-  }
-
-  if (!port.success || port.data == null) {
-    return [host.data] satisfies Fixed
-  }
-
-  return [host.data, port.data] satisfies Fixed
 }
 
 export function isHostWithOptionalPort(value: string) {
@@ -232,23 +185,24 @@ function parsePossibleIpString(value: string) {
 }
 
 function isValidFullIpV6(value: string[]) {
-  const last = value.pop()
+  /* v8 ignore next 1 */ // Unlikely to be undefined.
+  const last = value.pop() ?? ''
 
   // IPv4 translation.
-  if (ipV4Pattern.test(last ?? '')) {
+  if (ipV4Pattern.test(last)) {
     return value.length === 6 && value.every((p) => ipPairPattern.test(p))
   }
 
   // IPv6, only 7 since we pop'ped the last.
-  return value.length === 7 && value.every((p) => ipPairPattern.test(p)) && ipPairPattern.test(last ?? '')
+  return value.length === 7 && value.every((p) => ipPairPattern.test(p)) && ipPairPattern.test(last)
 }
 
 function isValidCompactIpV6([left, right]: [string[], string[]]) {
-  // Undefind if right is empty.
-  const last = right.pop()
+  /* v8 ignore next 1 */ // Unlikely to be undefined.
+  const last = right.pop() ?? ''
 
   // IPv4 translation, won't test on an empty right.
-  if (ipV4Pattern.test(last ?? '')) {
+  if (ipV4Pattern.test(last)) {
     return (
       left.length + right.length <= 6 &&
       left.every((p) => ipPairPattern.test(p)) &&
@@ -263,7 +217,7 @@ function isValidCompactIpV6([left, right]: [string[], string[]]) {
     left.length + right.length <= 7 &&
     left.every((p) => ipPairPattern.test(p)) &&
     right.every((p) => ipPairPattern.test(p)) &&
-    ipPairPattern.test(last ?? '')
+    ipPairPattern.test(last)
   )
 }
 
@@ -284,18 +238,5 @@ export function isIpV6Address(value: string) {
 export const ipV6AddressSchema = z.string().refine(isIpV6Address)
 
 // #endregion
-
-// #endregion
-
-// #region Schemas
-
-// More Zod
-export const schemas = {
-  hostname: hostNameSchema,
-  ipV4Address: ipV4AddressSchema,
-  ipV6Address: ipV6AddressSchema,
-  host: hostSchema,
-  hostWithOptionalPort: hostWithOptionalPortSchema
-}
 
 // #endregion

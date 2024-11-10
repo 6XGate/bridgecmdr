@@ -37,6 +37,8 @@ export default defineConfig({
         'src/main/routes/**/*.ts',
         'src/main/routes/**/*.ts',
         'src/main/services/rpc/**/*.ts',
+        // Not going to test the core URL module till it's used.
+        'src/core/url.ts',
         // Not going to test or cover the UI right now.
         // TODO: There are some parts that do need coverage:
         // - Import and export.
@@ -44,6 +46,8 @@ export default defineConfig({
         'src/renderer/**/*.ts',
         'src/renderer/**/*.tsx',
         'src/renderer/**/*.vue',
+        // No real need to test the support framework.
+        'src/tests/support/**/*.ts',
         // The configurations don't need any testing or converage.
         'electron.vite.config.ts',
         ...coverageConfigDefaults.exclude

@@ -13,7 +13,6 @@ import type { I18nSchema } from '../locales/locales'
 import type { Source } from '../services/sources'
 import type { NewTie } from '../services/ties'
 import type { DeepReadonly } from 'vue'
-import { deepClone } from '@/object'
 
 const props = defineProps<{
   // Dialog
@@ -46,7 +45,7 @@ const sources = useSources()
 // eslint-disable-next-line vue/no-setup-props-reactivity-loss -- Prop reactivity not desired.
 const target = ref<NewTie>({
   // eslint-disable-next-line vue/no-setup-props-reactivity-loss -- Prop reactivity not desired.
-  ...deepClone(props.tie),
+  ...structuredClone(props.tie),
   ...(props.source != null ? { sourceId: props.source._id } : {})
 })
 

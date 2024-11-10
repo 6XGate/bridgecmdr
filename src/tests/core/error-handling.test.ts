@@ -17,7 +17,6 @@ describe('getZodMessage', () => {
     assert(!badResult.success, 'Expected `!badResult.success`, got `badResult.success`')
     const zodError = badResult.error
 
-    console.log(getZodMessage(zodError))
     expect(getZodMessage(zodError)).toBe(zodError.errors[0]?.message)
   })
 
@@ -27,7 +26,6 @@ describe('getZodMessage', () => {
     assert(!badResult.success, 'Expected `!badResult.success`, got `badResult.success`')
     const zodError = badResult.error
 
-    console.log(getZodMessage(zodError))
     expect(getZodMessage(zodError)).toBe(`type: ${zodError.errors[0]?.message}`)
   })
 })
