@@ -8,7 +8,7 @@ afterEach(() => {
 test('no ports', async () => {
   const { SerialPort } = await import('serialport')
   vi.spyOn(SerialPort, 'list').mockResolvedValue([])
-  const { default: useSerialPorts } = await import('../../main/services/ports')
+  const { default: useSerialPorts } = await import('../../../main/services/ports')
   const ports = await useSerialPorts().listPorts()
   expect(ports).toStrictEqual([])
 })
@@ -45,7 +45,7 @@ test('list simple ports', async () => {
     }
   ])
 
-  const { default: useSerialPorts } = await import('../../main/services/ports')
+  const { default: useSerialPorts } = await import('../../../main/services/ports')
   const ports = await useSerialPorts().listPorts()
   expect(ports).toStrictEqual([
     {
@@ -114,7 +114,7 @@ describe('parsing PnP ID', () => {
       }
     ])
 
-    const { default: useSerialPorts } = await import('../../main/services/ports')
+    const { default: useSerialPorts } = await import('../../../main/services/ports')
     const ports = await useSerialPorts().listPorts()
     expect(ports).toStrictEqual([
       {
@@ -195,7 +195,7 @@ describe('parsing PnP ID', () => {
       }
     ])
 
-    const { default: useSerialPorts } = await import('../../main/services/ports')
+    const { default: useSerialPorts } = await import('../../../main/services/ports')
     const ports = await useSerialPorts().listPorts()
     expect(ports).toStrictEqual([
       {

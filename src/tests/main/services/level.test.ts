@@ -1,6 +1,6 @@
 import { test, expect, vi, beforeEach, afterEach } from 'vitest'
 
-const mock = await vi.hoisted(async () => await import('../support/mock'))
+const mock = await vi.hoisted(async () => await import('../../support/mock'))
 
 beforeEach(() => {
   vi.mock('electron', mock.electronModule)
@@ -13,7 +13,7 @@ afterEach(() => {
 })
 
 test('basics', async () => {
-  const { useLevelDb } = await import('../../main/services/level')
+  const { useLevelDb } = await import('../../../main/services/level')
 
   const { levelup } = useLevelDb()
   const connectSpy = vi.fn(levelup)

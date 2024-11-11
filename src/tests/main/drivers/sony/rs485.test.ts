@@ -1,14 +1,14 @@
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
-import type { MockStreamContext } from '../../support/stream'
+import type { MockStreamContext } from '../../../support/stream'
 
-const mock = await vi.hoisted(async () => await import('../../support/mock'))
-const port = await vi.hoisted(async () => await import('../../support/serial'))
-const stream = await vi.hoisted(async () => await import('../../support/stream'))
+const mock = await vi.hoisted(async () => await import('../../../support/mock'))
+const port = await vi.hoisted(async () => await import('../../../support/serial'))
+const stream = await vi.hoisted(async () => await import('../../../support/stream'))
 
 beforeEach<MockStreamContext>(async (context) => {
   vi.mock('electron-log')
   vi.mock('serialport', port.serialPortModule)
-  vi.doMock('../../../main/services/stream', stream.commandStreamModule(context))
+  vi.doMock('../../../../main/services/stream', stream.commandStreamModule(context))
   await port.createMockPorts()
 })
 
@@ -21,8 +21,8 @@ afterEach(async () => {
 const kDriverGuid = '8626D6D3-C211-4D21-B5CC-F5E3B50D9FF0'
 
 test('available', async () => {
-  const { default: driver } = await import('../../../main/drivers/sony/rs485')
-  const { default: useDrivers } = await import('../../../main/services/drivers')
+  const { default: driver } = await import('../../../../main/drivers/sony/rs485')
+  const { default: useDrivers } = await import('../../../../main/services/drivers')
 
   const drivers = useDrivers()
 
@@ -45,7 +45,7 @@ test<MockStreamContext>('power on', async (context) => {
 
   context.stream = new stream.MockCommandStream()
 
-  const { default: useDrivers } = await import('../../../main/services/drivers')
+  const { default: useDrivers } = await import('../../../../main/services/drivers')
   const drivers = useDrivers()
 
   const command = Buffer.of(0x02, 4, 0xc0, 0xc0, 0x29, 0x3e, 0x15)
@@ -68,7 +68,7 @@ test<MockStreamContext>('power off', async (context) => {
 
   context.stream = new stream.MockCommandStream()
 
-  const { default: useDrivers } = await import('../../../main/services/drivers')
+  const { default: useDrivers } = await import('../../../../main/services/drivers')
   const drivers = useDrivers()
 
   const commnad = Buffer.of(0x02, 4, 0xc0, 0xc0, 0x2a, 0x3e, 0x14)
@@ -91,7 +91,7 @@ test<MockStreamContext>('activate tie', async (context) => {
 
   context.stream = new stream.MockCommandStream()
 
-  const { default: useDrivers } = await import('../../../main/services/drivers')
+  const { default: useDrivers } = await import('../../../../main/services/drivers')
   const drivers = useDrivers()
 
   const input = 1

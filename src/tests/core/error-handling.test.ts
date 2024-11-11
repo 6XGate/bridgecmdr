@@ -4,6 +4,7 @@ import * as mock from '../support/mock'
 import {
   getMessage,
   getZodMessage,
+  isNodeError,
   logPromiseFailures,
   raiseError,
   toError,
@@ -68,6 +69,10 @@ test('toError', () => {
 
   const typeError = new TypeError('test')
   expect(toError(typeError)).toBe(typeError)
+})
+
+test('isNodeError', () => {
+  expect(isNodeError(new Error('test'))).toBe(false)
 })
 
 test('raiseError', () => {

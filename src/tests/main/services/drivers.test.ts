@@ -3,8 +3,8 @@ import useDrivers, {
   defineDriver,
   kDeviceCanDecoupleAudioOutput,
   kDeviceSupportsMultipleOutputs
-} from '../../main/services/drivers'
-import type { Driver, DriverInformation } from '../../main/services/drivers'
+} from '../../../main/services/drivers'
+import type { Driver, DriverInformation } from '../../../main/services/drivers'
 import type { UUID } from 'node:crypto'
 import type { Mock } from 'vitest'
 

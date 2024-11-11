@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-const mock = await vi.hoisted(async () => await import('../support/mock'))
+const mock = await vi.hoisted(async () => await import('../../support/mock'))
 
 describe('correct setup', () => {
   beforeEach(() => {
@@ -15,7 +15,7 @@ describe('correct setup', () => {
 
   test('ready', async () => {
     const os = await import('node:os')
-    const { default: useUserInfo } = await import('../../main/services/user')
+    const { default: useUserInfo } = await import('../../../main/services/user')
     const userInfo = useUserInfo()
 
     expect(userInfo).toStrictEqual({

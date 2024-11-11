@@ -5,8 +5,9 @@ import autoBind from 'auto-bind'
 import { app } from 'electron'
 import { autoUpdater } from 'electron-updater'
 import { memo } from 'radash'
-import { isNodeError, logError } from '../utilities'
+import { logError } from '../utilities'
 import type { UpdateCheckResult, ProgressInfo, CancellationToken, UpdateInfo } from 'electron-updater'
+import { isNodeError } from '@/error-handling'
 
 export type { UpdateInfo, ProgressInfo } from 'electron-updater'
 
