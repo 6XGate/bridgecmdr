@@ -7,7 +7,17 @@ export function electronModule() {
       getName: () => 'BridgeCmdr==mock==',
       getVersion: () => '2.0.0==mock==',
       getLocale: () => 'en==mock==',
-      getPath: (_name: string) => 'logs',
+      getPath: (...args: Parameters<Electron.App['getPath']>) => {
+        const [name] = args
+        switch (name) {
+          case 'exe':
+            return '/usr/bin/BridgeCmdr'
+          case 'userData':
+            return 'logs'
+          default:
+            return 'logs'
+        }
+      },
       on(_name: string, ..._args: unknown[]) {
         return this
       }
