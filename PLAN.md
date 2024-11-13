@@ -2,14 +2,14 @@
   - v2.2
     - Move more modules to core.
     - (#74) Rearrangeable dashboard icons.
-    - More drivers.
-      - Monoprice Blackbird
   - v2.3
     - Determine which drivers are being using by the public at large to remove the experimental mark; options:
       - Add a opt-in telemetry feature to see which drivers are being used, should be an ask to send survey sort of thing.
       - Ask users to submit survey somewhere, likely with a pop-up in the app to the direct them to the survey.
     - Add test coverage for some rendering process parts.
       - Import and export.
+    - More drivers.
+      - Monoprice Blackbird
   - v3.0
     - (#92) Remote UI support
       - Need settings toggle to control it's activation.
