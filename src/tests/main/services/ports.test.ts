@@ -316,26 +316,6 @@ describe('parsing PnP ID', () => {
         serialNumber: 'XXXXXXXX',
         title: 'FTDI',
         vendorId: '0403'
-      },
-      {
-        locationId: undefined,
-        manufacturer: undefined,
-        path: '/dev/ttyUSB5',
-        pnpId: 'FTDI_FT232R_USB_UART_XXXXXXXX-if00-port0',
-        productId: '6001',
-        serialNumber: 'XXXXXXXX',
-        title: '/dev/ttyUSB5',
-        vendorId: '0403'
-      },
-      {
-        locationId: undefined,
-        manufacturer: undefined,
-        path: '/dev/ttyUSB6',
-        pnpId: 'FTDI_FT232R_USB_UART_XXXXXXXX',
-        productId: '6001',
-        serialNumber: 'XXXXXXXX',
-        title: '/dev/ttyUSB6',
-        vendorId: '0403'
       }
     ])
   })
@@ -405,7 +385,7 @@ describe('parsing PnP ID', () => {
         pnpId: 'usb-FTDI_FT232R_USB_UART_XXXXXXXX',
         productId: '6001',
         serialNumber: 'XXXXXXXX',
-        title: 'FTDI',
+        title: '/dev/ttyUSB0',
         vendorId: '0403'
       },
       {
@@ -415,7 +395,7 @@ describe('parsing PnP ID', () => {
         pnpId: 'FTDI_FT232R_USB_UART_XXXXXXXX-if00-port0',
         productId: '6001',
         serialNumber: 'XXXXXXXX',
-        title: 'FTDI',
+        title: '/dev/ttyUSB1',
         vendorId: '0403'
       },
       {
@@ -425,7 +405,7 @@ describe('parsing PnP ID', () => {
         pnpId: 'FTDI_FT232R_USB_UART_XXXXXXXX',
         productId: '6001',
         serialNumber: 'XXXXXXXX',
-        title: 'FTDI',
+        title: '/dev/ttyUSB2',
         vendorId: '0403'
       },
       {
@@ -435,7 +415,7 @@ describe('parsing PnP ID', () => {
         pnpId: 'if00-port0-port1',
         productId: '6001',
         serialNumber: 'XXXXXXXX',
-        title: 'FTDI',
+        title: '/dev/ttyUSB3',
         vendorId: '0403'
       },
       {
@@ -445,17 +425,7 @@ describe('parsing PnP ID', () => {
         pnpId: 'FTDI_FT232R_USB_UART_XXXXXXXX-if00-port0',
         productId: '6001',
         serialNumber: 'XXXXXXXX',
-        title: 'FTDI',
-        vendorId: '0403'
-      },
-      {
-        locationId: undefined,
-        manufacturer: undefined,
-        path: '/dev/ttyUSB5',
-        pnpId: 'FTDI_FT232R_USB_UART_XXXXXXXX-if00-port0',
-        productId: '6001',
-        serialNumber: 'XXXXXXXX',
-        title: '/dev/ttyUSB5',
+        title: '/dev/ttyUSB4',
         vendorId: '0403'
       }
     ])
