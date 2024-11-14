@@ -22,19 +22,23 @@ beforeAll(() => {
     memo: (x: unknown) => x
   }))
   vi.doMock('node:fs/promises', () => {
-    statSpy = vi.fn(async (path) =>
-      (isEnabled ?? false) && path === '/home/user/.config/autostart/org.sleepingcats.BridgeCmdr.desktop'
-        ? await Promise.resolve({
-            isFile() {
-              return true
-            }
-          })
-        : await Promise.reject(new Error('ENOENT'))
-    )
-    mkdirSpy = vi.fn().mockResolvedValue(undefined)
-    readSpy = vi.fn(async () => (iniFile ? await Promise.resolve(iniFile) : await Promise.reject(new Error('ENOENT'))))
-    writeSpy = vi.fn().mockResolvedValue(undefined)
-    unlinkSpy = vi.fn().mockResolvedValue(undefined)
+    statSpy = vi
+      .fn(async (path) =>
+        (isEnabled ?? false) && path === '/home/user/.config/autostart/org.sleepingcats.BridgeCmdr.desktop'
+          ? await Promise.resolve({
+              isFile() {
+                return true
+              }
+            })
+          : await Promise.reject(new Error('ENOENT'))
+      )
+      .mockName('fs.stat')
+    mkdirSpy = vi.fn().mockResolvedValue(undefined).mockName('fs.mkdir')
+    readSpy = vi
+      .fn(async () => (iniFile ? await Promise.resolve(iniFile) : await Promise.reject(new Error('ENOENT'))))
+      .mockName('fs.readFile')
+    writeSpy = vi.fn().mockResolvedValue(undefined).mockName('fs.writeFile')
+    unlinkSpy = vi.fn().mockResolvedValue(undefined).mockName('fs.unlink')
     return {
       stat: statSpy,
       mkdir: mkdirSpy,

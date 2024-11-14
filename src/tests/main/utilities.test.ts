@@ -5,7 +5,7 @@ import type { Mock } from 'vitest'
 let errorSpy: Mock<(...args: any[]) => any>
 beforeEach(() => {
   vi.mock('electron-log', () => {
-    errorSpy = vi.fn().mockReturnValue(undefined)
+    errorSpy = vi.fn().mockReturnValue(undefined).mockName('Logger.error')
 
     return {
       default: {

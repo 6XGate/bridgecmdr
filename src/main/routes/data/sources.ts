@@ -21,6 +21,9 @@ export default function useSourcesRouter() {
     update: procedure.input(UpdateInputs).mutation(async ({ input }) => await sources.update(...input)),
     remove: procedure.input(DocumentId).mutation(async ({ input }) => {
       await sources.remove(input)
+    }),
+    clear: procedure.mutation(async () => {
+      await sources.clear()
     })
   })
 }

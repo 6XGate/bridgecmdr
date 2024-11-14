@@ -32,9 +32,9 @@ beforeAll(() => {
     },
     capabilities: kDeviceSupportsMultipleOutputs | kDeviceCanDecoupleAudioOutput
   }
-  activateSpy = vi.fn().mockResolvedValue(undefined)
-  powerOffSpy = vi.fn().mockResolvedValue(undefined)
-  powerOnSpy = vi.fn().mockResolvedValue(undefined)
+  activateSpy = vi.fn().mockResolvedValue(undefined).mockName('driver.activate')
+  powerOffSpy = vi.fn().mockResolvedValue(undefined).mockName('driver.powerOff')
+  powerOnSpy = vi.fn().mockResolvedValue(undefined).mockName('driver.powerOn')
   driver = defineDriver({
     ...information,
     setup: () => ({
@@ -62,9 +62,9 @@ describe('defining a driver', () => {
     const duplicate = defineDriver({
       ...information,
       setup: () => ({
-        activate: vi.fn().mockResolvedValue(undefined),
-        powerOff: vi.fn().mockResolvedValue(undefined),
-        powerOn: vi.fn().mockResolvedValue(undefined)
+        activate: vi.fn().mockResolvedValue(undefined).mockName('driver.activate'),
+        powerOff: vi.fn().mockResolvedValue(undefined).mockName('driver.powerOff'),
+        powerOn: vi.fn().mockResolvedValue(undefined).mockName('driver.powerOn')
       })
     })
 

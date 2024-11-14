@@ -1,27 +1,40 @@
+import { EventEmitter } from 'node:events'
 import { vi } from 'vitest'
 import type { MainLogger } from 'electron-log'
 
 export function electronModule() {
-  return {
-    app: {
-      getName: () => 'BridgeCmdr==mock==',
-      getVersion: () => '2.0.0==mock==',
-      getLocale: () => 'en==mock==',
-      getPath: (...args: Parameters<Electron.App['getPath']>) => {
-        const [name] = args
-        switch (name) {
-          case 'exe':
-            return '/usr/bin/BridgeCmdr'
-          case 'userData':
-            return 'logs'
-          default:
-            return 'logs'
-        }
-      },
-      on(_name: string, ..._args: unknown[]) {
-        return this
+  interface AppEvents {
+    'will-quit': []
+  }
+
+  class App extends EventEmitter<AppEvents> {
+    getName() {
+      return 'BridgeCmdr==mock=='
+    }
+
+    getVersion() {
+      return '2.0.0==mock=='
+    }
+
+    getLocale() {
+      return 'en==mock=='
+    }
+
+    getPath(...args: Parameters<Electron.App['getPath']>) {
+      const [name] = args
+      switch (name) {
+        case 'exe':
+          return '/usr/bin/BridgeCmdr'
+        case 'userData':
+          return 'logs'
+        default:
+          return 'logs'
       }
     }
+  }
+
+  return {
+    app: new App()
   }
 }
 

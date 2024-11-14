@@ -16,6 +16,9 @@ export default function useSourcesRouter() {
     update: procedure.input(SwitchUpdate).mutation(async ({ input }) => await switches.update(input)),
     remove: procedure.input(DocumentId).mutation(async ({ input }) => {
       await switches.remove(input)
+    }),
+    clear: procedure.mutation(async () => {
+      await switches.clear()
     })
   })
 }

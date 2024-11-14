@@ -27,6 +27,7 @@ export const useLevelDb = memo(function useLevelDb() {
       const db = levelDown(path)
       app.on('will-quit', () => {
         db.close((err) => {
+          /* v8 ignore next 1 */ // No way to spy or mock this deep in.
           if (err != null) console.error(err)
         })
       })
@@ -51,6 +52,7 @@ export const useLevelDb = memo(function useLevelDb() {
            * @param {Error|undefined} error
            */
           const cb = (error) => {
+            /* v8 ignore next 2 */ // No way to spy or mock this deep in.
             if (error == null) resolve(up)
             else reject(error)
           }

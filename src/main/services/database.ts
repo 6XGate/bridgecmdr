@@ -37,7 +37,10 @@ async function translateAttachment(key: string, attachment: PouchDB.Core.FullAtt
 }
 
 async function prepareAttachment(key: string, attachment: PouchDB.Core.Attachment) {
-  return isFullAttachment(attachment) ? await translateAttachment(key, attachment) : null
+  return isFullAttachment(attachment)
+    ? /* v8 ignore next 2 */ // `false` is actually unlikely due to design.
+      await translateAttachment(key, attachment)
+    : null
 }
 
 async function prepareAttachments(attachments: PouchDB.Core.Attachment[] | null | undefined) {
@@ -90,6 +93,8 @@ function defineDatabaseCore<RawSchema extends z.AnyZodObject>(
   type Insertable = getInsertable<typeof rawSchema>
   type Updateable = getUpdateable<typeof rawSchema>
 
+  const Insertable = getInsertable(rawSchema)
+
   const booted = (async function booted() {
     const db = new PouchDb<RawDocument>(name)
     const namedIndices = new Map<string, IndexFields>()
@@ -120,20 +125,6 @@ function defineDatabaseCore<RawSchema extends z.AnyZodObject>(
   })()
 
   /**
-   * Compacts the database.
-   */
-  async function compact() {
-    const db = await booted
-
-    await db.compact()
-  }
-
-  /**
-   * Provides a means to tap into the database interface directly.
-   */
-  const query = async <Result>(callback: (current: PouchDatabase) => Promise<Result>) => await callback(await booted)
-
-  /**
    * Defines a database operations.
    */
   const defineOperation =
@@ -142,9 +133,9 @@ function defineDatabaseCore<RawSchema extends z.AnyZodObject>(
       await op(await booted, ...args)
 
   /**
-   * Gets all document from the database.
+   * Gets all documents, in raw form, from the database.
    */
-  const all = defineOperation(async function all(db) {
+  const allDocs = defineOperation(async function allDocs(db) {
     const response = await db.allDocs({
       include_docs: true,
       attachments: true,
@@ -154,15 +145,41 @@ function defineDatabaseCore<RawSchema extends z.AnyZodObject>(
       endkey: 'Z'
     })
 
-    return await map(response.rows.map((row) => row.doc).filter(isNotNullish), prepareDocument)
+    return response.rows.map((row) => row.doc).filter(isNotNullish)
   })
+
+  /**
+   * Gets the specified document, in raw form, from the database.
+   */
+  const getDoc = defineOperation(async function getDoc(db, id: DocumentId) {
+    return await db.get<RawDocument>(id.toUpperCase(), { attachments: true, binary: true })
+  })
+
+  /**
+   * Compacts the database.
+   */
+  const compact = defineOperation(async function compact(db) {
+    await db.compact()
+  })
+
+  /**
+   * Provides a means to tap into the database interface directly.
+   */
+  const query = async <Result>(callback: (current: PouchDatabase) => Promise<Result>) => await callback(await booted)
+
+  /**
+   * Gets all document from the database.
+   */
+  async function all() {
+    return await map(await allDocs(), prepareDocument)
+  }
 
   /**
    * Gets the specified document from the database.
    */
-  const get = defineOperation(async function get(db, id: DocumentId) {
-    return await db.get<RawDocument>(id.toUpperCase(), { attachments: true, binary: true }).then(prepareDocument)
-  })
+  async function get(id: DocumentId) {
+    return await getDoc(id).then(prepareDocument)
+  }
 
   /**
    * Adds attachments to a document.
@@ -171,7 +188,7 @@ function defineDatabaseCore<RawSchema extends z.AnyZodObject>(
     // Add each attachment one-at-a-time, this must be serial.
     for (const attachment of attachments) {
       // eslint-disable-next-line no-await-in-loop -- Must be serialized.
-      const doc = await db.get(id)
+      const doc = await getDoc(id)
       // eslint-disable-next-line no-await-in-loop -- Must be serialized.
       await db.putAttachment(id, attachment.name, doc._rev, Buffer.from(attachment), attachment.type)
     }
@@ -181,7 +198,7 @@ function defineDatabaseCore<RawSchema extends z.AnyZodObject>(
    * Adds a document to the database.
    */
   const add = defineOperation(async function add(db, document: Insertable, ...attachments: Attachment[]) {
-    const doc = { ...document, _id: randomUUID().toUpperCase() }
+    const doc = { ...Insertable.parse(document), _id: randomUUID().toUpperCase() }
     await db.put(doc)
     if (attachments.length > 0) {
       await addAttachments(doc._id, attachments)
@@ -196,7 +213,7 @@ function defineDatabaseCore<RawSchema extends z.AnyZodObject>(
   const update = defineOperation(async function update(db, document: Updateable, ...attachments: Attachment[]) {
     const id = document._id
     const old = await db.get(id)
-    const doc = { ...document, _rev: old._rev }
+    const doc = { ...Insertable.parse({ ...old, ...document }), _id: id, _rev: old._rev }
 
     await db.put(doc)
     if (attachments.length > 0) {
@@ -210,8 +227,17 @@ function defineDatabaseCore<RawSchema extends z.AnyZodObject>(
    * Removes a document from the database.
    */
   const remove = defineOperation(async function remove(db, id: DocumentId) {
-    const doc = await db.get(id)
+    const doc = await getDoc(id)
     await db.remove(doc)
+  })
+
+  /**
+   * Removes all documents from the database.
+   */
+  const clear = defineOperation(async function clear(db) {
+    const docs = await allDocs()
+    await map(docs, async (doc) => await db.remove(doc))
+    await db.compact()
   })
 
   return {
@@ -225,7 +251,8 @@ function defineDatabaseCore<RawSchema extends z.AnyZodObject>(
     get,
     add,
     update,
-    remove
+    remove,
+    clear
   }
 }
 
