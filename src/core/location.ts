@@ -30,7 +30,7 @@ export function isValidLocation(value: string, ports: readonly PortInfo[]) {
 
 // #region Host and Port
 
-const hostWithOptionalPortPattern = /^((?:\[[A-Fa-f0-9.:]+\])|(?:[\p{N}\p{L}.-]+))(?::([1-9][0-9]*))?$/u
+export const hostWithOptionalPortPattern = /^((?:\[[A-Fa-f0-9.:]+\])|(?:[\p{N}\p{L}.-]+))(?::([1-9][0-9]*))?$/u
 
 function zodParseHostWithOptionalPort(value: string) {
   const match = hostWithOptionalPortPattern.exec(value)
@@ -85,7 +85,7 @@ export const hostSchema = z.string().refine(isHost)
   ```
 
   Fully rendered in hostNamePattern, with non-capture groups
-  to capturing converted for better readibility.
+  to capturing converted for better readability.
 */
 const hostNamePattern = /^[\p{N}\p{L}]([\p{N}\p{L}-]*[\p{N}\p{L}])?(\.[\p{N}\p{L}]([\p{N}\p{L}-]*[\p{N}\p{L}])?)*$/u
 /** Determines whether a string is a hostname. */
@@ -95,7 +95,7 @@ export const hostNameSchema = z.string().regex(hostNamePattern)
 // #region IPv4
 
 /**
-  Zod's IP pattern allows some invalid address strings, suchs as double-zero, `00`.
+  Zod's IP pattern allows some invalid address strings, such as double-zero, `00`.
   These days IPv4 is generally always in decimal, not octal. It seems Zod was
   aiming for this. With this in mind, the definition is as follows.
 
@@ -118,7 +118,7 @@ export const ipV4AddressSchema = z.string().regex(ipV4Pattern)
 /**
   Zod's IPv6 pattern allows a lot of invalid and misses some valid addresses.
   See {@link https://github.com/colinhacks/zod/issues/2339}.
-  The RFCs seems indicate the following battern.
+  The RFCs seems indicate the following pattern.
 
   IPv6
 
@@ -172,7 +172,7 @@ function parsePossibleIpString(value: string) {
     parts.pop()
   }
 
-  // Split if compact. Will only preduce one or two results.
+  // Split if compact. Will only produce one or two results.
   const sep = parts.indexOf('')
   if (sep >= 0) {
     // We add a zero to the second array to simply compact form logic.

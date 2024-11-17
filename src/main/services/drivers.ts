@@ -27,7 +27,7 @@ export type DriverKind = 'monitor' | 'switch'
 export interface DriverBasicInformation {
   /**
    * Indicates whether the driver is enabled, this is to allow partially coded drivers to be
-   * commited, but not usable to the UI or other code.
+   * committed, but not usable to the UI or other code.
    */
   readonly enabled: boolean
   /** Indicates whether the driver is experimental, usually due to lack of testing. */

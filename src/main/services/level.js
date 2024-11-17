@@ -80,7 +80,7 @@ export const useLevelAdapter = memo(function useLevelAdapter() {
    * @param {ErrorCallback} cb
    */
   function MainDown(opts, cb) {
-    // eslint-disable-next-line -- Eveything is messed up with no typings.
+    // eslint-disable-next-line -- Everything is messed up with no typings.
     LevelPouch.call(this, { ...opts, db: leveldown }, cb)
   }
 
@@ -93,7 +93,7 @@ export const useLevelAdapter = memo(function useLevelAdapter() {
   /** @type {PouchDB.Plugin<PouchDB.Static>} */
   const plugin = (pouch) => {
     // @ts-expect-error -- Not defined in the types.
-    // eslint-disable-next-line -- Eveything is messed up with no typings.
+    // eslint-disable-next-line -- Everything is messed up with no typings.
     pouch.adapter('maindb', MainDown, true)
   }
 
