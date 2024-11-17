@@ -60,7 +60,7 @@ const useDbus = memo(function useDbus() {
       throw new Error(stderr)
     }
 
-    return stdout.toString()
+    return stdout
   }
 
   /** Gets the schema named type to its argument type. */
