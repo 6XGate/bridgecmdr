@@ -3,6 +3,7 @@ import type { Mock } from 'vitest'
 
 let execaSpy: Mock
 
+let stdout = ''
 let stderr = ''
 let error = null as null | Error
 
@@ -16,18 +17,18 @@ beforeAll(() => {
 })
 
 beforeEach(() => {
+  stdout = ''
   stderr = ''
   error = null
 
   execaSpy.mockImplementation(async () =>
-    error == null
-      ? await Promise.resolve({ stdout: '', stderr, exitCode: stderr ? 1 : 0 })
-      : await Promise.reject(error)
+    error == null ? await Promise.resolve({ stdout, stderr, exitCode: stderr ? 1 : 0 }) : await Promise.reject(error)
   )
 })
 
 describe('powerOff', () => {
   test('success', async () => {
+    stdout = 'shutting down'
     const system = (await import('../../../main/services/system')).default()
 
     await expect(system.powerOff()).resolves.toBeUndefined()
