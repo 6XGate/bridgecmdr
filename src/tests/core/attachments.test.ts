@@ -9,6 +9,7 @@ let data: Uint8Array
 let buffer: Buffer
 let blob: Blob
 let file: File
+
 beforeAll(() => {
   const textEncoder = new TextEncoder()
   text = 'This is a test'

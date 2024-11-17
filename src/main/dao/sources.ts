@@ -1,36 +1,37 @@
+import { memo } from 'radash'
 import { z } from 'zod'
-import { defineDatabase, getInsertable, getUpdateable } from '../services/database'
+import { Database, inferDocumentOf, inferNewDocumentOf, inferUpdatesOf } from '../services/database'
 import useTiesDatabase from './ties'
-import type { getDocument, DocumentId } from '../services/database'
+import type { DocumentId, RevisionId } from '../services/database'
 
-export type Source = getDocument<typeof Source>
-export const Source = z.object({
+export const SourceModel = z.object({
   title: z.string().min(1),
   image: z.string().min(1).nullable()
 })
 
-export const useSourcesDatabase = defineDatabase({
-  name: 'sources',
-  schema: Source,
-  setup: (base) => {
-    const ties = useTiesDatabase()
+const useSourcesDatabase = memo(
+  () =>
+    new (class extends Database.of('sources', SourceModel) {
+      readonly #ties = useTiesDatabase()
 
-    return {
-      remove: async (id: DocumentId) => {
-        await base.remove(id)
+      override async remove(id: DocumentId, rev?: RevisionId) {
+        await super.remove(id, rev)
 
-        const related = await ties.forSource(id)
+        const related = await this.#ties.forSource(id)
         await Promise.all(
-          related.map(async ({ _id }) => {
-            await ties.remove(_id)
+          related.map(async ({ _id, _rev }) => {
+            await this.#ties.remove(_id, _rev)
           })
         )
       }
-    }
-  }
-})
+    })()
+)
 
-export type NewSource = getInsertable<typeof Source>
-export const NewSource = getInsertable(Source)
-export type SourceUpdate = getUpdateable<typeof Source>
-export const SourceUpdate = getUpdateable(Source)
+export type Source = inferDocumentOf<typeof SourceModel>
+export const Source = inferDocumentOf(SourceModel)
+export type NewSource = inferNewDocumentOf<typeof SourceModel>
+export const NewSource = inferNewDocumentOf(SourceModel)
+export type SourceUpdate = inferUpdatesOf<typeof SourceModel>
+export const SourceUpdate = inferUpdatesOf(SourceModel)
+
+export default useSourcesDatabase

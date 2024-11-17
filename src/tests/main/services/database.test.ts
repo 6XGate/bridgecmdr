@@ -1,18 +1,15 @@
-import { map } from 'radash'
-import { afterAll, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
+import { map, memo, omit } from 'radash'
+import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
 import { z } from 'zod'
-import { defineDatabase, getDocument, getInsertable, getUpdateable } from '../../../main/services/database'
-import type { Database } from '../../../main/services/database'
+import { Database } from '../../../main/services/database'
 import { Attachment } from '@/attachments'
 
 const mock = await vi.hoisted(async () => await import('../../support/mock'))
+const port = await vi.hoisted(async () => await import('../../support/serial'))
 
 beforeAll(() => {
-  vi.mock('electron', mock.electronModule)
-})
-
-afterAll(() => {
-  vi.restoreAllMocks()
+  vi.mock('electron', mock.electronModule('database'))
+  vi.mock('serialport', port.serialPortModule)
 })
 
 const kUuidPattern = /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/u
@@ -25,12 +22,8 @@ const Schema = z.object({
 
 let database: Database<typeof Schema>
 beforeEach(async () => {
-  const useDatabase = defineDatabase({
-    name: 'db',
-    schema: Schema,
-    indices: [[['x']], { r: ['y', 'z'] }],
-    setup: () => ({})
-  })
+  const indices = [[['x']], { r: ['y', 'z'] }]
+  const useDatabase = memo(() => new Database('db', Schema, ...indices))
   database = useDatabase()
 
   await database.clear()
@@ -39,12 +32,6 @@ beforeEach(async () => {
 test('test creation', () => {
   expect(database).toBeTypeOf('object')
   expect(database).not.toBeNull()
-})
-
-test('getting schemas', () => {
-  expect(getDocument(Schema)).toBeInstanceOf(z.ZodSchema)
-  expect(getInsertable(Schema)).toBeInstanceOf(z.ZodSchema)
-  expect(getUpdateable(Schema)).toBeInstanceOf(z.ZodSchema)
 })
 
 test('compacting', async () => {
@@ -110,12 +97,11 @@ describe('adding document', () => {
     const doc = await database.add(raw, attachment)
     expect(doc._id).toMatch(kUuidPattern)
     expect(doc._rev).toMatch(kRevPattern)
-    expect(doc._attachments).toStrictEqual([attachment])
     expect(doc).toStrictEqual({
       ...raw,
       _id: doc._id,
       _rev: doc._rev,
-      _attachments: doc._attachments
+      _attachments: [attachment]
     })
   })
 })
@@ -144,17 +130,61 @@ describe('updating document', () => {
     })
   })
 
-  test('with attachments', async () => {
-    const changes = { y: 14 }
-    const updated = await database.update({ _id: doc._id, ...changes }, attachment)
+  describe('with attachments', () => {
+    test('as parameter', async () => {
+      const changes = { y: 14 }
+      const updated = await database.update({ _id: doc._id, ...changes }, attachment)
+      expect(updated._rev).toMatch(kRevPattern)
+      expect(updated).toStrictEqual({
+        ...raw,
+        ...changes,
+        _id: doc._id,
+        _rev: updated._rev,
+        _attachments: [attachment]
+      })
+    })
+
+    test('existing on update payload', async () => {
+      const attached = await database.update({ _id: doc._id, y: 11 }, attachment)
+
+      const changes = { ...attached, y: 14 }
+      const updated = await database.update({ ...changes })
+      expect(updated._rev).toMatch(kRevPattern)
+      expect(updated).toStrictEqual({
+        ...raw,
+        ...changes,
+        _id: doc._id,
+        _rev: updated._rev,
+        _attachments: [attachment]
+      })
+    })
+
+    test('existing in database', async () => {
+      await expect(database.update({ _id: doc._id, y: 11 }, attachment)).resolves.toBeTruthy()
+
+      const changes = { ...doc, y: 14 }
+      const updated = await database.update({ ...changes })
+      expect(updated._rev).toMatch(kRevPattern)
+      expect(updated).toStrictEqual({
+        ...raw,
+        ...changes,
+        _id: doc._id,
+        _rev: updated._rev,
+        _attachments: [attachment]
+      })
+    })
+  })
+
+  test('strips unknown fields', async () => {
+    const changes = { y: 14, a: 5 }
+    const updated = await database.update({ _id: doc._id, ...changes })
     expect(updated._rev).toMatch(kRevPattern)
-    expect(updated._attachments).toStrictEqual([attachment])
     expect(updated).toStrictEqual({
       ...raw,
-      ...changes,
+      ...omit(changes, ['a']),
       _id: doc._id,
       _rev: updated._rev,
-      _attachments: updated._attachments
+      _attachments: doc._attachments
     })
   })
 })

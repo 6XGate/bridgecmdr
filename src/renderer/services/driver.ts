@@ -23,7 +23,7 @@ export const kDeviceCanDecoupleAudioOutput: CanDecoupleAudioOutput = 2
 
 /** Informational metadata about a device and driver. */
 export interface DriverInformation extends DriverBasicInformation, LocalizedDriverInformation {
-  // Just combines the locatized information with the basic information.
+  // Just combines the localized information with the basic information.
 }
 
 /** Driver to interact with switching devices. */

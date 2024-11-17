@@ -1,6 +1,6 @@
 import { EventEmitter } from 'node:events'
-import { expect, vi } from 'vitest'
-import type { CommandStream, createCommandStream as create } from '../../main/services/stream'
+import { expect } from 'vitest'
+import type { CommandStream } from '../../main/services/stream'
 import { raiseError } from '@/error-handling'
 
 interface StreamListeners {
@@ -119,12 +119,8 @@ export interface MockStreamContext {
 
 export function commandStreamModule(context: MockStreamContext) {
   return function $commandStreamModule() {
-    const createCommandStream = vi
-      .fn<typeof create>()
-      .mockImplementation(async () => await Promise.resolve(context.stream))
-
     return {
-      createCommandStream
+      createCommandStream: async () => await Promise.resolve(context.stream)
     }
   }
 }

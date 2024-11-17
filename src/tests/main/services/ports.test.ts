@@ -1,7 +1,7 @@
-import { afterEach, describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-afterEach(() => {
-  vi.restoreAllMocks()
+beforeEach(() => {
+  // Need to reset the port service state to check some duplicate paths.
   vi.resetModules()
 })
 

@@ -1,4 +1,4 @@
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
+import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
 import type { Mock } from 'vitest'
 
 const mock = await vi.hoisted(async () => await import('../../support/mock'))
@@ -12,8 +12,8 @@ let readSpy: Mock
 let writeSpy: Mock
 let unlinkSpy: Mock
 beforeAll(() => {
-  vi.mock('electron', mock.electronModule)
-  vi.mock('electron-log', mock.elctronLogModule)
+  vi.mock('electron', mock.electronModule())
+  vi.mock('electron-log', mock.electronLogModule)
   vi.mock('node:os', () => ({
     homedir: () => '/home/user'
   }))
@@ -58,15 +58,6 @@ beforeEach(() => {
   isEnabled = false
   xdgConfig = undefined
   iniFile = undefined
-})
-
-afterEach(() => {
-  vi.resetAllMocks()
-  vi.unstubAllEnvs()
-})
-
-afterAll(() => {
-  vi.restoreAllMocks()
 })
 
 describe('checking enabled', () => {

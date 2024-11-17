@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest'
+import { beforeAll, describe, expect, test } from 'vitest'
 import type { PortEntry } from '../../main/services/ports'
 import { isIpOrValidPort, isValidLocation } from '@/location'
 
@@ -16,11 +16,6 @@ beforeAll(() => {
       vendorId: '8086'
     }
   ]
-})
-
-afterAll(() => {
-  vi.restoreAllMocks()
-  vi.resetModules()
 })
 
 describe('isIpOrValidPort', () => {

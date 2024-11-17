@@ -53,7 +53,7 @@ watchOnce(isReady, async function checkForUpdate() {
 
   const yes = await dialogs.confirm({
     title: t('message.confirmUpdate', [appInfo.value.name]),
-    message: t('message.versionAvailale', { version: info.version }),
+    message: t('message.versionAvailable', { version: info.version }),
     confirmButton: t('action.update'),
     cancelButton: t('action.later')
   })
@@ -132,7 +132,7 @@ function roundByteSize(amount: number, type: 'size' | 'speed' = 'size') {
 en:
   message:
     confirmUpdate: Do you want to update {0}?
-    versionAvailale: The new version, {version}, is available for download.
+    versionAvailable: The new version, {version}, is available for download.
     progress: Downloaded {amount} of {total} at {speed}...
     updateReady: Download complete, ready to restart and update
   action:

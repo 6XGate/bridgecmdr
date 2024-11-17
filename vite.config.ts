@@ -21,7 +21,7 @@ export default defineConfig({
     coverage: {
       reportOnFailure: true,
       exclude: [
-        // Ignore the ouput directories.
+        // Ignore the output directories.
         'dist/**',
         'out/**',
         // No real tests can be run on the main process start-up.
@@ -46,9 +46,10 @@ export default defineConfig({
         'src/renderer/**/*.ts',
         'src/renderer/**/*.tsx',
         'src/renderer/**/*.vue',
-        // No real need to test the support framework.
+        // No real need to test the support and seeding framework.
         'src/tests/support/**/*.ts',
-        // The configurations don't need any testing or converage.
+        'src/tests/seeds/**/*.ts',
+        // The configurations don't need any testing or coverage.
         'electron.vite.config.ts',
         ...coverageConfigDefaults.exclude
       ]

@@ -1,4 +1,4 @@
-import { assert, describe, expect, test, vi } from 'vitest'
+import { assert, describe, expect, test } from 'vitest'
 import { z } from 'zod'
 import * as mock from '../support/mock'
 import {
@@ -90,8 +90,6 @@ test('warnPromiseFailures', async () => {
 
   expect(c.warn).toHaveBeenNthCalledWith(1, 'test', new TypeError('test'))
   expect(c.warn).toHaveBeenNthCalledWith(2, 'test', new TypeError('test'))
-
-  vi.restoreAllMocks()
 })
 
 test('logPromiseFailures', async () => {
@@ -104,6 +102,4 @@ test('logPromiseFailures', async () => {
 
   expect(c.error).toHaveBeenNthCalledWith(1, 'test', new TypeError('test'))
   expect(c.error).toHaveBeenNthCalledWith(2, 'test', new TypeError('test'))
-
-  vi.restoreAllMocks()
 })

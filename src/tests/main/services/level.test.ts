@@ -1,16 +1,11 @@
-import { test, expect, vi, beforeEach, afterEach } from 'vitest'
+import { test, expect, vi, beforeEach } from 'vitest'
 import { withResolvers } from '@/basics'
 
 const mock = await vi.hoisted(async () => await import('../../support/mock'))
 
 beforeEach(() => {
-  vi.mock('electron', mock.electronModule)
-  vi.mock('electron-log', mock.elctronLogModule)
-})
-
-afterEach(() => {
-  vi.restoreAllMocks()
-  vi.resetModules()
+  vi.mock('electron', mock.electronModule('level'))
+  vi.mock('electron-log', mock.electronLogModule)
 })
 
 test('basics', async () => {

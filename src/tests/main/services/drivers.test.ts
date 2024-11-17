@@ -1,4 +1,4 @@
-import { afterAll, afterEach, beforeAll, describe, expect, test, vi } from 'vitest'
+import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
 import useDrivers, {
   defineDriver,
   kDeviceCanDecoupleAudioOutput,
@@ -15,6 +15,7 @@ let driver: Driver
 let activateSpy: Mock<Driver['activate']>
 let powerOffSpy: Mock<Driver['powerOff']>
 let powerOnSpy: Mock<Driver['powerOn']>
+
 beforeAll(() => {
   badDriverId = '292709CD-5BB9-44A6-BEF2-B3980276E064'
   testDriverId = '4AACE202-FB07-49C8-B4FE-20C4C6C73788'
@@ -32,9 +33,9 @@ beforeAll(() => {
     },
     capabilities: kDeviceSupportsMultipleOutputs | kDeviceCanDecoupleAudioOutput
   }
-  activateSpy = vi.fn().mockResolvedValue(undefined).mockName('driver.activate')
-  powerOffSpy = vi.fn().mockResolvedValue(undefined).mockName('driver.powerOff')
-  powerOnSpy = vi.fn().mockResolvedValue(undefined).mockName('driver.powerOn')
+  activateSpy = vi.fn()
+  powerOffSpy = vi.fn()
+  powerOnSpy = vi.fn()
   driver = defineDriver({
     ...information,
     setup: () => ({
@@ -45,12 +46,10 @@ beforeAll(() => {
   })
 })
 
-afterEach(() => {
-  vi.resetAllMocks()
-})
-
-afterAll(() => {
-  vi.restoreAllMocks()
+beforeEach(() => {
+  activateSpy.mockResolvedValue(undefined).mockName('driver.activate')
+  powerOffSpy.mockResolvedValue(undefined).mockName('driver.powerOff')
+  powerOnSpy.mockResolvedValue(undefined).mockName('driver.powerOn')
 })
 
 describe('defining a driver', () => {

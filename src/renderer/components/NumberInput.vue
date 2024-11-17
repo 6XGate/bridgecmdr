@@ -9,7 +9,7 @@ interface Props {
   label?: string | undefined
   placeholder?: string | undefined
   //
-  // Basic propeties
+  // Basic properties
   //
   modelValue?: number | undefined
   min?: number | undefined
@@ -19,24 +19,6 @@ interface Props {
   //
   errorMessages?: string | string[] | undefined
 }
-
-//   props: {
-//     //
-//     // VTextField properties
-//     //
-//     label: String,
-//     placeholder: String,
-//     //
-//     // Basic propeties
-//     //
-//     modelValue: Number,
-//     min: Number,
-//     max: Number,
-//     //
-//     // Validation
-//     //
-//     errorMessages: { type: [Array, String] as PropType<string | string[]>, default: () => [] }
-//   },
 
 const props = withDefaults(defineProps<Props>(), {
   errorMessages: () => new Array<string>()

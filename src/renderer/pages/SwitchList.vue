@@ -54,7 +54,7 @@ async function addSwitch(target: NewSwitch) {
   }
 }
 
-async function updateSwitch(target: DeepReadonly<Switch>, changes: NewSwitch) {
+async function updateSwitch(target: Switch, changes: NewSwitch) {
   try {
     await switches.update({ ...target, ...changes })
   } catch (e) {
@@ -106,8 +106,8 @@ const { dialogProps: editorProps } = useSwitchDialog()
               editing
               @confirm="(v) => updateSwitch(item.switch, v)" />
           </template>
-          <template #activator="{ props: dailog }">
-            <VListItem v-bind="dailog" :title="item.switch.title" :subtitle="item.driver.title">
+          <template #activator="{ props: dialog }">
+            <VListItem v-bind="dialog" :title="item.switch.title" :subtitle="item.driver.title">
               <template #prepend>
                 <VAvatar :icon="item.driver.kind === 'monitor' ? mdiMonitor : mdiVideoSwitch" />
               </template>

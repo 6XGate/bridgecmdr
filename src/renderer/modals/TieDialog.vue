@@ -141,7 +141,7 @@ const { cardProps, isFullscreen, body, showDividers } = useTieDialog()
 </script>
 
 <template>
-  <VCard :laoding="isBusy" v-bind="cardProps">
+  <VCard :loading="isBusy" v-bind="cardProps">
     <VToolbar v-if="isFullscreen" :title="title" color="transparent">
       <template #prepend>
         <VBtn :icon="mdiClose" @click="cancelIfConfirmed" />
@@ -214,7 +214,7 @@ en:
     inputChannel: Input channel
     outputChannel: Output channel
     audioChannel: Output audio channel
-    sync: Synchronise audio and vidoe channels
+    sync: Synchronize audio and video channels
   message:
     discardNew: Do you want to discard this tie?
 </i18n>

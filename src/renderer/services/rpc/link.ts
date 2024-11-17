@@ -72,12 +72,12 @@ export function useIpcLink<Router extends AnyRouter>(): TRPCLink<Router> {
         const { type, path, id, context } = op
         const input = runtime.transformer.serialize(op.input) as unknown
 
-        const unsub = request(
+        const unsubscribe = request(
           { type, path, input, id, context },
           {
             error(err) {
               observer.error(err)
-              unsub()
+              unsubscribe()
             },
             complete() {
               observer.complete()
@@ -91,14 +91,14 @@ export function useIpcLink<Router extends AnyRouter>(): TRPCLink<Router> {
 
               observer.next({ result: transformed.result })
               if (op.type !== 'subscription') {
-                unsub()
+                unsubscribe()
                 observer.complete()
               }
             }
           }
         )
 
-        return unsub
+        return unsubscribe
       })
     }
   }

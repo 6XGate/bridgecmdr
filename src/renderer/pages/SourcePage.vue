@@ -5,7 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import InputDialog from '../components/InputDialog.vue'
 import Page from '../components/Page.vue'
-import ReplacableImage from '../components/ReplacableImage.vue'
+import ReplaceableImage from '../components/ReplaceableImage.vue'
 import { trackBusy } from '../hooks/tracking'
 import { useGuardedAsyncOp } from '../hooks/utilities'
 import TieDialog from '../modals/TieDialog.vue'
@@ -99,7 +99,7 @@ const drivers = useDrivers()
 const ties = useTies()
 const entries = computed(() =>
   ties.items
-    .map(function makeEntriy(tie) {
+    .map(function makeEntry(tie) {
       const switcher = switches.items.find((s) => s._id === tie.switchId)
       const driver = switcher != null ? drivers.items.find((d) => d.guid === switcher.driverId) : undefined
 
@@ -125,7 +125,7 @@ async function addTie(target: NewTie) {
   }
 }
 
-async function updateTie(target: DeepReadonly<Tie>, changes: NewTie) {
+async function updateTie(target: Tie, changes: NewTie) {
   try {
     await ties.update({ ...target, ...changes })
   } catch (e) {
@@ -171,7 +171,7 @@ const { isBusy } = trackBusy(
     <VProgressLinear v-show="isBusy" indeterminate />
     <div class="overflow-y-auto px-6 py-3">
       <div class="d-flex justify-center mb-5">
-        <ReplacableImage :image="file" @update="updateImage" />
+        <ReplaceableImage :image="file" @update="updateImage" />
       </div>
       <VList v-if="source != null" bg-color="transparent" :disabled="isBusy">
         <InputDialog

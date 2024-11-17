@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { NewSource, SourceUpdate, useSourcesDatabase } from '../../dao/sources'
+import useSourcesDatabase, { NewSource, SourceUpdate } from '../../dao/sources'
 import { DocumentId } from '../../services/database'
 import { procedure, router } from '../../services/rpc/trpc'
 import { Attachment } from '@/attachments'

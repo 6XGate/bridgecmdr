@@ -48,7 +48,7 @@ onMounted(useGuardedAsyncOp(dashboard.refresh))
   <VMain scrollable>
     <FirstRunLogic />
     <VContainer>
-      <div v-if="dashboard.isBusy" class="align-center d-flex justify-ceneter">
+      <div v-if="dashboard.isBusy" class="align-center d-flex justify-center">
         <VProgressCircular size="256px" indeterminate />
       </div>
       <template v-for="button of dashboard.items" :key="button.guid">

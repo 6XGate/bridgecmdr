@@ -1,44 +1,53 @@
 import { EventEmitter } from 'node:events'
+import fs from 'node:fs/promises'
+import { join } from 'node:path'
 import { vi } from 'vitest'
 import type { MainLogger } from 'electron-log'
 
-export function electronModule() {
-  interface AppEvents {
-    'will-quit': []
-  }
-
-  class App extends EventEmitter<AppEvents> {
-    getName() {
-      return 'BridgeCmdr==mock=='
+export function electronModule(test = 'test') {
+  return async function electronMockFactory() {
+    interface AppEvents {
+      'will-quit': []
     }
 
-    getVersion() {
-      return '2.0.0==mock=='
-    }
+    const exePath = join('/usr', 'bin', 'BridgeCmdr')
 
-    getLocale() {
-      return 'en==mock=='
-    }
+    // Make sure the userData path exists.
+    const userDataPath = join('logs', test)
+    await fs.mkdir(userDataPath, { recursive: true })
 
-    getPath(...args: Parameters<Electron.App['getPath']>) {
-      const [name] = args
-      switch (name) {
-        case 'exe':
-          return '/usr/bin/BridgeCmdr'
-        case 'userData':
-          return 'logs'
-        default:
-          return 'logs'
+    class App extends EventEmitter<AppEvents> {
+      getName() {
+        return 'BridgeCmdr==mock=='
+      }
+
+      getVersion() {
+        return '2.0.0==mock=='
+      }
+
+      getLocale() {
+        return 'en==mock=='
+      }
+
+      getPath(...args: Parameters<Electron.App['getPath']>) {
+        const [name] = args
+        switch (name) {
+          case 'exe':
+            return exePath
+          case 'userData':
+          default:
+            return userDataPath
+        }
       }
     }
-  }
 
-  return {
-    app: new App()
+    return {
+      app: new App()
+    }
   }
 }
 
-export function elctronLogModule() {
+export function electronLogModule() {
   const initialize = vi.fn<MainLogger['initialize']>().mockReturnValue()
 
   const error = vi.fn<MainLogger['error']>().mockReturnValue()

@@ -203,7 +203,7 @@ const showDividers = computed(() => scrolling.value.client.height !== scrolling.
           </template>
         </template>
         <template v-else>
-          <VRadioGroup v-model="innerValue" :mandantory="mandatory" @update:model-value="updateValue">
+          <VRadioGroup v-model="innerValue" :mandatory="mandatory" @update:model-value="updateValue">
             <template v-for="(item, index) of items">
               <template v-if="getItemType(item) === 'divider'">
                 <VDivider :key="`option-${index}`" />

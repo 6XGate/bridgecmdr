@@ -3,7 +3,7 @@ import { mdiClose } from '@mdi/js'
 import { useVModel } from '@vueuse/core'
 import { reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import ReplacableImage from '../components/ReplacableImage.vue'
+import ReplaceableImage from '../components/ReplaceableImage.vue'
 import { useRules, useValidation } from '../hooks/validation'
 import { useSources } from '../services/sources'
 import { toAttachments } from '../support/files'
@@ -106,7 +106,7 @@ const { cardProps, isFullscreen } = useSourceDialog()
           :placeholder="t('placeholder.required')"
           v-bind="getStatus(v$.title)" />
         <div class="d-flex justify-center">
-          <ReplacableImage :image="file" @update="file = $event" />
+          <ReplaceableImage :image="file" @update="file = $event" />
         </div>
       </VForm>
     </VCardText>

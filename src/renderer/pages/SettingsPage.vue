@@ -36,7 +36,7 @@ const { state: appInfo } = useAsyncState(async () => await useClient().appInfo.q
 })
 
 //
-// Loading sources and switchs so we have a count.
+// Loading sources and switches so we have a count.
 // TODO: Maybe find a better way.
 //
 

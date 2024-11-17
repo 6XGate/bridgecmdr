@@ -1,25 +1,18 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import { beforeEach, expect, test, vi } from 'vitest'
 
 const mock = await vi.hoisted(async () => await import('../../support/mock'))
 
-describe('correct setup', () => {
-  beforeEach(() => {
-    vi.mock('electron', mock.electronModule)
-    vi.mock('electron-log', mock.elctronLogModule)
-  })
+beforeEach(() => {
+  vi.mock('electron', mock.electronModule())
+  vi.mock('electron-log', mock.electronLogModule)
+})
 
-  afterEach(() => {
-    vi.restoreAllMocks()
-    vi.resetModules()
-  })
+test('ready', async () => {
+  const { default: useAppInfo } = await import('../../../main/services/app')
+  const appInfo = useAppInfo()
 
-  test('ready', async () => {
-    const { default: useAppInfo } = await import('../../../main/services/app')
-    const appInfo = useAppInfo()
-
-    expect(appInfo).toStrictEqual({
-      name: 'BridgeCmdr==mock==',
-      version: '2.0.0==mock=='
-    })
+  expect(appInfo).toStrictEqual({
+    name: 'BridgeCmdr==mock==',
+    version: '2.0.0==mock=='
   })
 })

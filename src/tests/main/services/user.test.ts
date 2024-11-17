@@ -1,16 +1,11 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 const mock = await vi.hoisted(async () => await import('../../support/mock'))
 
 describe('correct setup', () => {
   beforeEach(() => {
-    vi.mock('electron', mock.electronModule)
-    vi.mock('electron-log', mock.elctronLogModule)
-  })
-
-  afterEach(() => {
-    vi.restoreAllMocks()
-    vi.resetModules()
+    vi.mock('electron', mock.electronModule())
+    vi.mock('electron-log', mock.electronLogModule)
   })
 
   test('ready', async () => {

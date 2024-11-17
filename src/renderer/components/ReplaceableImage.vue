@@ -34,7 +34,7 @@ async function selectImage() {
 <template>
   <VHover v-slot="{ isHovering, props: hover }">
     <VAvatar
-      id="replacableImage"
+      id="replaceableImage"
       size="128"
       v-bind="{ ...hover }"
       color="surface-lighten-1"
@@ -57,7 +57,7 @@ async function selectImage() {
 </template>
 
 <style lang="scss" scoped>
-#replacableImage {
+#replaceableImage {
   cursor: pointer;
 }
 </style>
