@@ -5,12 +5,15 @@ import { z } from 'zod'
 const useEntry = memo(function useEntry() {
   const Boolean = z.coerce.boolean()
   const String = z.string()
-  const StringList = z.string().transform((v) => v.split(';'))
+  const StringList = z
+    .string()
+    .refine((v) => v.includes(';'))
+    .transform((v) => v.split(';'))
   const Type = z.enum(['Application', 'Link', 'Directory'])
   const Version = z.string().regex(/^\d+\.\d+/u)
   const Url = z.string().url()
 
-  const Any = z.union([Boolean, String])
+  const Any = z.union([Boolean, StringList, String])
 
   const Section = z.record(Any)
 

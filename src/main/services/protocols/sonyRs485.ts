@@ -44,18 +44,6 @@ export class PacketError extends SonyDriverError {
   }
 }
 
-export class ChecksumError extends PacketError {
-  constructor(message?: string) {
-    super(message ?? 'Unknown checksum error')
-  }
-}
-
-export class CommandBlockError extends SonyDriverError {
-  constructor(message?: string) {
-    super(message ?? 'Unknown command block error')
-  }
-}
-
 /** Calculates the checksum for a packet. */
 export function calculateChecksum(data: Buffer) {
   let x = 0n

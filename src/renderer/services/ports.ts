@@ -10,7 +10,7 @@ const usePorts = createSharedComposable(function usePorts() {
   const tracker = trackBusy()
   const client = useClient()
 
-  const items = ref<PortEntry[]>([])
+  const items = ref(new Array<PortEntry>())
 
   const all = tracker.track(async function all() {
     items.value = await client.ports.list.query()

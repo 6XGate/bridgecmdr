@@ -1,6 +1,6 @@
 import { EventEmitter } from 'node:events'
-import { expect, vi } from 'vitest'
-import type { CommandStream, createCommandStream as create } from '../../main/services/stream'
+import { expect } from 'vitest'
+import type { CommandStream } from '../../main/services/stream'
 import { raiseError } from '@/error-handling'
 
 interface StreamListeners {
@@ -25,7 +25,7 @@ class CommandSequence {
   }
 
   expectDone() {
-    expect(this.position).toEqual(this.definition.length)
+    expect(this.position).toStrictEqual(this.definition.length)
   }
 
   on(...definition: CommandDefinition) {
@@ -42,7 +42,7 @@ class CommandSequence {
 
     this.position += 1
     const [cmd, sender] = command
-    expect(data).toEqual(cmd)
+    expect(data).toStrictEqual(cmd)
 
     return sender()
   }
@@ -119,12 +119,8 @@ export interface MockStreamContext {
 
 export function commandStreamModule(context: MockStreamContext) {
   return function $commandStreamModule() {
-    const createCommandStream = vi
-      .fn<typeof create>()
-      .mockImplementation(async () => await Promise.resolve(context.stream))
-
     return {
-      createCommandStream
+      createCommandStream: async () => await Promise.resolve(context.stream)
     }
   }
 }

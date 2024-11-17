@@ -13,7 +13,6 @@ import type { I18nSchema } from '../locales/locales'
 import type { Source } from '../services/sources'
 import type { NewTie } from '../services/ties'
 import type { DeepReadonly } from 'vue'
-import { deepClone } from '@/object'
 
 const props = defineProps<{
   // Dialog
@@ -46,7 +45,7 @@ const sources = useSources()
 // eslint-disable-next-line vue/no-setup-props-reactivity-loss -- Prop reactivity not desired.
 const target = ref<NewTie>({
   // eslint-disable-next-line vue/no-setup-props-reactivity-loss -- Prop reactivity not desired.
-  ...deepClone(props.tie),
+  ...structuredClone(props.tie),
   ...(props.source != null ? { sourceId: props.source._id } : {})
 })
 
@@ -142,7 +141,7 @@ const { cardProps, isFullscreen, body, showDividers } = useTieDialog()
 </script>
 
 <template>
-  <VCard :laoding="isBusy" v-bind="cardProps">
+  <VCard :loading="isBusy" v-bind="cardProps">
     <VToolbar v-if="isFullscreen" :title="title" color="transparent">
       <template #prepend>
         <VBtn :icon="mdiClose" @click="cancelIfConfirmed" />
@@ -215,7 +214,7 @@ en:
     inputChannel: Input channel
     outputChannel: Output channel
     audioChannel: Output audio channel
-    sync: Synchronise audio and vidoe channels
+    sync: Synchronize audio and video channels
   message:
     discardNew: Do you want to discard this tie?
 </i18n>

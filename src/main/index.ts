@@ -1,7 +1,7 @@
 import { app } from 'electron'
 import unhandled from 'electron-unhandled'
 
-// Activate the unhandle handler...
+// Activate the unhandled handler...
 unhandled()
 
 async function main() {

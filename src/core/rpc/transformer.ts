@@ -27,7 +27,7 @@ export default function useSuperJson() {
     {
       isApplicable: (v): v is () => undefined => typeof v === 'function',
       serialize: (_: () => undefined) => raiseError(() => new TypeError('Functions may not be serialized')),
-      deserialize: (_: never) => () => undefined
+      deserialize: (_: never) => raiseError(() => new TypeError('Functions may not be serialized'))
     },
     'Function'
   )

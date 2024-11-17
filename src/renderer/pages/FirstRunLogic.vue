@@ -50,6 +50,9 @@ const steps = [
 watchOnce(isReady, async function doFirstRun() {
   console.debug(`Done first steps: ${doneFirstRun.value}`)
   try {
+    // Check if the entry needs to be updated.
+    await startup.checkUp()
+
     /* eslint-disable no-await-in-loop */
     for (const [index, step] of steps.entries()) {
       if (doneFirstRun.value >= index) {

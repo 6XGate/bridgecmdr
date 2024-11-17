@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { NewSource, SourceUpdate, useSourcesDatabase } from '../../dao/sources'
+import useSourcesDatabase, { NewSource, SourceUpdate } from '../../dao/sources'
 import { DocumentId } from '../../services/database'
 import { procedure, router } from '../../services/rpc/trpc'
 import { Attachment } from '@/attachments'
@@ -21,6 +21,9 @@ export default function useSourcesRouter() {
     update: procedure.input(UpdateInputs).mutation(async ({ input }) => await sources.update(...input)),
     remove: procedure.input(DocumentId).mutation(async ({ input }) => {
       await sources.remove(input)
+    }),
+    clear: procedure.mutation(async () => {
+      await sources.clear()
     })
   })
 }

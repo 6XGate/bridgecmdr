@@ -12,7 +12,6 @@ import { useDialogs, useSwitchDialog } from './dialogs'
 import type { I18nSchema } from '../locales/locales'
 import type { NewSwitch } from '../services/switches'
 import type { DeepReadonly } from 'vue'
-import { deepClone } from '@/object'
 
 const props = defineProps<{
   // Dialog
@@ -40,7 +39,7 @@ const ports = usePorts()
 onBeforeMount(ports.all)
 
 // eslint-disable-next-line vue/no-setup-props-reactivity-loss -- Prop reactivity not desired.
-const target = ref<NewSwitch>(deepClone(props.switch))
+const target = ref<NewSwitch>(structuredClone(props.switch))
 const location = computed({
   get: () => v$.path.$model,
   set: (v) => {
@@ -51,7 +50,7 @@ const location = computed({
 const { locationPath, pathTypes, pathType, path } = useLocation(location, () => ports.items)
 
 const driver = computed(() => drivers.items.find((d) => d.guid === target.value.driverId))
-const driverSerach = ref('')
+const driverSearch = ref('')
 const driverKind = computed(() => (driver.value?.kind === 'monitor' ? t('label.monitor') : t('label.switch')))
 
 function confirm() {
@@ -124,7 +123,7 @@ const title = computed(() =>
           v-bind="getStatus(v$.title)" />
         <VSelect
           v-model="v$.driverId.$model"
-          v-model:search="driverSerach"
+          v-model:search="driverSearch"
           :label="t('label.driver')"
           :items="drivers.items"
           item-title="title"
@@ -143,7 +142,7 @@ const title = computed(() =>
           </template>
           <template #item="{ props: itemProps, item }">
             <VListItem v-bind="itemProps">
-              <template #title><Highlight :text="item.title" :search="driverSerach"></Highlight></template>
+              <template #title><Highlight :text="item.title" :search="driverSearch"></Highlight></template>
               <template v-if="item.raw.experimental" #append>
                 <VTooltip :text="t('label.experimental')">
                   <template #activator="{ props: tooltipProps }">

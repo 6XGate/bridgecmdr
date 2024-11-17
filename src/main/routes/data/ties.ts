@@ -17,6 +17,9 @@ export default function useTiesRouter() {
     remove: procedure.input(DocumentId).mutation(async ({ input }) => {
       await ties.remove(input)
     }),
+    clear: procedure.mutation(async () => {
+      await ties.clear()
+    }),
     forSwitch: procedure.input(DocumentId).query(async ({ input }) => await ties.forSwitch(input)),
     forSource: procedure.input(DocumentId).query(async ({ input }) => await ties.forSource(input))
   })

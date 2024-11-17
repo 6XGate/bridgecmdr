@@ -5,12 +5,15 @@ import useStartup from '../services/startup'
 const useStartupRouter = memo(function useStartupRouter() {
   const startup = useStartup()
   return router({
-    checkEnabled: procedure.query(async () => await (await startup).checkEnabled()),
+    checkEnabled: procedure.query(async () => await startup.checkEnabled()),
+    checkUp: procedure.mutation(async () => {
+      await startup.checkUp()
+    }),
     enable: procedure.mutation(async () => {
-      await (await startup).enable()
+      await startup.enable()
     }),
     disable: procedure.mutation(async () => {
-      await (await startup).disable()
+      await startup.disable()
     })
   })
 })

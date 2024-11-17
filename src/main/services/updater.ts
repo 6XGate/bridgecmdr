@@ -5,8 +5,9 @@ import autoBind from 'auto-bind'
 import { app } from 'electron'
 import { autoUpdater } from 'electron-updater'
 import { memo } from 'radash'
-import { isNodeError, logError } from '../utilities'
+import { logError } from '../utilities'
 import type { UpdateCheckResult, ProgressInfo, CancellationToken, UpdateInfo } from 'electron-updater'
+import { isNodeError } from '@/error-handling'
 
 export type { UpdateInfo, ProgressInfo } from 'electron-updater'
 
@@ -37,7 +38,7 @@ const useUpdater = memo(function useUpdater() {
   class AppUpdater extends EventEmitter<AppUpdaterEventMap> {
     #checkPromise: Promise<UpdateCheckResult | null> | undefined = undefined
     #cancelToken: CancellationToken | undefined = undefined
-    #donwloadPromise: Promise<string[]> | undefined = undefined
+    #downloadPromise: Promise<string[]> | undefined = undefined
 
     constructor() {
       super()
@@ -74,7 +75,7 @@ const useUpdater = memo(function useUpdater() {
         throw cause
       }
 
-      // If the result is null or the cancel token is null, no update is avilable.
+      // If the result is null or the cancel token is null, no update is available.
       if (result?.cancellationToken == null) {
         return null
       }
@@ -85,7 +86,7 @@ const useUpdater = memo(function useUpdater() {
     }
 
     private async attemptCheckForUpdates() {
-      if (this.#donwloadPromise != null) {
+      if (this.#downloadPromise != null) {
         throw logError(new ReferenceError('Update download already in progress'))
       }
 
@@ -123,8 +124,8 @@ const useUpdater = memo(function useUpdater() {
       }
       try {
         autoUpdater.on('download-progress', handleProgress)
-        this.#donwloadPromise = autoUpdater.downloadUpdate(this.#cancelToken)
-        await this.#donwloadPromise
+        this.#downloadPromise = autoUpdater.downloadUpdate(this.#cancelToken)
+        await this.#downloadPromise
       } finally {
         autoUpdater.off('download-progress', handleProgress)
         this.#cancelToken = undefined
@@ -132,8 +133,8 @@ const useUpdater = memo(function useUpdater() {
     }
 
     async downloadUpdate() {
-      if (this.#donwloadPromise != null) {
-        await this.#donwloadPromise
+      if (this.#downloadPromise != null) {
+        await this.#downloadPromise
       } else {
         await this.attemptDownloadUpdate()
       }

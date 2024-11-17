@@ -8,7 +8,7 @@ import { memo } from 'radash'
 import { xdgConfig } from 'xdg-basedir'
 import { DesktopEntryFile, readyEntry } from './desktop'
 
-const useStartup = memo(async function useStartup() {
+const useStartup = memo(function useStartup() {
   const configPath = xdgConfig != null ? resolvePath(xdgConfig) : resolvePath(homedir(), '.config')
 
   const autoStartDir = joinPath(configPath, 'autostart')
@@ -72,10 +72,9 @@ const useStartup = memo(async function useStartup() {
     }
   }
 
-  await checkUp()
-
   return {
     checkEnabled,
+    checkUp,
     enable,
     disable
   }

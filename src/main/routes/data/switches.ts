@@ -1,4 +1,4 @@
-import { NewSwitch, SwitchUpdate, useSwitchesDatabase } from '../../dao/switches'
+import useSwitchesDatabase, { NewSwitch, SwitchUpdate } from '../../dao/switches'
 import { DocumentId } from '../../services/database'
 import { procedure, router } from '../../services/rpc/trpc'
 
@@ -16,6 +16,9 @@ export default function useSourcesRouter() {
     update: procedure.input(SwitchUpdate).mutation(async ({ input }) => await switches.update(input)),
     remove: procedure.input(DocumentId).mutation(async ({ input }) => {
       await switches.remove(input)
+    }),
+    clear: procedure.mutation(async () => {
+      await switches.clear()
     })
   })
 }

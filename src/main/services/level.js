@@ -27,6 +27,7 @@ export const useLevelDb = memo(function useLevelDb() {
       const db = levelDown(path)
       app.on('will-quit', () => {
         db.close((err) => {
+          /* v8 ignore next 1 */ // No way to spy or mock this deep in.
           if (err != null) console.error(err)
         })
       })
@@ -51,6 +52,7 @@ export const useLevelDb = memo(function useLevelDb() {
            * @param {Error|undefined} error
            */
           const cb = (error) => {
+            /* v8 ignore next 2 */ // No way to spy or mock this deep in.
             if (error == null) resolve(up)
             else reject(error)
           }
@@ -78,7 +80,7 @@ export const useLevelAdapter = memo(function useLevelAdapter() {
    * @param {ErrorCallback} cb
    */
   function MainDown(opts, cb) {
-    // eslint-disable-next-line -- Eveything is messed up with no typings.
+    // eslint-disable-next-line -- Everything is messed up with no typings.
     LevelPouch.call(this, { ...opts, db: leveldown }, cb)
   }
 
@@ -91,7 +93,7 @@ export const useLevelAdapter = memo(function useLevelAdapter() {
   /** @type {PouchDB.Plugin<PouchDB.Static>} */
   const plugin = (pouch) => {
     // @ts-expect-error -- Not defined in the types.
-    // eslint-disable-next-line -- Eveything is messed up with no typings.
+    // eslint-disable-next-line -- Everything is messed up with no typings.
     pouch.adapter('maindb', MainDown, true)
   }
 
