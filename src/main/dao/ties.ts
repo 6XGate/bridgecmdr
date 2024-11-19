@@ -17,7 +17,7 @@ const indices = { sourceId: ['sourceId'], switchId: ['switchId'] }
 const useTiesDatabase = memo(
   () =>
     new (class extends Database.of('ties', TieModel, indices) {
-      async forSwitch(switchId: DocumentId) {
+      async forDevice(switchId: DocumentId) {
         return await this.run(
           async (db) =>
             await db

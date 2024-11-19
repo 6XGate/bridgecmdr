@@ -3,7 +3,7 @@ import { toValue, computed, readonly } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { I18nSchema } from '../locales/locales'
 import type { PortEntry } from '../services/ports'
-import type { NewSwitch } from '../services/switches'
+import type { NewDevice } from '../services/switches'
 import type { LocationType } from '@/location'
 import type { MessageProps } from '@vuelidate/validators'
 import type { MaybeRefOrGetter, Ref } from 'vue'
@@ -102,7 +102,7 @@ export function useLocation(location: Ref<string | undefined>, validSwitches: Ma
 }
 
 export const useSwitchLocation = (
-  switcher: MaybeRefOrGetter<NewSwitch>,
+  switcher: MaybeRefOrGetter<NewDevice>,
   validSwitches: MaybeRefOrGetter<readonly PortEntry[]>
 ) => {
   const location = computed({

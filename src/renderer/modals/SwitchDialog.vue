@@ -10,7 +10,7 @@ import useDrivers from '../services/driver'
 import usePorts from '../services/ports'
 import { useDialogs, useSwitchDialog } from './dialogs'
 import type { I18nSchema } from '../locales/locales'
-import type { NewSwitch } from '../services/switches'
+import type { NewDevice } from '../services/switches'
 import type { DeepReadonly } from 'vue'
 
 const props = defineProps<{
@@ -19,12 +19,12 @@ const props = defineProps<{
   visible?: boolean
   // Form
   editing: boolean
-  switch: DeepReadonly<NewSwitch>
+  switch: DeepReadonly<NewDevice>
 }>()
 
 const emit = defineEmits<{
   (on: 'update:visible', value: boolean): void
-  (on: 'confirm', value: NewSwitch): void
+  (on: 'confirm', value: NewDevice): void
 }>()
 
 const { t } = useI18n<I18nSchema>()
@@ -39,7 +39,7 @@ const ports = usePorts()
 onBeforeMount(ports.all)
 
 // eslint-disable-next-line vue/no-setup-props-reactivity-loss -- Prop reactivity not desired.
-const target = ref<NewSwitch>(structuredClone(props.switch))
+const target = ref<NewDevice>(structuredClone(props.switch))
 const location = computed({
   get: () => v$.path.$model,
   set: (v) => {

@@ -11,7 +11,7 @@ import useDrivers from '../services/driver'
 import { useSwitches } from '../services/switches'
 import type { I18nSchema } from '../locales/locales'
 import type { DriverInformation } from '../services/driver'
-import type { NewSwitch, Switch } from '../services/switches'
+import type { NewDevice, Device } from '../services/switches'
 import type { DeepReadonly } from 'vue'
 import { isNotNullish } from '@/basics'
 
@@ -22,7 +22,7 @@ const dialogs = useDialogs()
 const { t } = useI18n<I18nSchema>()
 
 interface Item {
-  switch: DeepReadonly<Switch>
+  switch: DeepReadonly<Device>
   driver: DriverInformation
 }
 
@@ -45,7 +45,7 @@ const refresh = useGuardedAsyncOp(async () => {
 
 onMounted(refresh)
 
-async function addSwitch(target: NewSwitch) {
+async function addSwitch(target: NewDevice) {
   try {
     await switches.add(target)
   } catch (e) {
@@ -54,7 +54,7 @@ async function addSwitch(target: NewSwitch) {
   }
 }
 
-async function updateSwitch(target: Switch, changes: NewSwitch) {
+async function updateSwitch(target: Device, changes: NewDevice) {
   try {
     await switches.update({ ...target, ...changes })
   } catch (e) {

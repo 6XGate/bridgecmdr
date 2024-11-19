@@ -1,16 +1,16 @@
 import { alphabetical, map } from 'radash'
+import useDevicesDatabase from '../../main/dao/devices'
 import useSourcesDatabase from '../../main/dao/sources'
-import useSwitchesDatabase from '../../main/dao/switches'
 import useTiesDatabase from '../../main/dao/ties'
 import useDrivers from '../../main/services/drivers'
+import type { Device } from '../../main/dao/devices'
 import type { Source } from '../../main/dao/sources'
-import type { Switch } from '../../main/dao/switches'
 import type { Tie } from '../../main/dao/ties'
 import { Attachment } from '@/attachments'
 import { raiseError } from '@/error-handling'
 
 export async function seedDatabase() {
-  const switchDao = useSwitchesDatabase()
+  const switchDao = useDevicesDatabase()
   const sourceDao = useSourcesDatabase()
   const tieDao = useTiesDatabase()
 
@@ -33,7 +33,7 @@ export async function seedDatabase() {
       { title: 'Sony BVM24D', driverId: sonyRemote.guid, path: 'port:/dev/ttys1' }
     ],
     async (doc) => await switchDao.add(doc)
-  )) as [Switch, Switch, Switch]
+  )) as [Device, Device, Device]
 
   const file = new File([Buffer.from('test')], 'test.txt', { type: 'text/plain' })
   const image = await Attachment.fromFile(file)

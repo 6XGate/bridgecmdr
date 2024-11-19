@@ -19,7 +19,7 @@ import type { I18nSchema } from '../locales/locales'
 import type { DriverInformation } from '../services/driver'
 import type { Source } from '../services/sources'
 import type { DocumentId } from '../services/store'
-import type { Switch } from '../services/switches'
+import type { Device } from '../services/switches'
 import type { NewTie, Tie } from '../services/ties'
 import type { DeepReadonly } from 'vue'
 import { isNotNullish } from '@/basics'
@@ -89,7 +89,7 @@ onBeforeMount(loadSource)
 //
 
 interface TieEntry {
-  switch: DeepReadonly<Switch>
+  switch: DeepReadonly<Device>
   driver: DriverInformation
   tie: DeepReadonly<Tie>
 }

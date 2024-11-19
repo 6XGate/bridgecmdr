@@ -4,8 +4,6 @@ import { DocumentId } from '../../services/database'
 import { procedure, router } from '../../services/rpc/trpc'
 import { Attachment } from '@/attachments'
 
-export type { Source, NewSource, SourceUpdate } from '../../dao/sources'
-
 const InsertInputs = z.tuple([NewSource]).rest(z.instanceof(Attachment))
 const UpdateInputs = z.tuple([SourceUpdate]).rest(z.instanceof(Attachment))
 

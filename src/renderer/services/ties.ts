@@ -40,7 +40,7 @@ export const useTies = defineStore('ties', function defineTies() {
     return id
   })
 
-  const forSwitch = store.defineFetchMany(async (id: DocumentId) => await ties.forSwitch.query(id))
+  const forSwitch = store.defineFetchMany(async (id: DocumentId) => await ties.forDevice.query(id))
 
   const forSource = store.defineFetchMany(async (id: DocumentId) => await ties.forSource.query(id))
 

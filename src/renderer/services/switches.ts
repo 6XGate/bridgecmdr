@@ -3,15 +3,15 @@ import { forceUndefined } from '../hooks/utilities'
 import { useClient } from './rpc/trpc'
 import { useDataStore } from './store'
 import type { DocumentId } from './store'
-import type { NewSwitch, Switch, SwitchUpdate } from '../../preload/api'
+import type { NewDevice, Device, DeviceUpdate } from '../../preload/api'
 
-export type { NewSwitch, Switch, SwitchUpdate } from '../../preload/api'
+export type { NewDevice, Device, DeviceUpdate } from '../../preload/api'
 
 export const useSwitches = defineStore('switches', function defineSwitches() {
-  const { switches } = useClient()
-  const store = useDataStore<Switch>()
+  const { devices } = useClient()
+  const store = useDataStore<Device>()
 
-  function blank(): NewSwitch {
+  function blank(): NewDevice {
     return {
       driverId: forceUndefined(),
       title: forceUndefined(),
@@ -20,19 +20,19 @@ export const useSwitches = defineStore('switches', function defineSwitches() {
   }
 
   const compact = store.defineOperation(async () => {
-    await switches.compact.mutate()
+    await devices.compact.mutate()
   })
 
-  const all = store.defineFetchMany(async () => await switches.all.query())
+  const all = store.defineFetchMany(async () => await devices.all.query())
 
-  const get = store.defineFetch(async (id: DocumentId) => await switches.get.query(id))
+  const get = store.defineFetch(async (id: DocumentId) => await devices.get.query(id))
 
-  const add = store.defineInsertion(async (document: NewSwitch) => await switches.add.mutate(document))
+  const add = store.defineInsertion(async (document: NewDevice) => await devices.add.mutate(document))
 
-  const update = store.defineMutation(async (document: SwitchUpdate) => await switches.update.mutate(document))
+  const update = store.defineMutation(async (document: DeviceUpdate) => await devices.update.mutate(document))
 
   const remove = store.defineRemoval(async (id: DocumentId) => {
-    await switches.remove.mutate(id)
+    await devices.remove.mutate(id)
     return id
   })
 

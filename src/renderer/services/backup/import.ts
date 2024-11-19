@@ -98,12 +98,12 @@ export async function importSettings(file: File) {
       const switchItem = switches.items.find((s) => s._id === item.switchId)
       // Non-fatally skip ties that reference missing switches or sources.
       if (sourceItem == null) {
-        console.warn(`Switch for tie no longer present; ${item.sourceId}`)
+        console.warn(`Source for tie no longer present; ${item.sourceId}`)
         return
       }
 
       if (switchItem == null) {
-        console.warn(`Switch for tie no longer present; ${item.switchId}`)
+        console.warn(`Device for tie no longer present; ${item.switchId}`)
         return
       }
 

@@ -1,8 +1,8 @@
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
-import useSwitchesDatabase from '../../../main/dao/switches'
+import useDevicesDatabase from '../../../main/dao/devices'
 import useTiesDatabase from '../../../main/dao/ties'
 import { seedDatabase } from '../../seeds/database.seed'
-import type { NewSwitch } from '../../../main/dao/switches'
+import type { NewDevice } from '../../../main/dao/devices'
 import { Attachment } from '@/attachments'
 
 const mock = await vi.hoisted(async () => await import('../../support/mock'))
@@ -13,12 +13,12 @@ beforeAll(() => {
 })
 
 let database: Awaited<ReturnType<typeof seedDatabase>>
-let switchesDao: ReturnType<typeof useSwitchesDatabase>
+let switchesDao: ReturnType<typeof useDevicesDatabase>
 let tiesDao: ReturnType<typeof useTiesDatabase>
 
 beforeEach(async () => {
   database = await seedDatabase()
-  switchesDao = useSwitchesDatabase()
+  switchesDao = useDevicesDatabase()
   tiesDao = useTiesDatabase()
 })
 
@@ -46,7 +46,7 @@ const kRevPattern = /^[0-9]-[0-9a-f]{32}$/u
 test('adding', async () => {
   const file = new File([Buffer.from('hello')], 'hello.txt', { type: 'text/plain' })
   const attachment = await Attachment.fromFile(file)
-  const raw = { title: 'Extron', driverId: database.extronSis.guid, path: 'ip:192.168.10.2' } satisfies NewSwitch
+  const raw = { title: 'Extron', driverId: database.extronSis.guid, path: 'ip:192.168.10.2' } satisfies NewDevice
   const doc = await switchesDao.add(raw, attachment)
 
   expect(doc._id).toMatch(kUuidPattern)
