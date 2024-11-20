@@ -7,7 +7,7 @@ const useSerialPortRouter = memo(function useSerialPortRouter() {
   const ports = useSerialPorts()
 
   return router({
-    list: procedure.query(ports.listPorts),
+    list: procedure.query(async () => await ports.listPorts()),
     isPort: procedure.input(z.string()).query(async ({ input }) => await ports.isValidPort(input))
   })
 })

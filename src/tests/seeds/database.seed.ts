@@ -50,14 +50,14 @@ export async function seedDatabase() {
   const ties = (await map(
     [
       // NES
-      { sourceId: sources[0]._id, switchId: switches[0]._id, inputChannel: 1, outputChannels: { video: 1 } },
-      { sourceId: sources[0]._id, switchId: switches[2]._id, inputChannel: 1, outputChannels: {} },
+      { sourceId: sources[0]._id, deviceId: switches[0]._id, inputChannel: 1, outputChannels: { video: 1 } },
+      { sourceId: sources[0]._id, deviceId: switches[2]._id, inputChannel: 1, outputChannels: {} },
       // SNES (HDMI FGPA clone)
-      { sourceId: sources[1]._id, switchId: switches[1]._id, inputChannel: 1, outputChannels: { video: 1 } },
-      { sourceId: sources[1]._id, switchId: switches[2]._id, inputChannel: 2, outputChannels: {} },
+      { sourceId: sources[1]._id, deviceId: switches[1]._id, inputChannel: 1, outputChannels: { video: 1 } },
+      { sourceId: sources[1]._id, deviceId: switches[2]._id, inputChannel: 2, outputChannels: {} },
       // N64
-      { sourceId: sources[2]._id, switchId: switches[0]._id, inputChannel: 2, outputChannels: { video: 1 } },
-      { sourceId: sources[2]._id, switchId: switches[2]._id, inputChannel: 1, outputChannels: {} }
+      { sourceId: sources[2]._id, deviceId: switches[0]._id, inputChannel: 2, outputChannels: { video: 1 } },
+      { sourceId: sources[2]._id, deviceId: switches[2]._id, inputChannel: 1, outputChannels: {} }
     ],
     async (doc) => await tieDao.add(doc)
   )) as [Tie, Tie, Tie, Tie, Tie, Tie]

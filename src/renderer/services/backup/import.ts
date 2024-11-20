@@ -95,7 +95,7 @@ export async function importSettings(file: File) {
   await Promise.all(
     data.layouts.ties.map(async (item) => {
       const sourceItem = sources.items.find((s) => s._id === item.sourceId)
-      const switchItem = switches.items.find((s) => s._id === item.switchId)
+      const switchItem = switches.items.find((d) => d._id === item.deviceId)
       // Non-fatally skip ties that reference missing switches or sources.
       if (sourceItem == null) {
         console.warn(`Source for tie no longer present; ${item.sourceId}`)
@@ -103,7 +103,7 @@ export async function importSettings(file: File) {
       }
 
       if (switchItem == null) {
-        console.warn(`Device for tie no longer present; ${item.switchId}`)
+        console.warn(`Device for tie no longer present; ${item.deviceId}`)
         return
       }
 

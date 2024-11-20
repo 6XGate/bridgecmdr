@@ -100,7 +100,7 @@ const ties = useTies()
 const entries = computed(() =>
   ties.items
     .map(function makeEntry(tie) {
-      const switcher = switches.items.find((s) => s._id === tie.switchId)
+      const switcher = switches.items.find((s) => s._id === tie.deviceId)
       const driver = switcher != null ? drivers.items.find((d) => d.guid === switcher.driverId) : undefined
 
       return switcher != null && driver != null ? ({ switch: switcher, driver, tie } satisfies TieEntry) : undefined

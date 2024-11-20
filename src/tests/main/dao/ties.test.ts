@@ -45,7 +45,7 @@ test('adding', async () => {
   const attachment = await Attachment.fromFile(file)
   const raw = {
     sourceId: database.sources[2]._id,
-    switchId: database.switches[1]._id,
+    deviceId: database.switches[1]._id,
     inputChannel: 3,
     outputChannels: { video: 6 }
   } satisfies NewTie

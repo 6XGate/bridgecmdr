@@ -32,7 +32,7 @@ export async function exportSettings() {
       layouts: {
         sources: sources.items.map((item) => pick(item, ['_id', 'title', 'image'])),
         switches: switches.items.map((item) => pick(item, ['_id', 'driverId', 'path', 'title'])),
-        ties: ties.items.map((item) => pick(item, ['_id', 'sourceId', 'switchId', 'inputChannel', 'outputChannels']))
+        ties: ties.items.map((item) => pick(item, ['_id', 'sourceId', 'deviceId', 'inputChannel', 'outputChannels']))
       }
     })
   )

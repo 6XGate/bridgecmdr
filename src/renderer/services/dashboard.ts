@@ -78,18 +78,18 @@ export const useDashboard = defineStore('dashboard', function defineDashboard() 
     const commands = ties.items
       .filter((tie) => tie.sourceId === source._id)
       .map(function makeCommand(tie) {
-        const switcher = switches.items.find((item) => tie.switchId === item._id)
-        const driver = loadedDrivers.get(tie.switchId)
+        const switcher = switches.items.find((item) => tie.deviceId === item._id)
+        const driver = loadedDrivers.get(tie.deviceId)
 
         if (switcher == null) {
-          console.error(`${tie.switchId}: No such switch for source "${source.title}"`)
+          console.error(`${tie.deviceId}: No such device for source "${source.title}"`)
 
           return undefined
         }
 
         if (driver == null) {
           console.error(
-            `${switcher.driverId}:  No such driver for switch "${switcher.title}" used by source "${source.title}"`
+            `${switcher.driverId}:  No such driver for device "${switcher.title}" used by source "${source.title}"`
           )
 
           return undefined

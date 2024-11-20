@@ -4,7 +4,7 @@ import { Database, DocumentId, inferDocumentOf, inferNewDocumentOf, inferUpdates
 
 export const TieModel = z.object({
   sourceId: DocumentId,
-  switchId: DocumentId,
+  deviceId: DocumentId,
   inputChannel: z.number().int().nonnegative(),
   outputChannels: z.object({
     video: z.number().int().nonnegative().optional(),
@@ -12,16 +12,16 @@ export const TieModel = z.object({
   })
 })
 
-const indices = { sourceId: ['sourceId'], switchId: ['switchId'] }
+const indices = { sourceId: ['sourceId'], deviceId: ['deviceId'] }
 
 const useTiesDatabase = memo(
   () =>
     new (class extends Database.of('ties', TieModel, indices) {
-      async forDevice(switchId: DocumentId) {
+      async forDevice(deviceId: DocumentId) {
         return await this.run(
           async (db) =>
             await db
-              .find({ selector: { switchId } })
+              .find({ selector: { deviceId } })
               .then(async (r) => await map(r.docs, async (d) => await this.prepare(d)))
         )
       }

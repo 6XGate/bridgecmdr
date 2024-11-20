@@ -3,6 +3,7 @@ import { useAsyncState, useLocalStorage, watchOnce } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
 import { trackBusy } from '../hooks/tracking'
 import { useDialogs } from '../modals/dialogs'
+import useMigration from '../services/migration'
 import { useClient } from '../services/rpc/trpc'
 import useStartup from '../services/startup'
 import type { I18nSchema } from '../locales/locales'
@@ -18,6 +19,7 @@ const { state: appInfo, isReady } = useAsyncState(async () => await useClient().
 })
 
 const startup = useStartup()
+const migrate = useMigration()
 
 const steps = [
   // v0: does nothing...
@@ -52,6 +54,10 @@ watchOnce(isReady, async function doFirstRun() {
   try {
     // Check if the entry needs to be updated.
     await startup.checkUp()
+
+    // Always "run" migrations, this just checks
+    // what the status was when run at startup.
+    await migrate()
 
     /* eslint-disable no-await-in-loop */
     for (const [index, step] of steps.entries()) {

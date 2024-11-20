@@ -12,7 +12,7 @@ export const DeviceModel = z.object({
 
 const useDevicesDatabase = memo(
   () =>
-    new (class extends Database.of('switches', DeviceModel) {
+    new (class extends Database.of('devices', DeviceModel) {
       readonly #ties = useTiesDatabase()
 
       override async remove(id: DocumentId, rev?: RevisionId) {

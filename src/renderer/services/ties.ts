@@ -14,7 +14,7 @@ export const useTies = defineStore('ties', function defineTies() {
   function blank(): NewTie {
     return {
       sourceId: forceUndefined(),
-      switchId: forceUndefined(),
+      deviceId: forceUndefined(),
       inputChannel: forceUndefined(),
       outputChannels: {
         video: undefined,

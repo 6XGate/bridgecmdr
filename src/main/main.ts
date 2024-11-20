@@ -6,6 +6,7 @@ import Logger from 'electron-log'
 import { sleep } from 'radash'
 import appIcon from '../../resources/icon.png?asset&asarUnpack'
 import { useAppRouter } from './routes/router'
+import useMigrations from './services/migration'
 import { createIpcHandler } from './services/rpc/ipc'
 import { logError } from './utilities'
 import { toError } from '@/error-handling'
@@ -105,6 +106,11 @@ process.on('SIGTERM', () => {
 // windows. Some APIs can only be used after
 // this event occurs.
 await app.whenReady()
+
+const migrate = useMigrations()
+await migrate().catch((cause: unknown) => {
+  Logger.error(cause)
+})
 
 // Set app user model id for windows
 electronApp.setAppUserModelId('org.sleepingcats.BridgeCmdr')

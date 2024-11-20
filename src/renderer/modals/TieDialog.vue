@@ -73,7 +73,7 @@ const videoOutputChannel = computed({
   }
 })
 
-const switcher = computed(() => switches.items.find((s) => s._id === target.value.switchId))
+const switcher = computed(() => switches.items.find((s) => s._id === target.value.deviceId))
 
 const driver = computed(() =>
   switcher.value != null ? drivers.items.find((d) => d.guid === switcher.value?.driverId) : undefined
@@ -127,7 +127,7 @@ function cancel() {
 const { integer, minValue, required, requiredIf, uuid } = useRules()
 const rules = reactive({
   sourceId: { required, uuid },
-  switchId: { required, uuid },
+  deviceId: { required, uuid },
   inputChannel: { required, integer, ...minValue(1) },
   outputChannels: {
     video: { ...requiredIf(hasOutputChannel), integer, ...minValue(1) },
@@ -157,14 +157,14 @@ const { cardProps, isFullscreen, body, showDividers } = useTieDialog()
     <VCardText ref="body">
       <VForm :disabled="isBusy">
         <VSelect
-          v-model="v$.switchId.$model"
+          v-model="v$.deviceId.$model"
           :label="t('label.switchOrMonitor')"
           :items="switches.items"
           item-title="title"
           item-value="_id"
           :placeholder="t('placeholder.required')"
-          v-bind="getStatus(v$.switchId)" />
-        <div v-if="target.switchId != null" class="colg d-flex flex-wrap justify-start">
+          v-bind="getStatus(v$.deviceId)" />
+        <div v-if="target.deviceId != null" class="colg d-flex flex-wrap justify-start">
           <NumberInput
             v-model="v$.inputChannel.$model"
             class="flex-grow-0 w-300px"

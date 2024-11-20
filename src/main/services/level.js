@@ -1,5 +1,6 @@
 import { resolve as resolvePath } from 'node:path'
 import { app } from 'electron'
+import Logger from 'electron-log'
 import levelDown from 'leveldown'
 import levelUp from 'levelup'
 // @ts-expect-error -- No types
@@ -28,7 +29,7 @@ export const useLevelDb = memo(function useLevelDb() {
       app.on('will-quit', () => {
         db.close((err) => {
           /* v8 ignore next 1 */ // No way to spy or mock this deep in.
-          if (err != null) console.error(err)
+          if (err != null) Logger.error(err)
         })
       })
 

@@ -1,11 +1,7 @@
 import { z } from 'zod'
+import { ColorScheme, IconSize, PowerOffTaps } from '../../settings'
 import { DocHeader } from './version0'
-import type { Export as V2 } from './version2'
 
-/**
- * Layout v1, will be used in Export v1 but
- * may be reused by later versions.
- */
 export type Layouts = z.output<typeof Layouts>
 export const Layouts = z.object({
   sources: z.array(
@@ -24,27 +20,26 @@ export const Layouts = z.object({
   ties: z.array(
     DocHeader.extend({
       sourceId: z.string().uuid(),
-      switchId: z.string().uuid(),
+      deviceId: z.string().uuid(),
       inputChannel: z.number().int(),
       outputChannels: z.object({
         video: z.number().int().optional(),
         audio: z.number().int().optional()
       })
-    }).transform(({ switchId, ...tie }) => ({ ...tie, deviceId: switchId }))
+    })
   )
 })
 
-/**
- * Export format v1.
- */
-export const Export = z
-  .object({
-    version: z.literal(1),
-    ...Layouts.shape
-  })
-  .transform(
-    ({ sources, switches, ties }): V2 => ({
-      version: 2,
-      layouts: { sources, switches, ties }
+export type Export = z.output<typeof Export>
+export const Export = z.object({
+  version: z.literal(3),
+  settings: z
+    .object({
+      iconSize: IconSize.optional(),
+      colorScheme: ColorScheme.optional(),
+      powerOnSwitchesAtStart: z.boolean().optional(),
+      powerOffWhen: PowerOffTaps.optional()
     })
-  )
+    .optional(),
+  layouts: Layouts
+})
