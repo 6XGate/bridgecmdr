@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import { map, memo, omit } from 'radash'
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
 import { z } from 'zod'
@@ -185,6 +186,204 @@ describe('updating document', () => {
       _id: doc._id,
       _rev: updated._rev,
       _attachments: doc._attachments
+    })
+  })
+})
+
+describe('upserting document', () => {
+  let raw: { x: number; y: number; z: number }
+  let attachment: Attachment
+  let doc: Awaited<ReturnType<typeof database.add>>
+  beforeEach(async () => {
+    raw = { x: 3, y: 4, z: 5 }
+    const file = new File([Buffer.from('hello')], 'hello.txt', { type: 'text/plain' })
+    attachment = await Attachment.fromFile(file)
+    doc = await database.add(raw)
+  })
+
+  test('new document', async () => {
+    const id = randomUUID()
+    const changes = { x: 13, y: 14, z: 15 }
+    const updated = await database.upsert({ _id: id, ...changes })
+    expect(updated._rev).toMatch(kRevPattern)
+    expect(updated).toStrictEqual({
+      ...raw,
+      ...changes,
+      _id: id.toUpperCase(),
+      _rev: updated._rev,
+      _attachments: []
+    })
+  })
+
+  describe('existing document', () => {
+    test('just document', async () => {
+      const changes = { x: 13, y: 14, z: 15 }
+      const updated = await database.upsert({ _id: doc._id, ...changes })
+      expect(updated._rev).toMatch(kRevPattern)
+      expect(updated).toStrictEqual({
+        ...raw,
+        ...changes,
+        _id: doc._id,
+        _rev: updated._rev,
+        _attachments: doc._attachments
+      })
+    })
+
+    describe('with attachments', () => {
+      test('as parameter', async () => {
+        const changes = { x: 13, y: 14, z: 15 }
+        const updated = await database.upsert({ _id: doc._id, ...changes }, attachment)
+        expect(updated._rev).toMatch(kRevPattern)
+        expect(updated).toStrictEqual({
+          ...raw,
+          ...changes,
+          _id: doc._id,
+          _rev: updated._rev,
+          _attachments: [attachment]
+        })
+      })
+
+      test('existing on update payload', async () => {
+        const attached = await database.update({ _id: doc._id, y: 11 }, attachment)
+
+        const changes = { _id: doc._id, x: 13, y: 14, z: 15, _attachments: attached._attachments }
+        const updated = await database.upsert({ ...changes })
+        expect(updated._rev).toMatch(kRevPattern)
+        expect(updated).toStrictEqual({
+          ...raw,
+          ...changes,
+          _id: doc._id,
+          _rev: updated._rev,
+          _attachments: [attachment]
+        })
+      })
+
+      test('existing in database', async () => {
+        await expect(database.update({ _id: doc._id, y: 11 }, attachment)).resolves.toBeTruthy()
+
+        const changes = { _id: doc._id, x: 13, y: 14, z: 15 }
+        const updated = await database.upsert({ ...changes })
+        expect(updated._rev).toMatch(kRevPattern)
+        expect(updated).toStrictEqual({
+          ...raw,
+          ...changes,
+          _id: doc._id,
+          _rev: updated._rev,
+          _attachments: [attachment]
+        })
+      })
+    })
+
+    test('strips unknown fields', async () => {
+      const changes = { x: 13, y: 14, z: 15, a: 5 }
+      const updated = await database.upsert({ _id: doc._id, ...changes })
+      expect(updated._rev).toMatch(kRevPattern)
+      expect(updated).toStrictEqual({
+        ...raw,
+        ...omit(changes, ['a']),
+        _id: doc._id,
+        _rev: updated._rev,
+        _attachments: doc._attachments
+      })
+    })
+  })
+})
+
+describe('replacing document', () => {
+  let raw: { x: number; y: number; z: number }
+  let attachment: Attachment
+  let doc: Awaited<ReturnType<typeof database.add>>
+  beforeEach(async () => {
+    raw = { x: 3, y: 4, z: 5 }
+    const file = new File([Buffer.from('hello')], 'hello.txt', { type: 'text/plain' })
+    attachment = await Attachment.fromFile(file)
+    doc = await database.add(raw)
+  })
+
+  test('new document', async () => {
+    const id = randomUUID()
+    const changes = { x: 13, y: 14, z: 15 }
+    const updated = await database.replace({ _id: id, ...changes })
+    expect(updated._rev).toMatch(kRevPattern)
+    expect(updated).toStrictEqual({
+      ...raw,
+      ...changes,
+      _id: id.toUpperCase(),
+      _rev: updated._rev,
+      _attachments: []
+    })
+  })
+
+  describe('existing document', () => {
+    test('just document', async () => {
+      const changes = { x: 13, y: 14, z: 15 }
+      const updated = await database.replace({ _id: doc._id, ...changes })
+      expect(updated._rev).toMatch(kRevPattern)
+      expect(updated).toStrictEqual({
+        ...raw,
+        ...changes,
+        _id: doc._id,
+        _rev: updated._rev,
+        _attachments: doc._attachments
+      })
+    })
+
+    describe('with attachments', () => {
+      test('as parameter', async () => {
+        const changes = { x: 13, y: 14, z: 15 }
+        const updated = await database.replace({ _id: doc._id, ...changes }, attachment)
+        expect(updated._rev).toMatch(kRevPattern)
+        expect(updated).toStrictEqual({
+          ...raw,
+          ...changes,
+          _id: doc._id,
+          _rev: updated._rev,
+          _attachments: [attachment]
+        })
+      })
+
+      test('existing on update payload', async () => {
+        const attached = await database.update({ _id: doc._id, y: 11 }, attachment)
+
+        const changes = { _id: doc._id, x: 13, y: 14, z: 15, _attachments: attached._attachments }
+        const updated = await database.replace({ ...changes })
+        expect(updated._rev).toMatch(kRevPattern)
+        expect(updated).toStrictEqual({
+          ...raw,
+          ...changes,
+          _id: doc._id,
+          _rev: updated._rev,
+          _attachments: [attachment]
+        })
+      })
+
+      test('existing in database, not transferred', async () => {
+        await expect(database.update({ _id: doc._id, y: 11 }, attachment)).resolves.toBeTruthy()
+
+        const changes = { _id: doc._id, x: 13, y: 14, z: 15 }
+        const updated = await database.replace({ ...changes })
+        expect(updated._rev).toMatch(kRevPattern)
+        expect(updated).toStrictEqual({
+          ...raw,
+          ...changes,
+          _id: doc._id,
+          _rev: updated._rev,
+          _attachments: []
+        })
+      })
+    })
+
+    test('strips unknown fields', async () => {
+      const changes = { x: 13, y: 14, z: 15, a: 5 }
+      const updated = await database.replace({ _id: doc._id, ...changes })
+      expect(updated._rev).toMatch(kRevPattern)
+      expect(updated).toStrictEqual({
+        ...raw,
+        ...omit(changes, ['a']),
+        _id: doc._id,
+        _rev: updated._rev,
+        _attachments: doc._attachments
+      })
     })
   })
 })

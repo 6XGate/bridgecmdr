@@ -15,6 +15,7 @@ type State = z.infer<typeof State>
 const State = z.enum(['missed', 'failed', 'done'])
 const StateInDb = z
   .union([z.instanceof(Buffer), State])
+  /* v8 ignore next 1 */ // Generally one or the other most of the time.
   .transform((v) => (Buffer.isBuffer(v) ? State.parse(v.toString()) : v))
 
 const useMigrations = memo(function useMigrations() {
@@ -45,6 +46,7 @@ const useMigrations = memo(function useMigrations() {
       const state = StateInDb.parse(await database.get(name).catch(() => 'missed'))
       if (state === 'done') continue
 
+      /* v8 ignore next 2 */ // Difficult to test without injecting a broken migration.
       if (state === 'failed') {
         Logger.warn(`Attempting failed migration again: ${name}`)
       } else {
@@ -53,6 +55,7 @@ const useMigrations = memo(function useMigrations() {
 
       try {
         await migration.migrate()
+        /* v8 ignore next 4 */ // Difficult to test without injecting a broken migration.
       } catch (cause) {
         await database.put(name, 'failed')
         throw new Error(`Failed to complete migration: ${name}`, { cause })
@@ -60,12 +63,15 @@ const useMigrations = memo(function useMigrations() {
 
       try {
         await database.put(name, 'done')
+        /* v8 ignore next 4 */ // Difficult to test without injecting a broken migration.
       } catch (cause) {
         await database.put(name, 'failed')
         throw new Error(`Failed to record migration completion: ${name}`, { cause })
       }
     }
     /* eslint-enable no-await-in-loop */
+
+    await database.close()
   })
 
   return performMigration

@@ -17,6 +17,5 @@ export async function migrate() {
   }
 
   await switches.destroy()
-  await switches.close()
   await devices.close()
 }

@@ -1,6 +1,13 @@
 import { map, memo } from 'radash'
 import { z } from 'zod'
-import { Database, DocumentId, inferDocumentOf, inferNewDocumentOf, inferUpdatesOf } from '../services/database'
+import {
+  Database,
+  DocumentId,
+  inferDocumentOf,
+  inferNewDocumentOf,
+  inferUpdatesOf,
+  inferUpsertOf
+} from '../services/database'
 
 export const TieModel = z.object({
   sourceId: DocumentId,
@@ -43,5 +50,7 @@ export type NewTie = inferNewDocumentOf<typeof TieModel>
 export const NewTie = inferNewDocumentOf(TieModel)
 export type TieUpdate = inferUpdatesOf<typeof TieModel>
 export const TieUpdate = inferUpdatesOf(TieModel)
+export type TieUpsert = inferUpsertOf<typeof TieModel>
+export const TieUpsert = inferUpsertOf(TieModel)
 
 export default useTiesDatabase

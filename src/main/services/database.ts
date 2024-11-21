@@ -249,9 +249,11 @@ export class Database<RawSchema extends z.AnyZodObject> {
   /** Updates an existing document, or inserts a new one, with the given ID. */
   async upsert(document: Simplify<typeof this.__upsert__>, ...attachments: Attachment[]) {
     return await this.run(async (db) => {
-      const id = document._id
-      const old = await this.getDoc(id).catch(() => ({ _id: id, _rev: undefined, _attachments: undefined }))
-      const doc = { ...this.#schema.parse({ ...old, ...document }), _id: id, _rev: old._rev }
+      const id = document._id.toUpperCase()
+      const old = await this.getDoc(id).catch(() => ({ _rev: undefined, _attachments: undefined }))
+      const doc = old._rev
+        ? { ...this.#schema.parse(document), _id: id, _rev: old._rev }
+        : { ...this.#schema.parse(document), _id: id }
 
       const result = await db.put(doc)
       /* v8 ignore next 1 */ // Likely trigger by database corruption.
@@ -271,7 +273,7 @@ export class Database<RawSchema extends z.AnyZodObject> {
   /** Updates an existing document in the database. */
   async update(document: Simplify<typeof this.__updates__>, ...attachments: Attachment[]) {
     return await this.run(async (db) => {
-      const id = document._id
+      const id = document._id.toUpperCase()
       const old = await this.getDoc(id)
       const doc = { ...this.#schema.parse({ ...old, ...document }), _id: id, _rev: old._rev }
 
@@ -293,10 +295,14 @@ export class Database<RawSchema extends z.AnyZodObject> {
   /** Replaces an existing document, or inserts a new one, with the given ID  */
   async replace(document: Simplify<typeof this.__upsert__>, ...attachments: Attachment[]) {
     return await this.run(async (db) => {
-      const id = document._id
-      const doc = { ...this.#schema.parse(document), _id: id }
+      const id = document._id.toUpperCase()
+      const old = await this.getDoc(id).catch(() => ({ _rev: undefined, _attachments: undefined }))
+      const doc = old._rev
+        ? { ...this.#schema.parse(document), _id: id, _rev: old._rev }
+        : { ...this.#schema.parse(document), _id: id }
 
       const result = await db.put(doc)
+      // Unlike upsert, we don't transfer the existing attachments in the database to the new revision.
       /* v8 ignore next 1 */ // Likely trigger by database corruption.
       if (!result.ok) throw new Error(`Failed to insert document "${doc._id}"`)
       if (attachments.length > 0) {
