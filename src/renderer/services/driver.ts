@@ -26,7 +26,7 @@ export interface DriverInformation extends DriverBasicInformation, LocalizedDriv
   // Just combines the localized information with the basic information.
 }
 
-/** Driver to interact with switching devices. */
+/** Driver to interact with monitors or switches. */
 export interface Driver extends DriverInformation {
   /**
    * Sets input and output ties.

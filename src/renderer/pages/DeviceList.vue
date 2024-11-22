@@ -5,13 +5,13 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import Page from '../components/Page.vue'
 import { useGuardedAsyncOp } from '../hooks/utilities'
-import SwitchDialog from '../modals/SwitchDialog.vue'
-import { useDialogs, useSwitchDialog } from '../modals/dialogs'
+import DeviceDialog from '../modals/DeviceDialog.vue'
+import { useDialogs, useDeviceDialog } from '../modals/dialogs'
+import { useDevices } from '../services/data/devices'
 import useDrivers from '../services/driver'
-import { useSwitches } from '../services/switches'
 import type { I18nSchema } from '../locales/locales'
+import type { NewDevice, Device } from '../services/data/devices'
 import type { DriverInformation } from '../services/driver'
-import type { NewDevice, Device } from '../services/switches'
 import type { DeepReadonly } from 'vue'
 import { isNotNullish } from '@/basics'
 
@@ -22,53 +22,53 @@ const dialogs = useDialogs()
 const { t } = useI18n<I18nSchema>()
 
 interface Item {
-  switch: DeepReadonly<Device>
+  device: DeepReadonly<Device>
   driver: DriverInformation
 }
 
-const switches = useSwitches()
+const devices = useDevices()
 const drivers = useDrivers()
 const items = computed(() =>
-  switches.items
-    .map((item) => {
-      const driver = drivers.items.find((d) => d.guid === item.driverId)
+  devices.items
+    .map((device) => {
+      const driver = drivers.items.find((d) => d.guid === device.driverId)
 
-      return driver != null ? ({ switch: item, driver } satisfies Item) : undefined
+      return driver != null ? ({ device, driver } satisfies Item) : undefined
     })
     .filter(isNotNullish)
 )
 
 const refresh = useGuardedAsyncOp(async () => {
   // TODO: await drivers.all(), with busy tracking
-  await switches.all()
+  await devices.all()
 })
 
 onMounted(refresh)
 
-async function addSwitch(target: NewDevice) {
+async function addDevice(target: NewDevice) {
   try {
-    await switches.add(target)
+    await devices.add(target)
   } catch (e) {
     await dialogs.error(e)
     await refresh()
   }
 }
 
-async function updateSwitch(target: Device, changes: NewDevice) {
+async function updateDevice(target: Device, changes: NewDevice) {
   try {
-    await switches.update({ ...target, ...changes })
+    await devices.update({ ...target, ...changes })
   } catch (e) {
     await refresh()
     await dialogs.error(e)
   }
 }
 
-async function deleteSwitch(item: Item) {
+async function deleteDevice(item: Item) {
   const kind = item.driver.kind === 'monitor' ? t('label.monitor') : t('label.switch')
 
   const yes = await dialogs.confirm({
     title: t('message.confirmDeleteDevice', [kind]),
-    message: t('message.deleteSwitchWarning'),
+    message: t('message.deleteDeviceWarning'),
     confirmButton: t('action.delete'),
     cancelButton: t('action.keep'),
     color: 'error'
@@ -79,14 +79,14 @@ async function deleteSwitch(item: Item) {
   }
 
   try {
-    await switches.remove(item.switch._id)
+    await devices.remove(item.device._id)
   } catch (e) {
     await refresh()
     await dialogs.error(e)
   }
 }
 
-const { dialogProps: editorProps } = useSwitchDialog()
+const { dialogProps: editorProps } = useDeviceDialog()
 </script>
 
 <template>
@@ -94,27 +94,27 @@ const { dialogProps: editorProps } = useSwitchDialog()
     <VToolbar v-bind="toolbar" :title="t('label.switchesAndMonitors')">
       <template #prepend><VBtn :icon="mdiArrowLeft" @click="router.back" /></template>
     </VToolbar>
-    <VProgressLinear v-show="switches.isBusy" indeterminate />
-    <VList v-scroll.self="scrolled" :disabled="switches.isBusy" bg-color="transparent">
-      <template v-for="(item, index) of items" :key="item.switch._id">
+    <VProgressLinear v-show="devices.isBusy" indeterminate />
+    <VList v-scroll.self="scrolled" :disabled="devices.isBusy" bg-color="transparent">
+      <template v-for="(item, index) of items" :key="item.device._id">
         <VDivider v-if="index > 0" class="mx-4" />
         <VDialog v-bind="editorProps">
           <template #default="{ isActive }">
-            <SwitchDialog
+            <DeviceDialog
               v-model:visible="isActive.value"
-              :switch="item.switch"
+              :device="item.device"
               editing
-              @confirm="(v) => updateSwitch(item.switch, v)" />
+              @confirm="(v) => updateDevice(item.device, v)" />
           </template>
           <template #activator="{ props: dialog }">
-            <VListItem v-bind="dialog" :title="item.switch.title" :subtitle="item.driver.title">
+            <VListItem v-bind="dialog" :title="item.device.title" :subtitle="item.driver.title">
               <template #prepend>
                 <VAvatar :icon="item.driver.kind === 'monitor' ? mdiMonitor : mdiVideoSwitch" />
               </template>
               <template #append>
                 <VTooltip :text="t('action.delete')">
                   <template #activator="{ props: tooltip }">
-                    <VBtn v-bind="tooltip" :icon="mdiDelete" variant="text" @click.prevent.stop="deleteSwitch(item)" />
+                    <VBtn v-bind="tooltip" :icon="mdiDelete" variant="text" @click.prevent.stop="deleteDevice(item)" />
                   </template>
                 </VTooltip>
               </template>
@@ -128,11 +128,11 @@ const { dialogProps: editorProps } = useSwitchDialog()
         <template #activator="{ props }">
           <VDialog v-bind="editorProps">
             <template #default="{ isActive }">
-              <SwitchDialog
+              <DeviceDialog
                 v-model:visible="isActive.value"
-                :switch="switches.blank()"
+                :device="devices.blank()"
                 :editing="false"
-                @confirm="addSwitch" />
+                @confirm="addDevice" />
             </template>
             <template #activator="{ props: dialog }">
               <VBtn v-bind="{ ...props, ...dialog }" class="ml-6" :icon="mdiPlus" color="primary" />
@@ -150,7 +150,7 @@ en:
     addDevice: New switch or monitor
   message:
     confirmDeleteDevice: Do you want to remove this {0}?
-    deleteSwitchWarning: This will also remove any tie relationships on sources.
+    deleteDeviceWarning: This will also remove any tie relationships on sources.
   label:
     monitor: monitor
     switch: switch

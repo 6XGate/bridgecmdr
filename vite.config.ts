@@ -14,13 +14,6 @@ export default defineConfig({
   esbuild: {
     target: ['node20']
   },
-  build: {
-    rollupOptions: {
-      output: {
-        manualChunks: (id) => (id.includes('node_modules') ? 'vendor' : undefined)
-      }
-    }
-  },
   test: {
     restoreMocks: true,
     unstubEnvs: true,

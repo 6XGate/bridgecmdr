@@ -1,7 +1,11 @@
 import { z } from 'zod'
-import { ColorScheme, IconSize, PowerOffTaps } from '../../settings'
 import { DocHeader } from './version0'
+import { Settings } from './version2'
 
+/**
+ * Layout v3, will be used in Export v3 but
+ * may be reused by later versions.
+ */
 export type Layouts = z.output<typeof Layouts>
 export const Layouts = z.object({
   sources: z.array(
@@ -10,7 +14,7 @@ export const Layouts = z.object({
       image: z.string().min(1).nullable()
     })
   ),
-  switches: z.array(
+  devices: z.array(
     DocHeader.extend({
       driverId: z.string().uuid(),
       title: z.string(),
@@ -30,16 +34,12 @@ export const Layouts = z.object({
   )
 })
 
+/**
+ * Export format v3.
+ */
 export type Export = z.output<typeof Export>
 export const Export = z.object({
   version: z.literal(3),
-  settings: z
-    .object({
-      iconSize: IconSize.optional(),
-      colorScheme: ColorScheme.optional(),
-      powerOnSwitchesAtStart: z.boolean().optional(),
-      powerOffWhen: PowerOffTaps.optional()
-    })
-    .optional(),
+  settings: Settings,
   layouts: Layouts
 })

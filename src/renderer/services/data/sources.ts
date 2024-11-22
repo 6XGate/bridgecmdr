@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia'
-import { forceUndefined } from '../hooks/utilities'
-import { useClient } from './rpc/trpc'
-import { useDataStore } from './store'
-import type { DocumentId } from './store'
-import type { NewSource, Source, SourceUpdate } from '../../preload/api'
+import { forceUndefined } from '../../hooks/utilities'
+import { useClient } from '../rpc/trpc'
+import { useDataStore } from '../store'
+import type { NewSource, Source, SourceUpdate, SourceUpsert } from '../../../preload/api'
+import type { DocumentId } from '../store'
 import type { Attachment } from '@/attachments'
 
-export type { NewSource, Source, SourceUpdate } from '../../preload/api'
+export type { NewSource, Source, SourceUpdate } from '../../../preload/api'
 
 export const useSources = defineStore('sources', function defineSources() {
   const { sources } = useClient()
@@ -36,6 +36,11 @@ export const useSources = defineStore('sources', function defineSources() {
       await sources.update.mutate([document, ...attachments])
   )
 
+  const upsert = store.defineMutation(
+    async (document: SourceUpsert, ...attachments: Attachment[]) =>
+      await sources.upsert.mutate([document, ...attachments])
+  )
+
   const remove = store.defineRemoval(async (id: DocumentId) => {
     await sources.remove.mutate(id)
     return id
@@ -52,6 +57,7 @@ export const useSources = defineStore('sources', function defineSources() {
     get,
     add,
     update,
+    upsert,
     remove,
     dismiss: store.unsetCurrent,
     clear: store.clearItems

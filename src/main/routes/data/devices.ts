@@ -1,4 +1,4 @@
-import useDevicesDatabase, { NewDevice, DeviceUpdate } from '../../dao/devices'
+import useDevicesDatabase, { NewDevice, DeviceUpdate, DeviceUpsert } from '../../dao/devices'
 import { DocumentId } from '../../services/database'
 import { procedure, router } from '../../services/rpc/trpc'
 
@@ -12,6 +12,7 @@ export default function useDevicesRouter() {
     get: procedure.input(DocumentId).query(async ({ input }) => await devices.get(input)),
     add: procedure.input(NewDevice).mutation(async ({ input }) => await devices.add(input)),
     update: procedure.input(DeviceUpdate).mutation(async ({ input }) => await devices.update(input)),
+    upsert: procedure.input(DeviceUpsert).mutation(async ({ input }) => await devices.upsert(input)),
     remove: procedure.input(DocumentId).mutation(async ({ input }) => {
       await devices.remove(input)
     }),

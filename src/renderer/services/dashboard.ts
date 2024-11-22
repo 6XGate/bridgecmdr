@@ -3,13 +3,13 @@ import { computed, readonly, ref } from 'vue'
 import { useImages } from '../hooks/assets'
 import { trackBusy } from '../hooks/tracking'
 import { toFiles } from '../support/files'
+import { useDevices } from './data/devices'
+import { useSources } from './data/sources'
+import { useTies } from './data/ties'
 import useDrivers from './driver'
 import useSettings from './settings'
-import { useSources } from './sources'
-import { useSwitches } from './switches'
-import { useTies } from './ties'
+import type { Source } from './data/sources'
 import type { Driver } from './driver'
-import type { Source } from './sources'
 import type { DocumentId } from './store'
 import type { ReadonlyDeep } from 'type-fest'
 import { isNotNullish } from '@/basics'
@@ -30,12 +30,12 @@ export const useDashboard = defineStore('dashboard', function defineDashboard() 
   const drivers = useDrivers()
   const ties = useTies()
   const sources = useSources()
-  const switches = useSwitches()
+  const devices = useDevices()
   const tracker = trackBusy(
     () => !isReady.value,
     () => drivers.isBusy,
     () => sources.isBusy,
-    () => switches.isBusy,
+    () => devices.isBusy,
     () => ties.isBusy
   )
 
@@ -47,10 +47,10 @@ export const useDashboard = defineStore('dashboard', function defineDashboard() 
   async function loadDrivers() {
     await drivers.all()
 
-    // Remove drivers for switches removed
+    // Remove drivers for devices removed
     const closing: Driver[] = []
     for (const guid of loadedDrivers.keys()) {
-      if (switches.items.find((switcher) => switcher._id === guid) == null) {
+      if (devices.items.find((device) => device._id === guid) == null) {
         const driver = loadedDrivers.get(guid)
         if (driver != null) {
           loadedDrivers.delete(guid)
@@ -61,10 +61,10 @@ export const useDashboard = defineStore('dashboard', function defineDashboard() 
 
     // Load any drivers that are new or are being replaced.
     const loading = new Array<[string, Driver]>()
-    for (const switcher of switches.items) {
-      const driver = loadedDrivers.get(switcher._id)
-      if (driver == null || driver.uri !== switcher.path) {
-        loading.push([switcher._id, drivers.load(switcher.driverId, switcher.path)])
+    for (const device of devices.items) {
+      const driver = loadedDrivers.get(device._id)
+      if (driver == null || driver.uri !== device.path) {
+        loading.push([device._id, drivers.load(device.driverId, device.path)])
       }
     }
 
@@ -78,10 +78,10 @@ export const useDashboard = defineStore('dashboard', function defineDashboard() 
     const commands = ties.items
       .filter((tie) => tie.sourceId === source._id)
       .map(function makeCommand(tie) {
-        const switcher = switches.items.find((item) => tie.deviceId === item._id)
+        const device = devices.items.find((item) => tie.deviceId === item._id)
         const driver = loadedDrivers.get(tie.deviceId)
 
-        if (switcher == null) {
+        if (device == null) {
           console.error(`${tie.deviceId}: No such device for source "${source.title}"`)
 
           return undefined
@@ -89,13 +89,13 @@ export const useDashboard = defineStore('dashboard', function defineDashboard() 
 
         if (driver == null) {
           console.error(
-            `${switcher.driverId}:  No such driver for device "${switcher.title}" used by source "${source.title}"`
+            `${device.driverId}:  No such driver for device "${device.title}" used by source "${source.title}"`
           )
 
           return undefined
         }
 
-        return { tie, switch: switcher, driver }
+        return { tie, device, driver }
       })
       .filter(isNotNullish)
 
@@ -160,8 +160,8 @@ export const useDashboard = defineStore('dashboard', function defineDashboard() 
 
   const refresh = tracker.track(async function refresh() {
     items.value = []
-    await Promise.all([ties.compact(), sources.compact(), switches.compact()])
-    await Promise.all([ties.all(), sources.all(), switches.all()])
+    await Promise.all([ties.compact(), sources.compact(), devices.compact()])
+    await Promise.all([ties.all(), sources.all(), devices.all()])
     await loadDrivers()
     await setupDashboard()
     await powerOnOnce()

@@ -2,11 +2,11 @@ import { BlobReader, BlobWriter, TextWriter, ZipReader } from '@zip.js/zip.js'
 import mime from 'mime'
 import { z } from 'zod'
 import { toAttachment } from '../../support/files'
+import { useDevices } from '../data/devices'
+import { useSources } from '../data/sources'
+import { useTies } from '../data/ties'
 import useDrivers from '../driver'
 import useSettings from '../settings'
-import { useSources } from '../sources'
-import { useSwitches } from '../switches'
-import { useTies } from '../ties'
 
 export async function importSettings(file: File) {
   const settings = useSettings()
@@ -14,7 +14,8 @@ export async function importSettings(file: File) {
     // HACK: Don't use map to retain the tuple, and type for
     // each element, for z.union, which wants a tuple.
     import('./formats/version1').then((m) => m.Export),
-    import('./formats/version2').then((m) => m.Export)
+    import('./formats/version2').then((m) => m.Export),
+    import('./formats/version3').then((m) => m.Export)
   ])
 
   const backupSettings = z.union(formats)
@@ -44,21 +45,21 @@ export async function importSettings(file: File) {
   await drivers.all()
 
   const sources = useSources()
-  const switches = useSwitches()
+  const devices = useDevices()
   const ties = useTies()
 
   await Promise.all([
     Promise.all(
       data.layouts.sources.map(async (item) => {
         if (item.image == null) {
-          await sources.add(item)
+          await sources.upsert(item)
           return
         }
 
         const type = mime.getType(item.image) ?? 'application/octet-stream'
         let imageAttachment = imageCache.get(item.image)
         if (imageAttachment != null) {
-          await sources.add(item, await toAttachment(imageAttachment))
+          await sources.upsert(item, await toAttachment(imageAttachment))
           return
         }
 
@@ -66,7 +67,7 @@ export async function importSettings(file: File) {
         if (imageEntry?.getData == null) {
           // It's not fatal if the image is missing.
           console.warn(`Image for ${item._id}, "${item.image}", is missing`)
-          await sources.add({ ...item, image: null })
+          await sources.upsert({ ...item, image: null })
           return
         }
 
@@ -75,39 +76,39 @@ export async function importSettings(file: File) {
         const imageData = await imageFile.getData()
         imageAttachment = new File([imageData], item.image, { type })
         imageCache.set(item.image, imageAttachment)
-        await sources.add(item, await toAttachment(imageAttachment))
+        await sources.upsert(item, await toAttachment(imageAttachment))
       })
     ),
     Promise.all(
-      data.layouts.switches.map(async (item) => {
-        const driver = drivers.items.find((d) => d.guid === item.driverId)
-        // Non-fatally skip switches from drivers that don't exist.
+      data.layouts.devices.map(async (device) => {
+        const driver = drivers.items.find((d) => d.guid === device.driverId)
+        // Non-fatally skip devices from drivers that don't exist.
         if (driver == null) {
-          console.warn(`Driver for ${item.title} no longer support; ${item.driverId}`)
+          console.warn(`Driver for ${device.title} no longer support; ${device.driverId}`)
           return
         }
 
-        await switches.add(item)
+        await devices.upsert(device)
       })
     )
   ])
 
   await Promise.all(
     data.layouts.ties.map(async (item) => {
-      const sourceItem = sources.items.find((s) => s._id === item.sourceId)
-      const switchItem = switches.items.find((d) => d._id === item.deviceId)
-      // Non-fatally skip ties that reference missing switches or sources.
-      if (sourceItem == null) {
+      const source = sources.items.find((s) => s._id === item.sourceId)
+      const device = devices.items.find((d) => d._id === item.deviceId)
+      // Non-fatally skip ties that reference missing devices or sources.
+      if (source == null) {
         console.warn(`Source for tie no longer present; ${item.sourceId}`)
         return
       }
 
-      if (switchItem == null) {
+      if (device == null) {
         console.warn(`Device for tie no longer present; ${item.deviceId}`)
         return
       }
 
-      await ties.add(item)
+      await ties.upsert(item)
     })
   )
 }

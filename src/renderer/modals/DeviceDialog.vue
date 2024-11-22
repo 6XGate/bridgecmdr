@@ -3,14 +3,14 @@ import { mdiClose, mdiFlask } from '@mdi/js'
 import { useVModel } from '@vueuse/core'
 import { computed, ref, reactive, onBeforeMount } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Highlight } from '../components/Highlight'
-import { useLocation } from '../hooks/location'
+import Highlight from '../components/Highlight'
+import useLocation from '../hooks/location'
 import { useRules, useValidation } from '../hooks/validation'
 import useDrivers from '../services/driver'
 import usePorts from '../services/ports'
-import { useDialogs, useSwitchDialog } from './dialogs'
+import { useDialogs, useDeviceDialog } from './dialogs'
 import type { I18nSchema } from '../locales/locales'
-import type { NewDevice } from '../services/switches'
+import type { NewDevice } from '../services/data/devices'
 import type { DeepReadonly } from 'vue'
 
 const props = defineProps<{
@@ -19,7 +19,7 @@ const props = defineProps<{
   visible?: boolean
   // Form
   editing: boolean
-  switch: DeepReadonly<NewDevice>
+  device: DeepReadonly<NewDevice>
 }>()
 
 const emit = defineEmits<{
@@ -39,7 +39,7 @@ const ports = usePorts()
 onBeforeMount(ports.all)
 
 // eslint-disable-next-line vue/no-setup-props-reactivity-loss -- Prop reactivity not desired.
-const target = ref<NewDevice>(structuredClone(props.switch))
+const target = ref<NewDevice>(structuredClone(props.device))
 const location = computed({
   get: () => v$.path.$model,
   set: (v) => {
@@ -90,7 +90,7 @@ const rules = reactive({
 
 const { dirty, getStatus, submit, v$ } = useValidation(rules, target, confirm)
 
-const { cardProps, isFullscreen, body, showDividers } = useSwitchDialog()
+const { cardProps, isFullscreen, body, showDividers } = useDeviceDialog()
 
 const isBusy = computed(() => drivers.isBusy || ports.isBusy)
 
@@ -142,7 +142,7 @@ const title = computed(() =>
           </template>
           <template #item="{ props: itemProps, item }">
             <VListItem v-bind="itemProps">
-              <template #title><Highlight :text="item.title" :search="driverSearch"></Highlight></template>
+              <template #title><Highlight :text="item.title" :search="driverSearch" /></template>
               <template v-if="item.raw.experimental" #append>
                 <VTooltip :text="t('label.experimental')">
                   <template #activator="{ props: tooltipProps }">

@@ -14,7 +14,6 @@ import { toError } from '@/error-handling'
 // In this file you can include the rest of your app"s specific main process
 // code. You can also put them in separate files and require them here.
 
-Logger.initialize({ preload: true, spyRendererConsole: true })
 Logger.transports.console.format = '{h}:{i}:{s}.{ms} [{level}] › {text}'
 Logger.transports.file.level = 'debug'
 Logger.errorHandler.startCatching()
@@ -53,6 +52,26 @@ async function createWindow() {
 
   const kWait = 2000
   let lastError: unknown
+
+  window.webContents.on('console-message', (_, level, message) => {
+    switch (level) {
+      case 0:
+        Logger.verbose(message)
+        break
+      case 1:
+        Logger.info(message)
+        break
+      case 2:
+        Logger.warn(message)
+        break
+      case 3:
+        Logger.error(message)
+        break
+      default:
+        Logger.log(message)
+        break
+    }
+  })
 
   /* eslint-disable no-await-in-loop -- Retry loop must be serial. */
   for (let tries = 3; tries > 0; --tries) {

@@ -3,7 +3,6 @@ import { toValue, computed, readonly } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { I18nSchema } from '../locales/locales'
 import type { PortEntry } from '../services/ports'
-import type { NewDevice } from '../services/switches'
 import type { LocationType } from '@/location'
 import type { MessageProps } from '@vuelidate/validators'
 import type { MaybeRefOrGetter, Ref } from 'vue'
@@ -40,9 +39,12 @@ interface LocationTypeMetaData {
   value: LocationType
 }
 
-export function useLocation(location: Ref<string | undefined>, validSwitches: MaybeRefOrGetter<readonly PortEntry[]>) {
+export default function useLocation(
+  location: Ref<string | undefined>,
+  validPorts: MaybeRefOrGetter<readonly PortEntry[]>
+) {
   const { t } = useI18n<I18nSchema>()
-  const { locationPath } = useLocationUtils(validSwitches)
+  const { locationPath } = useLocationUtils(validPorts)
 
   const pathTypes = readonly([
     { title: t('label.remote'), value: 'ip' },
@@ -98,22 +100,5 @@ export function useLocation(location: Ref<string | undefined>, validSwitches: Ma
     pathType,
     pathLabel,
     path
-  }
-}
-
-export const useSwitchLocation = (
-  switcher: MaybeRefOrGetter<NewDevice>,
-  validSwitches: MaybeRefOrGetter<readonly PortEntry[]>
-) => {
-  const location = computed({
-    get: () => toValue(switcher).path,
-    set: (v) => {
-      toValue(switcher).path = v
-    }
-  })
-
-  return {
-    location,
-    ...useLocation(location, validSwitches)
   }
 }

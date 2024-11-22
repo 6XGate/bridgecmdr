@@ -1,20 +1,20 @@
 import { BlobReader, BlobWriter, TextReader, ZipWriter } from '@zip.js/zip.js'
 import { pick } from 'radash'
 import { toFiles } from '../../support/files'
+import { useDevices } from '../data/devices'
+import { useSources } from '../data/sources'
+import { useTies } from '../data/ties'
 import useSettings from '../settings'
-import { useSources } from '../sources'
-import { useSwitches } from '../switches'
-import { useTies } from '../ties'
 import { isNotNullish } from '@/basics'
 
 export async function exportSettings() {
   const settings = useSettings()
   const sources = useSources()
-  const switches = useSwitches()
+  const devices = useDevices()
   const ties = useTies()
 
   await sources.all()
-  await switches.all()
+  await devices.all()
   await ties.all()
 
   const zipFile = new BlobWriter()
@@ -27,11 +27,11 @@ export async function exportSettings() {
 
   const configText = new TextReader(
     JSON.stringify({
-      version: 2,
+      version: 3,
       settings: pick(settings, ['iconSize', 'colorScheme', 'powerOnSwitchesAtStart', 'powerOffWhen']),
       layouts: {
         sources: sources.items.map((item) => pick(item, ['_id', 'title', 'image'])),
-        switches: switches.items.map((item) => pick(item, ['_id', 'driverId', 'path', 'title'])),
+        devices: devices.items.map((item) => pick(item, ['_id', 'driverId', 'path', 'title'])),
         ties: ties.items.map((item) => pick(item, ['_id', 'sourceId', 'deviceId', 'inputChannel', 'outputChannels']))
       }
     })
