@@ -6,6 +6,7 @@ import Logger from 'electron-log'
 import { sleep } from 'radash'
 import appIcon from '../../resources/icon.png?asset&asarUnpack'
 import { useAppRouter } from './routes/router'
+import useMigrations from './services/migration'
 import { createIpcHandler } from './services/rpc/ipc'
 import { logError } from './utilities'
 import { toError } from '@/error-handling'
@@ -13,7 +14,6 @@ import { toError } from '@/error-handling'
 // In this file you can include the rest of your app"s specific main process
 // code. You can also put them in separate files and require them here.
 
-Logger.initialize({ preload: true, spyRendererConsole: true })
 Logger.transports.console.format = '{h}:{i}:{s}.{ms} [{level}] › {text}'
 Logger.transports.file.level = 'debug'
 Logger.errorHandler.startCatching()
@@ -52,6 +52,26 @@ async function createWindow() {
 
   const kWait = 2000
   let lastError: unknown
+
+  window.webContents.on('console-message', (_, level, message) => {
+    switch (level) {
+      case 0:
+        Logger.verbose(message)
+        break
+      case 1:
+        Logger.info(message)
+        break
+      case 2:
+        Logger.warn(message)
+        break
+      case 3:
+        Logger.error(message)
+        break
+      default:
+        Logger.log(message)
+        break
+    }
+  })
 
   /* eslint-disable no-await-in-loop -- Retry loop must be serial. */
   for (let tries = 3; tries > 0; --tries) {
@@ -105,6 +125,11 @@ process.on('SIGTERM', () => {
 // windows. Some APIs can only be used after
 // this event occurs.
 await app.whenReady()
+
+const migrate = useMigrations()
+await migrate().catch((cause: unknown) => {
+  Logger.error(cause)
+})
 
 // Set app user model id for windows
 electronApp.setAppUserModelId('org.sleepingcats.BridgeCmdr')

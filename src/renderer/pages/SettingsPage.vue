@@ -14,9 +14,9 @@ import { useRouter } from 'vue-router'
 import Page from '../components/Page.vue'
 import { trackBusy } from '../hooks/tracking'
 import { useGuardedAsyncOp } from '../hooks/utilities'
+import { useDevices } from '../services/data/devices'
+import { useSources } from '../services/data/sources'
 import { useClient } from '../services/rpc/trpc'
-import { useSources } from '../services/sources'
-import { useSwitches } from '../services/switches'
 import type { I18nSchema } from '../locales/locales'
 
 //
@@ -36,34 +36,34 @@ const { state: appInfo } = useAsyncState(async () => await useClient().appInfo.q
 })
 
 //
-// Loading sources and switches so we have a count.
+// Loading sources and devices so we have a count.
 // TODO: Maybe find a better way.
 //
 
 const sources = useSources()
-const switches = useSwitches()
+const devices = useDevices()
 
 // Reduce flicker and shorten the path to the items length of the stores, update
 // them only on refresh. We will only track the refresh.
 const sourceCount = ref(0)
-const switchCount = ref(0)
+const deviceCount = ref(0)
 
 const { isBusy } = trackBusy(
   () => sources.isBusy,
-  () => switches.isBusy
+  () => devices.isBusy
 )
 
 onMounted(
   useGuardedAsyncOp(async () => {
-    await Promise.all([sources.all(), switches.all()])
+    await Promise.all([sources.all(), devices.all()])
     sourceCount.value = sources.items.length
-    switchCount.value = switches.items.length
+    deviceCount.value = devices.items.length
   })
 )
 
 onUnmounted(() => {
   sources.clear()
-  switches.clear()
+  devices.clear()
 })
 </script>
 
@@ -90,8 +90,8 @@ onUnmounted(() => {
         :title="t('label.switchesAndMonitors')"
         lines="two"
         :prepend-icon="mdiVideoSwitch"
-        :subtitle="t('count.switchesAndMonitors', { n: n(switchCount, 'integer') }, switchCount)"
-        :to="{ name: 'switches' }" />
+        :subtitle="t('count.devices', { n: n(deviceCount, 'integer') }, deviceCount)"
+        :to="{ name: 'devices' }" />
       <VListItem
         :title="t('label.backup')"
         :prepend-icon="mdiSwapVertical"
@@ -117,5 +117,5 @@ en:
     about: Version {0}
   count:
     sources: No sources | One source | {n} sources
-    switchesAndMonitors: No devices | One device | {n} devices
+    devices: No devices | One device | {n} devices
 </i18n>

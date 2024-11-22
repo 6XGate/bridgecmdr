@@ -1,11 +1,11 @@
 import { defineStore } from 'pinia'
-import { forceUndefined } from '../hooks/utilities'
-import { useClient } from './rpc/trpc'
-import { useDataStore } from './store'
-import type { DocumentId } from './store'
-import type { NewTie, TieUpdate, Tie } from '../../preload/api'
+import { forceUndefined } from '../../hooks/utilities'
+import { useClient } from '../rpc/trpc'
+import { useDataStore } from '../store'
+import type { NewTie, TieUpdate, Tie, TieUpsert } from '../../../preload/api'
+import type { DocumentId } from '../store'
 
-export type { NewTie, TieUpdate, Tie } from '../../preload/api'
+export type { NewTie, TieUpdate, Tie } from '../../../preload/api'
 
 export const useTies = defineStore('ties', function defineTies() {
   const { ties } = useClient()
@@ -14,7 +14,7 @@ export const useTies = defineStore('ties', function defineTies() {
   function blank(): NewTie {
     return {
       sourceId: forceUndefined(),
-      switchId: forceUndefined(),
+      deviceId: forceUndefined(),
       inputChannel: forceUndefined(),
       outputChannels: {
         video: undefined,
@@ -35,12 +35,14 @@ export const useTies = defineStore('ties', function defineTies() {
 
   const update = store.defineMutation(async (document: TieUpdate) => await ties.update.mutate(document))
 
+  const upsert = store.defineMutation(async (document: TieUpsert) => await ties.upsert.mutate(document))
+
   const remove = store.defineRemoval(async (id: DocumentId) => {
     await ties.remove.mutate(id)
     return id
   })
 
-  const forSwitch = store.defineFetchMany(async (id: DocumentId) => await ties.forSwitch.query(id))
+  const forDevice = store.defineFetchMany(async (id: DocumentId) => await ties.forDevice.query(id))
 
   const forSource = store.defineFetchMany(async (id: DocumentId) => await ties.forSource.query(id))
 
@@ -55,8 +57,9 @@ export const useTies = defineStore('ties', function defineTies() {
     get,
     add,
     update,
+    upsert,
     remove,
-    forSwitch,
+    forDevice,
     forSource,
     dismiss: store.unsetCurrent,
     clear: store.clearItems

@@ -1,6 +1,6 @@
 import { memo } from 'radash'
 import { z } from 'zod'
-import { Database, inferDocumentOf, inferNewDocumentOf, inferUpdatesOf } from '../services/database'
+import { Database, inferDocumentOf, inferNewDocumentOf, inferUpdatesOf, inferUpsertOf } from '../services/database'
 import useTiesDatabase from './ties'
 import type { DocumentId, RevisionId } from '../services/database'
 
@@ -33,5 +33,7 @@ export type NewSource = inferNewDocumentOf<typeof SourceModel>
 export const NewSource = inferNewDocumentOf(SourceModel)
 export type SourceUpdate = inferUpdatesOf<typeof SourceModel>
 export const SourceUpdate = inferUpdatesOf(SourceModel)
+export type SourceUpsert = inferUpsertOf<typeof SourceModel>
+export const SourceUpsert = inferUpsertOf(SourceModel)
 
 export default useSourcesDatabase

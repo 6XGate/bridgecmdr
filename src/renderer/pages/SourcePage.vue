@@ -10,17 +10,17 @@ import { trackBusy } from '../hooks/tracking'
 import { useGuardedAsyncOp } from '../hooks/utilities'
 import TieDialog from '../modals/TieDialog.vue'
 import { useDialogs, useTieDialog } from '../modals/dialogs'
+import { useDevices } from '../services/data/devices'
+import { useSources } from '../services/data/sources'
+import { useTies } from '../services/data/ties'
 import useDrivers from '../services/driver'
-import { useSources } from '../services/sources'
-import { useSwitches } from '../services/switches'
-import { useTies } from '../services/ties'
 import { toAttachments, toFiles } from '../support/files'
 import type { I18nSchema } from '../locales/locales'
+import type { Device } from '../services/data/devices'
+import type { Source } from '../services/data/sources'
+import type { NewTie, Tie } from '../services/data/ties'
 import type { DriverInformation } from '../services/driver'
-import type { Source } from '../services/sources'
 import type { DocumentId } from '../services/store'
-import type { Switch } from '../services/switches'
-import type { NewTie, Tie } from '../services/ties'
 import type { DeepReadonly } from 'vue'
 import { isNotNullish } from '@/basics'
 
@@ -89,27 +89,27 @@ onBeforeMount(loadSource)
 //
 
 interface TieEntry {
-  switch: DeepReadonly<Switch>
+  device: DeepReadonly<Device>
   driver: DriverInformation
   tie: DeepReadonly<Tie>
 }
 
-const switches = useSwitches()
+const devices = useDevices()
 const drivers = useDrivers()
 const ties = useTies()
 const entries = computed(() =>
   ties.items
     .map(function makeEntry(tie) {
-      const switcher = switches.items.find((s) => s._id === tie.switchId)
-      const driver = switcher != null ? drivers.items.find((d) => d.guid === switcher.driverId) : undefined
+      const device = devices.items.find((d) => d._id === tie.deviceId)
+      const driver = device != null ? drivers.items.find((d) => d.guid === device.driverId) : undefined
 
-      return switcher != null && driver != null ? ({ switch: switcher, driver, tie } satisfies TieEntry) : undefined
+      return device != null && driver != null ? ({ device, driver, tie } satisfies TieEntry) : undefined
     })
     .filter(isNotNullish)
 )
 
 const loadTies = useGuardedAsyncOp(async function loadTies() {
-  await Promise.all([switches.all(), ties.forSource(props.id)])
+  await Promise.all([devices.all(), ties.forSource(props.id)])
 })
 
 onBeforeMount(loadTies)
@@ -160,7 +160,7 @@ const { dialogProps: editorProps } = useTieDialog()
 
 const { isBusy } = trackBusy(
   () => sources.isBusy,
-  () => switches.isBusy,
+  () => devices.isBusy,
   () => drivers.isBusy,
   () => ties.isBusy
 )
@@ -199,7 +199,7 @@ const { isBusy } = trackBusy(
                 @confirm="(v) => updateTie(entry.tie, v)" />
             </template>
             <template #activator="{ props: dialog }">
-              <VListItem v-bind="dialog" lines="three" :title="entry.switch.title" :subtitle="entry.driver.title">
+              <VListItem v-bind="dialog" lines="three" :title="entry.device.title" :subtitle="entry.driver.title">
                 <VChip
                   :prepend-icon="mdiImport"
                   class="mr-1"

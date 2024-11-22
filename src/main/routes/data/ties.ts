@@ -1,8 +1,6 @@
-import useTiesDatabase, { NewTie, TieUpdate } from '../../dao/ties'
+import useTiesDatabase, { NewTie, TieUpdate, TieUpsert } from '../../dao/ties'
 import { DocumentId } from '../../services/database'
 import { procedure, router } from '../../services/rpc/trpc'
-
-export type { Tie, NewTie, TieUpdate } from '../../dao/ties'
 
 export default function useTiesRouter() {
   const ties = useTiesDatabase()
@@ -14,13 +12,14 @@ export default function useTiesRouter() {
     get: procedure.input(DocumentId).query(async ({ input }) => await ties.get(input)),
     add: procedure.input(NewTie).mutation(async ({ input }) => await ties.add(input)),
     update: procedure.input(TieUpdate).mutation(async ({ input }) => await ties.update(input)),
+    upsert: procedure.input(TieUpsert).mutation(async ({ input }) => await ties.upsert(input)),
     remove: procedure.input(DocumentId).mutation(async ({ input }) => {
       await ties.remove(input)
     }),
     clear: procedure.mutation(async () => {
       await ties.clear()
     }),
-    forSwitch: procedure.input(DocumentId).query(async ({ input }) => await ties.forSwitch(input)),
+    forDevice: procedure.input(DocumentId).query(async ({ input }) => await ties.forDevice(input)),
     forSource: procedure.input(DocumentId).query(async ({ input }) => await ties.forSource(input))
   })
 }

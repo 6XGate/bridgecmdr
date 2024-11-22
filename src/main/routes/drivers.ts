@@ -12,7 +12,7 @@ const useDriversRouter = memo(function useDriversRoute() {
   const drivers = useDrivers()
 
   return router({
-    all: procedure.query(drivers.allInfo),
+    all: procedure.query(async () => await drivers.allInfo()),
     get: procedure.input(z.string().uuid()).query(async ({ input }) => {
       await drivers.get(input)
     }),

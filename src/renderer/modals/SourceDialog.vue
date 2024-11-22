@@ -5,11 +5,11 @@ import { reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ReplaceableImage from '../components/ReplaceableImage.vue'
 import { useRules, useValidation } from '../hooks/validation'
-import { useSources } from '../services/sources'
+import { useSources } from '../services/data/sources'
 import { toAttachments } from '../support/files'
 import { useDialogs, useSourceDialog } from './dialogs'
 import type { I18nSchema } from '../locales/locales'
-import type { NewSource, Source } from '../services/sources'
+import type { NewSource, Source } from '../services/data/sources'
 import { toError } from '@/error-handling'
 
 const props = defineProps<{

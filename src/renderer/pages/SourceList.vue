@@ -8,10 +8,10 @@ import { useObjectUrls } from '../hooks/assets'
 import { useGuardedAsyncOp } from '../hooks/utilities'
 import SourceDialog from '../modals/SourceDialog.vue'
 import { useDialogs, useSourceDialog } from '../modals/dialogs'
-import { useSources } from '../services/sources'
+import { useSources } from '../services/data/sources'
 import { toFiles } from '../support/files'
 import type { I18nSchema } from '../locales/locales'
-import type { Source } from '../services/sources'
+import type { Source } from '../services/data/sources'
 import type { DocumentId } from '../services/store'
 
 //

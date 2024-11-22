@@ -1,9 +1,9 @@
 import { z } from 'zod'
 import { DocHeader } from './version0'
-import type { Export as V3 } from './version3'
+import { Settings } from './version2'
 
 /**
- * Layout v1, will be used in Export v1 but
+ * Layout v3, will be used in Export v3 but
  * may be reused by later versions.
  */
 export type Layouts = z.output<typeof Layouts>
@@ -14,7 +14,7 @@ export const Layouts = z.object({
       image: z.string().min(1).nullable()
     })
   ),
-  switches: z.array(
+  devices: z.array(
     DocHeader.extend({
       driverId: z.string().uuid(),
       title: z.string(),
@@ -24,28 +24,22 @@ export const Layouts = z.object({
   ties: z.array(
     DocHeader.extend({
       sourceId: z.string().uuid(),
-      switchId: z.string().uuid(),
+      deviceId: z.string().uuid(),
       inputChannel: z.number().int(),
       outputChannels: z.object({
         video: z.number().int().optional(),
         audio: z.number().int().optional()
       })
-    }).transform(({ switchId, ...tie }) => ({ ...tie, deviceId: switchId }))
+    })
   )
 })
 
 /**
- * Export format v1.
+ * Export format v3.
  */
 export type Export = z.output<typeof Export>
-export const Export = z
-  .object({
-    version: z.literal(1),
-    ...Layouts.shape
-  })
-  .transform(
-    ({ sources, switches, ties }): V3 => ({
-      version: 3,
-      layouts: { sources, devices: switches, ties }
-    })
-  )
+export const Export = z.object({
+  version: z.literal(3),
+  settings: Settings,
+  layouts: Layouts
+})

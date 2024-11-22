@@ -2,11 +2,12 @@ import { memo } from 'radash'
 import useAppInfo from '../services/app'
 import { procedure, router } from '../services/rpc/trpc'
 import useUserInfo from '../services/user'
+import useDevicesRouter from './data/devices'
 import useSourcesRouter from './data/sources'
 import useUserStoreRouter from './data/storage'
-import useSwitchesRouter from './data/switches'
 import useTiesRouter from './data/ties'
 import useDriversRouter from './drivers'
+import useMigrationRouter from './migration'
 import useSerialPortRouter from './ports'
 import useStartupRouter from './startup'
 import useSystemRouter from './system'
@@ -23,9 +24,10 @@ export const useAppRouter = memo(() =>
     system: useSystemRouter(),
     drivers: useDriversRouter(),
     // Data service routes
+    migration: useMigrationRouter(),
     storage: useUserStoreRouter(),
     ties: useTiesRouter(),
-    switches: useSwitchesRouter(),
+    devices: useDevicesRouter(),
     sources: useSourcesRouter(),
     updates: useUpdaterRouter()
   })

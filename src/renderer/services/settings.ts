@@ -2,8 +2,8 @@ import { usePreferredColorScheme } from '@vueuse/core'
 import { defineStore } from 'pinia'
 import { readonly, computed } from 'vue'
 import { z } from 'zod'
+import { useUserStorage } from './data/storage'
 import useStartup from './startup'
-import { useUserStorage } from './storage'
 import type { UseStorageOptions } from '@vueuse/core'
 
 // eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style -- Will cause circular type reference.

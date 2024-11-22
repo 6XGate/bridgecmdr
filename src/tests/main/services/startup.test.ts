@@ -17,6 +17,7 @@ beforeAll(() => {
   vi.mock('node:os', () => ({
     homedir: () => '/home/user'
   }))
+  // Disable memoize caching.
   vi.mock('radash', async (original) => ({
     ...(await original()),
     memo: (x: unknown) => x

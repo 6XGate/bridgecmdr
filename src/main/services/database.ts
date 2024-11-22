@@ -81,6 +81,18 @@ export function inferUpdatesOf<Schema extends z.AnyZodObject>(schema: Schema) {
   )
 }
 
+export type inferUpsertOf<Schema> = Schema extends z.AnyZodObject
+  ? Simplify<z.infer<ReturnType<typeof inferUpsertOf<Schema>>>>
+  : never
+export function inferUpsertOf<Schema extends z.AnyZodObject>(schema: Schema) {
+  return schema.and(
+    z.object({
+      _id: DocumentId,
+      _attachments: z.array(z.instanceof(Attachment)).optional()
+    })
+  )
+}
+
 PouchDb.plugin(useLevelAdapter())
 PouchDb.plugin(find)
 
@@ -95,9 +107,10 @@ export class Database<RawSchema extends z.AnyZodObject> {
   declare readonly __raw__: z.infer<RawSchema>
   /** The database document that is retrieved from the database. */
   declare readonly __document__: inferDocumentOf<RawSchema>
-  // typeof this.__raw__ & { _id: DocumentId, _rev: RevisionId, _attachments: Attachment[] }
   /** The possible document updates. */
   declare readonly __updates__: inferUpdatesOf<RawSchema>
+  /** The raw document is a predefined ID. */
+  declare readonly __upsert__: inferUpsertOf<RawSchema>
 
   /**
    * Initializes a new instance of the Database class.
@@ -233,10 +246,34 @@ export class Database<RawSchema extends z.AnyZodObject> {
     })
   }
 
+  /** Updates an existing document, or inserts a new one, with the given ID. */
+  async upsert(document: Simplify<typeof this.__upsert__>, ...attachments: Attachment[]) {
+    return await this.run(async (db) => {
+      const id = document._id.toUpperCase()
+      const old = await this.getDoc(id).catch(() => ({ _rev: undefined, _attachments: undefined }))
+      const doc = old._rev
+        ? { ...this.#schema.parse(document), _id: id, _rev: old._rev }
+        : { ...this.#schema.parse(document), _id: id }
+
+      const result = await db.put(doc)
+      /* v8 ignore next 1 */ // Likely trigger by database corruption.
+      if (!result.ok) throw new Error(`Failed to insert document "${doc._id}"`)
+      if (attachments.length > 0) {
+        await this.addAttachments(result.id, result.rev, attachments)
+      } else if (document._attachments != null && document._attachments.length > 0) {
+        await this.addAttachments(result.id, result.rev, document._attachments)
+      } else if (old._attachments != null) {
+        await this.addAttachments(result.id, result.rev, await prepareAttachments(old._attachments))
+      }
+
+      return await this.get(id)
+    })
+  }
+
   /** Updates an existing document in the database. */
   async update(document: Simplify<typeof this.__updates__>, ...attachments: Attachment[]) {
     return await this.run(async (db) => {
-      const id = document._id
+      const id = document._id.toUpperCase()
       const old = await this.getDoc(id)
       const doc = { ...this.#schema.parse({ ...old, ...document }), _id: id, _rev: old._rev }
 
@@ -249,6 +286,29 @@ export class Database<RawSchema extends z.AnyZodObject> {
         await this.addAttachments(result.id, result.rev, document._attachments)
       } else if (old._attachments != null) {
         await this.addAttachments(result.id, result.rev, await prepareAttachments(old._attachments))
+      }
+
+      return await this.get(id)
+    })
+  }
+
+  /** Replaces an existing document, or inserts a new one, with the given ID  */
+  async replace(document: Simplify<typeof this.__upsert__>, ...attachments: Attachment[]) {
+    return await this.run(async (db) => {
+      const id = document._id.toUpperCase()
+      const old = await this.getDoc(id).catch(() => ({ _rev: undefined, _attachments: undefined }))
+      const doc = old._rev
+        ? { ...this.#schema.parse(document), _id: id, _rev: old._rev }
+        : { ...this.#schema.parse(document), _id: id }
+
+      const result = await db.put(doc)
+      // Unlike upsert, we don't transfer the existing attachments in the database to the new revision.
+      /* v8 ignore next 1 */ // Likely trigger by database corruption.
+      if (!result.ok) throw new Error(`Failed to insert document "${doc._id}"`)
+      if (attachments.length > 0) {
+        await this.addAttachments(result.id, result.rev, attachments)
+      } else if (document._attachments != null && document._attachments.length > 0) {
+        await this.addAttachments(result.id, result.rev, document._attachments)
       }
 
       return await this.get(id)
@@ -273,6 +333,20 @@ export class Database<RawSchema extends z.AnyZodObject> {
         })
       )
       await db.compact()
+    })
+  }
+
+  /** Deletes all data related to the database. */
+  async destroy() {
+    await this.run(async (db) => {
+      await db.destroy()
+    })
+  }
+
+  /** Closes the database. */
+  async close() {
+    await this.run(async (db) => {
+      await db.close()
     })
   }
 }

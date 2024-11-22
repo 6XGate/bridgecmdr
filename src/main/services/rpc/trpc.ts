@@ -1,6 +1,6 @@
 import { initTRPC } from '@trpc/server'
-import useSuperJson from '@/rpc/transformer'
+import { useIpcJson } from '@/rpc/transformer'
 
-const t = initTRPC.create({ transformer: useSuperJson() })
+const t = initTRPC.create({ transformer: useIpcJson() })
 
 export const { router, procedure } = t
