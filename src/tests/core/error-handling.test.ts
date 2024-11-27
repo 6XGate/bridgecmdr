@@ -1,15 +1,6 @@
 import { assert, describe, expect, test } from 'vitest'
 import { z } from 'zod'
-import * as mock from '../support/mock'
-import {
-  getMessage,
-  getZodMessage,
-  isNodeError,
-  logPromiseFailures,
-  raiseError,
-  toError,
-  warnPromiseFailures
-} from '@/error-handling'
+import { getMessage, getZodMessage, isNodeError, raiseError, toError } from '@/error-handling'
 
 describe('getZodMessage', () => {
   test('failed scalar parsing', () => {
@@ -78,28 +69,4 @@ test('isNodeError', () => {
 test('raiseError', () => {
   expect(() => raiseError(() => new ReferenceError('test'))).toThrowError(new ReferenceError('test'))
   expect(() => raiseError(() => new TypeError('test'))).toThrowError(new TypeError('test'))
-})
-
-test('warnPromiseFailures', async () => {
-  const c = mock.console()
-
-  warnPromiseFailures(
-    'test',
-    await Promise.allSettled([Promise.reject(new TypeError('test')), Promise.reject(new TypeError('test'))])
-  )
-
-  expect(c.warn).toHaveBeenNthCalledWith(1, 'test', new TypeError('test'))
-  expect(c.warn).toHaveBeenNthCalledWith(2, 'test', new TypeError('test'))
-})
-
-test('logPromiseFailures', async () => {
-  const c = mock.console()
-
-  logPromiseFailures(
-    'test',
-    await Promise.allSettled([Promise.reject(new TypeError('test')), Promise.reject(new TypeError('test'))])
-  )
-
-  expect(c.error).toHaveBeenNthCalledWith(1, 'test', new TypeError('test'))
-  expect(c.error).toHaveBeenNthCalledWith(2, 'test', new TypeError('test'))
 })

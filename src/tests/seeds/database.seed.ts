@@ -40,9 +40,9 @@ export async function seedDatabase() {
 
   const sources = (await map(
     [
-      { title: 'NES', image: image.name },
-      { title: 'SNES', image: image.name },
-      { title: 'N64', image: image.name }
+      { order: 0, title: 'NES', image: image.name },
+      { order: 1, title: 'SNES', image: image.name },
+      { order: 2, title: 'N64', image: image.name }
     ],
     async (doc) => await sourcesDao.add(doc, image)
   )) as [Source, Source, Source]

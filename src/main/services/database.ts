@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import PouchDb from 'pouchdb-core'
 import find from 'pouchdb-find'
+import mapReduce from 'pouchdb-mapreduce'
 import { map } from 'radash'
 import { z } from 'zod'
 import { useLevelAdapter } from './level'
@@ -95,6 +96,7 @@ export function inferUpsertOf<Schema extends z.AnyZodObject>(schema: Schema) {
 
 PouchDb.plugin(useLevelAdapter())
 PouchDb.plugin(find)
+PouchDb.plugin(mapReduce)
 
 /** The basis of a database. */
 export class Database<RawSchema extends z.AnyZodObject> {
@@ -208,6 +210,7 @@ export class Database<RawSchema extends z.AnyZodObject> {
     })
   }
 
+  /** Prepares the document. */
   protected async prepare<T extends typeof this.__raw__>(doc: T) {
     const { _attachments, _conflicts, _revs_info, _revisions, ...document } = doc
     const result = { ...document, _attachments: await prepareAttachments(_attachments as never) }

@@ -6,6 +6,7 @@ import Logger from 'electron-log'
 import { sleep } from 'radash'
 import appIcon from '../../resources/icon.png?asset&asarUnpack'
 import { useAppRouter } from './routes/router'
+import useBootOperations from './services/boot'
 import useMigrations from './services/migration'
 import { createIpcHandler } from './services/rpc/ipc'
 import { logError } from './utilities'
@@ -130,6 +131,9 @@ const migrate = useMigrations()
 await migrate().catch((cause: unknown) => {
   Logger.error(cause)
 })
+
+const boot = useBootOperations()
+await boot()
 
 // Set app user model id for windows
 electronApp.setAppUserModelId('org.sleepingcats.BridgeCmdr')

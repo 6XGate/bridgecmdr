@@ -36,6 +36,7 @@ export function useDataStore<Document extends { _id: DocumentId }>() {
       await nextTick()
       const docs = await wait(op(...args))
       initialize(docs)
+      return docs
     }
   }
 
