@@ -46,7 +46,7 @@ const kRevPattern = /^[0-9]-[0-9a-f]{32}$/u
 test('adding', async () => {
   const file = new File([Buffer.from('hello')], 'hello.txt', { type: 'text/plain' })
   const attachment = await Attachment.fromFile(file)
-  const raw = { title: 'NeoGeo', image: file.name } satisfies NewSource
+  const raw = { order: 3, title: 'NeoGeo', image: file.name } satisfies NewSource
   const doc = await sourcesDao.add(raw, attachment)
 
   expect(doc._id).toMatch(kUuidPattern)
@@ -91,4 +91,17 @@ test('clearing', async () => {
   )
   await expect(sourcesDao.all()).resolves.toHaveLength(0)
   await expect(tiesDao.all()).resolves.toHaveLength(0)
+})
+
+describe('utilities', () => {
+  describe('getNextOrderValue', () => {
+    test('with documents', async () => {
+      await expect(sourcesDao.getNextOrderValue()).resolves.toBe(3)
+    })
+
+    test('without documents', async () => {
+      await sourcesDao.clear()
+      await expect(sourcesDao.getNextOrderValue()).resolves.toBe(0)
+    })
+  })
 })

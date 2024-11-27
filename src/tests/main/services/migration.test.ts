@@ -1,5 +1,10 @@
 import { omit } from 'radash'
 import { beforeAll, expect, test, vi } from 'vitest'
+import { z } from 'zod'
+import { Device } from '../../../main/dao/devices'
+import { Source } from '../../../main/dao/sources'
+import { Tie } from '../../../main/dao/ties'
+import useZod from '../../support/vitestZod'
 
 const mock = await vi.hoisted(async () => await import('../../support/mock'))
 
@@ -11,6 +16,8 @@ beforeAll(() => {
     ...(await original()),
     memo: (x: unknown) => x
   }))
+
+  useZod()
 })
 
 test('migration', async () => {
@@ -30,11 +37,19 @@ test('migration', async () => {
   const sourceDao = useSourcesDatabase()
   const tieDao = useTiesDatabase()
 
-  await expect(deviceDao.all()).resolves.toMatchObject(switches.map((device) => omit(device, ['_rev'])))
+  const migrated = {
+    devices: await deviceDao.all(),
+    sources: await sourceDao.all(),
+    ties: await tieDao.all()
+  }
 
-  await expect(sourceDao.all()).resolves.toMatchObject(sources.map((source) => omit(source, ['_rev'])))
+  expect(migrated.devices).toMatchSchema(z.array(Device))
+  expect(migrated.sources).toMatchSchema(z.array(Source))
+  expect(migrated.ties).toMatchSchema(z.array(Tie))
 
-  await expect(tieDao.all()).resolves.toMatchObject(
+  expect(migrated.devices).toMatchObject(switches.map((device) => omit(device, ['_rev'])))
+  expect(migrated.sources).toMatchObject(sources.map((source) => omit(source, ['_rev'])))
+  expect(migrated.ties).toMatchObject(
     ties.map(({ switchId, ...tie }) => omit({ ...tie, deviceId: switchId }, ['_rev']))
   )
 

@@ -58,6 +58,12 @@ export default defineConfig({
         stream: fileURLToPath(new URL('./node_modules/stream-browserify', import.meta.url)),
         util: fileURLToPath(new URL('./node_modules/util', import.meta.url))
       }
+    },
+    css: {
+      preprocessorOptions: {
+        sass: { api: 'modern-compiler' },
+        scss: { api: 'modern-compiler' }
+      }
     }
   }
 })

@@ -10,6 +10,7 @@ export type Layouts = z.output<typeof Layouts>
 export const Layouts = z.object({
   sources: z.array(
     DocHeader.extend({
+      order: z.number().nonnegative().finite(),
       title: z.string().min(1),
       image: z.string().min(1).nullable()
     })

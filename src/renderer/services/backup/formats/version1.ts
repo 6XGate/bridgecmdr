@@ -8,12 +8,14 @@ import type { Export as V3 } from './version3'
  */
 export type Layouts = z.output<typeof Layouts>
 export const Layouts = z.object({
-  sources: z.array(
-    DocHeader.extend({
-      title: z.string().min(1),
-      image: z.string().min(1).nullable()
-    })
-  ),
+  sources: z
+    .array(
+      DocHeader.extend({
+        title: z.string().min(1),
+        image: z.string().min(1).nullable()
+      })
+    )
+    .transform((sources) => sources.map((source, order) => ({ order, ...source }))),
   switches: z.array(
     DocHeader.extend({
       driverId: z.string().uuid(),

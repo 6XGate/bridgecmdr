@@ -50,6 +50,7 @@ $widthspx: 50 75 100 125 150 175 200 250 300 400 500 600 700 800 900;
     width: string.unquote('#{$width}%') !important;
   }
 }
+
 @each $width in $widthspx {
   .minw-#{$width}px {
     min-width: string.unquote('#{$width}px') !important;
@@ -61,9 +62,11 @@ $widthspx: 50 75 100 125 150 175 200 250 300 400 500 600 700 800 900;
     width: string.unquote('#{$width}px') !important;
   }
 }
+
 .colg {
   column-gap: settings.$grid-gutter;
 }
+
 .rowg {
   row-gap: settings.$grid-gutter;
 }

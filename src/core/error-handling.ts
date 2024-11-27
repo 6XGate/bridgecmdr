@@ -46,19 +46,3 @@ export function isNodeError(value: unknown, type: new (...args: any[]) => Error 
 export function raiseError(factory: () => Error): never {
   throw factory()
 }
-
-export function warnPromiseFailures<T>(msg: string, results: PromiseSettledResult<T>[]) {
-  for (const result of results) {
-    if (result.status === 'rejected') {
-      console.warn(msg, result.reason)
-    }
-  }
-}
-
-export function logPromiseFailures<T>(msg: string, results: PromiseSettledResult<T>[]) {
-  for (const result of results) {
-    if (result.status === 'rejected') {
-      console.error(msg, result.reason)
-    }
-  }
-}

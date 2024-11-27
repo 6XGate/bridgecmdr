@@ -24,6 +24,11 @@ export default function useSourcesRouter() {
     }),
     clear: procedure.mutation(async () => {
       await sources.clear()
+    }),
+    // Utilities
+    getNextOrderValue: procedure.query(async () => await sources.getNextOrderValue()),
+    normalizeOrder: procedure.mutation(async () => {
+      await sources.normalizeOrder()
     })
   })
 }
