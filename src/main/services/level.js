@@ -7,6 +7,8 @@ import levelUp from 'levelup'
 import LevelPouch from 'pouchdb-adapter-leveldb-core'
 import { memo } from 'radash'
 
+/* globals PouchDB */ // Fixes PouchDB undefined in JSDoc.
+
 //
 // NOTE: While PouchDB has a built-in LevelDB adapter, we want to have
 // as minimum of an external footprint as possible. This will be
@@ -21,7 +23,7 @@ import { memo } from 'radash'
 export const useLevelDb = memo(function useLevelDb() {
   const leveldown = memo(
     /**
-     * @param {string} name
+     * @param {string} name The name of the database.
      */
     function leveldown(name) {
       const path = resolvePath(app.getPath('userData'), name)
@@ -39,18 +41,20 @@ export const useLevelDb = memo(function useLevelDb() {
 
   const levelup = memo(
     /**
-     * @param {string} name
+     * @param {string} name The name of the database.
      */
     async function levelup(name) {
       const db = leveldown(name)
       return await new Promise(
+        /* eslint-disable jsdoc/no-undefined-types -- Has issue with generics. */
         /**
-         * @param {(db: LevelUp<LevelDown>) => void} resolve
-         * @param {(error: Error) => void} reject
+         * @param {(db: LevelUp<LevelDown>) => void} resolve Resolver
+         * @param {(error: Error) => void} reject Rejecter
          */
+        /* eslint-enable jsdoc/no-undefined-types */
         (resolve, reject) => {
           /**
-           * @param {Error|undefined} error
+           * @param {Error|undefined} error Error
            */
           const cb = (error) => {
             /* v8 ignore next 2 */ // No way to spy or mock this deep in.
@@ -77,8 +81,8 @@ export const useLevelAdapter = memo(function useLevelAdapter() {
 
   /**
    * @this {Partial<LevelPouch>}
-   * @param {Record<string, unknown>} opts
-   * @param {ErrorCallback} cb
+   * @param {Record<string, unknown>} opts Plugin options
+   * @param {ErrorCallback} cb Error callback
    */
   function MainDown(opts, cb) {
     // eslint-disable-next-line -- Everything is messed up with no typings.

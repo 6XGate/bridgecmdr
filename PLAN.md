@@ -1,7 +1,4 @@
 - Milestones
-  - v2.2
-    - Move more modules to core.
-    - (#74) Rearrangeable dashboard icons.
   - v2.3
     - Determine which drivers are being using by the public at large to remove the experimental mark; options:
       - Add a opt-in telemetry feature to see which drivers are being used, should be an ask to send survey sort of thing.

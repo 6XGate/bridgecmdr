@@ -31,9 +31,9 @@ export interface Driver extends DriverInformation {
   /**
    * Sets input and output ties.
    *
-   * @param input The input channel to tie.
-   * @param videoOutput The output video channel to tie.
-   * @param audioOutput The output audio channel to tie.
+   * @param input - The input channel to tie.
+   * @param videoOutput - The output video channel to tie.
+   * @param audioOutput - The output audio channel to tie.
    */
   readonly activate: (input: number, videoOutput: number, audioOutput: number) => Promise<void>
   /** Powers on the switch or monitor. */
