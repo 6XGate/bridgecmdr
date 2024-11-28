@@ -67,26 +67,26 @@ export const hostSchema = z.string().refine(isHost)
 // #endregion
 
 /**
-  Is it a valid hostname?
-
-  From RFC-952 (with relaxation stated in RFC-1123 2.1)
-
-  ```
-  Hostname is <hname>
-  <hname> = <name>*["."<name>]
-  <name> = <let-or-digit>[*[<let-or-digit-or-hyphen]<let-or-digit]
-  ```
-
-  So, the regular expression would be,
-
-  ```
-  <name> = /[\p{N}\p{L}](?:[\p{N}\p{L}-]*[\p{N}\p{L}])?/gu
-  <hname> /^<name>(?:\.<name>)*$/gu
-  ```
-
-  Fully rendered in hostNamePattern, with non-capture groups
-  to capturing converted for better readability.
-*/
+ * Is it a valid hostname?
+ *
+ * From RFC-952 (with relaxation stated in RFC-1123 2.1)
+ *
+ * ```
+ * Hostname is <hname>
+ * <hname> = <name>*["."<name>]
+ * <name> = <let-or-digit>[*[<let-or-digit-or-hyphen]<let-or-digit]
+ * ```
+ *
+ * So, the regular expression would be,
+ *
+ * ```
+ * <name> = /[\p{N}\p{L}](?:[\p{N}\p{L}-]*[\p{N}\p{L}])?/gu
+ * <hname> /^<name>(?:\.<name>)*$/gu
+ * ```
+ *
+ * Fully rendered in hostNamePattern, with non-capture groups
+ * to capturing converted for better readability.
+ */
 const hostNamePattern = /^[\p{N}\p{L}]([\p{N}\p{L}-]*[\p{N}\p{L}])?(\.[\p{N}\p{L}]([\p{N}\p{L}-]*[\p{N}\p{L}])?)*$/u
 /** Determines whether a string is a hostname. */
 export const isHostName = (value: string) => hostNamePattern.test(value)
@@ -95,15 +95,15 @@ export const hostNameSchema = z.string().regex(hostNamePattern)
 // #region IPv4
 
 /**
-  Zod's IP pattern allows some invalid address strings, such as double-zero, `00`.
-  These days IPv4 is generally always in decimal, not octal. It seems Zod was
-  aiming for this. With this in mind, the definition is as follows.
-
-  ```
-  <address> = <octet> 3 * ("." <octet>)
-  <octet> = /(25[0-5])|(2[0-4][0-9])|(1[0-9]{2})|([1-9][0-9])|[0-9]/ # 0 - 255
-  ```
-*/
+ * Zod's IP pattern allows some invalid address strings, such as double-zero, `00`.
+ * These days IPv4 is generally always in decimal, not octal. It seems Zod was
+ * aiming for this. With this in mind, the definition is as follows.
+ *
+ * ```
+ * <address> = <octet> 3 * ("." <octet>)
+ * <octet> = /(25[0-5])|(2[0-4][0-9])|(1[0-9]{2})|([1-9][0-9])|[0-9]/ # 0 - 255
+ * ```
+ */
 const ipV4Pattern =
   /^((25[0-5])|(2[0-4][0-9])|(1[0-9]{2})|([1-9][0-9])|[0-9])(\.((25[0-5])|(2[0-4][0-9])|(1[0-9]{2})|([1-9][0-9])|[0-9])){3}$/u
 /** Determines whether a string is an IPv4 address */
@@ -116,46 +116,46 @@ export const ipV4AddressSchema = z.string().regex(ipV4Pattern)
 // #region IPv6
 
 /**
-  Zod's IPv6 pattern allows a lot of invalid and misses some valid addresses.
-  See {@link https://github.com/colinhacks/zod/issues/2339}.
-  The RFCs seems indicate the following pattern.
-
-  IPv6
-
-  ```
-    <six-address> | <four-address>
-
-    <six-address> = <full-address> | <compact-address>
-    <four-address> = <full-address-prefix> <four-address> | <compact-address-prefix> <four-address>
-
-    <full-address> = <ip6-octet-pair> (7 * (":" <ip6-octet-pair>))
-    <compact-address> = "::" # Zero address
-                      | ":" 7 * (":" <ip6-octet-pair>)
-                      | <ip6-octet-pair> ":" 1-6 * (":" <ip6-octet-pair>)
-                      | 1-2 * (<ip6-octet-pair> ":") 1-5 * (":" <ip6-octet-pair>)
-                      | 1-3 * (<ip6-octet-pair> ":") 1-4 * (":" <ip6-octet-pair>)
-                      | 1-4 * (<ip6-octet-pair> ":") 1-3 * (":" <ip6-octet-pair>)
-                      | 1-5 * (<ip6-octet-pair> ":") 1-2 * (":" <ip6-octet-pair>)
-                      | 1-6 * (<ip6-octet-pair> ":") ":" <ip6-octet-pair>
-                      | 7 * (<ip6-octet-pair> ":") ":"
-
-    <ip6-octet-pair> = /[0-9A-Fa-f]{1,3}/ | /[0-9A-F]{1,3}/i | /[0-9a-f]{1,3}/i
-
-    <full-address-prefix> = <ip6-octet-pair> (5 * (":" <ip6-octet-pair>))
-
-    <compact-address-prefix> = "::" # Zero prefix
-                                 | ":" 5 * (":" <ip6-octet-pair>) ":"
-                                 | <ip6-octet-pair> ":" 1-4 * (":" <ip6-octet-pair>) ":"
-                                 | 1-2 * (<ip6-octet-pair> ":") 1-3 * (":" <ip6-octet-pair>) ":"
-                                 | 1-3 * (<ip6-octet-pair> ":") 1-2 * (":" <ip6-octet-pair>) ":"
-                                 | 1-4 * (<ip6-octet-pair> ":") ":" <ip6-octet-pair> ":"
-                                 | 5 * (<ip6-octet-pair> ":") ":"
-
-    <four-address> = <ip4-octet> (3 * ("." <ip4-octet>))
-
-    <ip4-octet> = /(25[0-5])|(2[0-4][0-9])|(1[0-9]{2})|([1-9][0-9])|[0-9]/ # 0 - 255
-  ```
-*/
+ * Zod's IPv6 pattern allows a lot of invalid and misses some valid addresses.
+ * See {@link https://github.com/colinhacks/zod/issues/2339}.
+ * The RFCs seems indicate the following pattern.
+ *
+ * IPv6
+ *
+ * ```
+ *   <six-address> | <four-address>
+ *
+ *   <six-address> = <full-address> | <compact-address>
+ *   <four-address> = <full-address-prefix> <four-address> | <compact-address-prefix> <four-address>
+ *
+ *   <full-address> = <ip6-octet-pair> (7 * (":" <ip6-octet-pair>))
+ *   <compact-address> = "::" # Zero address
+ *                     | ":" 7 * (":" <ip6-octet-pair>)
+ *                     | <ip6-octet-pair> ":" 1-6 * (":" <ip6-octet-pair>)
+ *                     | 1-2 * (<ip6-octet-pair> ":") 1-5 * (":" <ip6-octet-pair>)
+ *                     | 1-3 * (<ip6-octet-pair> ":") 1-4 * (":" <ip6-octet-pair>)
+ *                     | 1-4 * (<ip6-octet-pair> ":") 1-3 * (":" <ip6-octet-pair>)
+ *                     | 1-5 * (<ip6-octet-pair> ":") 1-2 * (":" <ip6-octet-pair>)
+ *                     | 1-6 * (<ip6-octet-pair> ":") ":" <ip6-octet-pair>
+ *                     | 7 * (<ip6-octet-pair> ":") ":"
+ *
+ *   <ip6-octet-pair> = /[0-9A-Fa-f]{1,3}/ | /[0-9A-F]{1,3}/i | /[0-9a-f]{1,3}/i
+ *
+ *   <full-address-prefix> = <ip6-octet-pair> (5 * (":" <ip6-octet-pair>))
+ *
+ *   <compact-address-prefix> = "::" # Zero prefix
+ *                                | ":" 5 * (":" <ip6-octet-pair>) ":"
+ *                                | <ip6-octet-pair> ":" 1-4 * (":" <ip6-octet-pair>) ":"
+ *                                | 1-2 * (<ip6-octet-pair> ":") 1-3 * (":" <ip6-octet-pair>) ":"
+ *                                | 1-3 * (<ip6-octet-pair> ":") 1-2 * (":" <ip6-octet-pair>) ":"
+ *                                | 1-4 * (<ip6-octet-pair> ":") ":" <ip6-octet-pair> ":"
+ *                                | 5 * (<ip6-octet-pair> ":") ":"
+ *
+ *   <four-address> = <ip4-octet> (3 * ("." <ip4-octet>))
+ *
+ *   <ip4-octet> = /(25[0-5])|(2[0-4][0-9])|(1[0-9]{2})|([1-9][0-9])|[0-9]/ # 0 - 255
+ * ```
+ */
 const ipPairPattern = /^[0-9A-Fa-f]{1,4}$/u
 
 function parsePossibleIpString(value: string) {
