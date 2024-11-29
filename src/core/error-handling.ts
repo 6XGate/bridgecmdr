@@ -1,15 +1,10 @@
+import { toObjectPath } from './basics'
+import type { IsAny } from 'type-fest'
 import type { z } from 'zod'
-
-export type ToError<E> = E extends Error ? E : Error
-
-const toPath = (path: (number | string)[]) =>
-  path
-    .map((segment) => (typeof segment === 'number' ? `[${segment}]` : segment))
-    .reduce((p, c) => (c.startsWith('[') ? `${p}${c}` : `${p}.${c}`))
 
 export function getZodMessage(e: z.ZodError) {
   const flattened = e.flatten((issue) =>
-    issue.path.length > 0 ? `${toPath(issue.path)}: ${issue.message}` : issue.message
+    issue.path.length > 0 ? `${toObjectPath(issue.path)}: ${issue.message}` : issue.message
   )
 
   return (
@@ -31,27 +26,23 @@ export function getMessage(cause: unknown) {
   return cause.message
 }
 
-export function toError<Cause>(cause: Cause) {
-  if (cause instanceof Error) return cause as ToError<Cause>
-  return new Error(String(cause)) as ToError<Cause>
+export type AsError<T> = IsAny<T> extends true ? Error : T extends Error ? T : Error
+
+export function toError<Cause>(cause: Cause): AsError<Cause>
+export function toError(cause: unknown) {
+  if (cause instanceof Error) return cause
+  return new Error(getMessage(cause))
+}
+
+export function isNodeError(value: unknown): value is NodeJS.ErrnoException
+export function isNodeError<E extends new (...args: any[]) => Error>(
+  value: unknown,
+  type: E
+): value is InstanceType<E> & NodeJS.ErrnoException
+export function isNodeError(value: unknown, type: new (...args: any[]) => Error = Error) {
+  return value instanceof type && (value as NodeJS.ErrnoException).code != null
 }
 
 export function raiseError(factory: () => Error): never {
   throw factory()
-}
-
-export function warnPromiseFailures<T>(msg: string, results: PromiseSettledResult<T>[]) {
-  for (const result of results) {
-    if (result.status === 'rejected') {
-      console.warn(msg, result.reason)
-    }
-  }
-}
-
-export function logPromiseFailures<T>(msg: string, results: PromiseSettledResult<T>[]) {
-  for (const result of results) {
-    if (result.status === 'rejected') {
-      console.error(msg, result.reason)
-    }
-  }
 }

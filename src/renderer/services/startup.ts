@@ -1,9 +1,12 @@
 import { createSharedComposable } from '@vueuse/shared'
-import { useClient } from './rpc'
+import { useClient } from './rpc/trpc'
 
 const useStartup = createSharedComposable(function useStartup() {
   const client = useClient()
   const checkEnabled = async () => await client.startup.checkEnabled.query()
+  const checkUp = async () => {
+    await client.startup.checkUp.mutate()
+  }
   const enable = async () => {
     await client.startup.enable.mutate()
   }
@@ -13,6 +16,7 @@ const useStartup = createSharedComposable(function useStartup() {
 
   return {
     checkEnabled,
+    checkUp,
     enable,
     disable
   }

@@ -21,23 +21,35 @@ export default defineConfig({
     coverage: {
       reportOnFailure: true,
       exclude: [
-        // Ignore the ouput directories.
+        // Ignore the output directories.
         'dist/**',
         'out/**',
-        // No real unit tests can be run on the main process start-up.
+        // No real tests can be run on the main process start-up.
         'src/main/index.ts',
         'src/main/main.ts',
-        // No real unit tests can be run on the render process start-up.
+        // No real tests can be run on the preload process.
+        'src/preload/index.ts',
+        // No real tests can be run on the render process start-up.
         'src/renderer/index.ts',
         'src/renderer/main.ts',
+        // Not going to automatically test tRPC code, since it is a copy of the WebSocket server.
+        'src/core/rpc/ipc.ts',
+        'src/main/routes/**/*.ts',
+        'src/main/routes/**/*.ts',
+        'src/main/services/rpc/**/*.ts',
+        // Not going to test the core URL module till it's used.
+        'src/core/url.ts',
         // Not going to test or cover the UI right now.
-        'src/renderer/helpers/attachment.ts',
-        'src/renderer/helpers/element.ts',
-        'src/renderer/modals/dialogs.ts',
-        'src/renderer/plugins/router.ts',
-        'src/renderer/plugins/vuetify.ts',
+        // TODO: There are some parts that do need coverage:
+        // - Import and export.
+        'src/renderer/services/**/*.ts',
+        'src/renderer/**/*.ts',
+        'src/renderer/**/*.tsx',
         'src/renderer/**/*.vue',
-        // The configurations don't need any testing or converage.
+        // No real need to test the support and seeding framework.
+        'src/tests/support/**/*.ts',
+        'src/tests/seeds/**/*.ts',
+        // The configurations don't need any testing or coverage.
         'electron.vite.config.ts',
         ...coverageConfigDefaults.exclude
       ]

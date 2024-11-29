@@ -27,7 +27,7 @@ export type DriverKind = 'monitor' | 'switch'
 export interface DriverBasicInformation {
   /**
    * Indicates whether the driver is enabled, this is to allow partially coded drivers to be
-   * commited, but not usable to the UI or other code.
+   * committed, but not usable to the UI or other code.
    */
   readonly enabled: boolean
   /** Indicates whether the driver is experimental, usually due to lack of testing. */
@@ -78,27 +78,23 @@ export interface DriverBindings {
    *
    * @param uri - URI identifying the location of the device.
    */
-  readonly powerOn?: (uri: string) => Promise<void>
+  readonly powerOn: (uri: string) => Promise<void>
 
   /**
    * Powers off the switch or monitor.
    *
    * @param uri - URI identifying the location of the device.
    */
-  readonly powerOff?: (uri: string) => Promise<void>
+  readonly powerOff: (uri: string) => Promise<void>
 }
 
 export interface DefineDriverOptions extends DriverInformation {
   setup: () => DriverBindings
 }
 
-async function noOpBinding() {
-  /* no-op is not defined in setup */ await Promise.resolve()
-}
-
 const registry = new Map<string, Driver>()
 
-export interface Driver extends DriverBasicInformation, Required<DriverBindings> {
+export interface Driver extends DriverBasicInformation, DriverBindings {
   /** Raw metadata from the registration options. */
   readonly metadata: DriverInformation
   /** Gets the localized driver information. */
@@ -126,9 +122,6 @@ export function defineDriver(options: DefineDriverOptions) {
   })
 
   existing = Object.freeze({
-    // Optional bindings will be no-op.
-    powerOn: noOpBinding,
-    powerOff: noOpBinding,
     // Provided bindings.
     ...implemented,
     // Information and informational functionality.
@@ -162,7 +155,13 @@ const useDrivers = memo(function useDriver() {
     }
   }
 
-  const all = defineOperation(() => Array.from(registry.values()).filter((driver) => driver.enabled))
+  const registered = defineOperation(() => Array.from(registry.values()).filter((driver) => driver.enabled))
+
+  const allInfo = defineOperation(() =>
+    Array.from(registry.values())
+      .filter((driver) => driver.enabled)
+      .map((d) => d.metadata)
+  )
 
   const get = defineOperation((guid: string) => registry.get(guid) ?? null)
 
@@ -193,7 +192,8 @@ const useDrivers = memo(function useDriver() {
   })
 
   return {
-    all,
+    registered,
+    allInfo,
     get,
     activate,
     powerOn,

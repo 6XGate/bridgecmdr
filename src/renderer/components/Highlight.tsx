@@ -5,7 +5,7 @@ interface HighlightProps {
   search?: string
 }
 
-export function Highlight({ text, search }: HighlightProps) {
+export default function Highlight({ text, search }: HighlightProps) {
   if (!text) return h(Comment, 'Nothing')
   if (!search) return h(Text, text)
   const start = text.indexOf(search)

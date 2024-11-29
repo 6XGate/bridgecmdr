@@ -17,6 +17,16 @@ export function toArray<T>(value: T): T extends unknown[] ? T : T[] {
 }
 
 /**
+ * Converts and array of path segments to an object path
+ * @param path - Path segments.
+ * @returns Object path akin to radash `get`.
+ */
+export const toObjectPath = (path: (number | string)[]) =>
+  path
+    .map((segment) => (typeof segment === 'number' ? `[${segment}]` : segment))
+    .reduce((p, c) => (c.startsWith('[') ? `${p}${c}` : `${p}.${c}`))
+
+/**
  * Creates a new promise with externally accessible fulfillment operations.
  *
  * This is a polyfill for
@@ -25,6 +35,7 @@ export function toArray<T>(value: T): T extends unknown[] ? T : T[] {
  * @returns An object with a Promise and its fulfillment operations.
  */
 export function withResolvers<T>() {
+  /* v8 ignore next 2 */ // Won't be used.
   let resolve: (value: T | PromiseLike<T>) => void = () => undefined
   let reject: (reason?: unknown) => void = () => undefined
 

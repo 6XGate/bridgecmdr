@@ -5,20 +5,21 @@ import { app, shell, BrowserWindow, nativeTheme } from 'electron'
 import Logger from 'electron-log'
 import { sleep } from 'radash'
 import appIcon from '../../resources/icon.png?asset&asarUnpack'
-import useApiServer from './server'
-import { getAuthToken } from './services/trpc'
+import { useAppRouter } from './routes/router'
+import useBootOperations from './services/boot'
+import useMigrations from './services/migration'
+import { createIpcHandler } from './services/rpc/ipc'
 import { logError } from './utilities'
 import { toError } from '@/error-handling'
 
 // In this file you can include the rest of your app"s specific main process
 // code. You can also put them in separate files and require them here.
 
-Logger.initialize({ preload: true, spyRendererConsole: true })
 Logger.transports.console.format = '{h}:{i}:{s}.{ms} [{level}] › {text}'
 Logger.transports.file.level = 'debug'
 Logger.errorHandler.startCatching()
 
-async function createWindow(port: number) {
+async function createWindow() {
   const willStartWithDark = nativeTheme.shouldUseDarkColors || nativeTheme.shouldUseInvertedColorScheme
 
   const window = new BrowserWindow({
@@ -27,7 +28,11 @@ async function createWindow(port: number) {
     backgroundColor: willStartWithDark ? '#121212' : 'white',
     icon: appIcon,
     show: true,
-    useContentSize: true
+    useContentSize: true,
+    webPreferences: {
+      preload: joinPath(__dirname, '../preload/index.mjs'),
+      sandbox: false
+    }
   })
 
   window.removeMenu()
@@ -49,20 +54,35 @@ async function createWindow(port: number) {
   const kWait = 2000
   let lastError: unknown
 
+  window.webContents.on('console-message', (_, level, message) => {
+    switch (level) {
+      case 0:
+        Logger.verbose(message)
+        break
+      case 1:
+        Logger.info(message)
+        break
+      case 2:
+        Logger.warn(message)
+        break
+      case 3:
+        Logger.error(message)
+        break
+      default:
+        Logger.log(message)
+        break
+    }
+  })
+
   /* eslint-disable no-await-in-loop -- Retry loop must be serial. */
   for (let tries = 3; tries > 0; --tries) {
     try {
       // HMR for renderer base on electron-vite cli.
       // Load the remote URL for development or the local html file for production.
       if (is.dev && process.env.ELECTRON_RENDERER_URL != null) {
-        const url = new URL(process.env.ELECTRON_RENDERER_URL)
-        url.searchParams.set('port', String(port))
-        url.searchParams.set('auth', getAuthToken())
-        await window.loadURL(url.toString())
+        await window.loadURL(process.env.ELECTRON_RENDERER_URL)
       } else {
-        await window.loadFile(joinPath(__dirname, '../renderer/index.html'), {
-          query: { port: String(port), auth: getAuthToken() }
-        })
+        await window.loadFile(joinPath(__dirname, '../renderer/index.html'))
       }
 
       return window
@@ -107,8 +127,18 @@ process.on('SIGTERM', () => {
 // this event occurs.
 await app.whenReady()
 
+const migrate = useMigrations()
+await migrate().catch((cause: unknown) => {
+  Logger.error(cause)
+})
+
+const boot = useBootOperations()
+await boot()
+
 // Set app user model id for windows
 electronApp.setAppUserModelId('org.sleepingcats.BridgeCmdr')
 
-const port = useApiServer()
-await createWindow(port)
+// If macOS close vs quit behavior is reimplemented, we will have
+// to make sure port and handler are accessible earlier.
+const handler = createIpcHandler({ router: useAppRouter() })
+handler.attachWindow(await createWindow())

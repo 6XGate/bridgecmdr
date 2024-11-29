@@ -1,6 +1,6 @@
 import { createSharedComposable, tryOnScopeDispose } from '@vueuse/core'
 import useTypedEventTarget from '../support/events'
-import { useClient } from './rpc'
+import { useClient } from './rpc/trpc'
 import type { ProgressInfo } from 'electron-updater'
 
 export class UpdateProgressEvent extends Event implements ProgressInfo {
@@ -19,7 +19,7 @@ export class UpdateProgressEvent extends Event implements ProgressInfo {
 const useAppUpdates = createSharedComposable(function useAppUpdates() {
   const client = useClient()
 
-  // eslint-disable-next-line @typescript-eslint/consistent-type-definitions -- Inapropriate, type !== interface
+  // eslint-disable-next-line @typescript-eslint/consistent-type-definitions -- Inappropriate, type !== interface
   type Events = {
     progress: (ev: UpdateProgressEvent) => void
   }
@@ -57,7 +57,7 @@ const useAppUpdates = createSharedComposable(function useAppUpdates() {
     }
   })
 
-  const progres = client.updates.onProgress.subscribe(undefined, {
+  const progress = client.updates.onProgress.subscribe(undefined, {
     onData([info]) {
       progressProxy(info)
     }
@@ -66,7 +66,7 @@ const useAppUpdates = createSharedComposable(function useAppUpdates() {
   tryOnScopeDispose(() => {
     checking.unsubscribe()
     available.unsubscribe()
-    progres.unsubscribe()
+    progress.unsubscribe()
   })
 
   return appUpdater

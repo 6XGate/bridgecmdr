@@ -2,7 +2,7 @@ import { createSharedComposable } from '@vueuse/shared'
 import { computed, reactive, readonly, ref, shallowReadonly } from 'vue'
 import { trackBusy } from '../hooks/tracking'
 import i18n from '../plugins/i18n'
-import { useClient } from './rpc'
+import { useClient } from './rpc/trpc'
 import type {
   kDeviceHasNoExtraCapabilities as HasNoExtraCapabilities,
   kDeviceSupportsMultipleOutputs as SupportsMultipleOutputs,
@@ -23,17 +23,17 @@ export const kDeviceCanDecoupleAudioOutput: CanDecoupleAudioOutput = 2
 
 /** Informational metadata about a device and driver. */
 export interface DriverInformation extends DriverBasicInformation, LocalizedDriverInformation {
-  // Just combines the locatized information with the basic information.
+  // Just combines the localized information with the basic information.
 }
 
-/** Driver to interact with switching devices. */
+/** Driver to interact with monitors or switches. */
 export interface Driver extends DriverInformation {
   /**
    * Sets input and output ties.
    *
-   * @param input The input channel to tie.
-   * @param videoOutput The output video channel to tie.
-   * @param audioOutput The output audio channel to tie.
+   * @param input - The input channel to tie.
+   * @param videoOutput - The output video channel to tie.
+   * @param audioOutput - The output audio channel to tie.
    */
   readonly activate: (input: number, videoOutput: number, audioOutput: number) => Promise<void>
   /** Powers on the switch or monitor. */
@@ -58,9 +58,7 @@ const useDrivers = createSharedComposable(function useDrivers() {
   async function all() {
     if (items.value.length > 0) return items.value
     const drivers = await tracker.wait(client.drivers.all.query())
-    for (const {
-      metadata: { enabled, experimental, kind, guid, localized, capabilities }
-    } of drivers) {
+    for (const { enabled, experimental, kind, guid, localized, capabilities } of drivers) {
       /** The localized driver information made i18n compatible. */
       for (const [locale, description] of Object.entries(localized)) {
         i18n.global.mergeLocaleMessage(locale as never, {

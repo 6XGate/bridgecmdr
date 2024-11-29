@@ -5,15 +5,14 @@ import { computed, ref, reactive, watch, onBeforeMount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import NumberInput from '../components/NumberInput.vue'
 import { useRules, useValidation } from '../hooks/validation'
+import { useDevices } from '../services/data/devices'
+import { useSources } from '../services/data/sources'
 import useDrivers, { kDeviceCanDecoupleAudioOutput, kDeviceSupportsMultipleOutputs } from '../services/driver'
-import { useSources } from '../services/sources'
-import { useSwitches } from '../services/switches'
 import { useDialogs, useTieDialog } from './dialogs'
 import type { I18nSchema } from '../locales/locales'
-import type { Source } from '../services/sources'
-import type { NewTie } from '../services/ties'
+import type { Source } from '../services/data/sources'
+import type { NewTie } from '../services/data/ties'
 import type { DeepReadonly } from 'vue'
-import { deepClone } from '@/object'
 
 const props = defineProps<{
   // Dialog
@@ -32,7 +31,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n<I18nSchema>()
 const dialogs = useDialogs()
-const isBusy = computed(() => switches.isBusy || sources.isBusy || drivers.isBusy)
+const isBusy = computed(() => devices.isBusy || sources.isBusy || drivers.isBusy)
 
 const isVisible = useVModel(props, 'visible', emit)
 
@@ -41,12 +40,12 @@ const title = computed(() => (props.editing ? t('label.addTie') : t('label.editT
 const drivers = useDrivers()
 onBeforeMount(drivers.all)
 
-const switches = useSwitches()
+const devices = useDevices()
 const sources = useSources()
 // eslint-disable-next-line vue/no-setup-props-reactivity-loss -- Prop reactivity not desired.
 const target = ref<NewTie>({
   // eslint-disable-next-line vue/no-setup-props-reactivity-loss -- Prop reactivity not desired.
-  ...deepClone(props.tie),
+  ...structuredClone(props.tie),
   ...(props.source != null ? { sourceId: props.source._id } : {})
 })
 
@@ -74,10 +73,10 @@ const videoOutputChannel = computed({
   }
 })
 
-const switcher = computed(() => switches.items.find((s) => s._id === target.value.switchId))
+const device = computed(() => devices.items.find((s) => s._id === target.value.deviceId))
 
 const driver = computed(() =>
-  switcher.value != null ? drivers.items.find((d) => d.guid === switcher.value?.driverId) : undefined
+  device.value != null ? drivers.items.find((d) => d.guid === device.value?.driverId) : undefined
 )
 
 const hasOutputChannel = computed(() => Boolean((driver.value?.capabilities ?? 0) & kDeviceSupportsMultipleOutputs))
@@ -128,7 +127,7 @@ function cancel() {
 const { integer, minValue, required, requiredIf, uuid } = useRules()
 const rules = reactive({
   sourceId: { required, uuid },
-  switchId: { required, uuid },
+  deviceId: { required, uuid },
   inputChannel: { required, integer, ...minValue(1) },
   outputChannels: {
     video: { ...requiredIf(hasOutputChannel), integer, ...minValue(1) },
@@ -142,7 +141,7 @@ const { cardProps, isFullscreen, body, showDividers } = useTieDialog()
 </script>
 
 <template>
-  <VCard :laoding="isBusy" v-bind="cardProps">
+  <VCard :loading="isBusy" v-bind="cardProps">
     <VToolbar v-if="isFullscreen" :title="title" color="transparent">
       <template #prepend>
         <VBtn :icon="mdiClose" @click="cancelIfConfirmed" />
@@ -158,14 +157,14 @@ const { cardProps, isFullscreen, body, showDividers } = useTieDialog()
     <VCardText ref="body">
       <VForm :disabled="isBusy">
         <VSelect
-          v-model="v$.switchId.$model"
+          v-model="v$.deviceId.$model"
           :label="t('label.switchOrMonitor')"
-          :items="switches.items"
+          :items="devices.items"
           item-title="title"
           item-value="_id"
           :placeholder="t('placeholder.required')"
-          v-bind="getStatus(v$.switchId)" />
-        <div v-if="target.switchId != null" class="colg d-flex flex-wrap justify-start">
+          v-bind="getStatus(v$.deviceId)" />
+        <div v-if="target.deviceId != null" class="colg d-flex flex-wrap justify-start">
           <NumberInput
             v-model="v$.inputChannel.$model"
             class="flex-grow-0 w-300px"
@@ -215,7 +214,7 @@ en:
     inputChannel: Input channel
     outputChannel: Output channel
     audioChannel: Output audio channel
-    sync: Synchronise audio and vidoe channels
+    sync: Synchronize audio and video channels
   message:
     discardNew: Do you want to discard this tie?
 </i18n>

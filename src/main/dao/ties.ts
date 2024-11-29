@@ -1,12 +1,17 @@
-import { map } from 'radash'
+import { map, memo } from 'radash'
 import { z } from 'zod'
-import { defineDatabase, DocumentId, getInsertable, getUpdateable } from '../services/database'
-import type { getDocument } from '../services/database'
+import {
+  Database,
+  DocumentId,
+  inferDocumentOf,
+  inferNewDocumentOf,
+  inferUpdatesOf,
+  inferUpsertOf
+} from '../services/database'
 
-export type Tie = getDocument<typeof Tie>
-export const Tie = z.object({
+export const TieModel = z.object({
   sourceId: DocumentId,
-  switchId: DocumentId,
+  deviceId: DocumentId,
   inputChannel: z.number().int().nonnegative(),
   outputChannels: z.object({
     video: z.number().int().nonnegative().optional(),
@@ -14,25 +19,38 @@ export const Tie = z.object({
   })
 })
 
-const useTiesDatabase = defineDatabase({
-  name: 'ties',
-  schema: Tie,
-  indices: [{ sourceId: ['sourceId'], switchId: ['switchId'] }],
-  setup: (base) => ({
-    forSwitch: base.defineOperation(
-      async (db, switchId: DocumentId) =>
-        await db.find({ selector: { switchId } }).then(async (r) => await map(r.docs, base.prepare))
-    ),
-    forSource: base.defineOperation(
-      async (db, sourceId: DocumentId) =>
-        await db.find({ selector: { sourceId } }).then(async (r) => await map(r.docs, base.prepare))
-    )
-  })
-})
+const indices = { sourceId: ['sourceId'], deviceId: ['deviceId'] }
 
-export type NewTie = getInsertable<typeof Tie>
-export const NewTie = getInsertable(Tie)
-export type TieUpdate = getUpdateable<typeof Tie>
-export const TieUpdate = getUpdateable(Tie)
+const useTiesDatabase = memo(
+  () =>
+    new (class extends Database.of('ties', TieModel, indices) {
+      async forDevice(deviceId: DocumentId) {
+        return await this.run(
+          async (db) =>
+            await db
+              .find({ selector: { deviceId } })
+              .then(async (r) => await map(r.docs, async (d) => await this.prepare(d)))
+        )
+      }
+
+      async forSource(sourceId: DocumentId) {
+        return await this.run(
+          async (db) =>
+            await db
+              .find({ selector: { sourceId } })
+              .then(async (r) => await map(r.docs, async (d) => await this.prepare(d)))
+        )
+      }
+    })()
+)
+
+export type Tie = inferDocumentOf<typeof TieModel>
+export const Tie = inferDocumentOf(TieModel)
+export type NewTie = inferNewDocumentOf<typeof TieModel>
+export const NewTie = inferNewDocumentOf(TieModel)
+export type TieUpdate = inferUpdatesOf<typeof TieModel>
+export const TieUpdate = inferUpdatesOf(TieModel)
+export type TieUpsert = inferUpsertOf<typeof TieModel>
+export const TieUpsert = inferUpsertOf(TieModel)
 
 export default useTiesDatabase

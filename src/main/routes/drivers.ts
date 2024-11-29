@@ -1,7 +1,7 @@
 import { memo } from 'radash'
 import { z } from 'zod'
 import useDrivers from '../services/drivers'
-import { procedure, router } from '../services/trpc'
+import { procedure, router } from '../services/rpc/trpc'
 
 const Channel = z.number().int().nonnegative().finite()
 
@@ -12,7 +12,7 @@ const useDriversRouter = memo(function useDriversRoute() {
   const drivers = useDrivers()
 
   return router({
-    all: procedure.query(drivers.all),
+    all: procedure.query(async () => await drivers.allInfo()),
     get: procedure.input(z.string().uuid()).query(async ({ input }) => {
       await drivers.get(input)
     }),

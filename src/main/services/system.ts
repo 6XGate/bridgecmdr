@@ -1,20 +1,28 @@
+import Logger from 'electron-log'
+import { execa } from 'execa'
 import { memo } from 'radash'
-import useDbus from './dbus'
 
 const useSystem = memo(function useSystem() {
-  const { dbusBind } = useDbus()
-
-  const powerOffByDbus = dbusBind(
-    '--system',
-    'org.freedesktop.login1',
-    '/org/freedesktop/login1',
-    'org.freedesktop.login1.Manager',
-    'PowerOff',
-    ['boolean']
-  )
-
   async function powerOff(interactive = false) {
-    await powerOffByDbus(interactive)
+    const args = interactive ? ['boolean:true'] : ['boolean:false']
+    const params = [
+      '--system',
+      '--print-reply',
+      '--dest=org.freedesktop.login1',
+      '/org/freedesktop/login1',
+      'org.freedesktop.login1.Manager.PowerOff',
+      ...args
+    ]
+
+    Logger.debug('execa:dbus-send:params', ...params)
+    const { stdout, stderr, exitCode } = await execa('dbus-send', params)
+    if (exitCode !== 0) {
+      throw new Error(stderr)
+    }
+
+    if (stdout) {
+      Logger.debug('execa:dbus-send:output', stdout)
+    }
   }
 
   return {

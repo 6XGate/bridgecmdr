@@ -7,7 +7,7 @@ import AlertModal from './modals/AlertModal.vue'
 import ConfirmModal from './modals/ConfirmModal.vue'
 import { useDialogs } from './modals/dialogs'
 import useAppUpdates from './services/appUpdates'
-import { useClient } from './services/rpc'
+import { useClient } from './services/rpc/trpc'
 import useSettings from './services/settings'
 import type { I18nSchema } from './locales/locales'
 import type { UpdateProgressEvent } from './services/appUpdates'
@@ -53,7 +53,7 @@ watchOnce(isReady, async function checkForUpdate() {
 
   const yes = await dialogs.confirm({
     title: t('message.confirmUpdate', [appInfo.value.name]),
-    message: t('message.versionAvailale', { version: info.version }),
+    message: t('message.versionAvailable', { version: info.version }),
     confirmButton: t('action.update'),
     cancelButton: t('action.later')
   })
@@ -132,7 +132,7 @@ function roundByteSize(amount: number, type: 'size' | 'speed' = 'size') {
 en:
   message:
     confirmUpdate: Do you want to update {0}?
-    versionAvailale: The new version, {version}, is available for download.
+    versionAvailable: The new version, {version}, is available for download.
     progress: Downloaded {amount} of {total} at {speed}...
     updateReady: Download complete, ready to restart and update
   action:

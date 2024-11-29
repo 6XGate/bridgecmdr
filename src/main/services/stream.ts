@@ -6,6 +6,7 @@ import type { Socket, NetConnectOpts, TcpNetConnectOpts } from 'node:net'
 import type { Duplex } from 'node:stream'
 import type { Simplify } from 'type-fest'
 import { toError } from '@/error-handling'
+import { hostWithOptionalPortPattern } from '@/location'
 
 export type NetStreamOptions = Omit<TcpNetConnectOpts, 'host' | 'port'>
 
@@ -84,10 +85,8 @@ async function createSocketStream(options: NetConnectOpts) {
   return createStream(socket, { close })
 }
 
-const kHostWithOptionalPort = /^((?:\[[A-Fa-f0-9.:]+\])|(?:[\p{N}\p{L}.-]+))(?::([1-9][0-9]*))?$/u
-
 async function createNetStream(target: string, options: NetStreamOptions) {
-  const parts = kHostWithOptionalPort.exec(target)
+  const parts = hostWithOptionalPortPattern.exec(target)
   if (parts?.[1] == null) {
     throw new Error(`target "${target}" is not a valid host or host:port combination`)
   }
@@ -137,5 +136,5 @@ export async function createCommandStream(path: string, options: CommandStreamOp
     return await createNetStream(path.substring(3), options as NetStreamOptions)
   }
 
-  throw new TypeError('Unsupport stream address')
+  throw new TypeError('Unsupported stream address')
 }

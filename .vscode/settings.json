@@ -1,5 +1,18 @@
 {
   "i18n-ally.localesPaths": ["src/renderer/locales"],
   "vitest.disableWorkspaceWarning": true,
-  "i18n-ally.keystyle": "nested"
+  "i18n-ally.keystyle": "nested",
+  "cSpell.words": [
+    "bridgecmdr",
+    "extron",
+    "fgpa",
+    "pinia",
+    "radash",
+    "shinybow",
+    "sindresorhus",
+    "sixxgate",
+    "snes",
+    "vuelidate",
+    "vuetify"
+  ]
 }

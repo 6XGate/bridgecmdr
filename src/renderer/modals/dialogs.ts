@@ -128,7 +128,7 @@ export function useSourceDialog() {
   return { breakpoint: xs, ...model }
 }
 
-export function useSwitchDialog() {
+export function useDeviceDialog() {
   const { width } = useDisplay()
   const breakpoint = computed(() => width.value <= 700)
 

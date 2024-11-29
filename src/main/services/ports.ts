@@ -32,7 +32,7 @@ const useSerialPorts = memo(function useSerialPorts() {
       // If there is no pnpId; don't cache the name,
       // it's less costly by avoiding the map
       // lookup. We will still key on the
-      // manufacturer for wierd PnP IDs.
+      // manufacturer for weird PnP IDs.
       return is.nonEmptyStringAndNotWhitespace(manufacturer) ? manufacturer : path
     }
 
@@ -82,7 +82,7 @@ const useSerialPorts = memo(function useSerialPorts() {
       return is.nonEmptyStringAndNotWhitespace(manufacturer) ? manufacturer : path
     }
 
-    // Now, rejoin the label by hypens, in case
+    // Now, rejoin the label by hyphens, in case
     // those were in the friendly name, and
     // replace underscores with spaces.
     title = labelParts.join('-').replace(/_/gu, ' ')

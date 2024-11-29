@@ -1,11 +1,11 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
+import DeviceList from '../pages/DeviceList.vue'
 import GeneralPage from '../pages/GeneralPage.vue'
 import MainDashboard from '../pages/MainDashboard.vue'
 import SettingsBackupPage from '../pages/SettingsBackupPage.vue'
 import SettingsPage from '../pages/SettingsPage.vue'
 import SourceList from '../pages/SourceList.vue'
 import SourcePage from '../pages/SourcePage.vue'
-import SwitchList from '../pages/SwitchList.vue'
 import type { RouteRecordRaw } from 'vue-router'
 
 const routes = [
@@ -15,7 +15,7 @@ const routes = [
   { name: 'settings-backup', path: '/settings/backup', component: SettingsBackupPage },
   { name: 'sources', path: '/sources', component: SourceList },
   { name: 'sources-id', path: '/sources/:id', component: SourcePage, props: true },
-  { name: 'switches', path: '/switches', component: SwitchList }
+  { name: 'devices', path: '/devices', component: DeviceList }
 ] satisfies RouteRecordRaw[]
 
 const router = createRouter({

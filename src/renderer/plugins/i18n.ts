@@ -4,9 +4,9 @@ import enDateTimes from '../locales/en/datetimes'
 import enFunction from '../locales/en/functions'
 import en from '../locales/en/messages.json'
 import enNumbers from '../locales/en/numbers'
+import { mergeLocaleParts } from '../support/locale'
 import type { DateTimeSchema, Locales, MessageSchema, NumberSchema } from '../locales/locales'
 import type { MergeDeep } from 'type-fest'
-import { deepAssign } from '@/object'
 
 type CompleteSchema = MergeDeep<MessageSchema, { $vuetify: typeof vuetifyEn$ }>
 interface CompleteI18nSchema {
@@ -41,7 +41,7 @@ const i18n = createI18n<CompleteI18nSchema, Locales, false>({
   },
   // Localization messages and data.
   messages: {
-    en: { ...deepAssign(en, enFunction), $vuetify: vuetifyEn$ }
+    en: { ...mergeLocaleParts(en, enFunction), $vuetify: vuetifyEn$ }
   },
   numberFormats: {
     en: enNumbers

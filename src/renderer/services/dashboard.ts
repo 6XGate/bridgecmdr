@@ -3,24 +3,25 @@ import { computed, readonly, ref } from 'vue'
 import { useImages } from '../hooks/assets'
 import { trackBusy } from '../hooks/tracking'
 import { toFiles } from '../support/files'
+import { useDevices } from './data/devices'
+import { useSources } from './data/sources'
+import { useTies } from './data/ties'
 import useDrivers from './driver'
 import useSettings from './settings'
-import { useSources } from './sources'
-import { useSwitches } from './switches'
-import { useTies } from './ties'
+import type { Source } from './data/sources'
 import type { Driver } from './driver'
-import type { Source } from './sources'
 import type { DocumentId } from './store'
 import type { ReadonlyDeep } from 'type-fest'
 import { isNotNullish } from '@/basics'
-import { warnPromiseFailures } from '@/error-handling'
 
 export interface Button {
   readonly guid: string
   readonly title: string
   readonly image: string | undefined
+  order: number
   isActive: boolean
   activate: () => Promise<void>
+  setOrder: (to: number) => void
 }
 
 export const useDashboard = defineStore('dashboard', function defineDashboard() {
@@ -30,12 +31,12 @@ export const useDashboard = defineStore('dashboard', function defineDashboard() 
   const drivers = useDrivers()
   const ties = useTies()
   const sources = useSources()
-  const switches = useSwitches()
+  const devices = useDevices()
   const tracker = trackBusy(
     () => !isReady.value,
     () => drivers.isBusy,
     () => sources.isBusy,
-    () => switches.isBusy,
+    () => devices.isBusy,
     () => ties.isBusy
   )
 
@@ -47,10 +48,10 @@ export const useDashboard = defineStore('dashboard', function defineDashboard() 
   async function loadDrivers() {
     await drivers.all()
 
-    // Remove drivers for switches removed
+    // Remove drivers for devices removed
     const closing: Driver[] = []
     for (const guid of loadedDrivers.keys()) {
-      if (switches.items.find((switcher) => switcher._id === guid) == null) {
+      if (devices.items.find((device) => device._id === guid) == null) {
         const driver = loadedDrivers.get(guid)
         if (driver != null) {
           loadedDrivers.delete(guid)
@@ -61,10 +62,10 @@ export const useDashboard = defineStore('dashboard', function defineDashboard() 
 
     // Load any drivers that are new or are being replaced.
     const loading = new Array<[string, Driver]>()
-    for (const switcher of switches.items) {
-      const driver = loadedDrivers.get(switcher._id)
-      if (driver == null || driver.uri !== switcher.path) {
-        loading.push([switcher._id, drivers.load(switcher.driverId, switcher.path)])
+    for (const device of devices.items) {
+      const driver = loadedDrivers.get(device._id)
+      if (driver == null || driver.uri !== device.path) {
+        loading.push([device._id, drivers.load(device.driverId, device.path)])
       }
     }
 
@@ -74,28 +75,38 @@ export const useDashboard = defineStore('dashboard', function defineDashboard() 
     }
   }
 
+  let orderUpdates = 0
+  async function normalize() {
+    orderUpdates += 1
+    if (orderUpdates === 100) {
+      orderUpdates = 0
+      await sources.normalizeOrder()
+      await refresh()
+    }
+  }
+
   function defineButton(source: ReadonlyDeep<Source>, index: number): Button {
     const commands = ties.items
       .filter((tie) => tie.sourceId === source._id)
       .map(function makeCommand(tie) {
-        const switcher = switches.items.find((item) => tie.switchId === item._id)
-        const driver = loadedDrivers.get(tie.switchId)
+        const device = devices.items.find((item) => tie.deviceId === item._id)
+        const driver = loadedDrivers.get(tie.deviceId)
 
-        if (switcher == null) {
-          console.error(`${tie.switchId}: No such switch for source "${source.title}"`)
+        if (device == null) {
+          console.error(`${tie.deviceId}: No such device for source "${source.title}"`)
 
           return undefined
         }
 
         if (driver == null) {
           console.error(
-            `${switcher.driverId}:  No such driver for switch "${switcher.title}" used by source "${source.title}"`
+            `${device.driverId}:  No such driver for device "${device.title}" used by source "${source.title}"`
           )
 
           return undefined
         }
 
-        return { tie, switch: switcher, driver }
+        return { tie, device, driver }
       })
       .filter(isNotNullish)
 
@@ -104,14 +115,26 @@ export const useDashboard = defineStore('dashboard', function defineDashboard() 
         button.isActive = false
       }
 
-      warnPromiseFailures(
-        'tie activation failure',
-        await Promise.allSettled(
-          commands.map(async ({ tie, driver }) => {
-            await driver.activate(tie.inputChannel, tie.outputChannels.video ?? 0, tie.outputChannels.audio ?? 0)
-          })
-        )
+      await Promise.allSettled(
+        commands.map(async ({ tie, driver }) => {
+          await driver
+            .activate(tie.inputChannel, tie.outputChannels.video ?? 0, tie.outputChannels.audio ?? 0)
+            .catch((cause: unknown) => {
+              console.warn('tie activation failure', cause)
+            })
+        })
       )
+    }
+
+    function setOrder(to: number) {
+      orderUpdates += 1
+      sources
+        .update({ _id: source._id, order: to })
+        .then(normalize)
+        // .then(refresh)
+        .catch((cause: unknown) => {
+          console.warn('Failed to update order', cause)
+        })
     }
 
     return {
@@ -119,15 +142,28 @@ export const useDashboard = defineStore('dashboard', function defineDashboard() 
       title: source.title,
       image: images.value[index],
       isActive: false,
-      activate
+      order: source.order,
+      activate,
+      setOrder
     }
   }
 
   function prepareButton(button: Button) {
     const activate = button.activate
+    const setOrder = button.setOrder
+
     button.activate = async () => {
       await activate()
       button.isActive = true
+    }
+
+    button.setOrder = (to: number) => {
+      button.order = to
+      setOrder(to)
+
+      // HACK: To allow external reference to trigger, resort the list
+      // completely.
+      items.value.sort((a, b) => a.order - b.order)
     }
 
     return button
@@ -139,20 +175,21 @@ export const useDashboard = defineStore('dashboard', function defineDashboard() 
         toFiles(source._attachments).find((f) => source.image != null && f.name === source.image)
       )
     )
-    items.value = await Promise.all(sources.items.map(defineButton).map(prepareButton))
+    items.value = (await Promise.all(sources.items.map(defineButton).map(prepareButton))).sort(
+      (a, b) => a.order - b.order
+    )
   }
 
   let poweredOn = false
   async function powerOnOnce() {
     if (poweredOn) return
     if (!settings.powerOnSwitchesAtStart) return
-    warnPromiseFailures(
-      'driver power off failure',
-      await Promise.allSettled(
-        [...loadedDrivers.values()].map(async (driver) => {
-          await driver.powerOn()
+    await Promise.allSettled(
+      [...loadedDrivers.values()].map(async (driver) => {
+        await driver.powerOn().catch((cause: unknown) => {
+          console.warn('device power off failure', cause)
         })
-      )
+      })
     )
 
     poweredOn = true
@@ -160,8 +197,8 @@ export const useDashboard = defineStore('dashboard', function defineDashboard() 
 
   const refresh = tracker.track(async function refresh() {
     items.value = []
-    await Promise.all([ties.compact(), sources.compact(), switches.compact()])
-    await Promise.all([ties.all(), sources.all(), switches.all()])
+    await Promise.all([ties.compact(), sources.compact(), devices.compact()])
+    await Promise.all([ties.all(), sources.all(), devices.all()])
     await loadDrivers()
     await setupDashboard()
     await powerOnOnce()
@@ -169,13 +206,12 @@ export const useDashboard = defineStore('dashboard', function defineDashboard() 
   })
 
   async function powerOff() {
-    warnPromiseFailures(
-      'driver power off failure',
-      await Promise.allSettled(
-        [...loadedDrivers.values()].map(async (driver) => {
-          await driver.powerOff()
+    await Promise.allSettled(
+      [...loadedDrivers.values()].map(async (driver) => {
+        await driver.powerOff().catch((cause: unknown) => {
+          console.warn('device power off failure', cause)
         })
-      )
+      })
     )
   }
 

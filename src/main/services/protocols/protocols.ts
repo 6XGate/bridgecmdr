@@ -33,6 +33,7 @@ export const useProtocol = memo(function useProtocol(name: string, options: Prot
       Logger.debug(`${name}; returned ${String(data)}`)
     })
     connection.on('error', (error) => {
+      /* v8 ignore next 1 */ // TODO: Will attempt to mock later.
       Logger.error(`${name}; ${error.message}`)
     })
 

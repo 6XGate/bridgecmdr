@@ -25,6 +25,8 @@
     "general": "General",
     "image": "Image",
     "loading": "Loading...",
+    "monitor": "Monitor",
+    "monitors": "Monitors",
     "name": "Name",
     "port": "Port",
     "remote": "Remote host",

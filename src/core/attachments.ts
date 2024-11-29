@@ -8,7 +8,7 @@ export class Attachment extends Uint8Array {
 
   static async fromPouchAttachment(name: string, attachment: PouchDB.Core.FullAttachment) {
     if (Buffer.isBuffer(attachment.data)) {
-      return new Attachment(name, attachment.content_type, attachment.data.buffer)
+      return new Attachment(name, attachment.content_type, attachment.data)
     }
 
     if (attachment.data instanceof Blob) {

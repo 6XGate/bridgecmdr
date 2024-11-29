@@ -1,6 +1,6 @@
 import { observable } from '@trpc/server/observable'
 import { memo } from 'radash'
-import { procedure, router } from '../services/trpc'
+import { procedure, router } from '../services/rpc/trpc'
 import useUpdater from '../services/updater'
 import type { AppUpdaterEventMap } from '../services/updater'
 
