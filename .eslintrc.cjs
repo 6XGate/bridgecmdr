@@ -23,7 +23,7 @@ module.exports = defineConfig(({ useVue, useNode, useTypeScript }) => {
   const useJsDocRules = memo(() => ({
     ...useCommonJsDocRules(),
     // Only require the parameters if we want them.
-    'jsdoc/require-param': ['error', { ignoreWhenAllParamsMissing: true }],
+    'jsdoc/require-param': ['error', { ignoreWhenAllParamsMissing: true }]
   }))
 
   /** @type {() => Partial<import('eslint').Linter.RulesRecord>} */
