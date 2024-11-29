@@ -10,8 +10,6 @@ module.exports = defineConfig(({ useVue, useNode, useTypeScript }) => {
 
   /** @type {() => Partial<import('eslint').Linter.RulesRecord>} */
   const useCommonJsDocRules = memo(() => ({
-    // Only require the parameters if we want them.
-    'jsdoc/require-param': ['error', { ignoreWhenAllParamsMissing: true }],
     // Don't require all sections to be filled out.
     'jsdoc/require-returns': 'off',
     'jsdoc/require-yields': 'off',
@@ -23,7 +21,9 @@ module.exports = defineConfig(({ useVue, useNode, useTypeScript }) => {
 
   /** @type {() => Partial<import('eslint').Linter.RulesRecord>} */
   const useJsDocRules = memo(() => ({
-    ...useCommonJsDocRules()
+    ...useCommonJsDocRules(),
+    // Only require the parameters if we want them.
+    'jsdoc/require-param': ['error', { ignoreWhenAllParamsMissing: true }],
   }))
 
   /** @type {() => Partial<import('eslint').Linter.RulesRecord>} */
