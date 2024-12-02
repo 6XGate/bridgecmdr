@@ -61,7 +61,7 @@
   },
   "homepage": "https://github.com/6XGate/bridgecmdr#readme",
   "devDependencies": {
-    "@intlify/core-base": "^10.0.4",
+    "@intlify/core-base": "^10.0.5",
     "@intlify/unplugin-vue-i18n": "^5.2.0",
     "@mdi/js": "^7.4.47",
     "@mdi/svg": "^7.4.47",
@@ -139,7 +139,7 @@
     "vitest": "^2.1.5",
     "vue": "^3.5.13",
     "vue-eslint-parser": "^9.4.3",
-    "vue-i18n": "^10.0.4",
+    "vue-i18n": "^10.0.5",
     "vue-router": "^4.5.0",
     "vue-tsc": "2.1.10",
     "vuetify": "^3.7.4",
