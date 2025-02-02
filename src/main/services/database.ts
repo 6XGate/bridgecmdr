@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto'
+import is from '@sindresorhus/is'
 import PouchDb from 'pouchdb-core'
 import find from 'pouchdb-find'
 import mapReduce from 'pouchdb-mapreduce'
@@ -321,7 +322,7 @@ export class Database<RawSchema extends z.AnyZodObject> {
   /** Removes a document from the database. */
   async remove(id: DocumentId, rev?: RevisionId) {
     await this.run(async (db) => {
-      const revId = rev ? rev : (await this.getDoc(id))._rev
+      const revId = is.nonEmptyString(rev) ? rev : (await this.getDoc(id))._rev
       await db.remove(id, revId)
     })
   }

@@ -56,7 +56,6 @@ export async function asMicrotask<Result>(op: () => MaybePromise<Result>) {
   return await new Promise<Result>((resolve, reject) => {
     queueMicrotask(() => {
       try {
-        // eslint-disable-next-line @typescript-eslint/use-unknown-in-catch-callback-variable -- Proxied
         Promise.resolve(op()).then(resolve).catch(reject)
       } catch (cause) {
         // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- Proxied
