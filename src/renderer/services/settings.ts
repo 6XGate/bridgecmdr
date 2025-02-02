@@ -6,7 +6,6 @@ import { useUserStorage } from './data/storage'
 import useStartup from './startup'
 import type { UseStorageOptions } from '@vueuse/core'
 
-// eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style -- Will cause circular type reference.
 interface JsonObject {
   [property: string]: JsonValue
 }
