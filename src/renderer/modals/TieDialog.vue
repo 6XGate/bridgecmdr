@@ -86,7 +86,7 @@ const canDecoupleAudio = computed(
     Boolean((driver.value?.capabilities ?? 0) & kDeviceCanDecoupleAudioOutput)
 )
 
-function confirm() {
+async function preConfirm() {
   if (!hasOutputChannel.value) {
     // Ensure the video channel is undefined if no output channel is supported.
     target.value.outputChannels.video = undefined
@@ -97,6 +97,10 @@ function confirm() {
     target.value.outputChannels.audio = undefined
   }
 
+  await submit()
+}
+
+function confirm() {
   isVisible.value = false
   emit('confirm', target.value)
 }
@@ -147,7 +151,7 @@ const { cardProps, isFullscreen, body, showDividers } = useTieDialog()
         <VBtn :icon="mdiClose" @click="cancelIfConfirmed" />
       </template>
       <template #append>
-        <VBtn class="text-none" color="primary" @click="submit">{{ t('action.save') }}</VBtn>
+        <VBtn class="text-none" color="primary" @click="preConfirm">{{ t('action.save') }}</VBtn>
       </template>
     </VToolbar>
     <template v-else>
@@ -201,7 +205,7 @@ const { cardProps, isFullscreen, body, showDividers } = useTieDialog()
     <VCardActions v-if="!isFullscreen">
       <VSpacer />
       <VBtn class="text-none" @click="cancel">{{ t('action.discard') }}</VBtn>
-      <VBtn class="text-none" color="primary" @click="submit">{{ t('action.save') }}</VBtn>
+      <VBtn class="text-none" color="primary" @click="preConfirm">{{ t('action.save') }}</VBtn>
     </VCardActions>
   </VCard>
 </template>
