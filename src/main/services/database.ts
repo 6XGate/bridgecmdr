@@ -321,6 +321,7 @@ export class Database<RawSchema extends z.AnyZodObject> {
   /** Removes a document from the database. */
   async remove(id: DocumentId, rev?: RevisionId) {
     await this.run(async (db) => {
+      // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- This isn't a nullish check, but also an empty string.
       const revId = rev ? rev : (await this.getDoc(id))._rev
       await db.remove(id, revId)
     })
