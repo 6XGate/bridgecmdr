@@ -19,8 +19,11 @@ export class Attachment extends Uint8Array {
     return new Attachment(name, attachment.content_type, textEncoder.encode(attachment.data))
   }
 
-  constructor(name: string, type: string, data: ArrayBufferLike) {
-    super(data)
+  constructor(name: string, type: string, data: ArrayLike<number>)
+  constructor(name: string, type: string, data: ArrayBuffer)
+  constructor(name: string, type: string, data: ArrayLike<number> | ArrayBuffer)
+  constructor(name: string, type: string, data: ArrayLike<number> | ArrayBuffer) {
+    super(data) // Either is allowed, but too TS is having trouble narrowing the type
     this.name = name
     this.type = type
   }

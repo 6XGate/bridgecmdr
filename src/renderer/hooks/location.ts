@@ -12,7 +12,7 @@ export function useLocationUtils(validPorts: MaybeRefOrGetter<readonly PortEntry
   const { t } = useI18n<I18nSchema>()
 
   function locMsg({ $model }: MessageProps) {
-    const path = String($model)
+    const path = $model
     switch (true) {
       case path.startsWith('port:'):
         return t('validations.location.port')

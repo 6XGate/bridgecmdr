@@ -69,7 +69,7 @@ export function useWebJson() {
         type: attachment.type,
         data: toBase64(attachment)
       }),
-      deserialize: (attachment) => new Attachment(attachment.name, attachment.type, fromBase64(attachment.data))
+      deserialize: (attachment) => new Attachment(attachment.name, attachment.type, fromBase64(attachment.data).buffer)
     },
     'Attachment'
   )

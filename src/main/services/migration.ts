@@ -58,6 +58,7 @@ const useMigrations = memo(function useMigrations() {
         /* v8 ignore next 4 */ // Difficult to test without injecting a broken migration.
       } catch (cause) {
         await database.put(name, 'failed')
+        Logger.error(`Failed to complete migration: ${name}`, cause)
         throw new Error(`Failed to complete migration: ${name}`, { cause })
       }
 
@@ -66,6 +67,7 @@ const useMigrations = memo(function useMigrations() {
         /* v8 ignore next 4 */ // Difficult to test without injecting a broken migration.
       } catch (cause) {
         await database.put(name, 'failed')
+        Logger.error(`Failed to record migration completion: ${name}`, cause)
         throw new Error(`Failed to record migration completion: ${name}`, { cause })
       }
     }

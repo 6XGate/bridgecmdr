@@ -24,7 +24,7 @@ export async function importSettings(file: File) {
   const zipReader = new ZipReader(zipFile)
   const entries = await zipReader.getEntries()
   const configEntry = entries.find((e) => e.filename === 'config.json')
-  if (configEntry?.getData == null) {
+  if (configEntry?.directory || configEntry?.getData == null) {
     throw new TypeError(`${file.name} does not have a configuration file`)
   }
 
@@ -64,7 +64,7 @@ export async function importSettings(file: File) {
         }
 
         const imageEntry = entries.find((e) => e.filename === item.image)
-        if (imageEntry?.getData == null) {
+        if (imageEntry?.directory || imageEntry?.getData == null) {
           // It's not fatal if the image is missing.
           console.warn(`Image for ${item._id}, "${item.image}", is missing`)
           await sources.upsert({ ...item, image: null })

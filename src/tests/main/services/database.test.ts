@@ -93,7 +93,7 @@ describe('adding document', () => {
 
   test('with attachments', async () => {
     const raw = { x: 3, y: 4, z: 5 }
-    const file = new File([Buffer.from('hello')], 'hello.txt', { type: 'text/plain' })
+    const file = new File([Buffer.from('hello') as BlobPart], 'hello.txt', { type: 'text/plain' })
     const attachment = await Attachment.fromFile(file)
     const doc = await database.add(raw, attachment)
     expect(doc._id).toMatch(kUuidPattern)
@@ -113,7 +113,7 @@ describe('updating document', () => {
   let doc: Awaited<ReturnType<typeof database.add>>
   beforeEach(async () => {
     raw = { x: 3, y: 4, z: 5 }
-    const file = new File([Buffer.from('hello')], 'hello.txt', { type: 'text/plain' })
+    const file = new File([Buffer.from('hello') as BlobPart], 'hello.txt', { type: 'text/plain' })
     attachment = await Attachment.fromFile(file)
     doc = await database.add(raw)
   })
@@ -196,7 +196,7 @@ describe('upserting document', () => {
   let doc: Awaited<ReturnType<typeof database.add>>
   beforeEach(async () => {
     raw = { x: 3, y: 4, z: 5 }
-    const file = new File([Buffer.from('hello')], 'hello.txt', { type: 'text/plain' })
+    const file = new File([Buffer.from('hello') as BlobPart], 'hello.txt', { type: 'text/plain' })
     attachment = await Attachment.fromFile(file)
     doc = await database.add(raw)
   })
@@ -295,7 +295,7 @@ describe('replacing document', () => {
   let doc: Awaited<ReturnType<typeof database.add>>
   beforeEach(async () => {
     raw = { x: 3, y: 4, z: 5 }
-    const file = new File([Buffer.from('hello')], 'hello.txt', { type: 'text/plain' })
+    const file = new File([Buffer.from('hello') as BlobPart], 'hello.txt', { type: 'text/plain' })
     attachment = await Attachment.fromFile(file)
     doc = await database.add(raw)
   })

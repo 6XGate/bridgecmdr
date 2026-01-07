@@ -64,7 +64,7 @@ export const useDashboard = defineStore('dashboard', function defineDashboard() 
     const loading = new Array<[string, Driver]>()
     for (const device of devices.items) {
       const driver = loadedDrivers.get(device._id)
-      if (driver == null || driver.uri !== device.path) {
+      if (driver?.uri !== device.path) {
         loading.push([device._id, drivers.load(device.driverId, device.path)])
       }
     }
@@ -169,15 +169,16 @@ export const useDashboard = defineStore('dashboard', function defineDashboard() 
     return button
   }
 
-  async function setupDashboard() {
+  function setupDashboard() {
     loadImages(
       sources.items.map((source) =>
         toFiles(source._attachments).find((f) => source.image != null && f.name === source.image)
       )
     )
-    items.value = (await Promise.all(sources.items.map(defineButton).map(prepareButton))).sort(
-      (a, b) => a.order - b.order
-    )
+    items.value = sources.items
+      .map(defineButton)
+      .map(prepareButton)
+      .sort((a, b) => a.order - b.order)
   }
 
   let poweredOn = false
@@ -200,7 +201,7 @@ export const useDashboard = defineStore('dashboard', function defineDashboard() 
     await Promise.all([ties.compact(), sources.compact(), devices.compact()])
     await Promise.all([ties.all(), sources.all(), devices.all()])
     await loadDrivers()
-    await setupDashboard()
+    setupDashboard()
     await powerOnOnce()
     isReady.value = true
   })

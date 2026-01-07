@@ -99,7 +99,7 @@ export async function seedForMigration() {
     async (doc) => await switchesDb.add(doc)
   )) as [Switch, Switch, Switch]
 
-  const file = new File([Buffer.from('test')], 'test.txt', { type: 'text/plain' })
+  const file = new File([Buffer.from('test') as BlobPart], 'test.txt', { type: 'text/plain' })
   const image = await Attachment.fromFile(file)
 
   const sources = (await map(

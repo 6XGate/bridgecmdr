@@ -30,7 +30,8 @@ async function createWindow() {
     show: true,
     useContentSize: true,
     webPreferences: {
-      preload: joinPath(__dirname, '../preload/index.mjs'),
+      // eslint-disable-next-line n/no-unsupported-features/node-builtins -- Backported
+      preload: joinPath(import.meta.dirname, '../preload/index.mjs'),
       sandbox: false
     }
   })
@@ -82,7 +83,8 @@ async function createWindow() {
       if (is.dev && process.env.ELECTRON_RENDERER_URL != null) {
         await window.loadURL(process.env.ELECTRON_RENDERER_URL)
       } else {
-        await window.loadFile(joinPath(__dirname, '../renderer/index.html'))
+        // eslint-disable-next-line n/no-unsupported-features/node-builtins -- Backported
+        await window.loadFile(joinPath(import.meta.dirname, '../renderer/index.html'))
       }
 
       return window
