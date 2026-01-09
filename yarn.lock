@@ -1642,7 +1642,7 @@
   dependencies:
     tslib "^2.4.0"
 
-"@types/abstract-leveldown@*":
+"@types/abstract-leveldown@*", "@types/abstract-leveldown@^7.2.5":
   version "7.2.5"
   resolved "https://registry.yarnpkg.com/@types/abstract-leveldown/-/abstract-leveldown-7.2.5.tgz#db2cf364c159fb1f12be6cd3549f56387eaf8d73"
   integrity sha512-/2B0nQF4UdupuxeKTJA2+Rj1D+uDemo6P4kMwKCpbfpnzeVaWSELTsAw4Lxn3VJD6APtRrZOCuYo+4nHUQfTfg==

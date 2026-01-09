@@ -7,11 +7,13 @@ import { memo } from 'radash'
 import { parse as uuidParse, stringify as uuidStringify, v4 } from 'uuid'
 import type { DeviceTable } from './devices'
 import type { ImageTable } from './images'
+import type { SettingTable } from './settings'
 import type { SourceTable } from './sources'
 import type { TieTable } from './ties'
 import type { UUID } from 'node:crypto'
 
 export default interface DatabaseSchema {
+  settings: SettingTable
   devices: DeviceTable
   images: ImageTable
   sources: SourceTable
@@ -73,7 +75,7 @@ export async function kyselyMigration<DB>(callback: (trx: Kysely<DB>) => Promise
     const trx = await db.startTransaction().execute()
     await dbMigration.run(trx, async () => {
       try {
-        await db.transaction().execute(callback)
+        await callback(trx as Kysely<DB>)
         await trx.commit().execute()
       } catch (err) {
         await trx.rollback().execute()

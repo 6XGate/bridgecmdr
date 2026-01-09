@@ -4,6 +4,13 @@ import { kyselyMigration } from '../repos/database'
 export async function migrate() {
   await kyselyMigration(async function (trx) {
     await trx.schema
+      .createTable('settings')
+      .ifNotExists()
+      .addColumn('name', 'varchar(255)', (col) => col.primaryKey())
+      .addColumn('value', 'text', (col) => col.notNull())
+      .execute()
+
+    await trx.schema
       .createTable('devices')
       .ifNotExists()
       .addColumn('id', 'binary(16)', (col) => col.primaryKey())

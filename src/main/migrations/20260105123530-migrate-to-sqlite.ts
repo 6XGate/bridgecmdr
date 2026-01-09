@@ -6,15 +6,20 @@ import { SourceModel } from '../dao/sources'
 import { TieModel } from '../dao/ties'
 import { fromUuidString, kyselyMigration, newUuid, toUuidString } from '../repos/database'
 import { Database } from '../services/database'
+import { useLevelDb } from '../services/level'
 import type DatabaseSchema from '../repos/database'
 import type { UUID } from 'node:crypto'
 
 export async function migrate() {
   await kyselyMigration<DatabaseSchema>(async function (trx) {
+    const { levelup } = useLevelDb()
+    const settingsDb = await levelup('_userStorage')
     const sourcesDb = new Database('sources', SourceModel)
     const devicesDb = new Database('devices', DeviceModel)
     const tiesDb = new Database('ties', TieModel)
     try {
+      const sourceOrder = new Array<[number, string]>()
+
       const sources = await map(await sourcesDb.all(), async (sourceDoc) => {
         const imageAttachment = sourceDoc._attachments.find((att) => att.name === sourceDoc.image)
         let image
@@ -32,6 +37,8 @@ export async function migrate() {
             .then((r) => r?.id)
         }
 
+        sourceOrder.push([sourceDoc.order, sourceDoc._id.toLowerCase()])
+
         return await trx
           .insertInto('sources')
           .values({
@@ -42,6 +49,17 @@ export async function migrate() {
           .returningAll()
           .executeTakeFirstOrThrow()
       })
+
+      const buttonOrder = sourceOrder.sort((a, b) => a[0] - b[0]).map(([, id]) => id)
+
+      await trx
+        .insertInto('settings')
+        .values({ name: 'buttonOrder', value: JSON.stringify(buttonOrder) })
+        .execute()
+
+      for await (const [name, value] of settingsDb.iterator()) {
+        await trx.insertInto('settings').values({ name, value }).execute()
+      }
 
       const devices = await map(
         await devicesDb.all(),
@@ -77,6 +95,7 @@ export async function migrate() {
           .execute()
       }
     } finally {
+      await settingsDb.close()
       await sourcesDb.close()
       await devicesDb.close()
       await tiesDb.close()
