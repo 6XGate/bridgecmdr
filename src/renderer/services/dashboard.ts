@@ -198,7 +198,6 @@ export const useDashboard = defineStore('dashboard', function defineDashboard() 
     )
 
     const buttons = sources.items.map(defineButton).map(prepareButton)
-
     items.value = settings.buttonOrder
       .map((id) => buttons.find((item) => item.guid === id))
       .filter(isNotNullish)

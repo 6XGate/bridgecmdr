@@ -43,12 +43,14 @@ const useUserStore = createSharedComposable(function useUserStore() {
 
   async function setItem(key: string, newValue: string) {
     const oldValue = await client.storage.getItem.query(key)
+    if (newValue === oldValue) return
     await client.storage.setItem.mutate([key, newValue])
     emit({ key, newValue, oldValue, storageArea })
   }
 
   async function removeItem(key: string) {
     const oldValue = await client.storage.getItem.query(key)
+    if (oldValue == null) return
     await client.storage.removeItem.mutate(key)
     emit({ key, newValue: null, oldValue, storageArea })
   }

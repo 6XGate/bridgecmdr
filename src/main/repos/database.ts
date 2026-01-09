@@ -53,7 +53,7 @@ export function kyselyConnect<DB>() {
 
   return new Kysely<DB>({
     dialect: new SqliteDialect({
-      database: new SQLite(resolve(app.getPath('appData'), ...qualifiedPath, 'store.test.sqlite'))
+      database: new SQLite(resolve(app.getPath('appData'), ...qualifiedPath, 'store.sqlite'))
     })
   })
 }
