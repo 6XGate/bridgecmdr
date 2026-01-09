@@ -5,7 +5,7 @@ const extronSisDriver = defineDriver({
   enabled: true,
   experimental: false,
   kind: 'switch',
-  guid: '4C8F2838-C91D-431E-84DD-3666D14A6E2C',
+  guid: '4c8f2838-c91d-431e-84dd-3666d14a6e2c',
   localized: {
     en: {
       title: 'Extron SIS-compatible matrix switch',

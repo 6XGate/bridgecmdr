@@ -5,7 +5,7 @@ const teslaSmartSdiDriver = defineDriver({
   enabled: true,
   experimental: true,
   kind: 'switch',
-  guid: 'DDB13CBC-ABFC-405E-9EA6-4A999F9A16BD',
+  guid: 'ddb13cbc-abfc-405e-9ea6-4a999f9a16bd',
   localized: {
     en: {
       title: 'Tesla smart SDI-compatible switch',

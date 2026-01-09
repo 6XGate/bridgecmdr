@@ -14,14 +14,14 @@ describe('Web JSON', () => {
       const payload = { file: new Attachment('test.txt', 'text/plain', Buffer.from('Hello World')) }
       expect(superjson.serialize(payload)).toStrictEqual({
         json: { file: { name: 'test.txt', type: 'text/plain', data: 'SGVsbG8gV29ybGQ=' } },
-        meta: { values: { file: [['custom', 'Attachment']] } }
+        meta: { v: 1, values: { file: [['custom', 'Attachment']] } }
       })
     })
 
     test('deserialize', () => {
       const payload = {
         json: { file: { name: 'test.txt', type: 'text/plain', data: 'SGVsbG8gV29ybGQ=' } },
-        meta: { values: { file: [['custom', 'Attachment']] } }
+        meta: { v: 1, values: { file: [['custom', 'Attachment']] } }
       } satisfies SuperJSONResult
       expect(superjson.deserialize(payload)).toStrictEqual({
         file: new Attachment('test.txt', 'text/plain', Buffer.from('Hello World'))
@@ -57,7 +57,7 @@ describe('IPC JSON', () => {
       const payload = { file: new Attachment('test.txt', 'text/plain', buffer) }
       expect(superjson.serialize(payload)).toStrictEqual({
         json: { file: { name: 'test.txt', type: 'text/plain', data: buffer } },
-        meta: { values: { file: [['custom', 'Attachment']] } }
+        meta: { v: 1, values: { file: [['custom', 'Attachment']] } }
       })
     })
 

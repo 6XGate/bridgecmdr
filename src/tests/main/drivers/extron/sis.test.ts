@@ -23,7 +23,7 @@ beforeEach(async () => {
   drivers = (await import('../../../../main/services/drivers')).default()
 })
 
-const kDriverGuid = '4C8F2838-C91D-431E-84DD-3666D14A6E2C'
+const kDriverGuid = '4c8f2838-c91d-431e-84dd-3666d14a6e2c'
 
 test('available', async () => {
   const { default: driver } = await import('../../../../main/drivers/extron/sis')

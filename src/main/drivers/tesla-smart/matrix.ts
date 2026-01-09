@@ -5,7 +5,7 @@ const teslaSmartMatrixDriver = defineDriver({
   enabled: true,
   experimental: true,
   kind: 'switch',
-  guid: '671824ED-0BC4-43A6-85CC-4877890A7722',
+  guid: '671824ed-0bc4-43a6-85cc-4877890a7722',
   localized: {
     en: {
       title: 'Tesla smart matrix-compatible switch',

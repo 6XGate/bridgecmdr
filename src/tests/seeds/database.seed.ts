@@ -20,10 +20,10 @@ export async function seedDatabase() {
 
   const drivers = await useDrivers().registered()
   const extronSis =
-    drivers.find((driver) => driver.guid === '4C8F2838-C91D-431E-84DD-3666D14A6E2C') ??
+    drivers.find((driver) => driver.guid === '4c8f2838-c91d-431e-84dd-3666d14a6e2c') ??
     raiseError(() => new ReferenceError('Extron SIS driver not registered'))
   const sonyRemote =
-    drivers.find((driver) => driver.guid === '8626D6D3-C211-4D21-B5CC-F5E3B50D9FF0') ??
+    drivers.find((driver) => driver.guid === '8626d6d3-c211-4d21-b5cc-f5e3b50d9ff0') ??
     raiseError(() => new ReferenceError('Sony RS485 driver not registered'))
 
   const devices = (await map(

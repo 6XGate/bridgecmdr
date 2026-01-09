@@ -13,6 +13,8 @@ export default defineConfig({
     target: ['node20']
   },
   test: {
+    clearMocks: true,
+    mockReset: true,
     restoreMocks: true,
     unstubEnvs: true,
     unstubGlobals: true,
