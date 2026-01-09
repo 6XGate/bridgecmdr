@@ -23,7 +23,7 @@ export class Attachment extends Uint8Array {
   constructor(name: string, type: string, data: ArrayBuffer)
   constructor(name: string, type: string, data: ArrayLike<number> | ArrayBuffer)
   constructor(name: string, type: string, data: ArrayLike<number> | ArrayBuffer) {
-    super(data) // Either is allowed, but too TS is having trouble narrowing the type
+    super(data)
     this.name = name
     this.type = type
   }

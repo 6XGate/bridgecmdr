@@ -120,8 +120,6 @@ export const useDashboard = defineStore('dashboard', function defineDashboard() 
     function setOrder(to: number) {
       const index = order.value.indexOf(source._id)
 
-      console.log({ index, to, id: source._id, order: [...order.value] })
-
       if (index === to) {
         // No change needed.
         return

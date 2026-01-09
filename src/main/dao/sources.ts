@@ -63,13 +63,10 @@ class SourceDao {
   }
 
   async add(payload: NewSourceDoc, ...attachments: Attachment[]): Promise<SourceDoc> {
-    console.log('Adding source', payload)
     return await transaction(async () => {
-      console.log('Finding source image')
       const image = attachments.find((att) => att.name === payload.image)
       let imageId
       if (image) {
-        console.log('Adding source image')
         const img = await this.images.upsert({
           data: Buffer.from(image),
           type: image.type
@@ -80,13 +77,11 @@ class SourceDao {
         imageId = null
       }
 
-      console.log('Adding source record')
       const source = await this.repository.insert({
         title: payload.title,
         image: imageId
       })
 
-      console.log('Translating to source document')
       return {
         _id: source.id,
         _rev: '0', // Dummy revision for compatibility.
