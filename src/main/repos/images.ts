@@ -15,37 +15,35 @@ export interface ImageTable {
 type ImageRecord = Selectable<ImageTable>
 type NewImagePayload = Insertable<ImageTable>
 
-export const useImageRepository = memo(() => {
-  const db = useKysely()
-
-  function fromRecord(record: ImageRecord): Image {
-    return {
-      id: toUuidString(record.id),
-      data: record.data,
-      type: record.type,
-      hash: record.hash
-    }
+function fromRecord(record: ImageRecord): Image {
+  return {
+    id: toUuidString(record.id),
+    data: record.data,
+    type: record.type,
+    hash: record.hash
   }
+}
 
-  function toNewPayload(payload: NewImage): NewImagePayload {
-    return {
-      id: newUuid(),
-      data: payload.data,
-      type: payload.type,
-      hash: hash('sha256', new Uint8Array(payload.data), 'buffer')
-    }
+function toNewPayload(payload: NewImage): NewImagePayload {
+  return {
+    id: payload.id ? fromUuidString(payload.id) : newUuid(),
+    data: payload.data,
+    type: payload.type,
+    hash: hash('sha256', new Uint8Array(payload.data), 'buffer')
   }
+}
 
-  async function all(): Promise<Image[]> {
-    return await db
+class ImageRepository {
+  async all(): Promise<Image[]> {
+    return await useKysely()
       .selectFrom('images')
       .selectAll()
       .execute()
       .then((records) => records.map(fromRecord))
   }
 
-  async function findById(id: UUID): Promise<Image | null> {
-    return await db
+  async findById(id: UUID): Promise<Image | null> {
+    return await useKysely()
       .selectFrom('images')
       .selectAll()
       .where('id', '=', fromUuidString(id))
@@ -53,8 +51,8 @@ export const useImageRepository = memo(() => {
       .then((record) => (record ? fromRecord(record) : null))
   }
 
-  async function upsert(payload: NewImage): Promise<Image> {
-    return await db
+  async upsert(payload: NewImage): Promise<Image> {
+    return await useKysely()
       .insertInto('images')
       .orIgnore()
       .values(toNewPayload(payload))
@@ -63,25 +61,20 @@ export const useImageRepository = memo(() => {
       .then((record) => fromRecord(record))
   }
 
-  async function deleteById(id: UUID): Promise<Image> {
-    return await db
+  async deleteById(id: UUID): Promise<Image> {
+    return await useKysely()
       .deleteFrom('images')
       .where('id', '=', fromUuidString(id))
       .returningAll()
       .executeTakeFirstOrThrow()
       .then((record) => fromRecord(record))
   }
+}
 
-  return {
-    all,
-    findById,
-    upsert,
-    deleteById
-  }
-})
+export const useImageRepository = memo(() => new ImageRepository())
 
 interface ExternalImageSchema {
-  id: ColumnType<UUID, UUID, undefined>
+  id: ColumnType<UUID, UUID | undefined, undefined>
   data: Buffer
   type: string
   hash: ColumnType<Buffer, undefined, undefined>

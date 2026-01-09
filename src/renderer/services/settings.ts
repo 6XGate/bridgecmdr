@@ -25,6 +25,9 @@ export const PowerOffTaps = z.enum(['single', 'double'])
 export type ColorScheme = z.infer<typeof ColorScheme>
 export const ColorScheme = z.enum(['light', 'dark', 'no-preference'])
 
+export type ButtonOrder = z.infer<typeof ButtonOrder>
+export const ButtonOrder = z.array(z.string().min(1))
+
 function useSchema<Schema extends JsonType>(schema: Schema, deep = false) {
   return {
     deep,
@@ -58,6 +61,8 @@ const useSettings = defineStore('settings', function defineSettings() {
   const powerOffWhen = useUserStorage('powerOffWhen', 'single', useSchema(PowerOffTaps))
   const powerOffWhenOptions = readonly(PowerOffTaps.options)
 
+  const buttonOrder = useUserStorage('buttonOrder', [], useSchema(ButtonOrder))
+
   const startup = useStartup()
 
   return {
@@ -69,6 +74,7 @@ const useSettings = defineStore('settings', function defineSettings() {
     powerOnSwitchesAtStart,
     powerOffWhen,
     powerOffWhenOptions,
+    buttonOrder,
     checkAutoStart: startup.checkEnabled,
     enableAutoStart: startup.enable,
     disableAutoStart: startup.disable

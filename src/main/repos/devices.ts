@@ -15,45 +15,43 @@ type DeviceRecord = Selectable<DeviceTable>
 type NewDevicePayload = Insertable<DeviceTable>
 type DeviceUpdatePayload = Updateable<DeviceTable>
 
-export const useDevicesRepository = memo(function useDevicesRepository() {
-  const db = useKysely()
-
-  function fromRecord(record: DeviceRecord): Device {
-    return {
-      id: toUuidString(record.id),
-      driverId: toUuidString(record.driver_id),
-      name: record.name,
-      path: record.path
-    }
+function fromRecord(record: DeviceRecord): Device {
+  return {
+    id: toUuidString(record.id),
+    driverId: toUuidString(record.driver_id),
+    name: record.name,
+    path: record.path
   }
+}
 
-  function toNewPayload(payload: NewDevice): NewDevicePayload {
-    return {
-      id: newUuid(),
-      driver_id: fromUuidString(payload.driverId),
-      name: payload.name,
-      path: payload.path
-    }
+function toNewPayload(payload: NewDevice): NewDevicePayload {
+  return {
+    id: payload.id ? fromUuidString(payload.id) : newUuid(),
+    driver_id: fromUuidString(payload.driverId),
+    name: payload.name,
+    path: payload.path
   }
+}
 
-  function toUpdatePayload(payload: DeviceUpdate): DeviceUpdatePayload {
-    return shake({
-      driver_id: payload.driverId ? fromUuidString(payload.driverId) : undefined,
-      name: payload.name,
-      path: payload.path
-    })
-  }
+function toUpdatePayload(payload: DeviceUpdate): DeviceUpdatePayload {
+  return shake({
+    driver_id: payload.driverId ? fromUuidString(payload.driverId) : undefined,
+    name: payload.name,
+    path: payload.path
+  })
+}
 
-  async function all(): Promise<Device[]> {
-    return await db
+class DevicesRepository {
+  async all(): Promise<Device[]> {
+    return await useKysely()
       .selectFrom('devices')
       .selectAll()
       .execute()
       .then((records) => records.map(fromRecord))
   }
 
-  async function findById(id: UUID): Promise<Device | null> {
-    return await db
+  async findById(id: UUID): Promise<Device | null> {
+    return await useKysely()
       .selectFrom('devices')
       .selectAll()
       .where('id', '=', fromUuidString(id))
@@ -61,8 +59,8 @@ export const useDevicesRepository = memo(function useDevicesRepository() {
       .then((record) => (record ? fromRecord(record) : null))
   }
 
-  async function insert(payload: NewDevice): Promise<Device> {
-    return await db
+  async insert(payload: NewDevice): Promise<Device> {
+    return await useKysely()
       .insertInto('devices')
       .values(toNewPayload(payload))
       .returningAll()
@@ -70,8 +68,8 @@ export const useDevicesRepository = memo(function useDevicesRepository() {
       .then((record) => fromRecord(record))
   }
 
-  async function updateById(id: UUID, payload: DeviceUpdate): Promise<Device> {
-    return await db
+  async updateById(id: UUID, payload: DeviceUpdate): Promise<Device> {
+    return await useKysely()
       .updateTable('devices')
       .set(toUpdatePayload(payload))
       .where('id', '=', fromUuidString(id))
@@ -80,26 +78,33 @@ export const useDevicesRepository = memo(function useDevicesRepository() {
       .then((record) => fromRecord(record))
   }
 
-  async function deleteById(id: UUID): Promise<Device> {
-    return await db
+  async upsert(payload: NewDevice): Promise<Device> {
+    return await useKysely()
+      .replaceInto('devices')
+      .values(toNewPayload(payload))
+      .returningAll()
+      .executeTakeFirstOrThrow()
+      .then((record) => fromRecord(record))
+  }
+
+  async deleteAll(): Promise<void> {
+    await useKysely().deleteFrom('devices').execute()
+  }
+
+  async deleteById(id: UUID): Promise<Device> {
+    return await useKysely()
       .deleteFrom('devices')
       .where('id', '=', fromUuidString(id))
       .returningAll()
       .executeTakeFirstOrThrow()
       .then((record) => fromRecord(record))
   }
+}
 
-  return {
-    all,
-    findById,
-    insert,
-    updateById,
-    deleteById
-  }
-})
+export const useDevicesRepository = memo(() => new DevicesRepository())
 
 interface ExternalTableSchema {
-  id: ColumnType<UUID, UUID, undefined>
+  id: ColumnType<UUID, UUID | undefined, undefined>
   driverId: UUID
   name: string
   path: string

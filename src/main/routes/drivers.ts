@@ -14,7 +14,7 @@ const useDriversRouter = memo(function useDriversRoute() {
   return router({
     all: procedure.query(async () => await drivers.allInfo()),
     get: procedure.input(z.string().uuid()).query(async ({ input }) => {
-      await drivers.get(input)
+      await drivers.get(input.toLowerCase())
     }),
     activate: procedure.input(ActivateInputs).mutation(async ({ input }) => {
       await drivers.activate(...input)

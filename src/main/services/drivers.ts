@@ -102,7 +102,7 @@ export interface Driver extends DriverBasicInformation, DriverBindings {
 }
 
 export function defineDriver(options: DefineDriverOptions) {
-  let existing = registry.get(options.guid)
+  let existing = registry.get(options.guid.toLowerCase())
   if (existing != null) return existing
 
   const { setup, ...info } = options
@@ -115,7 +115,7 @@ export function defineDriver(options: DefineDriverOptions) {
       enabled: info.enabled,
       experimental: info.experimental,
       kind: info.kind,
-      guid: info.guid,
+      guid: info.guid.toLowerCase(),
       ...localizedInfo,
       capabilities: info.capabilities
     }
@@ -128,13 +128,13 @@ export function defineDriver(options: DefineDriverOptions) {
     enabled: info.enabled,
     experimental: info.experimental,
     kind: info.kind,
-    guid: info.guid,
+    guid: info.guid.toLowerCase(),
     capabilities: info.capabilities,
     metadata: info,
     getInfo
   })
 
-  registry.set(options.guid, existing)
+  registry.set(options.guid.toLowerCase(), existing)
   return existing
 }
 
@@ -163,13 +163,13 @@ const useDrivers = memo(function useDriver() {
       .map((d) => d.metadata)
   )
 
-  const get = defineOperation((guid: string) => registry.get(guid) ?? null)
+  const get = defineOperation((guid: string) => registry.get(guid.toLowerCase()) ?? null)
 
   function defineDriverOperation<Args extends unknown[], Result>(
     op: (driver: Driver, uri: string, ...args: Args) => MaybePromise<Result>
   ) {
     return async (guid: string, uri: string, ...args: Args) => {
-      const driver = await get(guid)
+      const driver = await get(guid.toLowerCase())
       if (driver == null) throw new ReferenceError(`No such driver: "${guid}"`)
       const valid = await ports.listPorts()
       if (!isIpOrValidPort(uri, valid)) throw new TypeError(`"${uri}" is not a valid location`)

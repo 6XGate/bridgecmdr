@@ -32,6 +32,7 @@ export const useDashboard = defineStore('dashboard', function defineDashboard() 
   const ties = useTies()
   const sources = useSources()
   const devices = useDevices()
+  const order = ref<string[]>([])
   const tracker = trackBusy(
     () => !isReady.value,
     () => drivers.isBusy,
@@ -75,17 +76,7 @@ export const useDashboard = defineStore('dashboard', function defineDashboard() 
     }
   }
 
-  let orderUpdates = 0
-  async function normalize() {
-    orderUpdates += 1
-    if (orderUpdates === 100) {
-      orderUpdates = 0
-      await sources.normalizeOrder()
-      await refresh()
-    }
-  }
-
-  function defineButton(source: ReadonlyDeep<Source>, index: number): Button {
+  function defineButton(source: ReadonlyDeep<Source>, imageIndex: number): Button {
     const commands = ties.items
       .filter((tie) => tie.sourceId === source._id)
       .map(function makeCommand(tie) {
@@ -127,20 +118,46 @@ export const useDashboard = defineStore('dashboard', function defineDashboard() 
     }
 
     function setOrder(to: number) {
-      orderUpdates += 1
-      sources
-        .update({ _id: source._id, order: to })
-        .then(normalize)
-        // .then(refresh)
-        .catch((cause: unknown) => {
-          console.warn('Failed to update order', cause)
-        })
+      const index = order.value.indexOf(source._id)
+
+      console.log({ index, to, id: source._id, order: [...order.value] })
+
+      if (index === to) {
+        // No change needed.
+        return
+      }
+
+      if (index === -1) {
+        // Not in the order? Okay, just insert it.
+        order.value.splice(to, 0, source._id)
+        settings.buttonOrder = order.value
+        return
+      }
+
+      if (to > index) {
+        // Inserting after current position. Need to insert
+        // first, before all the indices prior to the
+        // insert point change. Then remove the
+        // original position.
+        order.value.splice(to, 0, source._id)
+        order.value.splice(index, 1)
+        settings.buttonOrder = order.value
+        return
+      }
+
+      // Final case, the new location is before the current one.
+      // Remove it from the original index first, so the
+      // insertion doesn't shuffle it out of place.
+      // Then insert it where we want it.
+      order.value.splice(index, 1)
+      order.value.splice(to, 0, source._id)
+      settings.buttonOrder = order.value
     }
 
     return {
       guid: source._id,
       title: source.title,
-      image: images.value[index],
+      image: images.value[imageIndex],
       isActive: false,
       order: source.order,
       activate,
@@ -163,7 +180,11 @@ export const useDashboard = defineStore('dashboard', function defineDashboard() 
 
       // HACK: To allow external reference to trigger, resort the list
       // completely.
-      items.value.sort((a, b) => a.order - b.order)
+      const buttons = [...items.value]
+      items.value = settings.buttonOrder
+        .map((id) => buttons.find((item) => item.guid === id))
+        .filter(isNotNullish)
+        .concat(buttons.filter((item) => !settings.buttonOrder.includes(item.guid)))
     }
 
     return button
@@ -175,10 +196,15 @@ export const useDashboard = defineStore('dashboard', function defineDashboard() 
         toFiles(source._attachments).find((f) => source.image != null && f.name === source.image)
       )
     )
-    items.value = sources.items
-      .map(defineButton)
-      .map(prepareButton)
-      .sort((a, b) => a.order - b.order)
+
+    const buttons = sources.items.map(defineButton).map(prepareButton)
+
+    items.value = settings.buttonOrder
+      .map((id) => buttons.find((item) => item.guid === id))
+      .filter(isNotNullish)
+      .concat(buttons.filter((item) => !settings.buttonOrder.includes(item.guid)))
+
+    order.value = items.value.map((item) => item.guid)
   }
 
   let poweredOn = false

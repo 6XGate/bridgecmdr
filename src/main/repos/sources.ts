@@ -13,46 +13,44 @@ type SourceRecord = Selectable<SourceTable>
 type NewSourcePayload = Insertable<SourceTable>
 type SourceUpdatePayload = Updateable<SourceTable>
 
-export const useTieRepository = memo(() => {
-  const db = useKysely()
-
-  function fromRecord(record: SourceRecord): Source {
-    return {
-      id: toUuidString(record.id),
-      title: record.title,
-      image: record.image ? toUuidString(record.image) : null
-    }
+function fromRecord(record: SourceRecord): Source {
+  return {
+    id: toUuidString(record.id),
+    title: record.title,
+    image: record.image ? toUuidString(record.image) : null
   }
+}
 
-  function toNewPayload(payload: NewSource): NewSourcePayload {
-    return {
-      id: newUuid(),
-      title: payload.title,
-      image: payload.image ? fromUuidString(payload.image) : null
-    }
+function toNewPayload(payload: NewSource): NewSourcePayload {
+  return {
+    id: payload.id ? fromUuidString(payload.id) : newUuid(),
+    title: payload.title,
+    image: payload.image ? fromUuidString(payload.image) : null
   }
+}
 
-  function toUpdatePayload(payload: SourceUpdate): SourceUpdatePayload {
-    let image
-    if (payload.image === null) image = null
-    else if (payload.image) image = fromUuidString(payload.image)
+function toUpdatePayload(payload: SourceUpdate): SourceUpdatePayload {
+  let image
+  if (payload.image === null) image = null
+  else if (payload.image) image = fromUuidString(payload.image)
 
-    return shake({
-      title: payload.title,
-      image
-    })
-  }
+  return shake({
+    title: payload.title,
+    image
+  })
+}
 
-  async function all(): Promise<Source[]> {
-    return await db
+class SourceRepository {
+  async all(): Promise<Source[]> {
+    return await useKysely()
       .selectFrom('sources')
       .selectAll()
       .execute()
       .then((records) => records.map(fromRecord))
   }
 
-  async function findById(id: UUID): Promise<Source | null> {
-    return await db
+  async findById(id: UUID): Promise<Source | null> {
+    return await useKysely()
       .selectFrom('sources')
       .selectAll()
       .where('id', '=', fromUuidString(id))
@@ -60,8 +58,8 @@ export const useTieRepository = memo(() => {
       .then((record) => (record ? fromRecord(record) : null))
   }
 
-  async function insert(payload: NewSource): Promise<Source> {
-    return await db
+  async insert(payload: NewSource): Promise<Source> {
+    return await useKysely()
       .insertInto('sources')
       .values(toNewPayload(payload))
       .returningAll()
@@ -69,8 +67,8 @@ export const useTieRepository = memo(() => {
       .then((record) => fromRecord(record))
   }
 
-  async function updateById(id: UUID, payload: SourceUpdate): Promise<Source> {
-    return await db
+  async updateById(id: UUID, payload: SourceUpdate): Promise<Source> {
+    return await useKysely()
       .updateTable('sources')
       .set(toUpdatePayload(payload))
       .where('id', '=', fromUuidString(id))
@@ -79,26 +77,33 @@ export const useTieRepository = memo(() => {
       .then((record) => fromRecord(record))
   }
 
-  async function deleteById(id: UUID): Promise<Source> {
-    return await db
+  async upsert(payload: NewSource): Promise<Source> {
+    return await useKysely()
+      .replaceInto('sources')
+      .values(toNewPayload(payload))
+      .returningAll()
+      .executeTakeFirstOrThrow()
+      .then((record) => fromRecord(record))
+  }
+
+  async deleteAll(): Promise<void> {
+    await useKysely().deleteFrom('sources').execute()
+  }
+
+  async deleteById(id: UUID): Promise<Source> {
+    return await useKysely()
       .deleteFrom('sources')
       .where('id', '=', fromUuidString(id))
       .returningAll()
       .executeTakeFirstOrThrow()
       .then((record) => fromRecord(record))
   }
+}
 
-  return {
-    all,
-    findById,
-    insert,
-    updateById,
-    deleteById
-  }
-})
+export const useSourceRepository = memo(() => new SourceRepository())
 
 interface ExternalSourceSchema {
-  id: ColumnType<UUID, UUID, undefined>
+  id: ColumnType<UUID, UUID | undefined, undefined>
   title: string
   image: UUID | null
 }

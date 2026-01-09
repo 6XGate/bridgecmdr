@@ -1,9 +1,9 @@
-import useTiesDatabase, { NewTie, TieUpdate, TieUpsert } from '../../dao/ties'
+import { NewTie, TieUpdate, TieUpsert, useTieDao } from '../../dao/ties'
 import { DocumentId } from '../../services/database'
 import { procedure, router } from '../../services/rpc/trpc'
 
 export default function useTiesRouter() {
-  const ties = useTiesDatabase()
+  const ties = useTieDao()
   return router({
     compact: procedure.mutation(async () => {
       await ties.compact()

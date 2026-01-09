@@ -72,18 +72,7 @@ function dragLeave() {
 function dragDrop(index: number) {
   dropPosition.value = undefined
   if (dragged.value == null) return
-  const button = dashboard.items[index]
-  if (button == null) return
-  const next = dashboard.items[index + 1]
-  if (next == null) {
-    // Last item, so just use a delta of 1.
-    dragged.value.setOrder(button.order + 1)
-    return
-  }
-
-  // Fine the delta between the button.
-  const delta = (next.order - button.order) / 2
-  dragged.value.setOrder(button.order + delta)
+  dragged.value.setOrder(index)
 }
 
 onMounted(
@@ -141,7 +130,7 @@ onMounted(
               class="align-center d-flex justify-center"
               @dragover="dragOver($event, index)"
               @dragleave="dragLeave"
-              @drop="dragDrop(index)">
+              @drop="dragDrop(index + 1)">
               <VSheet
                 :class="$style.eventsNone"
                 width="4"

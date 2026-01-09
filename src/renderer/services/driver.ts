@@ -67,12 +67,12 @@ const useDrivers = createSharedComposable(function useDrivers() {
       }
 
       registry.set(
-        guid,
+        guid.toLowerCase(),
         readonly({
           enabled,
           experimental,
           kind,
-          guid,
+          guid: guid.toLowerCase(),
           get title() {
             return i18n.global.t(`$driver.${guid}.title`)
           },
@@ -96,21 +96,21 @@ const useDrivers = createSharedComposable(function useDrivers() {
       throw new ReferenceError(`No driver "${guid}"`)
     }
 
-    const driver = registry.get(guid)
+    const driver = registry.get(guid.toLowerCase())
     if (driver == null) {
       throw new ReferenceError(`No driver "${guid}"`)
     }
 
     async function activate(input: number, videoOutput: number, audioOutput: number) {
-      await client.drivers.activate.mutate([guid, uri, input, videoOutput, audioOutput])
+      await client.drivers.activate.mutate([guid.toLowerCase(), uri, input, videoOutput, audioOutput])
     }
 
     async function powerOn() {
-      await client.drivers.powerOn.mutate([guid, uri])
+      await client.drivers.powerOn.mutate([guid.toLowerCase(), uri])
     }
 
     async function powerOff() {
-      await client.drivers.powerOff.mutate([guid, uri])
+      await client.drivers.powerOff.mutate([guid.toLowerCase(), uri])
     }
 
     return readonly({
