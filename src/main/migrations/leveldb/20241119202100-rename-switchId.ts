@@ -1,7 +1,7 @@
 import { z } from 'zod'
-import { Database, DocumentId } from '../services/database'
+import { Database, DocumentId } from '../../services/database'
 
-export async function migrate() {
+export async function up() {
   const Model = z.object({}).catchall(z.unknown())
 
   const OldModel = z

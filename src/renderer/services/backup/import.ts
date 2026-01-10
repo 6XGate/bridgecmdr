@@ -13,9 +13,10 @@ export async function importSettings(file: File) {
   const formats = await Promise.all([
     // HACK: Don't use map to retain the tuple, and type for
     // each element, for z.union, which wants a tuple.
-    import('./formats/version1').then((m) => m.Export),
-    import('./formats/version2').then((m) => m.Export),
-    import('./formats/version3').then((m) => m.Export)
+    import('./formats/version1').then((m) => m.Backup),
+    import('./formats/version2').then((m) => m.Backup),
+    import('./formats/version3').then((m) => m.Backup),
+    import('./formats/version4').then((m) => m.Backup)
   ])
 
   const backupSettings = z.union(formats)
@@ -38,6 +39,14 @@ export async function importSettings(file: File) {
   settings.colorScheme = data.settings?.colorScheme ?? settings.colorScheme
   settings.powerOnSwitchesAtStart = data.settings?.powerOnSwitchesAtStart ?? settings.powerOnSwitchesAtStart
   settings.powerOffWhen = data.settings?.powerOffWhen ?? settings.powerOffWhen
+  settings.buttonOrder = data.settings?.buttonOrder ?? []
+
+  // v4 uses a format that isn't PouchDB-like, so we need to normalize it.
+  const normalized = {
+    sources: data.layouts.sources,
+    devices: data.layouts.devices,
+    ties: data.layouts.ties
+  }
 
   const imageCache = new Map<string, File>()
 
@@ -48,9 +57,8 @@ export async function importSettings(file: File) {
   const devices = useDevices()
   const ties = useTies()
 
-  const ordering = new Array<[string, number]>()
   await Promise.all([
-    ...data.layouts.sources.map(async (item) => {
+    ...normalized.sources.map(async (item) => {
       if (item.image == null) {
         await sources.upsert(item)
         return
@@ -71,8 +79,6 @@ export async function importSettings(file: File) {
         return
       }
 
-      ordering.push([item._id, item.order])
-
       const imageFile = new BlobWriter()
       await imageEntry.getData(imageFile)
       const imageData = await imageFile.getData()
@@ -80,7 +86,7 @@ export async function importSettings(file: File) {
       imageCache.set(item.image, imageAttachment)
       await sources.upsert(item, await toAttachment(imageAttachment))
     }),
-    ...data.layouts.devices.map(async (device) => {
+    ...normalized.devices.map(async (device) => {
       const driver = drivers.items.find((d) => d.guid === device.driverId)
       // Non-fatally skip devices from drivers that don't exist.
       if (driver == null) {
@@ -92,11 +98,8 @@ export async function importSettings(file: File) {
     })
   ])
 
-  const buttonOrder = ordering.sort((a, b) => a[1] - b[1]).map((item) => item[0])
-  settings.buttonOrder = buttonOrder
-
   await Promise.all(
-    data.layouts.ties.map(async (item) => {
+    normalized.ties.map(async (item) => {
       const source = sources.items.find((s) => s._id === item.sourceId)
       const device = devices.items.find((d) => d._id === item.deviceId)
       // Non-fatally skip ties that reference missing devices or sources.

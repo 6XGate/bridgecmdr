@@ -3,17 +3,17 @@ import { isObservable } from '@trpc/server/observable'
 import { getErrorShape, transformTRPCResponse } from '@trpc/server/shared'
 import { ipcMain } from 'electron'
 import Logger from 'electron-log'
-import type { MaybePromise } from '@/basics'
 import type { CreateContextOptions } from '@/rpc/ipc'
 import type { AnyRouter, inferRouterContext } from '@trpc/server'
 import type { Unsubscribable } from '@trpc/server/observable'
 import type { TRPCClientOutgoingMessage, TRPCResponseMessage } from '@trpc/server/rpc'
 import type { BrowserWindow, IpcMainEvent } from 'electron'
+import type { Promisable } from 'type-fest'
 import { theRpcChannel } from '@/rpc/ipc'
 
 interface CreateIpcHandlerOptions<Router extends AnyRouter> {
   router: Router
-  createContext?: (opts: CreateContextOptions) => MaybePromise<inferRouterContext<Router>>
+  createContext?: (opts: CreateContextOptions) => Promisable<inferRouterContext<Router>>
   windows?: BrowserWindow[]
 }
 

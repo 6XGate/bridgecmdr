@@ -7,7 +7,7 @@ import type { UUID } from 'node:crypto'
 export interface DeviceTable {
   id: ColumnType<Buffer, Buffer, undefined>
   driver_id: Buffer
-  name: string
+  title: string
   path: string
 }
 
@@ -19,7 +19,7 @@ function fromRecord(record: DeviceRecord): Device {
   return {
     id: toUuidString(record.id),
     driverId: toUuidString(record.driver_id),
-    name: record.name,
+    title: record.title,
     path: record.path
   }
 }
@@ -28,7 +28,7 @@ function toNewPayload(payload: NewDevice): NewDevicePayload {
   return {
     id: payload.id ? fromUuidString(payload.id) : newUuid(),
     driver_id: fromUuidString(payload.driverId),
-    name: payload.name,
+    title: payload.title,
     path: payload.path
   }
 }
@@ -36,7 +36,7 @@ function toNewPayload(payload: NewDevice): NewDevicePayload {
 function toUpdatePayload(payload: DeviceUpdate): DeviceUpdatePayload {
   return shake({
     driver_id: payload.driverId ? fromUuidString(payload.driverId) : undefined,
-    name: payload.name,
+    title: payload.title,
     path: payload.path
   })
 }
@@ -125,7 +125,7 @@ export const useDevicesRepository = memo(() => new DevicesRepository())
 interface ExternalTableSchema {
   id: ColumnType<UUID, UUID | undefined, undefined>
   driverId: UUID
-  name: string
+  title: string
   path: string
 }
 

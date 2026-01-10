@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { DocHeader } from './version0'
-import type { Export as V3 } from './version3'
+import type { Import } from './version4'
 
 /**
  * Layout v1, will be used in Export v1 but
@@ -8,14 +8,12 @@ import type { Export as V3 } from './version3'
  */
 export type Layouts = z.output<typeof Layouts>
 export const Layouts = z.object({
-  sources: z
-    .array(
-      DocHeader.extend({
-        title: z.string().min(1),
-        image: z.string().min(1).nullable()
-      })
-    )
-    .transform((sources) => sources.map((source, order) => ({ order, ...source }))),
+  sources: z.array(
+    DocHeader.extend({
+      title: z.string().min(1),
+      image: z.string().min(1).nullable()
+    })
+  ),
   switches: z.array(
     DocHeader.extend({
       driverId: z.string().uuid(),
@@ -34,22 +32,35 @@ export const Layouts = z.object({
           audio: z.number().int().optional()
         })
         .default({})
-    }).transform(({ switchId, ...tie }) => ({ ...tie, deviceId: switchId }))
+    })
   )
 })
 
 /**
- * Export format v1.
+ * Backup parser for v1.
  */
-export type Export = z.output<typeof Export>
-export const Export = z
+export const Backup = z
   .object({
     version: z.literal(1),
     ...Layouts.shape
   })
   .transform(
-    ({ sources, switches, ties }): V3 => ({
-      version: 3,
-      layouts: { sources, devices: switches, ties }
+    (payload): Import => ({
+      version: 'normalized' as const,
+      settings: {
+        buttonOrder: payload.sources.map((source) => source._id)
+      },
+      layouts: {
+        sources: payload.sources.map((source) => ({ order: 0, ...source })),
+        devices: payload.switches,
+        ties: payload.ties.map(({ switchId, outputChannels, ...tie }) => ({
+          ...tie,
+          deviceId: switchId,
+          outputChannels: {
+            video: outputChannels.video ?? undefined,
+            audio: outputChannels.audio ?? undefined
+          }
+        }))
+      }
     })
   )

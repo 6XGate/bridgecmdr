@@ -26,7 +26,7 @@ export type ColorScheme = z.infer<typeof ColorScheme>
 export const ColorScheme = z.enum(['light', 'dark', 'no-preference'])
 
 export type ButtonOrder = z.infer<typeof ButtonOrder>
-export const ButtonOrder = z.array(z.string().uuid())
+export const ButtonOrder = z.array(z.string().uuid().toUpperCase())
 
 function useSchema<Schema extends JsonType>(schema: Schema, deep = false): UseStorageOptions<z.output<Schema>> {
   return {

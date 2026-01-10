@@ -41,7 +41,7 @@ class DeviceDao {
       _id: device.id,
       _rev: '0', // Dummy revision for compatibility.
       driverId: device.driverId,
-      title: device.name,
+      title: device.title,
       path: device.path,
       _attachments: []
     }))
@@ -55,7 +55,7 @@ class DeviceDao {
       _id: device.id,
       _rev: '0', // Dummy revision for compatibility.
       driverId: device.driverId,
-      title: device.name,
+      title: device.title,
       path: device.path,
       _attachments: []
     }
@@ -64,7 +64,7 @@ class DeviceDao {
   async add(payload: NewDeviceDoc, ..._: Attachment[]): Promise<DeviceDoc> {
     const device = await this.repository.upsert({
       driverId: payload.driverId as UUID,
-      name: payload.title,
+      title: payload.title,
       path: payload.path
     })
 
@@ -72,7 +72,7 @@ class DeviceDao {
       _id: device.id,
       _rev: '0', // Dummy revision for compatibility.
       driverId: device.driverId,
-      title: device.name,
+      title: device.title,
       path: device.path,
       _attachments: []
     }
@@ -83,7 +83,7 @@ class DeviceDao {
       payload._id as UUID,
       shake({
         driverId: payload.driverId as UUID | undefined,
-        name: payload.title,
+        title: payload.title,
         path: payload.path
       })
     )
@@ -92,7 +92,7 @@ class DeviceDao {
       _id: device.id,
       _rev: '0', // Dummy revision for compatibility.
       driverId: device.driverId,
-      title: device.name,
+      title: device.title,
       path: device.path,
       _attachments: []
     }
@@ -102,7 +102,7 @@ class DeviceDao {
     const device = await this.repository.upsert({
       id: payload._id as UUID,
       driverId: payload.driverId as UUID,
-      name: payload.title,
+      title: payload.title,
       path: payload.path
     })
 
@@ -110,7 +110,7 @@ class DeviceDao {
       _id: device.id,
       _rev: '0', // Dummy revision for compatibility.
       driverId: device.driverId,
-      title: device.name,
+      title: device.title,
       path: device.path,
       _attachments: []
     }

@@ -1,8 +1,7 @@
+import type { Promisable } from 'type-fest'
+
 /** Provides a means to define a tuple via satisfies. */
 export type Fixed<T = unknown> = [T, ...T[]]
-
-/** Could be a promise. */
-export type MaybePromise<T> = Promise<T> | T
 
 /** Guards and filter to not nullish */
 export const isNotNullish = <T>(value: T | null | undefined): value is T => value != null
@@ -52,7 +51,7 @@ export function withResolvers<T>() {
  * @param op - The operation to run as a micro-task.
  * @returns The result of the operation.
  */
-export async function asMicrotask<Result>(op: () => MaybePromise<Result>) {
+export async function asMicrotask<Result>(op: () => Promisable<Result>) {
   return await new Promise<Result>((resolve, reject) => {
     queueMicrotask(() => {
       try {
