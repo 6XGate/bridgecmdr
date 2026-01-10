@@ -28,10 +28,12 @@ export const Layouts = z.object({
       sourceId: z.string().uuid(),
       switchId: z.string().uuid(),
       inputChannel: z.number().int(),
-      outputChannels: z.object({
-        video: z.number().int().optional(),
-        audio: z.number().int().optional()
-      })
+      outputChannels: z
+        .object({
+          video: z.number().int().optional(),
+          audio: z.number().int().optional()
+        })
+        .default({})
     }).transform(({ switchId, ...tie }) => ({ ...tie, deviceId: switchId }))
   )
 })
