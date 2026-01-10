@@ -62,7 +62,8 @@ class ImageRepository {
       async (trx) =>
         await trx
           .insertInto('images')
-          .orIgnore()
+          // On conflict, something has to be updated to get a return value.
+          .onConflict((query) => query.doUpdateSet({ type: payload.type }))
           .values(toNewPayload(payload))
           .returningAll()
           .executeTakeFirstOrThrow()

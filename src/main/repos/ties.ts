@@ -126,7 +126,8 @@ class TieRepository {
     return await transaction(
       async (db) =>
         await db
-          .replaceInto('ties')
+          .insertInto('ties')
+          .orReplace()
           .values(toNewPayload(payload))
           .returningAll()
           .executeTakeFirstOrThrow()

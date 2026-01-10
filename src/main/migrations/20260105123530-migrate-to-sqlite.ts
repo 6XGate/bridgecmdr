@@ -26,6 +26,8 @@ export async function migrate() {
         if (imageAttachment) {
           image = await trx
             .insertInto('images')
+            // On conflict, something has to be updated to get a return value.
+            .onConflict((query) => query.doUpdateSet({ type: imageAttachment.type }))
             .values({
               id: newUuid(),
               data: Buffer.from(imageAttachment),
@@ -54,11 +56,16 @@ export async function migrate() {
 
       await trx
         .insertInto('settings')
+        .onConflict((query) => query.doUpdateSet({ value: JSON.stringify(buttonOrder) }))
         .values({ name: 'buttonOrder', value: JSON.stringify(buttonOrder) })
         .execute()
 
-      for await (const [name, value] of settingsDb.iterator()) {
-        await trx.insertInto('settings').values({ name, value }).execute()
+      for await (const [name, value] of settingsDb.iterator({ keyAsBuffer: false, valueAsBuffer: false })) {
+        await trx
+          .insertInto('settings')
+          .onConflict((query) => query.doUpdateSet({ value }))
+          .values({ name, value })
+          .execute()
       }
 
       const devices = await map(

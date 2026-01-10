@@ -48,50 +48,52 @@ export async function importSettings(file: File) {
   const devices = useDevices()
   const ties = useTies()
 
+  const ordering = new Array<[string, number]>()
   await Promise.all([
-    Promise.all(
-      data.layouts.sources.map(async (item) => {
-        if (item.image == null) {
-          await sources.upsert(item)
-          return
-        }
+    ...data.layouts.sources.map(async (item) => {
+      if (item.image == null) {
+        await sources.upsert(item)
+        return
+      }
 
-        const type = mime.getType(item.image) ?? 'application/octet-stream'
-        let imageAttachment = imageCache.get(item.image)
-        if (imageAttachment != null) {
-          await sources.upsert(item, await toAttachment(imageAttachment))
-          return
-        }
-
-        const imageEntry = entries.find((e) => e.filename === item.image)
-        if (imageEntry?.directory || imageEntry?.getData == null) {
-          // It's not fatal if the image is missing.
-          console.warn(`Image for ${item._id}, "${item.image}", is missing`)
-          await sources.upsert({ ...item, image: null })
-          return
-        }
-
-        const imageFile = new BlobWriter()
-        await imageEntry.getData(imageFile)
-        const imageData = await imageFile.getData()
-        imageAttachment = new File([imageData], item.image, { type })
-        imageCache.set(item.image, imageAttachment)
+      const type = mime.getType(item.image) ?? 'application/octet-stream'
+      let imageAttachment = imageCache.get(item.image)
+      if (imageAttachment != null) {
         await sources.upsert(item, await toAttachment(imageAttachment))
-      })
-    ),
-    Promise.all(
-      data.layouts.devices.map(async (device) => {
-        const driver = drivers.items.find((d) => d.guid === device.driverId)
-        // Non-fatally skip devices from drivers that don't exist.
-        if (driver == null) {
-          console.warn(`Driver for ${device.title} no longer support; ${device.driverId}`)
-          return
-        }
+        return
+      }
 
-        await devices.upsert(device)
-      })
-    )
+      const imageEntry = entries.find((e) => e.filename === item.image)
+      if (imageEntry?.directory || imageEntry?.getData == null) {
+        // It's not fatal if the image is missing.
+        console.warn(`Image for ${item._id}, "${item.image}", is missing`)
+        await sources.upsert({ ...item, image: null })
+        return
+      }
+
+      ordering.push([item._id, item.order])
+
+      const imageFile = new BlobWriter()
+      await imageEntry.getData(imageFile)
+      const imageData = await imageFile.getData()
+      imageAttachment = new File([imageData], item.image, { type })
+      imageCache.set(item.image, imageAttachment)
+      await sources.upsert(item, await toAttachment(imageAttachment))
+    }),
+    ...data.layouts.devices.map(async (device) => {
+      const driver = drivers.items.find((d) => d.guid === device.driverId)
+      // Non-fatally skip devices from drivers that don't exist.
+      if (driver == null) {
+        console.warn(`Driver for ${device.title} no longer support; ${device.driverId}`)
+        return
+      }
+
+      await devices.upsert(device)
+    })
   ])
+
+  const buttonOrder = ordering.sort((a, b) => a[1] - b[1]).map((item) => item[0])
+  settings.buttonOrder = buttonOrder
 
   await Promise.all(
     data.layouts.ties.map(async (item) => {

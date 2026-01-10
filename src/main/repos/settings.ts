@@ -17,7 +17,14 @@ class SettingsRepository {
   }
 
   async setSetting(name: string, value: string): Promise<void> {
-    await transaction(async (db) => await db.replaceInto('settings').values({ name, value }).execute())
+    await transaction(
+      async (db) =>
+        await db
+          .insertInto('settings')
+          .onConflict((query) => query.doUpdateSet({ value }))
+          .values({ name, value })
+          .execute()
+    )
   }
 
   async removeSetting(name: string): Promise<void> {

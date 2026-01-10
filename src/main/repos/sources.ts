@@ -93,7 +93,8 @@ class SourceRepository {
     return await transaction(
       async (db) =>
         await db
-          .replaceInto('sources')
+          .insertInto('sources')
+          .orReplace()
           .values(toNewPayload(payload))
           .returningAll()
           .executeTakeFirstOrThrow()

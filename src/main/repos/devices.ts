@@ -94,7 +94,8 @@ class DevicesRepository {
     return await transaction(
       async (db) =>
         await db
-          .replaceInto('devices')
+          .insertInto('devices')
+          .orReplace()
           .values(toNewPayload(payload))
           .returningAll()
           .executeTakeFirstOrThrow()
