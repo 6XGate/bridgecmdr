@@ -10,7 +10,7 @@ export type Layouts = z.output<typeof Layouts>
 export const Layouts = z.object({
   sources: z.array(
     DocHeader.extend({
-      order: z.number().nonnegative().finite(),
+      order: z.number().nonnegative().finite().default(0),
       title: z.string().min(1),
       image: z.string().min(1).nullable()
     })
@@ -27,10 +27,12 @@ export const Layouts = z.object({
       sourceId: z.string().uuid(),
       deviceId: z.string().uuid(),
       inputChannel: z.number().int(),
-      outputChannels: z.object({
-        video: z.number().int().optional(),
-        audio: z.number().int().optional()
-      })
+      outputChannels: z
+        .object({
+          video: z.number().int().optional(),
+          audio: z.number().int().optional()
+        })
+        .default({})
     })
   )
 })
