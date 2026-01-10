@@ -48,7 +48,7 @@ test('adding', async () => {
   const attachment = await Attachment.fromFile(file)
   const raw = {
     title: 'Extron',
-    driverId: database.extronSis.guid.toUpperCase(),
+    driverId: database.extronSis.guid,
     path: 'ip:192.168.10.2'
   } satisfies NewDevice
   const doc = await devicesDao.add(raw, attachment)

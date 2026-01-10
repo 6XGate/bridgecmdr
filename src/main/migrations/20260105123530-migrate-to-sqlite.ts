@@ -37,7 +37,7 @@ export async function migrate() {
             .then((r) => r?.id)
         }
 
-        sourceOrder.push([sourceDoc.order, sourceDoc._id.toLowerCase()])
+        sourceOrder.push([sourceDoc.order, sourceDoc._id])
 
         return await trx
           .insertInto('sources')

@@ -23,7 +23,7 @@ beforeEach(async () => {
   drivers = (await import('../../../../main/services/drivers')).default()
 })
 
-const kDriverGuid = '75fb7ed2-ee3a-46d5-b11f-7d8c3c208e7c'
+const kDriverGuid = '75FB7ED2-EE3A-46D5-B11F-7D8C3C208E7C'
 
 test('available', async () => {
   const { default: driver } = await import('../../../../main/drivers/shinybow/v2')

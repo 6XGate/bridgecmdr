@@ -26,7 +26,7 @@ export function newUuid() {
 }
 
 export function toUuidString(buffer: Buffer) {
-  return uuidStringify(new Uint8Array(buffer)) as UUID
+  return uuidStringify(new Uint8Array(buffer)).toUpperCase() as UUID
 }
 
 export function fromUuidString(uuid: UUID) {

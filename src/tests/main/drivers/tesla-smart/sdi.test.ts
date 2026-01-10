@@ -23,7 +23,7 @@ beforeEach(async () => {
   drivers = (await import('../../../../main/services/drivers')).default()
 })
 
-const kDriverGuid = 'ddb13cbc-abfc-405e-9ea6-4a999f9a16bd'
+const kDriverGuid = 'DDB13CBC-ABFC-405E-9EA6-4A999F9A16BD'
 
 test('available', async () => {
   const { default: driver } = await import('../../../../main/drivers/tesla-smart/sdi')

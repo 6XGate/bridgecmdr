@@ -5,7 +5,7 @@ const tesmartSdiDriver = defineDriver({
   enabled: true,
   experimental: true,
   kind: 'switch',
-  guid: '8c524e65-83ef-4aef-b0da-29c4582aa4a0',
+  guid: '8C524E65-83EF-4AEF-B0DA-29C4582AA4A0',
   localized: {
     en: {
       title: 'TESmart SDI-compatible switch',

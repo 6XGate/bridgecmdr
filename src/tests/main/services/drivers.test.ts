@@ -17,8 +17,8 @@ let powerOffSpy: Mock<Driver['powerOff']>
 let powerOnSpy: Mock<Driver['powerOn']>
 
 beforeAll(() => {
-  badDriverId = '292709cd-5bb9-44a6-bef2-b3980276e064'
-  testDriverId = '4aace202-fb07-49c8-b4fe-20c4c6c73788'
+  badDriverId = '292709CD-5BB9-44A6-BEF2-B3980276E064'
+  testDriverId = '4AACE202-FB07-49C8-B4FE-20C4C6C73788'
   information = {
     enabled: true,
     experimental: false,

@@ -5,7 +5,7 @@ const tesmartMatrixDriver = defineDriver({
   enabled: true,
   experimental: true,
   kind: 'switch',
-  guid: '01b8884c-1d7d-4451-883d-3c8f18e17b14',
+  guid: '01B8884C-1D7D-4451-883D-3C8F18E17B14',
   localized: {
     en: {
       title: 'TESmart matrix-compatible switch',

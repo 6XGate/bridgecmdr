@@ -5,7 +5,7 @@ const shinybowV2 = defineDriver({
   enabled: true,
   experimental: true,
   kind: 'switch',
-  guid: '75fb7ed2-ee3a-46d5-b11f-7d8c3c208e7c',
+  guid: '75FB7ED2-EE3A-46D5-B11F-7D8C3C208E7C',
   localized: {
     en: {
       title: 'Shinybow v2.0 compatible matrix switch',

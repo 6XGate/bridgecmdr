@@ -18,22 +18,20 @@ export const Layouts = z.object({
     .transform((sources) => sources.map((source, order) => ({ order, ...source }))),
   switches: z.array(
     DocHeader.extend({
-      driverId: z.string().uuid().toLowerCase(),
+      driverId: z.string().uuid(),
       title: z.string(),
       path: z.string()
     })
   ),
   ties: z.array(
     DocHeader.extend({
-      sourceId: z.string().uuid().toLowerCase(),
-      switchId: z.string().uuid().toLowerCase(),
+      sourceId: z.string().uuid(),
+      switchId: z.string().uuid(),
       inputChannel: z.number().int(),
-      outputChannels: z
-        .object({
-          video: z.number().int().optional(),
-          audio: z.number().int().optional()
-        })
-        .default({})
+      outputChannels: z.object({
+        video: z.number().int().optional(),
+        audio: z.number().int().optional()
+      })
     }).transform(({ switchId, ...tie }) => ({ ...tie, deviceId: switchId }))
   )
 })

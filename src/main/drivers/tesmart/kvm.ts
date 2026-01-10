@@ -5,7 +5,7 @@ const tesmartKvmDriver = defineDriver({
   enabled: true,
   experimental: true,
   kind: 'switch',
-  guid: '2b4edb8e-d2d6-4809-ba18-d5b1785da028',
+  guid: '2B4EDB8E-D2D6-4809-BA18-D5B1785DA028',
   localized: {
     en: {
       title: 'TESmart KVM-compatible switch',

@@ -23,7 +23,7 @@ beforeEach(async () => {
   drivers = (await import('../../../../main/services/drivers')).default()
 })
 
-const kDriverGuid = '671824ed-0bc4-43a6-85cc-4877890a7722'
+const kDriverGuid = '671824ED-0BC4-43A6-85CC-4877890A7722'
 
 test('available', async () => {
   const { default: driver } = await import('../../../../main/drivers/tesla-smart/matrix')
