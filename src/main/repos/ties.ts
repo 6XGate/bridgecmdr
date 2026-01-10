@@ -1,5 +1,5 @@
 import { memo, shake } from 'radash'
-import { fromUuidString, newUuid, toUuidString, useKysely } from './database'
+import { fromUuidString, newUuid, toUuidString, transaction } from './database'
 import type { ColumnType, Insertable, Selectable, Updateable } from 'kysely'
 import type { Buffer } from 'node:buffer'
 import type { UUID } from 'node:crypto'
@@ -51,97 +51,127 @@ function toUpdatePayload(payload: TieUpdate): TieUpdatePayload {
 
 class TieRepository {
   async all(): Promise<Tie[]> {
-    return await useKysely()
-      .selectFrom('ties')
-      .selectAll()
-      .execute()
-      .then((records) => records.map(fromRecord))
+    return await transaction(
+      async (db) =>
+        await db
+          .selectFrom('ties')
+          .selectAll()
+          .execute()
+          .then((records) => records.map(fromRecord))
+    )
   }
 
   async findById(id: UUID): Promise<Tie | null> {
-    return await useKysely()
-      .selectFrom('ties')
-      .selectAll()
-      .where('id', '=', fromUuidString(id))
-      .executeTakeFirst()
-      .then((record) => (record ? fromRecord(record) : null))
+    return await transaction(
+      async (db) =>
+        await db
+          .selectFrom('ties')
+          .selectAll()
+          .where('id', '=', fromUuidString(id))
+          .executeTakeFirst()
+          .then((record) => (record ? fromRecord(record) : null))
+    )
   }
 
   async findBySourceId(sourceId: UUID): Promise<Tie[]> {
-    return await useKysely()
-      .selectFrom('ties')
-      .selectAll()
-      .where('source_id', '=', fromUuidString(sourceId))
-      .execute()
-      .then((records) => records.map(fromRecord))
+    return await transaction(
+      async (db) =>
+        await db
+          .selectFrom('ties')
+          .selectAll()
+          .where('source_id', '=', fromUuidString(sourceId))
+          .execute()
+          .then((records) => records.map(fromRecord))
+    )
   }
 
   async findByDeviceId(deviceId: UUID): Promise<Tie[]> {
-    return await useKysely()
-      .selectFrom('ties')
-      .selectAll()
-      .where('device_id', '=', fromUuidString(deviceId))
-      .execute()
-      .then((records) => records.map(fromRecord))
+    return await transaction(
+      async (db) =>
+        await db
+          .selectFrom('ties')
+          .selectAll()
+          .where('device_id', '=', fromUuidString(deviceId))
+          .execute()
+          .then((records) => records.map(fromRecord))
+    )
   }
 
   async insert(payload: NewTie): Promise<Tie> {
-    return await useKysely()
-      .insertInto('ties')
-      .values(toNewPayload(payload))
-      .returningAll()
-      .executeTakeFirstOrThrow()
-      .then((record) => fromRecord(record))
+    return await transaction(
+      async (db) =>
+        await db
+          .insertInto('ties')
+          .values(toNewPayload(payload))
+          .returningAll()
+          .executeTakeFirstOrThrow()
+          .then((record) => fromRecord(record))
+    )
   }
 
   async updateById(id: UUID, payload: TieUpdate): Promise<Tie> {
-    return await useKysely()
-      .updateTable('ties')
-      .set(toUpdatePayload(payload))
-      .where('id', '=', fromUuidString(id))
-      .returningAll()
-      .executeTakeFirstOrThrow()
-      .then((record) => fromRecord(record))
+    return await transaction(
+      async (db) =>
+        await db
+          .updateTable('ties')
+          .set(toUpdatePayload(payload))
+          .where('id', '=', fromUuidString(id))
+          .returningAll()
+          .executeTakeFirstOrThrow()
+          .then((record) => fromRecord(record))
+    )
   }
 
   async upsert(payload: NewTie): Promise<Tie> {
-    return await useKysely()
-      .replaceInto('ties')
-      .values(toNewPayload(payload))
-      .returningAll()
-      .executeTakeFirstOrThrow()
-      .then((record) => fromRecord(record))
+    return await transaction(
+      async (db) =>
+        await db
+          .replaceInto('ties')
+          .values(toNewPayload(payload))
+          .returningAll()
+          .executeTakeFirstOrThrow()
+          .then((record) => fromRecord(record))
+    )
   }
 
   async deleteAll(): Promise<void> {
-    await useKysely().deleteFrom('ties').execute()
+    await transaction(async (db) => await db.deleteFrom('ties').execute())
   }
 
   async deleteById(id: UUID): Promise<Tie> {
-    return await useKysely()
-      .deleteFrom('ties')
-      .where('id', '=', fromUuidString(id))
-      .returningAll()
-      .executeTakeFirstOrThrow()
-      .then((record) => fromRecord(record))
+    return await transaction(
+      async (db) =>
+        await db
+          .deleteFrom('ties')
+          .where('id', '=', fromUuidString(id))
+          .returningAll()
+          .executeTakeFirstOrThrow()
+          .then((record) => fromRecord(record))
+    )
   }
 
   async deleteBySourceId(sourceId: UUID): Promise<Tie[]> {
-    return await useKysely()
-      .deleteFrom('ties')
-      .where('source_id', '=', fromUuidString(sourceId))
-      .returningAll()
-      .execute()
-      .then((records) => records.map(fromRecord))
+    return await transaction(
+      async (db) =>
+        await db
+          .deleteFrom('ties')
+          .where('source_id', '=', fromUuidString(sourceId))
+          .returningAll()
+          .execute()
+          .then((records) => records.map(fromRecord))
+    )
   }
 
   async deleteByDeviceId(deviceId: UUID): Promise<Tie[]> {
-    return await useKysely()
-      .deleteFrom('ties')
-      .where('device_id', '=', fromUuidString(deviceId))
-      .returningAll()
-      .execute()
-      .then((records) => records.map(fromRecord))
+    return await transaction(
+      async (db) =>
+        await db
+          .deleteFrom('ties')
+          .where('device_id', '=', fromUuidString(deviceId))
+          .returningAll()
+          .execute()
+          .then((records) => records.map(fromRecord))
+    )
   }
 }
 

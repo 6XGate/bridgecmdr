@@ -4,14 +4,14 @@ import { map } from 'radash'
 import { DeviceModel } from '../dao/devices'
 import { SourceModel } from '../dao/sources'
 import { TieModel } from '../dao/ties'
-import { fromUuidString, kyselyMigration, newUuid, toUuidString } from '../repos/database'
+import { fromUuidString, migration, newUuid, toUuidString } from '../repos/database'
 import { Database } from '../services/database'
 import { useLevelDb } from '../services/level'
 import type DatabaseSchema from '../repos/database'
 import type { UUID } from 'node:crypto'
 
 export async function migrate() {
-  await kyselyMigration<DatabaseSchema>(async function (trx) {
+  await migration<DatabaseSchema>(async function (trx) {
     const { levelup } = useLevelDb()
     const settingsDb = await levelup('_userStorage')
     const sourcesDb = new Database('sources', SourceModel)

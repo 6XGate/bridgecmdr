@@ -1,5 +1,5 @@
 import { memo, shake } from 'radash'
-import { newUuid, fromUuidString, useKysely, toUuidString } from './database'
+import { newUuid, fromUuidString, toUuidString, transaction } from './database'
 import type { ColumnType, Insertable, Selectable, Updateable } from 'kysely'
 import type { Buffer } from 'node:buffer'
 import type { UUID } from 'node:crypto'
@@ -43,61 +43,79 @@ function toUpdatePayload(payload: DeviceUpdate): DeviceUpdatePayload {
 
 class DevicesRepository {
   async all(): Promise<Device[]> {
-    return await useKysely()
-      .selectFrom('devices')
-      .selectAll()
-      .execute()
-      .then((records) => records.map(fromRecord))
+    return await transaction(
+      async (db) =>
+        await db
+          .selectFrom('devices')
+          .selectAll()
+          .execute()
+          .then((records) => records.map(fromRecord))
+    )
   }
 
   async findById(id: UUID): Promise<Device | null> {
-    return await useKysely()
-      .selectFrom('devices')
-      .selectAll()
-      .where('id', '=', fromUuidString(id))
-      .executeTakeFirst()
-      .then((record) => (record ? fromRecord(record) : null))
+    return await transaction(
+      async (db) =>
+        await db
+          .selectFrom('devices')
+          .selectAll()
+          .where('id', '=', fromUuidString(id))
+          .executeTakeFirst()
+          .then((record) => (record ? fromRecord(record) : null))
+    )
   }
 
   async insert(payload: NewDevice): Promise<Device> {
-    return await useKysely()
-      .insertInto('devices')
-      .values(toNewPayload(payload))
-      .returningAll()
-      .executeTakeFirstOrThrow()
-      .then((record) => fromRecord(record))
+    return await transaction(
+      async (db) =>
+        await db
+          .insertInto('devices')
+          .values(toNewPayload(payload))
+          .returningAll()
+          .executeTakeFirstOrThrow()
+          .then((record) => fromRecord(record))
+    )
   }
 
   async updateById(id: UUID, payload: DeviceUpdate): Promise<Device> {
-    return await useKysely()
-      .updateTable('devices')
-      .set(toUpdatePayload(payload))
-      .where('id', '=', fromUuidString(id))
-      .returningAll()
-      .executeTakeFirstOrThrow()
-      .then((record) => fromRecord(record))
+    return await transaction(
+      async (db) =>
+        await db
+          .updateTable('devices')
+          .set(toUpdatePayload(payload))
+          .where('id', '=', fromUuidString(id))
+          .returningAll()
+          .executeTakeFirstOrThrow()
+          .then((record) => fromRecord(record))
+    )
   }
 
   async upsert(payload: NewDevice): Promise<Device> {
-    return await useKysely()
-      .replaceInto('devices')
-      .values(toNewPayload(payload))
-      .returningAll()
-      .executeTakeFirstOrThrow()
-      .then((record) => fromRecord(record))
+    return await transaction(
+      async (db) =>
+        await db
+          .replaceInto('devices')
+          .values(toNewPayload(payload))
+          .returningAll()
+          .executeTakeFirstOrThrow()
+          .then((record) => fromRecord(record))
+    )
   }
 
   async deleteAll(): Promise<void> {
-    await useKysely().deleteFrom('devices').execute()
+    await transaction(async (db) => await db.deleteFrom('devices').execute())
   }
 
   async deleteById(id: UUID): Promise<Device> {
-    return await useKysely()
-      .deleteFrom('devices')
-      .where('id', '=', fromUuidString(id))
-      .returningAll()
-      .executeTakeFirstOrThrow()
-      .then((record) => fromRecord(record))
+    return await transaction(
+      async (db) =>
+        await db
+          .deleteFrom('devices')
+          .where('id', '=', fromUuidString(id))
+          .returningAll()
+          .executeTakeFirstOrThrow()
+          .then((record) => fromRecord(record))
+    )
   }
 }
 

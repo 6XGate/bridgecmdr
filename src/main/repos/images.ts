@@ -1,7 +1,7 @@
 // eslint-disable-next-line n/no-unsupported-features/node-builtins -- Backported
 import { hash } from 'node:crypto'
 import { memo } from 'radash'
-import { fromUuidString, newUuid, toUuidString, useKysely } from './database'
+import { fromUuidString, newUuid, toUuidString, transaction } from './database'
 import type { ColumnType, Insertable, Selectable } from 'kysely'
 import type { UUID } from 'node:crypto'
 
@@ -35,39 +35,51 @@ function toNewPayload(payload: NewImage): NewImagePayload {
 
 class ImageRepository {
   async all(): Promise<Image[]> {
-    return await useKysely()
-      .selectFrom('images')
-      .selectAll()
-      .execute()
-      .then((records) => records.map(fromRecord))
+    return await transaction(
+      async (trx) =>
+        await trx
+          .selectFrom('images')
+          .selectAll()
+          .execute()
+          .then((records) => records.map(fromRecord))
+    )
   }
 
   async findById(id: UUID): Promise<Image | null> {
-    return await useKysely()
-      .selectFrom('images')
-      .selectAll()
-      .where('id', '=', fromUuidString(id))
-      .executeTakeFirst()
-      .then((record) => (record ? fromRecord(record) : null))
+    return await transaction(
+      async (trx) =>
+        await trx
+          .selectFrom('images')
+          .selectAll()
+          .where('id', '=', fromUuidString(id))
+          .executeTakeFirst()
+          .then((record) => (record ? fromRecord(record) : null))
+    )
   }
 
   async upsert(payload: NewImage): Promise<Image> {
-    return await useKysely()
-      .insertInto('images')
-      .orIgnore()
-      .values(toNewPayload(payload))
-      .returningAll()
-      .executeTakeFirstOrThrow()
-      .then((record) => fromRecord(record))
+    return await transaction(
+      async (trx) =>
+        await trx
+          .insertInto('images')
+          .orIgnore()
+          .values(toNewPayload(payload))
+          .returningAll()
+          .executeTakeFirstOrThrow()
+          .then((record) => fromRecord(record))
+    )
   }
 
   async deleteById(id: UUID): Promise<Image> {
-    return await useKysely()
-      .deleteFrom('images')
-      .where('id', '=', fromUuidString(id))
-      .returningAll()
-      .executeTakeFirstOrThrow()
-      .then((record) => fromRecord(record))
+    return await transaction(
+      async (trx) =>
+        await trx
+          .deleteFrom('images')
+          .where('id', '=', fromUuidString(id))
+          .returningAll()
+          .executeTakeFirstOrThrow()
+          .then((record) => fromRecord(record))
+    )
   }
 }
 

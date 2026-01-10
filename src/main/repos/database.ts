@@ -1,9 +1,9 @@
 import { AsyncLocalStorage } from 'node:async_hooks'
+import { mkdir } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import SQLite from 'better-sqlite3'
 import { app } from 'electron'
 import { Kysely, SqliteDialect } from 'kysely'
-import { memo } from 'radash'
 import { parse as uuidParse, stringify as uuidStringify, v4 } from 'uuid'
 import type { DeviceTable } from './devices'
 import type { ImageTable } from './images'
@@ -13,9 +13,9 @@ import type { TieTable } from './ties'
 import type { UUID } from 'node:crypto'
 
 export default interface DatabaseSchema {
-  settings: SettingTable
   devices: DeviceTable
   images: ImageTable
+  settings: SettingTable
   sources: SourceTable
   ties: TieTable
 }
@@ -33,7 +33,7 @@ export function fromUuidString(uuid: UUID) {
 }
 
 /** Connects to the Kysely database, without remembering the connection. */
-export function kyselyConnect<DB>() {
+export async function makeConnection<DB>() {
   // Since BridgeCmdr v3 will use the XDG spec, Windows recommended,
   // and macOS recommended directory structure. Which electron.js
   // doesn't entirely follow, we will manually construct the
@@ -51,6 +51,9 @@ export function kyselyConnect<DB>() {
       break
   }
 
+  const appDataPath = resolve(app.getPath('appData'), ...qualifiedPath)
+  await mkdir(appDataPath, { recursive: true })
+
   return new Kysely<DB>({
     dialect: new SqliteDialect({
       database: new SQLite(resolve(app.getPath('appData'), ...qualifiedPath, 'store.sqlite'))
@@ -63,14 +66,14 @@ type KyselyConnection = Kysely<any>
 
 const dbMigration = new AsyncLocalStorage<KyselyConnection>()
 
-export async function kyselyMigration<DB>(callback: (trx: Kysely<DB>) => Promise<void>): Promise<void> {
+export async function migration<DB>(callback: (trx: Kysely<DB>) => Promise<void>): Promise<void> {
   const current = dbMigration.getStore()
   if (current != null) {
     await callback(current as Kysely<DB>)
     return
   }
 
-  const db = kyselyConnect<DB>()
+  const db = await makeConnection<DB>()
   try {
     const trx = await db.startTransaction().execute()
     await dbMigration.run(trx, async () => {
@@ -87,24 +90,22 @@ export async function kyselyMigration<DB>(callback: (trx: Kysely<DB>) => Promise
   }
 }
 
-const connect = memo(() => kyselyConnect<DatabaseSchema>())
+let dbInstance: Kysely<DatabaseSchema> | null = null
+async function getConnection() {
+  if (dbInstance != null) return dbInstance
+  dbInstance = await makeConnection<DatabaseSchema>()
+  return dbInstance
+}
 
 const dbTransaction = new AsyncLocalStorage<KyselyConnection>()
-
-/** Connects to the Kysely database. */
-export function useKysely(): Kysely<DatabaseSchema> {
-  const current = dbTransaction.getStore()
-  if (current != null) return current as Kysely<DatabaseSchema>
-
-  return connect()
-}
 
 export async function transaction<R>(callback: (trx: Kysely<DatabaseSchema>) => Promise<R>): Promise<R> {
   const current = dbTransaction.getStore()
   if (current != null) return await callback(current as Kysely<DatabaseSchema>)
 
-  const trx = await connect().startTransaction().execute()
-  return await dbTransaction.run(trx, async () => {
+  const db = await getConnection()
+  const trx = await db.startTransaction().execute()
+  return await dbTransaction.run(trx, async function () {
     try {
       const result = await callback(trx)
       await trx.commit().execute()

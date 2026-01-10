@@ -1,8 +1,8 @@
 import { sql } from 'kysely'
-import { kyselyMigration } from '../repos/database'
+import { migration } from '../repos/database'
 
 export async function migrate() {
-  await kyselyMigration(async function (trx) {
+  await migration(async function (trx) {
     await trx.schema
       .createTable('settings')
       .ifNotExists()

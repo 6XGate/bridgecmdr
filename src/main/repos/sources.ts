@@ -1,5 +1,5 @@
 import { memo, shake } from 'radash'
-import { fromUuidString, newUuid, toUuidString, useKysely } from './database'
+import { fromUuidString, newUuid, toUuidString, transaction } from './database'
 import type { ColumnType, Insertable, Selectable, Updateable } from 'kysely'
 import type { UUID } from 'node:crypto'
 
@@ -42,61 +42,79 @@ function toUpdatePayload(payload: SourceUpdate): SourceUpdatePayload {
 
 class SourceRepository {
   async all(): Promise<Source[]> {
-    return await useKysely()
-      .selectFrom('sources')
-      .selectAll()
-      .execute()
-      .then((records) => records.map(fromRecord))
+    return await transaction(
+      async (db) =>
+        await db
+          .selectFrom('sources')
+          .selectAll()
+          .execute()
+          .then((records) => records.map(fromRecord))
+    )
   }
 
   async findById(id: UUID): Promise<Source | null> {
-    return await useKysely()
-      .selectFrom('sources')
-      .selectAll()
-      .where('id', '=', fromUuidString(id))
-      .executeTakeFirst()
-      .then((record) => (record ? fromRecord(record) : null))
+    return await transaction(
+      async (db) =>
+        await db
+          .selectFrom('sources')
+          .selectAll()
+          .where('id', '=', fromUuidString(id))
+          .executeTakeFirst()
+          .then((record) => (record ? fromRecord(record) : null))
+    )
   }
 
   async insert(payload: NewSource): Promise<Source> {
-    return await useKysely()
-      .insertInto('sources')
-      .values(toNewPayload(payload))
-      .returningAll()
-      .executeTakeFirstOrThrow()
-      .then((record) => fromRecord(record))
+    return await transaction(
+      async (db) =>
+        await db
+          .insertInto('sources')
+          .values(toNewPayload(payload))
+          .returningAll()
+          .executeTakeFirstOrThrow()
+          .then((record) => fromRecord(record))
+    )
   }
 
   async updateById(id: UUID, payload: SourceUpdate): Promise<Source> {
-    return await useKysely()
-      .updateTable('sources')
-      .set(toUpdatePayload(payload))
-      .where('id', '=', fromUuidString(id))
-      .returningAll()
-      .executeTakeFirstOrThrow()
-      .then((record) => fromRecord(record))
+    return await transaction(
+      async (db) =>
+        await db
+          .updateTable('sources')
+          .set(toUpdatePayload(payload))
+          .where('id', '=', fromUuidString(id))
+          .returningAll()
+          .executeTakeFirstOrThrow()
+          .then((record) => fromRecord(record))
+    )
   }
 
   async upsert(payload: NewSource): Promise<Source> {
-    return await useKysely()
-      .replaceInto('sources')
-      .values(toNewPayload(payload))
-      .returningAll()
-      .executeTakeFirstOrThrow()
-      .then((record) => fromRecord(record))
+    return await transaction(
+      async (db) =>
+        await db
+          .replaceInto('sources')
+          .values(toNewPayload(payload))
+          .returningAll()
+          .executeTakeFirstOrThrow()
+          .then((record) => fromRecord(record))
+    )
   }
 
   async deleteAll(): Promise<void> {
-    await useKysely().deleteFrom('sources').execute()
+    await transaction(async (db) => await db.deleteFrom('sources').execute())
   }
 
   async deleteById(id: UUID): Promise<Source> {
-    return await useKysely()
-      .deleteFrom('sources')
-      .where('id', '=', fromUuidString(id))
-      .returningAll()
-      .executeTakeFirstOrThrow()
-      .then((record) => fromRecord(record))
+    return await transaction(
+      async (db) =>
+        await db
+          .deleteFrom('sources')
+          .where('id', '=', fromUuidString(id))
+          .returningAll()
+          .executeTakeFirstOrThrow()
+          .then((record) => fromRecord(record))
+    )
   }
 }
 
