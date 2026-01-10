@@ -20,7 +20,7 @@ export type DocumentId = z.output<typeof DocumentId>
 export const DocumentId = z
   .string()
   .uuid()
-  .transform((value) => value.toUpperCase())
+  .transform((value) => value.toLowerCase())
 export type RevisionId = z.output<typeof RevisionId>
 export const RevisionId = z.string().min(1)
 

@@ -6,6 +6,7 @@ import { useSourceRepository } from '../repos/sources'
 import { useTieRepository } from '../repos/ties'
 import { Database, inferDocumentOf, inferNewDocumentOf, inferUpdatesOf, inferUpsertOf } from '../services/database'
 import useTiesDatabase from './ties'
+import type { Image } from '../repos/images'
 import type { DocumentId, RevisionId } from '../services/database'
 import type { UUID } from 'crypto'
 import { Attachment } from '@/attachments'
@@ -20,6 +21,10 @@ type SourceDoc = inferDocumentOf<typeof SourceModel>
 type NewSourceDoc = inferNewDocumentOf<typeof SourceModel>
 type SourceUpdateDoc = inferUpdatesOf<typeof SourceModel>
 type SourceUpsertDoc = inferUpsertOf<typeof SourceModel>
+
+function toAttachment(image: Image): Attachment {
+  return new Attachment(image.id, image.type, image.data)
+}
 
 class SourceDao {
   private readonly repository = useSourceRepository()
@@ -62,66 +67,60 @@ class SourceDao {
     }
   }
 
+  private async upsertImage(
+    payload: NewSourceDoc | SourceUpdateDoc,
+    attachments: Attachment[]
+  ): Promise<Image | null | undefined> {
+    const attachment = attachments.find((att) => att.name === payload.image)
+    let image
+    if (attachment) {
+      image = await this.images.upsert({
+        data: Buffer.from(attachment),
+        type: attachment.type
+      })
+    } else if (payload.image === null) {
+      image = null
+    }
+
+    return image
+  }
+
   async add(payload: NewSourceDoc, ...attachments: Attachment[]): Promise<SourceDoc> {
     return await transaction(async () => {
-      const image = attachments.find((att) => att.name === payload.image)
-      let imageId
-      if (image) {
-        const img = await this.images.upsert({
-          data: Buffer.from(image),
-          type: image.type
-        })
-
-        imageId = img.id
-      } else {
-        imageId = null
-      }
-
+      let image = await this.upsertImage(payload, attachments)
       const source = await this.repository.insert({
         title: payload.title,
-        image: imageId
+        image: image?.id ?? null
       })
+
+      if (source.image != null && image == null) {
+        image = await this.images.findById(source.image)
+      }
 
       return {
         _id: source.id,
         _rev: '0', // Dummy revision for compatibility.
         order: 0, // Dummy order for compatibility.
         title: source.title,
-        image: imageId,
-        _attachments: image ? [image] : []
+        image: image?.id ?? null,
+        _attachments: image ? [toAttachment(image)] : []
       }
     })
   }
 
   async update(payload: SourceUpdateDoc, ...attachments: Attachment[]): Promise<SourceDoc> {
     return await transaction(async () => {
-      let image = attachments.find((att) => att.name === payload.image)
-      let imageId
-      if (payload.image != null && image != null) {
-        const img = await this.images.upsert({
-          data: Buffer.from(image),
-          type: image.type
-        })
-
-        imageId = img.id
-      } else if (payload.image === null) {
-        imageId = null
-      }
-
+      let image = await this.upsertImage(payload, attachments)
       const source = await this.repository.updateById(
         payload._id as UUID,
         shake({
           title: payload.title,
-          image: imageId
+          image: image?.id
         })
       )
 
       if (source.image != null && image == null) {
-        image =
-          (await this.images.findById(source.image).then((img) => {
-            if (!img) return null
-            return new Attachment(img.id, img.type, img.data)
-          })) ?? undefined
+        image = await this.images.findById(source.image)
       }
 
       return {
@@ -129,19 +128,35 @@ class SourceDao {
         _rev: '0', // Dummy revision for compatibility.
         order: 0, // Dummy order for compatibility.
         title: source.title,
-        image: source.image,
-        _attachments: image ? [image] : []
+        image: image?.id ?? null,
+        _attachments: image ? [toAttachment(image)] : []
       }
     })
   }
 
   async upsert(payload: SourceUpsertDoc, ...attachments: Attachment[]): Promise<SourceDoc> {
-    const existing = await this.repository.findById(payload._id as UUID)
-    if (existing) {
-      return await this.update(payload, ...attachments)
-    }
+    return await transaction(async () => {
+      let image = await this.upsertImage(payload, attachments)
 
-    return await this.add(payload, ...attachments)
+      const source = await this.repository.upsert({
+        id: payload._id as UUID,
+        title: payload.title,
+        image: image?.id ?? null
+      })
+
+      if (source.image != null && image == null) {
+        image = await this.images.findById(source.image)
+      }
+
+      return {
+        _id: source.id,
+        _rev: '0', // Dummy revision for compatibility.
+        order: 0, // Dummy order for compatibility.
+        title: source.title,
+        image: image?.id ?? null,
+        _attachments: image ? [toAttachment(image)] : []
+      }
+    })
   }
 
   async remove(id: string, _?: unknown): Promise<void> {

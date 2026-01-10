@@ -1,9 +1,10 @@
 import { AsyncLocalStorage } from 'node:async_hooks'
 import { mkdir } from 'node:fs/promises'
-import { resolve } from 'node:path'
+import { join, resolve } from 'node:path'
 import SQLite from 'better-sqlite3'
 import { app } from 'electron'
 import { Kysely, SqliteDialect } from 'kysely'
+import { memo } from 'radash'
 import { parse as uuidParse, stringify as uuidStringify, v4 } from 'uuid'
 import type { DeviceTable } from './devices'
 import type { ImageTable } from './images'
@@ -32,8 +33,7 @@ export function fromUuidString(uuid: UUID) {
   return Buffer.from(uuidParse(uuid))
 }
 
-/** Connects to the Kysely database, without remembering the connection. */
-export async function makeConnection<DB>() {
+const getSqlDatabasePath = memo(function getSqlDatabasePath(): [string, string] {
   // Since BridgeCmdr v3 will use the XDG spec, Windows recommended,
   // and macOS recommended directory structure. Which electron.js
   // doesn't entirely follow, we will manually construct the
@@ -52,11 +52,18 @@ export async function makeConnection<DB>() {
   }
 
   const appDataPath = resolve(app.getPath('appData'), ...qualifiedPath)
+
+  return [appDataPath, 'store.sqlite']
+})
+
+/** Connects to the Kysely database, without remembering the connection. */
+export async function makeConnection<DB>() {
+  const [appDataPath, databaseFile] = getSqlDatabasePath()
   await mkdir(appDataPath, { recursive: true })
 
   return new Kysely<DB>({
     dialect: new SqliteDialect({
-      database: new SQLite(resolve(app.getPath('appData'), ...qualifiedPath, 'store.sqlite'))
+      database: new SQLite(join(appDataPath, databaseFile))
     })
   })
 }
