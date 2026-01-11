@@ -68,47 +68,18 @@ export async function makeConnection<DB>() {
   })
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Makes the generic casts easier.
-type KyselyConnection = Kysely<any>
-
-const dbMigration = new AsyncLocalStorage<KyselyConnection>()
-
-export async function migration<DB>(callback: (trx: Kysely<DB>) => Promise<void>): Promise<void> {
-  const current = dbMigration.getStore()
-  if (current != null) {
-    await callback(current as Kysely<DB>)
-    return
-  }
-
-  const db = await makeConnection<DB>()
-  try {
-    const trx = await db.startTransaction().execute()
-    await dbMigration.run(trx, async () => {
-      try {
-        await callback(trx as Kysely<DB>)
-        await trx.commit().execute()
-      } catch (err) {
-        await trx.rollback().execute()
-        throw err
-      }
-    })
-  } finally {
-    await db.destroy()
-  }
-}
-
 let dbInstance: Kysely<DatabaseSchema> | null = null
 async function getConnection() {
   if (dbInstance != null) return dbInstance
-  dbInstance = await makeConnection<DatabaseSchema>()
+  dbInstance = await makeConnection()
   return dbInstance
 }
 
-const dbTransaction = new AsyncLocalStorage<KyselyConnection>()
+const dbTransaction = new AsyncLocalStorage<Kysely<DatabaseSchema>>()
 
 export async function transaction<R>(callback: (trx: Kysely<DatabaseSchema>) => Promise<R>): Promise<R> {
   const current = dbTransaction.getStore()
-  if (current != null) return await callback(current as Kysely<DatabaseSchema>)
+  if (current != null) return await callback(current)
 
   const db = await getConnection()
   const trx = await db.startTransaction().execute()

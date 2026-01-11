@@ -45,7 +45,7 @@ export async function up({ context }: MigrationParams<Kysely<DatabaseSchema>>) {
         image = await context
           .insertInto('images')
           // On conflict, something has to be updated to get a return value.
-          .onConflict((query) => query.doUpdateSet({ type: imageAttachment.type }))
+          .onConflict((query) => query.column('hash').doUpdateSet({ type: imageAttachment.type }))
           .values({
             id: newUuid(),
             data: Buffer.from(imageAttachment),

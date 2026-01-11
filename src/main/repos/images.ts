@@ -63,7 +63,7 @@ class ImageRepository {
         await trx
           .insertInto('images')
           // On conflict, something has to be updated to get a return value.
-          .onConflict((query) => query.doUpdateSet({ type: payload.type }))
+          .onConflict((query) => query.column('hash').doUpdateSet({ type: payload.type }))
           .values(toNewPayload(payload))
           .returningAll()
           .executeTakeFirstOrThrow()
