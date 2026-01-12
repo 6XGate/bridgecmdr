@@ -1,5 +1,4 @@
 import { createSharedComposable, useConfirmDialog } from '@vueuse/core'
-import { computed } from 'vue'
 import { useDisplay } from 'vuetify'
 import { z } from 'zod'
 import { useErrors } from '../hooks/errors'
@@ -122,17 +121,16 @@ export function useTieDialog() {
 }
 
 export function useSourceDialog() {
-  const { xs } = useDisplay()
-  const model = useResponsiveModal(xs, { maxWidth: 480, rounded: 'xl' })
+  const { smAndDown } = useDisplay()
+  const model = useResponsiveModal(smAndDown, { maxWidth: 480, rounded: 'xl' })
 
-  return { breakpoint: xs, ...model }
+  return { breakpoint: smAndDown, ...model }
 }
 
 export function useDeviceDialog() {
-  const { width } = useDisplay()
-  const breakpoint = computed(() => width.value <= 700)
+  const { smAndDown } = useDisplay()
 
-  const model = useResponsiveModal(breakpoint, { minWidth: 640, maxWidth: 800, rounded: 'xl' })
+  const model = useResponsiveModal(smAndDown, { minWidth: 640, maxWidth: 800, rounded: 'xl' })
 
-  return { breakpoint, ...model }
+  return { breakpoint: smAndDown, ...model }
 }

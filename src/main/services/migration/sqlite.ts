@@ -30,22 +30,22 @@ class MigrationStorage implements UmzugStorage<Transaction> {
 
 export async function runMigrations() {
   await defer(async function $runMigrations(cleanup) {
-    Logger.debug('Loading migration information')
+    Logger.info('Loading migration information')
     const migrations = Object.entries<Migration>(import.meta.glob('../../migrations/sqlite/**/*', { eager: true })).map(
       ([name, { up }]) => ({ name: basename(name, '.ts'), up })
     )
 
     const database = await makeConnection<BareDatabaseSchema>()
     cleanup(async () => {
-      Logger.debug('Finished migration')
+      Logger.info('Finished migration')
       await database.destroy()
     })
 
     await database.schema
       .createTable('bridgecmdr_migrations')
       .ifNotExists()
-      .addColumn('name', 'text', (col) => col.primaryKey())
-      .addColumn('date', 'text')
+      .addColumn('name', 'text', (col) => col.notNull().primaryKey())
+      .addColumn('date', 'text', (col) => col.notNull())
       .execute()
 
     await database.transaction().execute(async function migrate(trx) {

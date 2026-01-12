@@ -38,14 +38,9 @@ const steps = [
       throw new Error(t('message.autoStartError'), { cause })
     }
   },
-  // v2: Data migration warning.
+  // v2: Data migration from v1 warning. Removed in v2.3.0.
   async () => {
-    await dialogs.alert({
-      title: t('label.v1Settings'),
-      message: t('message.v1Settings'),
-      button: t('action.understood'),
-      color: 'red'
-    })
+    await Promise.resolve()
   }
 ]
 
@@ -91,10 +86,4 @@ en:
   message:
     autoStartConfirm: Do you want {0} to start on boot?
     autoStartError: Unable to create start-up entry
-    v1Settings: |
-      Due to unavoidable reasons, your data from v1.x cannot migrate to v2.x automatically.
-      Your should export your version v1.x data and import it into v2.x.
-      This should not be an issue in the future.
-  action:
-    understood: Got it
 </i18n>
