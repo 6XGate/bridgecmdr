@@ -42,6 +42,8 @@ function useSchema<Schema extends JsonType>(schema: Schema, deep = false): UseSt
 }
 
 const useSettings = defineStore('settings', function defineSettings() {
+  const doneFirstRun = useUserStorage('doneFirstRun', 0, useSchema(z.number()))
+
   const iconSize = useUserStorage('iconSize', 128, useSchema(IconSize))
   const iconSizes = readonly(kIconSizes)
 
@@ -66,6 +68,7 @@ const useSettings = defineStore('settings', function defineSettings() {
   const startup = useStartup()
 
   return {
+    doneFirstRun,
     iconSize,
     iconSizes,
     colorScheme,

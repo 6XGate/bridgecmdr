@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { useAsyncState, useLocalStorage, watchOnce } from '@vueuse/core'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { trackBusy } from '../hooks/tracking'
 import { useDialogs } from '../modals/dialogs'
 import useMigration from '../services/migration'
 import { useClient } from '../services/rpc/trpc'
+import useSettings from '../services/settings'
 import useStartup from '../services/startup'
 import type { I18nSchema } from '../locales/locales'
 
@@ -20,6 +22,15 @@ const { state: appInfo, isReady } = useAsyncState(async () => await useClient().
 
 const startup = useStartup()
 const migrate = useMigration()
+const settings = useSettings()
+
+const stepIndex = computed({
+  get: () => doneFirstRun.value,
+  set: (value) => {
+    doneFirstRun.value = value
+    settings.doneFirstRun = value
+  }
+})
 
 const steps = [
   // v0: does nothing...
@@ -45,7 +56,7 @@ const steps = [
 ]
 
 watchOnce(isReady, async function doFirstRun() {
-  console.debug(`Done first steps: ${doneFirstRun.value}`)
+  console.debug(`Done first steps: ${stepIndex.value}`)
   try {
     // Check if the entry needs to be updated.
     await startup.checkUp()
@@ -56,14 +67,14 @@ watchOnce(isReady, async function doFirstRun() {
 
     /* eslint-disable no-await-in-loop */
     for (const [index, step] of steps.entries()) {
-      if (doneFirstRun.value >= index) {
+      if (stepIndex.value >= index) {
         continue
       }
 
       console.debug(`Doing first run step: ${index}`)
       await step()
 
-      doneFirstRun.value = index
+      stepIndex.value = index
     }
     /* eslint-enable no-await-in-loop */
   } catch (cause) {
