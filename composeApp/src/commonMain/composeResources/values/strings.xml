@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<resources>
+  <!-- General purpose labels -->
+  <string name="unknown_error">An unknown error occurred</string>
+
+  <!-- Common components -->
+  <string name="message_loading">Loading...</string>
+  <string name="image_chooseImage">Choose image</string>
+</resources>

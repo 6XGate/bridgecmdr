@@ -1,17 +1,6 @@
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/sdks
-!.yarn/versions
-
-# Swap the comments on the following lines if you wish to use zero-installs
-# In that case, don't forget to run `yarn config set enableGlobalCache false`!
-# Documentation here: https://yarnpkg.com/features/caching#zero-installs
-
-#!.yarn/cache
-node_modules/
-.pnp.*
+# Gradle
+.gradle
+*.iml
 
 # Hidden data
 .DS_Store
@@ -19,40 +8,32 @@ node_modules/
 # Logs
 logs
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+logs/
 
-cypress/videos/
-cypress/screenshots/
+# Android Studio
+captures
 
-# Editor directories and files
-.idea
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-
-# We want to carry some VSCode settings with the code.
-.vscode/*
-!.vscode/extensions.json
-!.vscode/settings.json
-!.vscode/launch.json
+# XCode
+xcuserdata
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+!*.xcodeproj/project.xcworkspace/
+!*.xcworkspace/contents.xcworkspacedata
+**/xcshareddata/WorkspaceSettings.xcsettings
 
 # Local environment data
-compose.override.yml
+local.properties
+.kotlin
 .env
 .env.*
 dev-app-update.yml
 
-# Test output
-coverage/
-logs/
-
 # Build output
-package.tgz
-dist/
-out/
+**/build/
+!src/**/build/
+node_modules/
+
+# Generated native code
+.externalNativeBuild
+.cxx

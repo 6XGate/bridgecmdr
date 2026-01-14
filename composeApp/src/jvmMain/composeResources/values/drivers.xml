@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<resources>
+  <!-- General purpose labels -->
+  <string name="unknown_driver">Unknown driver</string>
+
+  <!-- Driver metadata -->
+  <string name="company_extron">Extron Electronics</string>
+  <string name="company_shinybow">ShinybowUSA</string>
+  <string name="company_sony">Sony Corporation</string>
+  <string name="company_teslaelec">Tesla Elec Technology Co.,Ltd</string>
+  <string name="driver_extron_sis_matrix">Extron SIS-compatible matrix switch</string>
+  <string name="driver_shinybow_v2_0_matrix">Shinybow v2.0 compatible matrix switch</string>
+  <string name="driver_shinybow_v3_0_matrix">Shinybow v3.0 compatible matrix switch</string>
+  <string name="driver_sony_rs_485_monitor">Sony RS-485 controllable monitor</string>
+  <string name="driver_telsasmart_kvm">Tesla smart KVM-compatible switch</string>
+  <string name="driver_telsasmart_matrix">Tesla smart matrix-compatible switch</string>
+  <string name="driver_telsasmart_sdi">Tesla smart SDI-compatible switch</string>
+  <string name="driver_tesmart_kvm">TESmart KVM-compatible switch</string>
+  <string name="driver_tesmart_matrix">TESmart matrix-compatible switch</string>
+  <string name="driver_tesmart_sdi">TESmart SDI-compatible switch</string>
+  <string name="internal_contributor">New tie</string>
+</resources>

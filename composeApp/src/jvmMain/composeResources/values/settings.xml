@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<resources>
+  <!-- Settings home -->
+  <string name="settings_general">General</string>
+  <string name="settings_general_support">Basic settings for %1$s</string>
+  <string name="settings_sources">Sources</string>
+  <plurals name="settings_sources_support">
+    <item quantity="one">1 source</item>
+    <item quantity="other">%1$d sources</item>
+  </plurals>
+  <string name="settings_devices">Switches and Monitors</string>
+  <plurals name="settings_devices_support">
+    <item quantity="one">1 device</item>
+    <item quantity="other">%1$d devices</item>
+  </plurals>
+  <string name="settings_backups">Backup settings</string>
+  <string name="settings_backups_support">Import or export setting as a file</string>
+  <!-- General settings -->
+  <string name="setting_autoStart">Automatic start-up</string>
+  <string name="setting_autoStart_false">%1$s will not start automatically with your system</string>
+  <string name="setting_autoStart_true">%1$s will start automatically with your system</string>
+  <string name="setting_powerOnDevices">Device automatic power-on</string>
+  <string name="setting_powerOnDevices_false">Leave switches &amp; monitors as is when %1$s starts</string>
+  <string name="setting_powerOnDevices_true">Switches &amp; monitors will power on when %1$s starts</string>
+  <string name="setting_server">Remote control server</string>
+  <string name="setting_server_support">Use the remote control server to controller your equipment from your mobile device</string>
+  <string name="setting_server_status">Status: %1$s</string>
+  <string name="setting_close_application">Close %1$s</string>
+  <string name="setting_close_application_support">Close %1$s without powering down</string>
+</resources>

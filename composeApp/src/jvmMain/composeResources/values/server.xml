@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<resources>
+  <!-- Remote code -->
+  <string name="server_remoteCode">Remote server code</string>
+  <string name="server_remoteCode_instructions">Open %1$s on your mobile device and\nscan this QR code for remote control</string>
+
+  <!-- ServerStatus -->
+  <string name="server_ServerStatus_Stopped">Stopped</string>
+  <string name="server_ServerStatus_Starting">Starting</string>
+  <string name="server_ServerStatus_Running">Running</string>
+  <string name="server_ServerStatus_Stopping">Stopping</string>
+</resources>

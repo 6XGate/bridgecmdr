@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<resources>
+  <!-- Settings home -->
+  <string name="settings">Settings</string>
+  <string name="settings_about">About %1$s</string>
+  <string name="settings_about_support">Version %1$s</string>
+  <!-- General settings -->
+  <string name="setting_AppTheme">Color theme</string>
+  <string name="setting_AppTheme_Dark">Use dark theme</string>
+  <string name="setting_AppTheme_Dark_option">Dark</string>
+  <string name="setting_AppTheme_Light">Use light theme</string>
+  <string name="setting_AppTheme_Light_option">Light</string>
+  <string name="setting_AppTheme_System">Use system theme</string>
+  <string name="setting_AppTheme_System_option">System theme</string>
+  <string name="setting_IconSize">Dashboard icon size</string>
+  <string name="setting_IconSize_Size">%1$d ⨉ %1$d</string>
+  <string name="setting_PowerOffTaps">Power button behavior</string>
+  <string name="setting_PowerOffTaps_supporting">The power button will power off the system after</string>
+  <string name="setting_PowerOffTaps_Double">Will power off when tapped or clicked twice</string>
+  <string name="setting_PowerOffTaps_Double_option">Double-tapping / double-clicking</string>
+  <string name="setting_PowerOffTaps_Single">Will power off when tapped or clicked once</string>
+  <string name="setting_PowerOffTaps_Single_option">Single-tapping / single-clicking</string>
+</resources>

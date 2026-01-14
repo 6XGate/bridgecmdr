@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<resources>
+  <!-- General purpose labels -->
+  <string name="unknown_tie">Unknown tie</string>
+
+  <!-- Tie list -->
+  <string name="ties_deleteTie">Delete tie</string>
+  <string name="ties_addTie">Add tie</string>
+
+  <string name="ties_source">Source</string>
+  <string name="ties_ties">Ties</string>
+  <string name="ties_noTies">No ties, add some</string>
+  <string name="ties_input">Input channel</string>
+  <string name="ties_video">Video output channel</string>
+  <string name="ties_audio">Video output channel</string>
+
+  <string name="ties_doYouWantToDeleteTie">Delete this tie?</string>
+
+  <string name="ties_failedToRefresh">Failed to get ties</string>
+  <string name="ties_failedToUploadImage">Failed to upload image</string>
+  <string name="ties_failedToUpdateImage">Failed to update source image</string>
+  <string name="ties_failedToUpdateTitle">Failed to update source title</string>
+  <string name="ties_failedToDelete">Failed to delete tie</string>
+
+  <!-- Tie modal -->
+  <string name="tie_addTie">Add tie</string>
+  <string name="tie_editTie">Edit tie</string>
+
+  <string name="tie_deviceId_notNil">Device must be selected</string>
+  <string name="tie_inputChannel_minimum">Input channel must be at least 1</string>
+  <string name="tie_videoChannel_minimum">Video output channel must be at least 1</string>
+  <string name="tie_audioChannel_minimum">Audio output channel must be at least 1</string>
+
+  <string name="tie_failedToGet">Failed to get tie</string>
+  <string name="tie_failedToAdd">Failed to add tie</string>
+  <string name="tie_failedToUpdate">Failed to update tie</string>
+</resources>

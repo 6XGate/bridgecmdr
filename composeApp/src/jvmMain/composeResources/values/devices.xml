@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<resources>
+  <!-- General purpose labels -->
+  <string name="unknown_device">Unknown device</string>
+
+  <!-- Device list -->
+  <string name="devices_deleteMonitor">Delete monitor</string>
+  <string name="devices_deleteSwitch">Delete switch</string>
+  <string name="devices_deleteDevice">Delete device</string>
+  <string name="devices_addDevice">Add switch or monitor</string>
+
+  <string name="devices_doYouWantToDeleteMonitor">Delete this monitor?</string>
+  <string name="devices_doYouWantToDeleteSwitch">Delete this switch?</string>
+  <string name="devices_doYouWantToDeleteDevice">Delete this device?</string>
+  <string name="devices_deleteWarning">This will also delete any related source ties.</string>
+
+  <string name="devices_failedToRefresh">Failed to get devices</string>
+  <string name="devices_failedToDelete">Failed to delete device</string>
+
+  <!-- Device modal -->
+  <string name="device_addDevice">Add device</string>
+  <string name="device_editDevice">Edit device</string>
+
+  <string name="device_title">Title</string>
+  <string name="device_driver">Driver</string>
+  <string name="device_pathType">Connection type</string>
+  <string name="device_port">Port</string>
+  <string name="device_hostname">Hostname</string>
+  <string name="device_experimentalDriver">Experimental driver</string>
+
+  <string name="device_failedToGet">Failed to get device</string>
+  <string name="device_failedToAdd">Failed to add device</string>
+  <string name="device_failedToUpdate">Failed to update device</string>
+
+  <string name="device_title_notBlank">Device title cannot be blank</string>
+  <string name="device_title_maxLength">Device title cannot exceed 255 characters</string>
+  <string name="device_driver_notNil">Device driver must be selected</string>
+  <string name="device_path_noHostname">Hostname cannot be blank</string>
+  <string name="device_path_noPort">Serial port must be selected</string>
+  <string name="device_path_noType">Make a selection</string>
+</resources>
