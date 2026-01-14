@@ -1,5 +1,14 @@
 - Milestones
   - v2.3
+    - Move to SQLite.
+  - v3.0
+    - (#92) Remote UI support
+      - Need settings toggle to control it's activation.
+      - Need security or authentication method, preferably just a PIN code.
+      - Need a means to identify it's URL via the local UI.
+      - May need a way to disable the power-off button in the remote UI.
+    - Possible move to 64-bit ARM.
+  - v3.1
     - Determine which drivers are being using by the public at large to remove the experimental mark; options:
       - Add a opt-in telemetry feature to see which drivers are being used, should be an ask to send survey sort of thing.
       - Ask users to submit survey somewhere, likely with a pop-up in the app to the direct them to the survey.
@@ -8,14 +17,7 @@
       - Import and export.
     - More drivers.
       - Monoprice Blackbird
-  - v3.0
-    - (#92) Remote UI support
-      - Need settings toggle to control it's activation.
-      - Need security or authentication method, preferably just a PIN code.
-      - Need a means to identify it's URL via the local UI.
-      - May need a way to disable the power-off button in the remote UI.
-    - Possible move to 64-bit ARM.
-- Drivers
+- Drivers to research
   - Monoprice Blackbird
   - J-Tech Digital -- Need to find actual command list.
   - ASHATA -- Now unable to find.
