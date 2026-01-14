@@ -31,7 +31,9 @@ export const ButtonOrder = z.array(z.string().uuid().toUpperCase())
 function useSchema<Schema extends JsonType>(schema: Schema, deep = false): UseStorageOptions<z.output<Schema>> {
   return {
     deep,
-    listenToStorageChanges: true,
+    // There is only one view, and it will be the only thing modifying this storage.
+    // Also, everything goes through the settings anyways. So `false` it is.
+    listenToStorageChanges: false,
     writeDefaults: true,
     serializer: {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return -- TS is unable to infer properly.
@@ -42,7 +44,7 @@ function useSchema<Schema extends JsonType>(schema: Schema, deep = false): UseSt
 }
 
 const useSettings = defineStore('settings', function defineSettings() {
-  const doneFirstRun = useUserStorage('doneFirstRun', 0, useSchema(z.number()))
+  const doneFirstRun = useUserStorage('doneFirstRun', 0, useSchema(z.number().finite().int().nonnegative()))
 
   const iconSize = useUserStorage('iconSize', 128, useSchema(IconSize))
   const iconSizes = readonly(kIconSizes)
