@@ -62,6 +62,7 @@ class MobileConnectionService(
       HttpStatusCode.Unauthorized,
       HttpStatusCode.Forbidden,
       // Server may be overloaded or having issues.
+      HttpStatusCode.InternalServerError,
       HttpStatusCode.RequestTimeout,
       HttpStatusCode.BadGateway,
       HttpStatusCode.ServiceUnavailable,

@@ -15,6 +15,7 @@
 - [ ] Fix the momentary flash of "Unknown error" when dismissing an error modal.
 - [ ] Don't ignore the 500 server error as a troubling status code.
 - [ ] Release v2.3.0 of TypeScript version.
+- [ ] Need short snackbar to show when clicking the Power off button with double-tap enabled.
 - [ ] Need an interface flow to explain the mobile remote control apps from the server code view. Maybe the first time
       the code view is opened. Maybe even a link to show the information again. QR Codes to the app stores would be
       nice.
