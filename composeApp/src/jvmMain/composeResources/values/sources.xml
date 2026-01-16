@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<resources>
+  <!-- General purpose labels -->
+  <string name="unknown_source">Unknown source</string>
+
+  <!-- Source list -->
+  <string name="sources_deleteSource">Delete source</string>
+  <string name="sources_addSource">Add source</string>
+
+  <string name="devices_doYouWantToDeleteSource">Delete this source?</string>
+
+  <string name="sources_failedToRefresh">Failed to get sources</string>
+  <string name="sources_failedToDelete">Failed to delete source</string>
+
+  <!-- Source modal -->
+  <string name="source_addSource">Add source</string>
+  <string name="source_editSource">Edit source</string>
+
+  <string name="source_title">Title</string>
+
+  <string name="source_failedToGet">Failed to get source</string>
+  <string name="source_failedToAdd">Failed to add source</string>
+  <string name="source_failedToUpdate">Failed to update source</string>
+  <string name="source_failedToUploadImage">Failed to upload image</string>
+
+  <string name="source_title_notBlank">Source title cannot be blank</string>
+  <string name="source_title_maxLength">Source title cannot exceed 255 characters</string>
+</resources>

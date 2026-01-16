@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<resources>
+  <!-- General purpose buttons -->
+  <string name="action_add">Add</string>
+  <string name="action_back">Back</string>
+  <string name="action_collapse">Collapse</string>
+  <string name="action_close">Close</string>
+  <string name="action_decrement">Decrement</string>
+  <string name="action_delete">Delete</string>
+  <string name="action_discard">Discard</string>
+  <string name="action_edit">Edit</string>
+  <string name="action_expand">Expand</string>
+  <string name="action_increment">Increment</string>
+  <string name="action_keep">Keep</string>
+  <string name="action_save">Save</string>
+</resources>

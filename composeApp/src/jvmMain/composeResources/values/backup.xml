@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<resources>
+  <string name="backup_export">Export settings</string>
+  <string name="backup_export_supporting">Exports settings to an archive</string>
+  <string name="backup_export_failed">Failed to export back-up</string>
+  <string name="backup_import">Import settings</string>
+  <string name="backup_import_supporting">Imports settings from an archive</string>
+  <string name="backup_import_failed">Failed to import back-up</string>
+  <string name="backup_load">Load backup</string>
+  <string name="backup_suggestion">BridgeCmdr.Backup</string>
+</resources>

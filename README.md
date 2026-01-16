@@ -6,7 +6,7 @@ A/V switch and monitor controller
 
 ### BridgeCmdr
 
-Copyright ©2019-2020 Matthew Holder
+Copyright ©2019-2026 Matthew Holder
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
 License as published by the Free Software Foundation, either version 3 of the License, or (at your option)
@@ -44,89 +44,59 @@ You will want a touchscreen, such as the official Raspberry Pi touchscreen, or a
 keyboard while setting up your configuration, but it is not needed during day-to-day use.
 
 You may also need additional USB-to-serial adapters or a serial HAT. Some supported monitors and switches can be
-controlled over ethernet. For those you will need an ethernet cable; and if you have more than one such device,
-an ethernet hub or switch. See [Wiki](https://github.com/6XGate/bridgecmdr/wiki) for more information on how
+controlled over Ethernet. For those you will need an Ethernet cable; and if you have more than one such device,
+an Ethernet hub or switch. See [Wiki](https://github.com/6XGate/bridgecmdr/wiki) for more information on how
 to connect to supported monitors and switches.
 
 ## Tools, Frameworks, Libraries, and Assets
 
 BridgeCmdr uses the following libraries and frameworks are a major part of its makeup.
 
-| Framework/Library                                  | License                                                                  |
-| -------------------------------------------------- | ------------------------------------------------------------------------ |
-| [Electron](https://electronjs.org/)                | [MIT](https://github.com/electron/electron/blob/master/LICENSE)          |
-| [Vue.js](https://vuejs.org/)                       | [MIT](https://github.com/vuejs/vue/blob/master/LICENSE)                  |
-| [Vuetify](https://vuetifyjs.com/)                  | [MIT](https://github.com/vuetifyjs/vuetify/blob/master/LICENSE.md)       |
-| [PouchDB](https://pouchdb.com/)                    | [Apache 2.0](https://github.com/pouchdb/pouchdb/blob/master/LICENSE)     |
-| [LevelDOWN](https://github.com/Level/leveldown)    | [MIT](https://github.com/Level/leveldown/blob/master/LICENSE)            |
-| [Vue I18n](https://vue-i18n.intlify.dev/)          | [MIT](https://github.com/intlify/vue-i18n/blob/master/LICENSE)           |
-| [SerialPort](https://serialport.io/)               | [MIT](https://github.com/serialport/node-serialport/blob/master/LICENSE) |
-| [Vuelidate](https://vuelidate-next.netlify.app/)   | [MIT](https://github.com/vuelidate/vuelidate/blob/next/LICENSE)          |
-| [zip.js](https://gildas-lormeau.github.io/zip.js/) | [BSD](https://github.com/gildas-lormeau/zip.js/blob/master/LICENSE)      |
+> TODO: Update licenses as dependencies are updated.
 
-For a complete list of dependencies and other utilized libraries, see the `package.json` file. Any other dependencies
-not listed above or in the package file are dependencies of those packages.
+| Framework/Library | License |
+|-------------------| ------- |
 
-BridgeCmdr also uses the [Material Design Icons](https://pictogrammers.com/library/mdi/) SVG graphics which are
-licensed under the [Pictogrammers Free License](https://pictogrammers.com/docs/general/license/).
+For a complete list of dependencies and other utilized libraries, see the Gradle files. Any other dependencies not
+listed above or in the package file are dependencies of those packages.
+
+BridgeCmdr also uses the [Material Design Icons](https://pictogrammers.com/library/mdi/) SVG graphics which are licensed
+under the [Pictogrammers Free License](https://pictogrammers.com/docs/general/license/).
 
 ## Building
 
 The following tools or libraries are used to build and maintain BridgeCmdr.
 
-- [TypeScript](https://www.typescriptlang.org/).
-- [Prettier](https://prettier.io/)
-- [ESLint](https://eslint.org/), and the following third-party plug-ins;
-  - [ESLint TypeScript plug-in](https://typescript-eslint.io/),
-  - [ESLint Import plug-in](https://github.com/benmosher/eslint-plugin-import),
-  - [ESLint Promise plug-in](https://github.com/xjamundx/eslint-plugin-promise),
-  - [ESLint Node plug-in](https://github.com/eslint-community/eslint-plugin-n),
-  - [ESLint Vue.js plug-in](https://eslint.vuejs.org/).
-- [Electron Vite](https://evite.netlify.app/), and the following third-party plug-ins;
-  - [Vue.js plug-in](https://github.com/vitejs/vite-plugin-vue),
-  - [Dart Sass](https://sass-lang.com/dart-sass),
-  - [@intlify/bundle-tools](https://github.com/intlify/bundle-tools).
-- [electron-builder)](https://www.electron.build/).
-- [VisualStudio Code](https://code.visualstudio.com/)
+> TODO: Update the list of build requirements.
 
-For a complete list of tools, see the `package.json` file. Any other dependencies not listed above or in the package
-file are dependencies of those packages.
+For a complete list of tools, see the Gradle files. Any other dependencies not listed above or in the package file are
+dependencies of those packages.
+
+### Build and Run Android Application
+
+To build and run the development version of the Android app, use the run configuration from the run widget in your IDE’s
+toolbar or build it directly from the terminal:
+
+```shell
+./gradlew :composeApp:assembleDebug
+```
+
+### Build and Run Desktop (JVM) Application
+
+To build and run the development version of the desktop app, use the run configuration from the run widget in your IDE’s
+toolbar or run it directly from the terminal:
+
+```shell
+./gradlew :composeApp:run
+```
 
 ### Recommended IDE Setup
 
-[VSCode](https://code.visualstudio.com/) with:
-
-- [i18n Ally](https://marketplace.visualstudio.com/items?itemName=Lokalise.i18n-ally)
-- [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar)
-- [Dotenv + Vault](https://marketplace.visualstudio.com/items?itemName=dotenv.dotenv-vscode)
-- [EditorConfig](https://marketplace.visualstudio.com/items?itemName=EditorConfig.EditorConfig)
-- [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
-- [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
-- [Todo Tree](https://marketplace.visualstudio.com/items?itemName=Gruntfuggly.todo-tree)
-- [YAML](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml)
-
-#### Type Support for `.vue` Imports in TS
-
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for
-type checking.
+> TODO: Update recommended IDE setup.
 
 ### Development
 
-If you want to help with the development of BridgeCmdr, downloading, building, then running the project on a GNU/Linux
-based operating system is required. The following steps will get you setup on a Debian-base operating system.
-
-1. Install the `build-essential` package; `sudo apt install build-essential git -y`
-2. Acquire the source:
-   - **Preferred**, Fork the [GitHub repository](https://github.com/6XGate/bridgecmdr), you may then issue pull
-     requests back to the official source code. Also start personal branches from `develop`.
-   - Download the [source](https://github.com/6XGate/bridgecmdr/archive/develop.zip) and extract it.
-3. Open a terminal clone and go to the folder into which source was cloned or extracted.
-4. Install the node packages; `yarn`
-5. Build and run the app;
-
-- For hot-reload development mode: `yarn dev`
-- For product builds: `yarn build`
-- For packaged application: `yarn make`
+> TODO: Update the development instructions.
 
 ### Docker and ARM support
 
@@ -140,21 +110,23 @@ you will need to run `yarn` to reinstall the native code dependencies with their
 
 ### Packaging the Installer
 
-To package the application, you will need to use `yarn package` steps you acquire the working copy of the source code
-on an ARM system or in an ARM Docker container. It is not recommended to build directly on the Raspberry Pi since
-the systems can be underpowered for such a purpose.
-
-#### The Package
-
-You should now have a package ending in `.AppImage` in the `dist` folder. This package can be run like any other
-AppImage file.
+> TODO: Update the packaging instructions.
 
 ### Releasing
 
 - Start the build docker conatiner: `docker compose run --build -it --rm build`
-- Fresh install the packages: `yarn --force --frozen-lockfile`
-- Package the application: `yarn make`
-- Land and tag the release.
+- > TODO: Update the release instructions.
 - Create a release from the tag and copy the following files to the release assets:
   - `bridgecmdr-<version>-armv7l.AppImage`
   - `latest-linux-arm.yml`
+
+## Source Code Structure
+
+This is a Kotlin Multiplatform project targeting Android and Desktop (JVM).
+
+* [/composeApp](./composeApp/src) is for code that will be shared across the Compose Multiplatform applications.
+  It contains several subfolders:
+  - [androidMain](./composeApp/src/androidMain/kotlin) is the code for the Android target.
+  - [commonMain](./composeApp/src/commonMain/kotlin) is for code that’s common for all targets.
+  - [jvmMain](./composeApp/src/commonMain/kotlin) is the code for the Desktop (JVM) target.
+

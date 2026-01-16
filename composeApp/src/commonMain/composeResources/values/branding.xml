@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<resources>
+  <string name="branding_appName">BridgeCmdr</string>
+  <string name="branding_company">Matthew Holder</string>
+  <string name="branding_copyright">© 2019-2026 Matthew Holder. All rights reserved.</string>
+  <string name="branding_version">3.0.0</string>
+</resources>

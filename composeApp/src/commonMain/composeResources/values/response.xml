@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<resources>
+  <!-- General purpose responses -->
+  <string name="response_understood">Got it</string>
+  <string name="response_cancel">Cancel</string>
+  <string name="response_confirm">OK</string>
+  <string name="response_no">No</string>
+  <string name="response_yes">Yes</string>
+</resources>
