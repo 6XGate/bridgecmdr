@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
   alias(libs.plugins.kotlin.multiplatform)
+  alias(libs.plugins.kover)
   alias(libs.plugins.android.application)
   alias(libs.plugins.compose.multiplatform)
   alias(libs.plugins.compose.compiler)
@@ -95,8 +96,14 @@ kotlin {
     jvmTest.dependencies {
       implementation(libs.ktor.server.testHost)
       implementation(libs.kotlin.testJunit)
+      implementation(libs.koin.test.junit4)
+      implementation(libs.mockk)
     }
   }
+}
+
+tasks.withType<Test> {
+  jvmArgs("-XX:+EnableDynamicAgentLoading")
 }
 
 android {
@@ -184,4 +191,7 @@ compose.desktop {
       isEnabled = false
     }
   }
+}
+
+kover {
 }

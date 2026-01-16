@@ -8,19 +8,21 @@ class ShinybowProtocol(
 ) : AbstractDriverProtocol("shinybow/v$version.0") {
   private val stream = ProtocolStream.create(name)
 
-  private val argRange =
+  private val argRange by lazy {
     when (version) {
-      2 -> 0..99
-      3 -> 0..999
+      2 -> 1..99
+      3 -> 1..999
       else -> throw IllegalArgumentException("Unsupported Shinybow protocol version: $version")
     }
+  }
 
-  private val toArg: (input: Int) -> String =
+  private val toArg: (input: Int) -> String by lazy {
     when (version) {
       2 -> { input -> input.toString().padStart(2, '0') }
       3 -> { input -> input.toString().padStart(3, '0') }
       else -> throw IllegalArgumentException("Unsupported Shinybow protocol version: $version")
     }
+  }
 
   suspend fun sendCommand(
     uri: String,
@@ -43,8 +45,8 @@ class ShinybowProtocol(
     videoOutput: Int,
     audioOutput: Int,
   ) {
-    check(input in argRange) { "Input out of range ($argRange): $input" }
-    check(videoOutput in argRange) { "Input out of range ($argRange): $input" }
+    require(input in argRange) { "Input out of range ($argRange): $input" }
+    require(videoOutput in argRange) { "Input out of range ($argRange): $input" }
     logger.info { "$name/tie($input, $videoOutput) -> $uri" }
     sendCommand(uri, "OUTPUT${toArg(videoOutput)} ${toArg(input)};\r\n")
   }

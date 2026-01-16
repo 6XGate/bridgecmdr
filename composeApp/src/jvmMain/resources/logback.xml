@@ -11,5 +11,6 @@
   <logger name="org.sqlite.core" level="INFO"/>
   <logger name="io.ktor.server" level="INFO"/>
   <logger name="io.netty" level="INFO"/>
+  <logger name="io.mockk" level="INFO"/>
   <logger name="Exposed" level="INFO"/>
 </configuration>

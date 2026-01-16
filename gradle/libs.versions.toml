@@ -3,26 +3,27 @@ agp = "8.11.2"
 android-compileSdk = "36"
 android-minSdk = "26"
 android-targetSdk = "36"
-androidx-activity = "1.12.0"
+androidx-activity = "1.12.2"
 androidx-datastore = "1.2.0"
 androidx-lifecycle = "2.9.6"
 androidx-navigation = "2.9.1"
 composeHotReload = "1.0.0"
 composeMultiplatform = "1.9.3"
-junit = "4.13.2"
 kotlin = "2.2.21"
 kotlin-serializaiton = "1.9.0"
+junit = "4.13.2"
+kover = "0.9.4"
 kotlinx-coroutines = "1.10.2"
 ktor = "3.3.3"
 koin = "4.1.1"
-logback = "1.5.21"
-exposed = "1.0.0-rc-3"
+logback = "1.5.24"
+exposed = "1.0.0-rc-4"
 sqlite = "3.49.1.0"
-konform = "0.11.0"
-atlassian-onetime = "2.1.1"
+konform = "0.11.1"
+atlassian-onetime = "2.2.0"
 jserialcomm = "2.11.4"
-oshai-logging = "7.0.3"
-dbus-java = "5.1.1"
+oshai-logging = "7.0.14"
+dbus-java = "5.2.0"
 reorderable = "3.0.0"
 zxing = "3.5.4"
 filekit = "0.12.0"
@@ -30,6 +31,7 @@ coil = "3.3.0"
 slf4j = "2.0.17"
 uk-slf4j = "2.0.17-0"
 code-scanner = "2.3.2"
+mockk = "1.14.7"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -44,6 +46,7 @@ androidx-lifecycle-runtimeCompose = { module = "org.jetbrains.androidx.lifecycle
 androidx-navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "androidx-navigation" }
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 koin-test = { module = "io.insert-koin:koin-test", version.ref = "koin" }
+koin-test-junit4 = { module = "io.insert-koin:koin-test-junit4", version.ref = "koin" }
 koin-logger-slf4j = { module = "io.insert-koin:koin-logger-slf4j", version.ref = "koin" }
 koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koin" }
 koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", version.ref = "koin" }
@@ -90,8 +93,10 @@ sqlite = { module = "org.xerial:sqlite-jdbc", version.ref = "sqlite" }
 slf4j = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 uk-slf4j = { module = "uk.uuid.slf4j:slf4j-android", version.ref = "uk-slf4j" }
 codeScanner = { module = "com.github.yuriy-budiyev:code-scanner", version.ref = "code-scanner" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 
 [plugins]
+kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 compose-hotReload = { id = "org.jetbrains.compose.hot-reload", version.ref = "composeHotReload" }

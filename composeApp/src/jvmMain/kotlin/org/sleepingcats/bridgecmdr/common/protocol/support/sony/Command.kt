@@ -14,8 +14,8 @@ enum class Command(
       destination: Address,
       source: Address,
       command: Command,
-      arg0: Int?,
-      arg1: Int?,
+      arg0: Int? = null,
+      arg1: Int? = null,
     ): Packet {
       require(arg0 == null || (arg0 in 0x00..0xff)) { "arg0 must be between 0x00 and 0xff" }
       require(arg1 == null || (arg1 in 0x00..0xff)) { "arg1 must be between 0x00 and 0xff" }

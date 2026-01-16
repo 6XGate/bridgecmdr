@@ -19,9 +19,9 @@ class TeslaElecMatrixProtocol : AbstractDriverProtocol("teslaElec/matrix") {
     videoOutput: Int,
     audioOutput: Int,
   ) {
-    check(input in 1..99) { "Input out of range (1..99): $input" }
-    check(videoOutput in 1..99) { "Input out of range (1..99): $input" }
+    require(input in 1..99) { "Input out of range (1..99): $input" }
+    require(videoOutput in 1..99) { "Input out of range (1..99): $input" }
     logger.info { "$name/tie($input, $videoOutput) -> $uri" }
-    sendCommand(uri, "MT00SW${toArg(input)}${toArg(videoOutput)}NT/r/n")
+    sendCommand(uri, "MT00SW${toArg(input)}${toArg(videoOutput)}NT\r\n")
   }
 }

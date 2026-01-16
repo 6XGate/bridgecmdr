@@ -52,8 +52,8 @@ class SonyProtocol : AbstractDriverProtocol("sony/bvm") {
     videoOutput: Int,
     audioOutput: Int,
   ) {
-    check(input in 1..255) { "Input out of range (1..255): $input" }
+    require(input in 1..255) { "Input out of range (1..255): $input" }
     logger.info { "$name/channel($input) -> $uri" }
-    sendCommand(uri, Command.SetChannel, input)
+    sendCommand(uri, Command.SetChannel, 1, input)
   }
 }
