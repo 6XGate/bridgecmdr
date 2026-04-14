@@ -1,10 +1,10 @@
 import { memo } from 'radash'
 import { z } from 'zod'
-import useUserStore from '../../dao/storage'
+import { useStorageDao } from '../../dao/storage'
 import { procedure, router } from '../../services/rpc/trpc'
 
 const useUserStoreRouter = memo(function useUserStoreRouter() {
-  const storage = useUserStore()
+  const storage = useStorageDao()
 
   const SetItemInputs = z.tuple([z.string(), z.string()])
 

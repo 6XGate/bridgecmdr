@@ -21,7 +21,7 @@ const file = computed(() => props.image)
 const url = useObjectUrl(file)
 
 async function selectImage() {
-  const results = await openFile({ accepts: 'image/*' })
+  const results = await openFile({ accepts: '.png,.svg,.jpg,.jpeg' })
 
   const newFile = results?.at(0) ?? null
   if (newFile != null) {
@@ -72,6 +72,5 @@ en:
     all: Support images
     svg: SVG images
     png: PNG images
-    gif: GIF images
     jpg: JPEG Images
 </i18n>

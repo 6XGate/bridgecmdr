@@ -77,7 +77,7 @@ function cancel() {
 const { required, minLength } = useRules()
 const rules = reactive({
   title: { required, ...minLength(1) },
-  image: { required, ...minLength(1) }
+  image: { ...minLength(1) }
 })
 
 const { dirty, getStatus, submit, v$ } = useValidation(rules, source, confirm)

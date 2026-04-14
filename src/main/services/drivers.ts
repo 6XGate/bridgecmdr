@@ -5,7 +5,7 @@
 import { memo } from 'radash'
 import useSerialPorts from './ports'
 import type { ApiLocales } from './locale'
-import type { MaybePromise } from '@/basics'
+import type { Promisable } from 'type-fest'
 import { isIpOrValidPort } from '@/location'
 
 /** The device has no extended capabilities. */
@@ -148,7 +148,7 @@ const useDrivers = memo(function useDriver() {
     })
   )
 
-  function defineOperation<Args extends unknown[], Result>(op: (...args: Args) => MaybePromise<Result>) {
+  function defineOperation<Args extends unknown[], Result>(op: (...args: Args) => Promisable<Result>) {
     return async (...args: Args) => {
       await booted
       return await op(...args)
@@ -166,7 +166,7 @@ const useDrivers = memo(function useDriver() {
   const get = defineOperation((guid: string) => registry.get(guid) ?? null)
 
   function defineDriverOperation<Args extends unknown[], Result>(
-    op: (driver: Driver, uri: string, ...args: Args) => MaybePromise<Result>
+    op: (driver: Driver, uri: string, ...args: Args) => Promisable<Result>
   ) {
     return async (guid: string, uri: string, ...args: Args) => {
       const driver = await get(guid)

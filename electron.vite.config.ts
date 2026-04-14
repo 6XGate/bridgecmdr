@@ -2,7 +2,7 @@ import { fileURLToPath, URL } from 'node:url'
 import vueI18nPlugin from '@intlify/unplugin-vue-i18n/vite'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
-import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
+import { defineConfig } from 'electron-vite'
 import vueDevTools from 'vite-plugin-vue-devtools'
 import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 import tsconfigPaths from 'vite-tsconfig-paths'
@@ -12,7 +12,6 @@ export default defineConfig({
   main,
   preload: {
     plugins: [
-      externalizeDepsPlugin(),
       tsconfigPaths({
         projects: [fileURLToPath(new URL('./tsconfig.node.json', import.meta.url))],
         loose: true
@@ -57,12 +56,6 @@ export default defineConfig({
         buffer: fileURLToPath(new URL('./node_modules/buffer', import.meta.url)),
         stream: fileURLToPath(new URL('./node_modules/stream-browserify', import.meta.url)),
         util: fileURLToPath(new URL('./node_modules/util', import.meta.url))
-      }
-    },
-    css: {
-      preprocessorOptions: {
-        sass: { api: 'modern-compiler' },
-        scss: { api: 'modern-compiler' }
       }
     }
   }

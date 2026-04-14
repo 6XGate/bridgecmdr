@@ -1,10 +1,10 @@
 import { z } from 'zod'
 import { ColorScheme, IconSize, PowerOffTaps } from '../../settings'
 import { Layouts } from './version1'
+import type { Import } from './version4'
 
 /**
- * Settings v2, will be used in Export v2 but
- * may be reused by later versions.
+ * Settings v2, will be used in Export v2.
  */
 export type Settings = z.output<typeof Settings>
 export const Settings = z
@@ -17,11 +17,32 @@ export const Settings = z
   .optional()
 
 /**
- * Export format v2.
+ * Backup parser for v2.
  */
-export type Export = z.output<typeof Export>
-export const Export = z.object({
-  version: z.literal(2).transform(() => 3 as const),
-  settings: Settings,
-  layouts: Layouts.transform(({ sources, switches, ties }) => ({ sources, devices: switches, ties }))
-})
+export const Backup = z
+  .object({
+    version: z.literal(2),
+    settings: Settings,
+    layouts: Layouts
+  })
+  .transform(
+    (payload): Import => ({
+      version: 'normalized' as const,
+      settings: {
+        ...payload.settings,
+        buttonOrder: payload.layouts.sources.map((source) => source._id)
+      },
+      layouts: {
+        sources: payload.layouts.sources.map((source) => ({ order: 0, ...source })),
+        devices: payload.layouts.switches,
+        ties: payload.layouts.ties.map(({ switchId, outputChannels, ...tie }) => ({
+          ...tie,
+          deviceId: switchId,
+          outputChannels: {
+            video: outputChannels.video ?? undefined,
+            audio: outputChannels.audio ?? undefined
+          }
+        }))
+      }
+    })
+  )

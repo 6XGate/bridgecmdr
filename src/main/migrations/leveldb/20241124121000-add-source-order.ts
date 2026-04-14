@@ -1,7 +1,7 @@
 import { z } from 'zod'
-import { Database } from '../services/database'
+import { Database } from '../../services/database'
 
-export async function migrate() {
+export async function up() {
   const OldModel = z.object({
     order: z.number().nonnegative().finite().optional(),
     title: z.string().min(1),

@@ -1,11 +1,27 @@
 import { BlobReader, BlobWriter, TextReader, ZipWriter } from '@zip.js/zip.js'
-import { pick } from 'radash'
+import { omit, pick, reduce } from 'radash'
 import { toFiles } from '../../support/files'
 import { useDevices } from '../data/devices'
 import { useSources } from '../data/sources'
 import { useTies } from '../data/ties'
 import useSettings from '../settings'
-import { isNotNullish } from '@/basics'
+import type { Export } from './formats/version4'
+
+function mimeTypeToExt(type: string) {
+  switch (type) {
+    case 'image/png':
+      return 'png'
+    case 'image/svg+xml':
+      return 'svg'
+    case 'image/gif':
+      return 'gif'
+    case 'image/jpg':
+    case 'image/jpeg':
+      return 'jpg'
+    default:
+      return 'bin'
+  }
+}
 
 export async function exportSettings() {
   const settings = useSettings()
@@ -20,34 +36,56 @@ export async function exportSettings() {
   const zipFile = new BlobWriter()
   const zipWriter = new ZipWriter(zipFile)
 
-  // FIXME: Images should be given unique names rather than
-  // relying on the name used in the "source" document.
-  // This will prevent any issues where two or more
-  // "source" documents share the same image name.
+  const imageNames = await reduce(
+    sources.items,
+    async function (imageToName, item) {
+      const image = toFiles(item._attachments).find((file) => file.name === item.image)
+      if (image == null) return imageToName
 
-  const configText = new TextReader(
-    JSON.stringify({
-      version: 3,
-      settings: pick(settings, ['iconSize', 'colorScheme', 'powerOnSwitchesAtStart', 'powerOffWhen']),
-      layouts: {
-        sources: sources.items.map((item) => pick(item, ['_id', 'title', 'image'])),
-        devices: devices.items.map((item) => pick(item, ['_id', 'driverId', 'path', 'title'])),
-        ties: ties.items.map((item) => pick(item, ['_id', 'sourceId', 'deviceId', 'inputChannel', 'outputChannels']))
-      }
-    })
+      const ext = mimeTypeToExt(image.type)
+      const name = `${image.name.toLowerCase()}.${ext}`
+      imageToName.set(image.name, name)
+
+      const imageData = new BlobReader(image)
+      await zipWriter.add(name, imageData)
+      return imageToName
+    },
+    new Map<string | null, string>()
   )
 
-  await zipWriter.add('config.json', configText)
-
-  const images = sources.items
-    .map((item) => toFiles(item._attachments).find((file) => file.name === item.image))
-    .filter(isNotNullish)
-
-  for (const image of images) {
-    const imageData = new BlobReader(image)
-    // eslint-disable-next-line no-await-in-loop -- Must be serial.
-    await zipWriter.add(image.name, imageData)
+  const backupPayload: Export = {
+    version: 4,
+    settings: {
+      ...pick(settings, ['iconSize', 'colorScheme', 'powerOnSwitchesAtStart', 'powerOffWhen']),
+      buttonOrder: settings.buttonOrder.map((id) => id.toLowerCase())
+    },
+    layouts: {
+      sources: sources.items.map(function translateSource({ _id, image, ...item }) {
+        return {
+          id: _id.toLowerCase(),
+          image: imageNames.get(image) ?? null,
+          ...omit(item, ['order', '_attachments', '_rev'])
+        }
+      }),
+      devices: devices.items.map(({ _id, driverId, ...item }) => ({
+        id: _id.toLowerCase(),
+        driverId: driverId.toLowerCase(),
+        ...omit(item, ['_attachments', '_rev'])
+      })),
+      ties: ties.items.map(({ _id, sourceId, deviceId, outputChannels, ...item }) => ({
+        id: _id.toLowerCase(),
+        sourceId: sourceId.toLowerCase(),
+        deviceId: deviceId.toLowerCase(),
+        outputVideoChannel: outputChannels.video ?? null,
+        outputAudioChannel: outputChannels.audio ?? null,
+        ...omit(item, ['_attachments', '_rev'])
+      }))
+    }
   }
+
+  const configText = new TextReader(JSON.stringify(backupPayload))
+
+  await zipWriter.add('config.json', configText)
 
   return new File([await zipWriter.close()], 'BridgeCmdr.config.zip')
 }

@@ -79,7 +79,7 @@ en:
     export: Export settings
     import: Import settings
   description:
-    export: Export settings from to archive
+    export: Export settings to an archive
     import: Import settings from an archive
     archive: Settings archive
   error:

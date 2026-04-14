@@ -1,11 +1,9 @@
 import { fileURLToPath, URL } from 'node:url'
-import { externalizeDepsPlugin } from 'electron-vite'
 import tsconfigPaths from 'vite-tsconfig-paths'
 import { coverageConfigDefaults, defineConfig } from 'vitest/config'
 
 export default defineConfig({
   plugins: [
-    externalizeDepsPlugin(),
     tsconfigPaths({
       projects: [fileURLToPath(new URL('./tsconfig.base.json', import.meta.url))],
       loose: true
@@ -15,6 +13,8 @@ export default defineConfig({
     target: ['node20']
   },
   test: {
+    clearMocks: true,
+    mockReset: true,
     restoreMocks: true,
     unstubEnvs: true,
     unstubGlobals: true,

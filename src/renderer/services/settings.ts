@@ -25,20 +25,27 @@ export const PowerOffTaps = z.enum(['single', 'double'])
 export type ColorScheme = z.infer<typeof ColorScheme>
 export const ColorScheme = z.enum(['light', 'dark', 'no-preference'])
 
-function useSchema<Schema extends JsonType>(schema: Schema, deep = false) {
+export type ButtonOrder = z.infer<typeof ButtonOrder>
+export const ButtonOrder = z.array(z.string().uuid().toUpperCase())
+
+function useSchema<Schema extends JsonType>(schema: Schema, deep = false): UseStorageOptions<z.output<Schema>> {
   return {
     deep,
-    listenToStorageChanges: true,
+    // There is only one view, and it will be the only thing modifying this storage.
+    // Also, everything goes through the settings anyways. So `false` it is.
+    listenToStorageChanges: false,
     writeDefaults: true,
     serializer: {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return -- TS is unable to infer properly.
       read: (raw) => JsonValue.pipe(schema).parse(raw),
       write: (value) => JSON.stringify(value)
     }
-  } satisfies UseStorageOptions<z.output<Schema>>
+  }
 }
 
 const useSettings = defineStore('settings', function defineSettings() {
+  const doneFirstRun = useUserStorage('doneFirstRun', 0, useSchema(z.number().finite().int().nonnegative()))
+
   const iconSize = useUserStorage('iconSize', 128, useSchema(IconSize))
   const iconSizes = readonly(kIconSizes)
 
@@ -58,9 +65,12 @@ const useSettings = defineStore('settings', function defineSettings() {
   const powerOffWhen = useUserStorage('powerOffWhen', 'single', useSchema(PowerOffTaps))
   const powerOffWhenOptions = readonly(PowerOffTaps.options)
 
+  const buttonOrder = useUserStorage('buttonOrder', [], useSchema(ButtonOrder))
+
   const startup = useStartup()
 
   return {
+    doneFirstRun,
     iconSize,
     iconSizes,
     colorScheme,
@@ -69,6 +79,7 @@ const useSettings = defineStore('settings', function defineSettings() {
     powerOnSwitchesAtStart,
     powerOffWhen,
     powerOffWhenOptions,
+    buttonOrder,
     checkAutoStart: startup.checkEnabled,
     enableAutoStart: startup.enable,
     disableAutoStart: startup.disable

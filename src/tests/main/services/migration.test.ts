@@ -24,10 +24,9 @@ test('migration', async () => {
   const { seedForMigration } = await import('../../seeds/migration.seed')
   const { switches, sources, ties } = await seedForMigration()
 
-  const { default: useMigrations } = await import('../../../main/services/migration')
+  const { runLegacyMigrations } = await import('../../../main/services/migration/leveldb')
 
-  const migrate = useMigrations()
-  await migrate()
+  await runLegacyMigrations()
 
   const { default: useDevicesDatabase } = await import('../../../main/dao/devices')
   const { default: useSourcesDatabase } = await import('../../../main/dao/sources')
@@ -61,8 +60,7 @@ test('migration', async () => {
 test('rerun migration', async () => {
   vi.resetModules()
 
-  const { default: useMigrations } = await import('../../../main/services/migration')
+  const { runLegacyMigrations } = await import('../../../main/services/migration/leveldb')
 
-  const migrate = useMigrations()
-  await expect(migrate()).resolves.toBeUndefined()
+  await expect(runLegacyMigrations()).resolves.toBeUndefined()
 })

@@ -51,11 +51,21 @@ const { locationPath, pathTypes, pathType, path } = useLocation(location, () => 
 
 const driver = computed(() => drivers.items.find((d) => d.guid === target.value.driverId))
 const driverSearch = ref('')
-const driverKind = computed(() => (driver.value?.kind === 'monitor' ? t('label.monitor') : t('label.switch')))
 
 function confirm() {
   isVisible.value = false
   emit('confirm', target.value)
+}
+
+function discardNewMessage() {
+  switch (driver.value?.kind) {
+    case 'monitor':
+      return t('message.discardNewMonitor')
+    case 'switch':
+      return t('message.discardNewSwitch')
+    default:
+      return t('message.discardNewDevice')
+  }
 }
 
 async function cancelIfConfirmed() {
@@ -66,7 +76,7 @@ async function cancelIfConfirmed() {
   }
 
   const yes = await dialogs.confirm({
-    message: props.editing ? t('message.discardChanges') : t('message.discardNew', [driverKind.value]),
+    message: props.editing ? t('message.discardChanges') : discardNewMessage(),
     color: 'primary',
     confirmButton: t('action.discard'),
     cancelButton: t('common.cancel')
@@ -94,9 +104,18 @@ const { cardProps, isFullscreen, body, showDividers } = useDeviceDialog()
 
 const isBusy = computed(() => drivers.isBusy || ports.isBusy)
 
-const title = computed(() =>
-  props.editing ? t('label.addDevice', [driverKind.value]) : t('label.editDevice', [driverKind.value])
-)
+function editTitle() {
+  switch (driver.value?.kind) {
+    case 'monitor':
+      return t('label.editMonitor')
+    case 'switch':
+      return t('label.editSwitch')
+    default:
+      return t('label.editDevice')
+  }
+}
+
+const title = computed(() => (props.editing ? editTitle() : t('label.addDevice')))
 </script>
 
 <template>
@@ -187,11 +206,13 @@ const title = computed(() =>
 <i18n lang="yaml">
 en:
   label:
-    monitor: monitor
-    switch: switch
-    addDevice: Add {0}
-    editDevice: Edit {0}
+    addDevice: Add device
+    editMonitor: Edit monitor
+    editSwitch: Edit switch
+    editDevice: Edit device
     experimental: Experimental driver
   message:
-    discardNew: Do you want to discard this {0}?
+    discardNewMonitor: Do you want to discard this monitor?
+    discardNewSwitch: Do you want to discard this switch?
+    discardNewDevice: Do you want to discard this device?
 </i18n>

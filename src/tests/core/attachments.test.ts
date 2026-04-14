@@ -15,8 +15,9 @@ beforeAll(() => {
   text = 'This is a test'
   data = textEncoder.encode(text)
   buffer = Buffer.from(data)
-  blob = new Blob([data], { type: 'text/plain' })
-  file = new File([data], 'test', { type: 'text/plain' })
+  // More array buffer type narrowing issues...
+  blob = new Blob([data as BlobPart], { type: 'text/plain' })
+  file = new File([data as BlobPart], 'test', { type: 'text/plain' })
 })
 
 test('creating an Attachment instance', () => {

@@ -19,7 +19,10 @@ export class Attachment extends Uint8Array {
     return new Attachment(name, attachment.content_type, textEncoder.encode(attachment.data))
   }
 
-  constructor(name: string, type: string, data: ArrayBufferLike) {
+  constructor(name: string, type: string, data: ArrayLike<number>)
+  constructor(name: string, type: string, data: ArrayBuffer)
+  constructor(name: string, type: string, data: ArrayLike<number> | ArrayBuffer)
+  constructor(name: string, type: string, data: ArrayLike<number> | ArrayBuffer) {
     super(data)
     this.name = name
     this.type = type

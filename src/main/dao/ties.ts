@@ -1,5 +1,6 @@
-import { map, memo } from 'radash'
+import { map, memo, shake } from 'radash'
 import { z } from 'zod'
+import { useTieRepository } from '../repos/ties'
 import {
   Database,
   DocumentId,
@@ -8,6 +9,7 @@ import {
   inferUpdatesOf,
   inferUpsertOf
 } from '../services/database'
+import type { UUID } from 'node:crypto'
 
 export const TieModel = z.object({
   sourceId: DocumentId,
@@ -18,6 +20,168 @@ export const TieModel = z.object({
     audio: z.number().int().nonnegative().optional()
   })
 })
+
+type TieDoc = inferDocumentOf<typeof TieModel>
+type NewTieDoc = inferNewDocumentOf<typeof TieModel>
+type TieUpdateDoc = inferUpdatesOf<typeof TieModel>
+type TieUpsertDoc = inferUpsertOf<typeof TieModel>
+
+class TieDao {
+  private readonly repository = useTieRepository()
+
+  async compact() {
+    await Promise.resolve() // Compatibility.
+  }
+
+  async all(): Promise<TieDoc[]> {
+    const ties = await this.repository.all()
+    return ties.map((tie) => ({
+      _id: tie.id,
+      _rev: '0', // Dummy revision for compatibility.
+      sourceId: tie.sourceId,
+      deviceId: tie.deviceId,
+      inputChannel: tie.inputChannel,
+      outputChannels: {
+        video: tie.outputVideoChannel ?? undefined,
+        audio: tie.outputAudioChannel ?? undefined
+      },
+      _attachments: []
+    }))
+  }
+
+  async get(id: string): Promise<TieDoc> {
+    const tie = await this.repository.findById(id as UUID)
+    if (!tie) throw new Error('Tie not found')
+
+    return {
+      _id: tie.id,
+      _rev: '0', // Dummy revision for compatibility.
+      sourceId: tie.sourceId,
+      deviceId: tie.deviceId,
+      inputChannel: tie.inputChannel,
+      outputChannels: {
+        video: tie.outputVideoChannel ?? undefined,
+        audio: tie.outputAudioChannel ?? undefined
+      },
+      _attachments: []
+    }
+  }
+
+  async add(payload: NewTieDoc): Promise<TieDoc> {
+    const tie = await this.repository.insert({
+      sourceId: payload.sourceId as UUID,
+      deviceId: payload.deviceId as UUID,
+      inputChannel: payload.inputChannel,
+      outputVideoChannel: payload.outputChannels.video ?? null,
+      outputAudioChannel: payload.outputChannels.audio ?? null
+    })
+
+    return {
+      _id: tie.id,
+      _rev: '0', // Dummy revision for compatibility.
+      sourceId: tie.sourceId,
+      deviceId: tie.deviceId,
+      inputChannel: tie.inputChannel,
+      outputChannels: {
+        video: tie.outputVideoChannel ?? undefined,
+        audio: tie.outputAudioChannel ?? undefined
+      },
+      _attachments: []
+    }
+  }
+
+  async update(payload: TieUpdateDoc): Promise<TieDoc> {
+    const tie = await this.repository.updateById(
+      payload._id as UUID,
+      shake({
+        sourceId: payload.sourceId as UUID | undefined,
+        deviceId: payload.deviceId as UUID | undefined,
+        inputChannel: payload.inputChannel,
+        outputVideoChannel: payload.outputChannels?.video,
+        outputAudioChannel: payload.outputChannels?.audio
+      })
+    )
+
+    return {
+      _id: tie.id,
+      _rev: '0', // Dummy revision for compatibility.
+      sourceId: tie.sourceId,
+      deviceId: tie.deviceId,
+      inputChannel: tie.inputChannel,
+      outputChannels: {
+        video: tie.outputVideoChannel ?? undefined,
+        audio: tie.outputAudioChannel ?? undefined
+      },
+      _attachments: []
+    }
+  }
+
+  async upsert(payload: TieUpsertDoc): Promise<TieDoc> {
+    const tie = await this.repository.upsert({
+      id: payload._id as UUID,
+      sourceId: payload.sourceId as UUID,
+      deviceId: payload.deviceId as UUID,
+      inputChannel: payload.inputChannel,
+      outputVideoChannel: payload.outputChannels.video ?? null,
+      outputAudioChannel: payload.outputChannels.audio ?? null
+    })
+
+    return {
+      _id: tie.id,
+      _rev: '0', // Dummy revision for compatibility.
+      sourceId: tie.sourceId,
+      deviceId: tie.deviceId,
+      inputChannel: tie.inputChannel,
+      outputChannels: {
+        video: tie.outputVideoChannel ?? undefined,
+        audio: tie.outputAudioChannel ?? undefined
+      },
+      _attachments: []
+    }
+  }
+
+  async remove(id: string): Promise<void> {
+    await this.repository.deleteById(id as UUID)
+  }
+
+  async forDevice(deviceId: string): Promise<TieDoc[]> {
+    const ties = await this.repository.findByDeviceId(deviceId as UUID)
+    return ties.map((tie) => ({
+      _id: tie.id,
+      _rev: '0', // Dummy revision for compatibility.
+      sourceId: tie.sourceId,
+      deviceId: tie.deviceId,
+      inputChannel: tie.inputChannel,
+      outputChannels: {
+        video: tie.outputVideoChannel ?? undefined,
+        audio: tie.outputAudioChannel ?? undefined
+      },
+      _attachments: []
+    }))
+  }
+
+  async forSource(sourceId: string): Promise<TieDoc[]> {
+    const ties = await this.repository.findBySourceId(sourceId as UUID)
+    return ties.map((tie) => ({
+      _id: tie.id,
+      _rev: '0', // Dummy revision for compatibility.
+      sourceId: tie.sourceId,
+      deviceId: tie.deviceId,
+      inputChannel: tie.inputChannel,
+      outputChannels: {
+        video: tie.outputVideoChannel ?? undefined,
+        audio: tie.outputAudioChannel ?? undefined
+      },
+      _attachments: []
+    }))
+  }
+
+  async clear(): Promise<void> {
+    await this.repository.deleteAll()
+  }
+}
+
+export const useTieDao = memo(() => new TieDao())
 
 const indices = { sourceId: ['sourceId'], deviceId: ['deviceId'] }
 

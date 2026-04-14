@@ -103,7 +103,7 @@ export function readyEntry(file: DesktopEntryFile) {
   for (const section of Object.values(file)) {
     for (const [key, value] of Object.entries(section)) {
       if (Array.isArray(value)) {
-        section[key] = value.map((v) => String(v)).join(';')
+        section[key] = value.join(';')
       }
     }
   }

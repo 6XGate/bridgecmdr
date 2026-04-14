@@ -144,11 +144,6 @@ To package the application, you will need to use `yarn package` steps you acquir
 on an ARM system or in an ARM Docker container. It is not recommended to build directly on the Raspberry Pi since
 the systems can be underpowered for such a purpose.
 
-#### The Package
-
-You should now have a package ending in `.AppImage` in the `dist` folder. This package can be run like any other
-AppImage file.
-
 ### Releasing
 
 - Start the build docker conatiner: `docker compose run --build -it --rm build`
@@ -158,3 +153,8 @@ AppImage file.
 - Create a release from the tag and copy the following files to the release assets:
   - `bridgecmdr-<version>-armv7l.AppImage`
   - `latest-linux-arm.yml`
+
+#### The Package
+
+You should now have a package ending in `.AppImage` in the `dist` folder. This package can be run like any other
+AppImage file.

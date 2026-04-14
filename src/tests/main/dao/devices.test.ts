@@ -44,9 +44,13 @@ const kUuidPattern = /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{
 const kRevPattern = /^[0-9]-[0-9a-f]{32}$/u
 
 test('adding', async () => {
-  const file = new File([Buffer.from('hello')], 'hello.txt', { type: 'text/plain' })
+  const file = new File([Buffer.from('hello') as BlobPart], 'hello.txt', { type: 'text/plain' })
   const attachment = await Attachment.fromFile(file)
-  const raw = { title: 'Extron', driverId: database.extronSis.guid, path: 'ip:192.168.10.2' } satisfies NewDevice
+  const raw = {
+    title: 'Extron',
+    driverId: database.extronSis.guid,
+    path: 'ip:192.168.10.2'
+  } satisfies NewDevice
   const doc = await devicesDao.add(raw, attachment)
 
   expect(doc._id).toMatch(kUuidPattern)

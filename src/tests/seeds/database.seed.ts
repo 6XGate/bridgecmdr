@@ -35,7 +35,7 @@ export async function seedDatabase() {
     async (doc) => await devicesDao.add(doc)
   )) as [Device, Device, Device]
 
-  const file = new File([Buffer.from('test')], 'test.txt', { type: 'text/plain' })
+  const file = new File([Buffer.from('test') as BlobPart], 'test.txt', { type: 'text/plain' })
   const image = await Attachment.fromFile(file)
 
   const sources = (await map(

@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import useSourcesDatabase, { NewSource, SourceUpdate, SourceUpsert } from '../../dao/sources'
+import { NewSource, SourceUpdate, SourceUpsert, useSourceDao } from '../../dao/sources'
 import { DocumentId } from '../../services/database'
 import { procedure, router } from '../../services/rpc/trpc'
 import { Attachment } from '@/attachments'
@@ -9,7 +9,7 @@ const UpdateInputs = z.tuple([SourceUpdate]).rest(z.instanceof(Attachment))
 const UpsertInputs = z.tuple([SourceUpsert]).rest(z.instanceof(Attachment))
 
 export default function useSourcesRouter() {
-  const sources = useSourcesDatabase()
+  const sources = useSourceDao()
   return router({
     compact: procedure.mutation(async () => {
       await sources.compact()

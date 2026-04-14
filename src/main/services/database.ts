@@ -17,10 +17,7 @@ type NamedIndices = Record<string, IndexFields>
 export type Indices = IndexList | NamedIndices
 
 export type DocumentId = z.output<typeof DocumentId>
-export const DocumentId = z
-  .string()
-  .uuid()
-  .transform((value) => value.toUpperCase())
+export const DocumentId = z.string().uuid().toUpperCase()
 export type RevisionId = z.output<typeof RevisionId>
 export const RevisionId = z.string().min(1)
 

@@ -1,9 +1,9 @@
-import useDevicesDatabase, { NewDevice, DeviceUpdate, DeviceUpsert } from '../../dao/devices'
+import { NewDevice, DeviceUpdate, DeviceUpsert, useDeviceDao } from '../../dao/devices'
 import { DocumentId } from '../../services/database'
 import { procedure, router } from '../../services/rpc/trpc'
 
 export default function useDevicesRouter() {
-  const devices = useDevicesDatabase()
+  const devices = useDeviceDao()
   return router({
     compact: procedure.mutation(async () => {
       await devices.compact()
